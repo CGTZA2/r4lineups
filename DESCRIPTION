@@ -1,0 +1,34 @@
+Package: r4lineups
+Title: Statistical Inference on Lineup Fairness
+Version: 0.1.2
+Authors@R: c(
+    person("Colin", "Tredoux", email = "colin.tredoux@uct.ac.za", role = c("aut", "cre")),
+    person("Tamsyn", "Naylor", email = "tmnaylor@outlook.com", role = "aut"))
+Description: Computes various properties of laboratory or police lineups for researchers in forensic psychology. The package includes functions for calculating lineup bias, functional size, effective size, diagnosticity ratio, homogeneity of the diagnosticity ratio, and ROC curves for confidence-accuracy data. Face similarity is computed using state-of-the-art deep learning embeddings (ArcFace, FaceNet, etc.) via Python's deepface library.
+Depends: R (>= 4.0.0)
+Imports:
+    boot,
+    dplyr,
+    ggplot2,
+    ggrepel,
+    magick,
+    magrittr,
+    pROC,
+    purrr,
+    reticulate (>= 1.26),
+    stats,
+    tibble
+Suggests:
+    here,
+    knitr,
+    pander,
+    rmarkdown,
+    Rtsne,
+    umap
+License: CC0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.3
+VignetteBuilder: knitr
+Maintainer: Colin Tredoux <colin.tredoux@uct.ac.za>
+
