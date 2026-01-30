@@ -287,7 +287,7 @@ display_lineup <- function(target_path,
   # Read and scale images
   imgs <- lapply(all_paths, function(p) {
     img <- magick::image_read(p)
-    magick::image_scale(img, paste0(scale))
+    magick::image_scale(img, paste0(scale, "x"))
   })
   
   # Add labels if requested

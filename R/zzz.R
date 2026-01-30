@@ -18,10 +18,23 @@
 #' @keywords internal
 init_python <- function() {
 
+  # Ensure legacy Keras behavior for DeepFace compatibility
+  if (Sys.getenv("TF_USE_LEGACY_KERAS") == "") {
+    Sys.setenv(TF_USE_LEGACY_KERAS = "1")
+  }
+
   if (isTRUE(.faceR_env$python_ready)) {
     return(invisible(TRUE))
   }
   
+  if (reticulate::py_available(initialize = FALSE)) {
+    warning(
+      "Python is already initialized. If you see KerasTensor errors, ",
+      "restart R and set TF_USE_LEGACY_KERAS=1 before loading r4lineups.",
+      call. = FALSE
+    )
+  }
+
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(
       "Python is not available. Please install Python and ensure it's on your PATH.\n",
@@ -53,6 +66,10 @@ init_python <- function() {
   }
   
   # Import modules
+  # Attempt to import tf_keras if available (ensures legacy Keras path)
+  if (reticulate::py_module_available("tf_keras")) {
+    reticulate::import("tf_keras", delay_load = FALSE)
+  }
   .faceR_env$deepface <- reticulate::import("deepface.DeepFace", delay_load = FALSE)
   .faceR_env$DeepFace <- .faceR_env$deepface
   .faceR_env$cv2 <- reticulate::import("cv2", delay_load = FALSE)
