@@ -24,8 +24,11 @@ Suggests:
     knitr,
     pander,
     patchwork,
+    DT,
     rmarkdown,
     Rtsne,
+    shiny,
+    shinyWidgets,
     testthat (>= 3.0.0),
     umap
 License: CC0
