@@ -13,7 +13,7 @@ This document tracks the implementation of high-priority features from pyWitness
 1. ✅ RAC (Response Time-Accuracy) Analysis - COMPLETED
 2. ✅ Data Simulation Framework - COMPLETED
 3. ✅ Model Comparison Framework - COMPLETED
-4. ⏳ pAUC Statistical Comparison - PENDING
+4. ✅ pAUC Statistical Comparison - COMPLETED
 
 ### Medium Priority ⭐⭐
 5. ⏳ Additional SDT Models (BEST-REST, Ensemble, Integration)
@@ -256,61 +256,107 @@ format_comparison_table(comparison, format = "markdown")
 
 ## Next Steps
 
-### 4. pAUC Statistical Comparison ⏳ PENDING
+### 4. pAUC Statistical Comparison ✅ COMPLETED
 
-**Goal**: Make it easy to fit and compare multiple models (e.g., different SDT models, 2-HT variants)
+**Status**: ✅ Complete
+**Files Created**:
+- `R/pauc_comparison.R` - Core pAUC comparison framework
+- `examples/pauc_comparison_example.R` - Comprehensive examples with 8 examples
+- Man pages: `compare_pauc.Rd`, `print.pauc_comparison.Rd`, `summary.pauc_comparison.Rd`, `plot.pauc_comparison.Rd`
 
-**Planned Features**:
-- Fit multiple models to same data with single function call
-- Generate comparison table (χ², AIC, BIC, parameter estimates)
-- Side-by-side plots
-- Model selection recommendations
-
-**Inspiration from pyWitness**:
-- Table 6 in pyWitness paper shows excellent model comparison format
-- Multiple models (SIO, IO, BR, EN, IN) with EV/UV variants
-- Clear presentation of fit quality (χ²/ndf, p-value)
-- Number of iterations and fit time
-
-**Implementation Plan**:
+**Functions**:
 ```r
-compare_models <- function(data, models = c("2ht", "eig", "winter_2ht"), ...)
-  # Returns: comparison table, plots, recommendations
-
-fit_multiple_models <- function(data, ...)
-  # Fit all available models, return list
-
-plot_model_comparison <- function(comparison_obj, ...)
-  # Visualize model fits
+compare_pauc(data1, data2, ...)                # Main function - compare pAUC
+print.pauc_comparison(x)                       # Print method
+summary.pauc_comparison(object)                # Summary with effect sizes
+plot.pauc_comparison(x, ...)                   # Side-by-side ROC plots
 ```
 
-### 4. pAUC Statistical Comparison ⏳ PENDING
+**Features**:
+- Z-test for pAUC differences following pyWitness methodology
+- Bootstrap-based standard errors (customizable n_bootstrap)
+- Automatic handling of different false ID rate cutoffs
+- Publication-ready comparison plots with shaded pAUC regions
+- Confidence intervals for differences
+- Effect size calculation (Cohen's d equivalent)
+- Interpolation for precise cutoff matching
 
-**Goal**: Systematic framework for comparing ROC curves between conditions
+**Statistical Framework**:
+- **Z-statistic**: Z = (pAUC1 - pAUC2) / SE(pAUC1 - pAUC2)
+- **Bootstrap SE**: Non-parametric standard errors via resampling
+- **Two-tailed test**: p-value from standard normal distribution
+- **Confidence intervals**: 95% CI (customizable)
+- **Effect size**: Standardized difference using pooled SE
 
-**Planned Features**:
-- Z-test for pAUC differences (as in pyWitness)
-- Automatic handling of different false ID cutoffs
-- Bootstrap-based standard errors
-- Publication-ready comparison plots
+**Use Cases**:
+1. Compare lineup procedures (simultaneous vs. sequential)
+2. Evaluate system variables (lineup size, presentation method)
+3. Test estimator variables (retention interval, viewing conditions)
+4. Assess policy-relevant cutoffs (5%, 10%, 20% false ID rates)
+5. Multiple pairwise comparisons with Bonferroni correction
 
-**Formula** (from pyWitness):
-$$Z = \frac{pAUC_1 - pAUC_2}{sd(pAUC_1 - pAUC_2)}$$
+**Integration**:
+- ✅ Works with existing make_rocdata() function
+- ✅ Handles same data format as make_roc()
+- ✅ S3 classes for clean printing and plotting
+- ✅ Comprehensive error handling for bootstrap failures
 
-**Implementation Plan**:
+**Example Usage**:
 ```r
-compare_pAUC <- function(data1, data2, ...) {
-  # Bootstrap both datasets
-  # Compute Z-score
-  # Return: Z, p-value, confidence intervals, comparison plot
-}
+# Compare two conditions
+comparison <- compare_pauc(
+  condition1_data,
+  condition2_data,
+  lineup_size = 6,
+  max_false_id_rate = 0.20,  # 20% cutoff
+  label1 = "Simultaneous",
+  label2 = "Sequential",
+  n_bootstrap = 2000,
+  seed = 123
+)
 
-plot_pAUC_comparison <- function(data1, data2, labels, ...) {
-  # Overlay ROCs with shaded pAUC regions
-  # Show cutoff false ID rate
-  # Display test results
-}
+# View results
+print(comparison)
+summary(comparison)  # Includes effect size
+
+# Create comparison plot
+plot(comparison)
+
+# Access components
+comparison$pauc_diff         # Difference
+comparison$z_score           # Z-statistic
+comparison$p_value          # P-value
+comparison$ci_diff          # 95% CI
+comparison$bootstrap_results # Bootstrap distributions
 ```
+
+**Documentation**:
+- ✅ Function documentation (roxygen2)
+- ✅ Comprehensive example script with 8 examples
+- ✅ Interpretation guide included in examples
+- ✅ Multiple comparison procedures demonstrated
+- ⏳ Needs: Vignette for ROC comparison workflow
+
+**Testing**:
+- ✅ Basic functionality tested
+- ✅ Bootstrap resampling works correctly
+- ✅ Z-test and p-values computed correctly
+- ✅ Plots render with proper formatting
+- ⏳ Needs: Unit tests, validation against pyWitness
+
+**Key Features Demonstrated in Examples**:
+1. Basic pAUC comparison
+2. Custom false ID rate cutoffs
+3. Non-significant differences (null hypothesis)
+4. Accessing individual ROC curves
+5. Bootstrap distribution visualization
+6. Multiple pairwise comparisons with adjustment
+7. Real data examples
+8. Complete interpretation guide
+
+**References**:
+- Mickes et al. (2024). *Behavior Research Methods*, 56, 1533-1550
+- Wixted & Mickes (2012). *Perspectives on Psychological Science*, 7(3), 275-278
 
 ---
 
@@ -410,28 +456,42 @@ Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0
 - ✅ Generated roxygen documentation for model comparison
 - ✅ Tested all models (2-HT, EIG, Full ROC) successfully
 - ✅ Updated tracking document
+- ✅ Committed and pushed model comparison framework
+
+### 2026-01-30 (Session 3)
+- ✅ Implemented pAUC statistical comparison (functions, examples)
+- ✅ Z-test for pAUC differences with bootstrap standard errors
+- ✅ False ID rate cutoff handling with interpolation
+- ✅ Publication-ready comparison plots
+- ✅ Updated NAMESPACE with new exports
+- ✅ Generated roxygen documentation for pAUC comparison
+- ✅ Tested pAUC comparison successfully
+- ✅ Updated tracking document
 
 ### Next Session
 - ⏳ Create simulation/power analysis vignette
 - ⏳ Create model comparison vignette
-- ⏳ Implement pAUC statistical comparison
-- ⏳ Add unit tests
+- ⏳ Create pAUC comparison vignette
+- ⏳ Add unit tests for all new features
 - ⏳ Update package version and NEWS
 
 ---
 
 ## Summary
 
-**Completed**: 3 of 8 features (38%)
-**High Priority Completed**: 3 of 4 (75%)
+**Completed**: 4 of 8 features (50%)
+**High Priority Completed**: 4 of 4 (100%) ✅
 
 **Impact**: The implemented features significantly enhance r4lineups' capabilities for:
 - **RAC Analysis**: Response time-accuracy characteristics for objective memory assessment
 - **Data Simulation**: Study planning, power analysis, and method validation
 - **Model Comparison**: Unified framework for comparing 2-HT, EIG, and Full ROC models
+- **pAUC Statistical Comparison**: Rigorous statistical tests for comparing ROC curves
 - Teaching signal detection theory and eyewitness identification methodology
 
+**All High-Priority Items Complete!** 🎉
+
 **Next Priorities**:
-1. **pAUC Statistical Comparison** - Complete high-priority list (1 remaining)
-2. **Vignettes** - Document simulation and model comparison workflows
-3. **Unit Tests** - Comprehensive testing for all new features
+1. **Vignettes** - Document all new features (simulation, model comparison, pAUC comparison)
+2. **Unit Tests** - Comprehensive testing for all new features
+3. **Medium Priority Features** - Additional SDT models, z-ROC, standardized data format
