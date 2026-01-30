@@ -33,6 +33,7 @@ utils::globalVariables(c(
   "information_gain",
   "label",
   "mean_confidence_plot",
+  "n",
   "n_total",
   "posterior",
   "posterior_guilty",

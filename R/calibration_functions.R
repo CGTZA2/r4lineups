@@ -378,7 +378,7 @@ make_calibration_gg <- function(cal_obj, show_stats = TRUE, show_n = TRUE,
 #' @return A ggplot2 object
 #'
 #' @export
-#' @import ggplot2 dplyr
+#' @import ggplot2
 make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
                                              show_stats = TRUE) {
 

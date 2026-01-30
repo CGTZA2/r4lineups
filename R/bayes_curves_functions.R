@@ -76,7 +76,7 @@ entropy <- function(p) {
 #' suspicion. \emph{Law and Human Behavior, 39}(2), 99-122.
 #'
 #' @export
-#' @import tibble dplyr
+#' @import tibble
 make_bayes_curves <- function(data,
                                response_categories = c("simple", "confidence"),
                                confidence_bins = NULL,

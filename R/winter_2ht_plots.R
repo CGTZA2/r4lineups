@@ -1,5 +1,6 @@
 #' Plot Parameter Estimates from 2-HT Model
 #'
+#' @description
 #' Creates a visual display of the parameter estimates from a fitted 2-HT model,
 #' with error bars showing 95% confidence intervals.
 #'

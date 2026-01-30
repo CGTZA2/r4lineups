@@ -3,6 +3,10 @@
 \name{plot_2ht_parameters}
 \alias{plot_2ht_parameters}
 \title{Plot Parameter Estimates from 2-HT Model}
+\description{
+Creates a visual display of the parameter estimates from a fitted 2-HT model,
+with error bars showing 95\% confidence intervals.
+}
 \usage{
 plot_2ht_parameters(x, ..., which = c("dP", "dA", "b", "g"), show_ci = TRUE)
 }
@@ -14,12 +18,8 @@ plot_2ht_parameters(x, ..., which = c("dP", "dA", "b", "g"), show_ci = TRUE)
 \item{which}{Character vector specifying which parameters to plot.
 Default is c("dP", "dA", "b", "g") (all parameters).}
 
-\item{show_ci}{Logical indicating whether to show 95% confidence intervals. Default is TRUE.}
+\item{show_ci}{Logical indicating whether to show 95\% confidence intervals. Default is TRUE.}
 }
 \value{
 A ggplot object
-}
-\description{
-Creates a visual display of the parameter estimates from a fitted 2-HT model,
-with error bars showing 95% confidence intervals.
 }
