@@ -1,2 +1,15 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^FULLROC_QUICK_REFERENCE\.md$
+^FULLROC_README\.md$
+^PACKAGE_CHECK_FIXES\.md$
+^ROC_COMPARISON_GUIDE\.md$
+^EIG_IMPLEMENTATION_SUMMARY\.md$
+^PPV_RANGE_IMPLEMENTATION_SUMMARY\.md$
+^FITZGERALD.*\.md$
+^AGENT_SUMMARY\.md$
+^examples$
+^test_.*\.R$
+^test_.*\.png$
+^Rplots\.pdf$
+^notes$

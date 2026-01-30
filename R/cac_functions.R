@@ -47,7 +47,7 @@
 #' Psychology: Learning, Memory, and Cognition, 22}(5), 1304-1316.
 #'
 #' @export
-#' @import dplyr tibble
+#' @import tibble
 make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
 
   # Validate required columns
@@ -167,13 +167,13 @@ make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
 #' between confidence and accuracy.
 #'
 #' @param cacobj_list List output from make_cacdata()
-#' @param show_errorbar Logical. Whether to show error bars (default = TRUE)
+#' @param show_errorbars Logical. Whether to show error bars (default = TRUE)
 #' @param show_n Logical. Whether to show sample sizes (default = TRUE)
 #'
 #' @return A ggplot2 object
 #'
 #' @export
-#' @import ggplot2 dplyr
+#' @import ggplot2
 make_cac_gg <- function(cacobj_list, show_errorbars = TRUE, show_n = TRUE) {
 
   cac_data <- cacobj_list$cac_data

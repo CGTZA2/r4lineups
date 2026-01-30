@@ -46,7 +46,7 @@
 #' \emph{Current Directions in Psychological Science, 23}(1), 3-10.
 #'
 #' @export
-#' @import dplyr tibble
+#' @import tibble
 make_rocdata <- function(data, lineup_size = 6) {
 
   # Validate required columns
@@ -145,7 +145,7 @@ make_rocdata <- function(data, lineup_size = 6) {
 #' @return A ggplot2 object
 #'
 #' @export
-#' @import ggplot2 ggrepel dplyr
+#' @import ggplot2 ggrepel
 make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE) {
 
   roc_data <- rocobj_list$roc_data

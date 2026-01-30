@@ -2,44 +2,68 @@
 % Please edit documentation in R/make_roc.R
 \name{make_roc}
 \alias{make_roc}
-\title{Compute and plot ROC curve for lineup accuracy ~ confidence}
+\title{Compute and Plot ROC Curve for Lineup Identification}
 \usage{
-make_roc(df_confacc)
+make_roc(data, lineup_size = 6, show_plot = TRUE, ...)
 }
 \arguments{
-\item{df_confacc}{A dataframe with two columns, named confidence and accuracy (where accuracy = binary accuracy)}
+\item{data}{A dataframe with the following columns:
+\itemize{
+  \item target_present: Logical. TRUE if guilty suspect in lineup
+  \item identification: Character. "suspect", "filler", or "reject"
+  \item confidence: Numeric. Confidence rating
+}}
+
+\item{lineup_size}{Integer. Number of people in lineup (default = 6)}
+
+\item{show_plot}{Logical. Whether to display the plot (default = TRUE)}
+
+\item{...}{Additional arguments passed to make_roc_gg()}
 }
 \value{
-An ROC object of package pROC
+A list containing:
+  \itemize{
+    \item plot: ggplot2 object (if show_plot = TRUE)
+    \item roc_data: Dataframe with ROC curve points
+    \item pauc: Partial area under the curve
+    \item summary: Summary statistics
+  }
 }
 \description{
-Function to compute and plot an ROC curve for data from an eyewitness
-experiment, where accuracy is recorded for target present and target
-absent lineups
+Main function to compute and plot an ROC curve for eyewitness lineup data.
+This follows the methodology of Wixted & Mickes (2012) and Mickes (2015).
 }
 \details{
-The approach is outlined in several papers by Mickes, Wixted, Gronlund,
-Clark, and others (see \strong{References})
+ROC analysis measures discriminability - the ability to distinguish innocent
+from guilty suspects. According to Mickes (2015), ROC analysis is most relevant
+for policymakers deciding on system variables (e.g., simultaneous vs. sequential
+lineups, lineup size, etc.).
 
-This function is a user level function.  It chains the two roc functions
-together. The user must pass a dataframe, with one column indicating
-confidence, and another accuracy, and these must be named as such.
-
-The approach is outlined in several papers by Mickes, Wixted, Gronlund,
-Clark, and others (see references)
+For estimator variables (e.g., exposure duration, retention interval), use
+CAC analysis instead (see \code{\link{make_cac}}).
 }
 \examples{
-#Data:
-data(mickwick)
+\dontrun{
+# Example data structure:
+lineup_data <- data.frame(
+  target_present = c(TRUE, TRUE, FALSE, FALSE),
+  identification = c("suspect", "filler", "suspect", "reject"),
+  confidence = c(90, 70, 80, 50)
+)
 
-#Call:
-make_roc(mickwick)
-
-
+# Compute and plot ROC
+roc_result <- make_roc(lineup_data)
+print(roc_result$pauc)
+}
 
 }
 \references{
-Gronlund, S. D., Wixted, J. T., & Mickes, L. (2014). Evaluating
-eyewitness identification procedures using receiver operating characteristic
-analysis. \emph{Current Directions in Psychological Science, 23}(1), 3-10.
+Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should
+abandon probative value and embrace receiver operating characteristic analysis.
+\emph{Perspectives on Psychological Science, 7}(3), 275-278.
+
+Mickes, L. (2015). Receiver operating characteristic analysis and
+confidence-accuracy characteristic analysis in investigations of system
+variables and estimator variables that affect eyewitness memory.
+\emph{Journal of Applied Research in Memory and Cognition, 4}(2), 93-102.
 }

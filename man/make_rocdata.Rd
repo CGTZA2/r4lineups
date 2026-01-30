@@ -2,19 +2,56 @@
 % Please edit documentation in R/roc_functions.R
 \name{make_rocdata}
 \alias{make_rocdata}
-\title{Helper functions: Compute and plot ROC curve for lineup accuracy ~ confidence}
+\title{Compute ROC Data for Lineup Identification}
 \usage{
-make_rocdata(df_confacc)
+make_rocdata(data, lineup_size = 6)
 }
 \arguments{
-\item{df_confacc}{A df with two columns, confidence and accuracy,
-where accuracy = binary accuracy.}
+\item{data}{A dataframe with the following columns:
+\itemize{
+  \item target_present: Logical. TRUE if guilty suspect in lineup, FALSE if innocent
+  \item identification: Character. "suspect", "filler", or "reject"
+  \item confidence: Numeric. Confidence rating (higher = more confident)
+}}
+
+\item{lineup_size}{Integer. Number of people in the lineup (default = 6).
+Used to estimate false ID rate when fillers are chosen from target-absent lineups.}
 }
 \value{
-An ROC object of package pROC
+A list containing:
+  \itemize{
+    \item roc_data: Dataframe with correct_id_rate, false_id_rate, and confidence
+    \item pauc: Partial area under the curve
+    \item n_target_present: Number of target-present lineups
+    \item n_target_absent: Number of target-absent lineups
+  }
 }
 \description{
-Function to compute and plot an ROC curve for data from an eyewitness
-experiment, where accuracy is recorded for target present and target
-absent lineups
+Computes Receiver Operating Characteristic (ROC) data from lineup identification
+experiments following the methodology of Mickes, Wixted, and Gronlund.
+}
+\details{
+This function computes ROC curves following Wixted & Mickes (2012) and
+Mickes (2015). For each confidence level:
+\itemize{
+  \item Correct ID rate = proportion of target-present lineups where suspect identified
+  \item False ID rate = proportion of target-absent lineups where suspect identified
+}
+
+When no innocent suspect is designated in target-absent lineups, filler IDs
+are divided by lineup size to estimate the false ID rate.
+}
+\references{
+Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should
+abandon probative value and embrace receiver operating characteristic analysis.
+\emph{Perspectives on Psychological Science, 7}(3), 275-278.
+
+Mickes, L. (2015). Receiver operating characteristic analysis and
+confidence-accuracy characteristic analysis in investigations of system
+variables and estimator variables that affect eyewitness memory.
+\emph{Journal of Applied Research in Memory and Cognition, 4}(2), 93-102.
+
+Gronlund, S. D., Wixted, J. T., & Mickes, L. (2014). Evaluating eyewitness
+identification procedures using receiver operating characteristic analysis.
+\emph{Current Directions in Psychological Science, 23}(1), 3-10.
 }

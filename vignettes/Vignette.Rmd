@@ -384,19 +384,19 @@ _Note:_ R = number of bootstrap replications
 ## ROC Curve (Confidence ~ Accuracy)
 
 The `make_roc()` function allows you to compute and plot an ROC curve for data from an eyewitness experiment, where accuracy is recorded for target present and target
-absent lineups. We follow the ideas suggested by Mickes, Wixted, and others (see references). This function is experimental, and we don't offer much control over the output.
+absent lineups. We follow the ideas suggested by Mickes, Wixted, and others (see references).
 
-1. This function requires a dataframe with two columns, which must be named confidence and accuracy (where accuracy = binary accuracy):
+This function requires a dataframe with three columns: `target_present` (logical), `identification` (character: "suspect", "filler", or "reject"), and `confidence` (numeric).
 
 ```{r, echo = F, results='asis', warning=FALSE}
-#Load ROC data: mickwick sample data
-data(mickwick)
-pander::pandoc.table(mickwick[1:8,], "Confacc data")
+#Load ROC data: lineup_example sample data
+data(lineup_example)
+pander::pandoc.table(lineup_example[1:8,], "Lineup identification data")
 ```
 
 ```{r, fig.cap= "ROC Curve for Confidence ~ Accuracy", fig.width= 5, warning=FALSE}
 #Call roc function
-make_roc(mickwick)
+make_roc(lineup_example)
 ```
 
 ---

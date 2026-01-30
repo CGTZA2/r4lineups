@@ -163,6 +163,7 @@ face_similarity <- function(img1_path,
 #' }
 #'
 #' @export
+#' @importFrom dplyr mutate arrange
 lineup_similarity <- function(target_path,
                               foil_paths,
                               model = "ArcFace",

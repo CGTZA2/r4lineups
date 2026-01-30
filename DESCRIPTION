@@ -13,11 +13,11 @@ Imports:
     ggrepel,
     magick,
     magrittr,
-    pROC,
     purrr,
     reticulate (>= 1.26),
     stats,
-    tibble
+    tibble,
+    utils
 Suggests:
     here,
     knitr,

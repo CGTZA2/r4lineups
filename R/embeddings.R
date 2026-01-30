@@ -133,6 +133,8 @@ get_embedding <- function(img_path,
 #' }
 #'
 #' @export
+#' @importFrom dplyr bind_rows
+#' @importFrom utils txtProgressBar setTxtProgressBar
 batch_embeddings <- function(img_paths,
                              model = "ArcFace",
                              detector = "retinaface",
@@ -218,13 +220,13 @@ batch_embeddings <- function(img_paths,
 #' }
 #'
 #' @examples
-#' \dontrun
+#' \dontrun{
 #' emb1 <- get_embedding("face1.jpg")$embedding
 #' emb2 <- get_embedding("face2.jpg")$embedding
-#' 
+#'
 #' # Cosine distance (recommended)
 #' embedding_distance(emb1, emb2, metric = "cosine")
-#' 
+#'
 #' # Euclidean distance
 #' embedding_distance(emb1, emb2, metric = "euclidean")
 #' }

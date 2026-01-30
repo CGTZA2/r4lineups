@@ -157,6 +157,7 @@ plot_lineup_similarity <- function(lineup,
 #' }
 #'
 #' @export
+#' @importFrom stats prcomp
 plot_embedding_space <- function(embeddings_df,
                                  method = c("umap", "pca", "tsne"),
                                  labels = NULL,

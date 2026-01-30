@@ -1,0 +1,335 @@
+---
+title: "Full ROC Analysis for Eyewitness Lineups"
+author: "r4lineups Package"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Full ROC Analysis for Eyewitness Lineups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Introduction
+
+This vignette demonstrates the use of **full ROC (Receiver Operating Characteristic) curves** for analyzing eyewitness lineup data, following the method developed by Smith, Yang, and Wells (2020).
+
+### Why Full ROC?
+
+Traditional (partial) ROC analysis of lineup data only uses **suspect identifications**, ignoring filler identifications and lineup rejections. This creates several problems:
+
+1. **Incomplete evidence**: Filler IDs and rejections also provide diagnostic information about suspect guilt
+2. **Biased comparisons**: Partial AUC (pAUC) systematically favors more conservative procedures
+3. **Limited range**: Partial ROC curves don't span the full [0,1] range
+4. **Confounded with bias**: Cannot separate discriminability from response bias
+
+The **full ROC method** addresses these issues by using ALL eyewitness responses.
+
+## The Key Insight: Two Signal Detection Tasks
+
+Smith et al. (2020) recognized that lineup procedures involve **two simultaneous signal detection tasks**:
+
+### 1. Eyewitness Task (3 × 2)
+- Determine if culprit is present AND identify them
+- Three responses: suspect ID, filler ID, or reject
+- Two states: culprit present or absent
+
+### 2. Investigator Task (2 × 2)
+- Determine if suspect is guilty
+- Two decisions: arrest or release
+- Two states: guilty or innocent suspect
+- **Key point**: Investigator knows which lineup members are fillers
+
+The investigator uses the witness's decision (and confidence) as evidence to decide about the suspect. The **full ROC measures investigator discriminability**, not just eyewitness memory.
+
+## Basic Usage
+
+### Data Structure
+
+Your data needs three columns:
+
+```{r eval=FALSE}
+library(r4lineups)
+
+data <- data.frame(
+  target_present = c(TRUE, TRUE, FALSE, FALSE, ...),  # Logical
+  identification = c("suspect", "filler", "reject", ...),  # Character
+  confidence = c(90, 70, 80, 50, ...)  # Numeric
+)
+```
+
+### Compute Full ROC
+
+```{r eval=FALSE}
+# Main function
+result <- make_fullroc(
+  data,
+  conf_bins = NULL,           # Optional: bin confidence
+  order = "diagnosticity",    # or "apriori"
+  lineup_size = 6,
+  show_plot = TRUE
+)
+
+# View results
+print(result)
+print(result$auc)
+
+# Access plot
+print(result$plot)
+```
+
+## Example 1: Strong vs. Weak Memory
+
+Let's simulate data for two viewing conditions:
+
+```{r eval=FALSE}
+set.seed(123)
+
+# Strong memory (clear viewing)
+strong_data <- data.frame(
+  target_present = c(rep(TRUE, 100), rep(FALSE, 100)),
+  identification = c(
+    # Target-present: high suspect ID rate
+    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
+           prob = c(0.70, 0.15, 0.15)),
+    # Target-absent: low false ID rate
+    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
+           prob = c(0.10, 0.30, 0.60))
+  ),
+  confidence = sample(seq(0, 100, 10), 200, replace = TRUE)
+)
+
+# Weak memory (degraded viewing)
+weak_data <- data.frame(
+  target_present = c(rep(TRUE, 100), rep(FALSE, 100)),
+  identification = c(
+    # Target-present: lower suspect ID rate
+    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
+           prob = c(0.35, 0.35, 0.30)),
+    # Target-absent: higher false ID rate
+    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
+           prob = c(0.25, 0.40, 0.35))
+  ),
+  confidence = sample(seq(0, 100, 10), 200, replace = TRUE)
+)
+
+# Compute full ROCs
+strong_roc <- make_fullroc(strong_data)
+weak_roc <- make_fullroc(weak_data)
+
+# Compare
+cat("Strong memory AUC:", strong_roc$auc, "\n")
+cat("Weak memory AUC:", weak_roc$auc, "\n")
+```
+
+Expected result: Strong memory condition should have substantially higher AUC (e.g., 0.85 vs. 0.65).
+
+## Example 2: Custom Confidence Bins
+
+Instead of using every unique confidence value, you can create bins:
+
+```{r eval=FALSE}
+# Create Low (0-60), Medium (60-80), High (80-100) bins
+result_binned <- make_fullroc(
+  data,
+  conf_bins = c(0, 60, 80, 100),
+  order = "diagnosticity"
+)
+
+# This creates cleaner ROC curves with fewer operating points
+# Useful when you have many confidence levels
+```
+
+## Ordering Methods
+
+### Diagnosticity Ordering (Default)
+
+Orders response categories by their empirical diagnosticity ratio (DR = Hit Rate / False Alarm Rate):
+
+```{r eval=FALSE}
+result <- make_fullroc(data, order = "diagnosticity")
+```
+
+- High DR (e.g., 10.0): Strong evidence of guilt (e.g., high-confidence suspect ID)
+- DR ≈ 1.0: Neutral evidence
+- Low DR (e.g., 0.1): Strong evidence of innocence (e.g., high-confidence rejection)
+
+**This is the recommended method** as it's data-driven.
+
+### A-priori Ordering
+
+Uses theoretical ordering:
+
+```{r eval=FALSE}
+result <- make_fullroc(data, order = "apriori")
+```
+
+Order (from evidence of guilt → evidence of innocence):
+1. Suspect IDs: high confidence → low confidence
+2. Filler IDs: low confidence → high confidence
+3. Rejections: low confidence → high confidence
+
+Rationale:
+- High-confidence suspect IDs are strong evidence of guilt
+- Low-confidence filler IDs/rejections are strong evidence of innocence (rare when guilty, common when innocent)
+
+## Understanding the Output
+
+### The Diagnosticity Table
+
+This shows non-cumulative rates for each decision × confidence category:
+
+```{r eval=FALSE}
+result <- make_fullroc(data)
+head(result$diagnosticity_table)
+```
+
+Columns:
+- `decision`: suspect, filler, or reject
+- `conf_bin`: confidence level
+- `hit_rate`: P(this response | target present)
+- `false_alarm_rate`: P(this response | target absent)
+- `diagnosticity_ratio`: hit_rate / false_alarm_rate
+- `cumulative_*`: Running sum (for ROC curve)
+
+### The ROC Data
+
+```{r eval=FALSE}
+head(result$roc_data)
+```
+
+Each row is an operating point (decision criterion) on the ROC curve:
+- `cumulative_hit_rate`: Y-axis (correct IDs of guilty suspects)
+- `cumulative_false_alarm_rate`: X-axis (false IDs of innocent suspects)
+
+### The AUC
+
+```{r eval=FALSE}
+result$auc
+```
+
+- **0.50**: Chance performance
+- **0.60-0.70**: Weak discriminability
+- **0.70-0.80**: Moderate discriminability
+- **0.80-0.90**: Good discriminability
+- **0.90-1.00**: Excellent discriminability
+
+## Comparing Procedures
+
+### When One ROC Dominates
+
+If Procedure A's ROC is above Procedure B's across the **entire** range:
+
+```{r eval=FALSE}
+# Procedure A dominates if its ROC curve is always above Procedure B's
+# This means A is unambiguously superior regardless of:
+#   - Base rate assumptions
+#   - Cost/utility functions
+#   - Operating points chosen
+```
+
+### When ROC Curves Cross
+
+When curves cross, there's no clear winner without additional assumptions. You need:
+
+1. **Base rate**: How often is the suspect actually guilty?
+2. **Costs**: Relative cost of missed ID vs. false ID
+3. **Utility analysis**: Use expected utility framework (see Lampinen et al., 2019)
+
+## Full ROC vs. Partial ROC
+
+```{r eval=FALSE}
+# Traditional partial ROC
+partial <- make_roc(data)
+print(partial$pauc)  # Partial AUC
+
+# Full ROC
+full <- make_fullroc(data)
+print(full$auc)  # Full AUC
+
+# These are NOT comparable!
+# pAUC only uses suspect IDs
+# Full AUC uses ALL evidence
+```
+
+Key differences:
+
+| Feature | Partial ROC | Full ROC |
+|---------|-------------|----------|
+| Responses | Suspect IDs only | ALL responses |
+| Range | Limited (often 0-0.30) | Full (0-1.0) |
+| Measure | pAUC | AUC |
+| Bias | Favors conservative procedures | Unbiased |
+| Evidence | Inculpatory only | Inculpatory + exculpatory |
+
+## Practical Recommendations
+
+1. **Use full ROC for new analyses**
+   - Provides unbiased discriminability measure
+   - Uses all available evidence
+   - Aligns with real investigator decisions
+
+2. **Use diagnosticity ordering** (default)
+   - Data-driven approach
+   - Optimal ordering of evidence
+
+3. **Bin confidence if needed**
+   - Creates cleaner ROC curves
+   - Reduces noise from sparse confidence levels
+   - Example: `conf_bins = c(0, 60, 80, 100)`
+
+4. **Check for curve dominance**
+   - If one curve dominates → clear winner
+   - If curves cross → need utility analysis
+
+5. **Report full results**
+   - AUC value
+   - Sample sizes (target-present, target-absent)
+   - Number of operating points
+   - Ordering method used
+
+## Mathematical Details
+
+### Algorithm
+
+For each decision × confidence category:
+
+1. Compute non-cumulative rates:
+   $$HR_i = \frac{\text{count}(response_i | target\_present)}{N_{present}}$$
+   $$FAR_i = \frac{\text{count}(response_i | target\_absent)}{N_{absent}}$$
+
+2. Compute diagnosticity ratio:
+   $$DR_i = \frac{HR_i}{FAR_i}$$
+
+3. Order categories by $DR_i$ (descending)
+
+4. Compute cumulative rates:
+   $$CHR_k = \sum_{i=1}^{k} HR_i$$
+   $$CFAR_k = \sum_{i=1}^{k} FAR_i$$
+
+5. Calculate AUC (trapezoidal rule):
+   $$AUC = \sum_{i=2}^{n} \frac{(CFAR_i - CFAR_{i-1}) \times (CHR_i + CHR_{i-1})}{2}$$
+
+### Edge Cases
+
+- **FAR = 0**: Use small epsilon (default 0.001) to compute DR
+- **HR = FAR = 0**: Set DR = 1.0 (neutral evidence), remove from ROC
+- **Empty bins**: Automatically removed
+
+## References
+
+Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability: A method for creating full receiver operating characteristic curves of lineup identification performance. *Perspectives on Psychological Science, 15*(3), 589-607. https://doi.org/10.1177/1745691620902426
+
+Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in eyewitness identification practice: Dissociations between receiver operating characteristic (ROC) analysis and expected utility analysis. *Law and Human Behavior, 43*(1), 26-44.
+
+National Research Council. (2014). *Identifying the culprit: Assessing eyewitness identification*. Washington, DC: The National Academies Press.
+
+Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(1), 99-122.
