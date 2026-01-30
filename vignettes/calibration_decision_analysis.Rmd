@@ -1,0 +1,458 @@
+---
+title: "Calibration and Decision Analysis"
+subtitle: "Advanced Methods for Evaluating Eyewitness Identification Performance"
+author:
+- "Colin G. Tredoux"
+- "Tamsyn M. Naylor"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calibration and Decision Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = NA,
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+This vignette demonstrates five advanced statistical methods for analyzing eyewitness identification data in **r4lineups**:
+
+1. **Calibration Analysis** - Assessing confidence-accuracy correspondence
+2. **Bayesian Information-Gain Curves** - Evaluating diagnostic value of evidence
+3. **Expected Utility Analysis** - Decision-theoretic evaluation with cost/benefit tradeoffs
+4. **Deviation from Perfect Performance (DPP)** - ROC-based truncation-robust metric
+5. **ANRI** - Bias-corrected resolution index with bootstrap inference
+
+These methods complement the traditional lineup fairness measures by providing sophisticated analyses of identification accuracy, confidence calibration, and decision-making utility.
+
+## Data Format
+
+All methods in this vignette require a dataframe with the following columns:
+
+- `target_present`: Logical. TRUE if the guilty suspect is in the lineup
+- `identification`: Character. "suspect", "filler", or "reject"
+- `confidence`: Numeric. Confidence rating (any scale)
+
+We'll use the built-in `lineup_example` dataset throughout.
+
+```{r load-data}
+library(r4lineups)
+data(lineup_example)
+
+# Examine the data structure
+head(lineup_example)
+str(lineup_example)
+```
+
+## 1. Calibration Analysis
+
+Calibration measures how well confidence judgments correspond to accuracy. Perfect calibration means that when witnesses express X% confidence, they are correct X% of the time.
+
+### Basic Calibration
+
+```{r calibration-basic}
+# Compute calibration with binned confidence
+cal_result <- make_calibration(
+  lineup_example,
+  confidence_bins = c(0, 60, 80, 100),
+  choosers_only = TRUE  # Analyze only suspect identifications
+)
+
+print(cal_result)
+```
+
+The output provides three key statistics:
+
+- **C statistic**: Overall calibration quality (0 = perfect, higher = worse)
+- **O/U (Over/Under confidence)**: Positive = overconfident, Negative = underconfident
+- **NRI (Normalized Resolution Index)**: Ability to discriminate accuracy levels with confidence (higher = better)
+
+### Interpreting the Calibration Plot
+
+The calibration plot shows:
+
+- **Diagonal line**: Perfect calibration
+- **Points above diagonal**: Underconfident (accuracy exceeds confidence)
+- **Points below diagonal**: Overconfident (confidence exceeds accuracy)
+- **Point size**: Sample size in each bin
+
+```{r calibration-plot, eval=FALSE}
+# The plot is automatically displayed, but you can save it:
+ggsave("calibration_plot.png", cal_result$plot, width = 8, height = 6)
+```
+
+### Calibration by Condition
+
+Compare calibration across experimental conditions:
+
+```{r calibration-by-condition}
+# Add a grouping variable (for demonstration)
+lineup_example$procedure <- sample(
+  c("Simultaneous", "Sequential"),
+  nrow(lineup_example),
+  replace = TRUE
+)
+
+# Compute calibration by condition
+cal_by_cond <- make_calibration_by_condition(
+  lineup_example,
+  condition_var = "procedure",
+  confidence_bins = c(0, 60, 80, 100)
+)
+
+print(cal_by_cond)
+
+# Plot comparison
+cal_by_cond$plot
+```
+
+## 2. Bayesian Information-Gain Analysis
+
+Bayesian analysis evaluates how much an identification response changes our belief about guilt, quantified as information gain (reduction in uncertainty).
+
+### Prior-Posterior Curves
+
+```{r bayes-curves}
+# Compute Bayesian curves for simple responses
+bayes_result <- make_bayes_curves(
+  lineup_example,
+  response_categories = "simple",  # "suspect", "filler", "reject"
+  prior_grid = seq(0.01, 0.99, 0.01)
+)
+
+print(bayes_result)
+
+# Plot prior-posterior relationships
+plot_bayes_prior_posterior(bayes_result)
+```
+
+The plot shows how each response type updates prior belief:
+
+- **Lines above diagonal**: Evidence increases guilt belief (diagnostic of guilt)
+- **Lines below diagonal**: Evidence decreases guilt belief (diagnostic of innocence)
+- **Steeper slopes**: More diagnostic evidence
+
+### Information Gain
+
+Information gain quantifies uncertainty reduction:
+
+```{r bayes-information-gain}
+# Plot information gain
+plot_bayes_information_gain(bayes_result)
+```
+
+Interpretation:
+
+- **Positive values**: Response reduces uncertainty (diagnostic)
+- **Negative values**: Response increases uncertainty (misleading)
+- **Higher magnitude**: Stronger diagnostic value
+
+### Confidence-Based Bayesian Analysis
+
+Analyze by confidence level:
+
+```{r bayes-confidence}
+bayes_conf <- make_bayes_curves(
+  lineup_example,
+  response_categories = "confidence",
+  confidence_bins = c(0, 60, 80, 100)
+)
+
+# Get suspect responses only
+suspect_responses <- grep("^suspect_", unique(bayes_conf$curves$response), value = TRUE)
+plot_bayes_prior_posterior(bayes_conf, selected_responses = suspect_responses)
+```
+
+### Base-Rate Equivalency of Evidence (BREE)
+
+BREE curves compare the diagnostic value of two procedures:
+
+```{r bree}
+# Create two procedure datasets (for demonstration)
+data_proc_a <- lineup_example[lineup_example$procedure == "Simultaneous", ]
+data_proc_b <- lineup_example[lineup_example$procedure == "Sequential", ]
+
+# Compute BREE curve for suspect identifications
+bree_result <- make_bree_curve(
+  data_proc_a,
+  data_proc_b,
+  reference_response = "suspect"
+)
+
+plot_bree(bree_result)
+```
+
+The BREE curve shows equivalent base rates for equal posterior probabilities. Points above the diagonal indicate Procedure A requires higher base rates to achieve the same posterior as Procedure B.
+
+## 3. Expected Utility Analysis
+
+Expected utility analysis evaluates identification procedures considering costs and benefits of different outcomes.
+
+### Define Utility Matrix
+
+```{r utility-matrix}
+# Define costs/benefits (on same scale)
+utility_matrix <- c(
+  tp = 1.0,    # True positive (correct suspect ID): Benefit
+  fn = -0.5,   # False negative (reject/filler ID when guilty): Cost
+  fp = -2.0,   # False positive (suspect ID when innocent): Major cost
+  tn = 0.5     # True negative (reject/filler ID when innocent): Benefit
+)
+```
+
+### Compute Utility Curves
+
+```{r utility-curves}
+# Compute expected utility across confidence criteria
+util_result <- make_utility_curves(
+  lineup_example,
+  base_rate = 0.5,  # Assume 50% guilty suspects
+  utility_matrix = utility_matrix,
+  lineup_size = 6
+)
+
+print(util_result)
+
+# Plot utility curves
+plot_utility_curves(util_result)
+```
+
+The plot shows:
+
+- **Expected utility** at each confidence threshold
+- **Optimal threshold**: Maximum utility point
+- **Comparison with "all identifications"** strategy
+
+### Compare Procedures
+
+```{r utility-comparison, eval=FALSE}
+# Compare two procedures (requires datasets from BREE section)
+# First compute utility for each procedure separately
+util_proc_a <- make_utility_curves(data_proc_a, base_rate = 0.5,
+                                   utility_matrix = utility_matrix)
+util_proc_b <- make_utility_curves(data_proc_b, base_rate = 0.5,
+                                   utility_matrix = utility_matrix)
+
+cat("Procedure A max utility:", round(util_proc_a$max_utility, 3), "\n")
+cat("Procedure B max utility:", round(util_proc_b$max_utility, 3), "\n")
+```
+
+### Sensitivity to Base Rate
+
+Examine how utility depends on base rate:
+
+```{r utility-base-rates, eval=FALSE}
+# Test multiple base rates
+base_rates <- c(0.2, 0.5, 0.8)
+
+for (br in base_rates) {
+  util <- make_utility_curves(lineup_example, base_rate = br,
+                              utility_matrix = utility_matrix)
+  cat("Base rate:", br, "  Max utility:", round(util$max_utility, 3), "\n")
+}
+```
+
+## 4. Deviation from Perfect Performance (DPP)
+
+DPP quantifies how far an ROC curve deviates from perfect performance. It's robust to ROC truncation (missing low-confidence data).
+
+### Basic DPP
+
+```{r dpp}
+# Compute DPP
+dpp_result <- make_dpp(
+  lineup_example,
+  lineup_size = 6
+)
+
+print(dpp_result)
+
+# Plot ROC with perfect performance comparison
+plot_dpp(dpp_result)
+```
+
+Interpretation:
+
+- **DPP = 0**: Perfect performance
+- **DPP = 1**: Chance performance
+- **DPP < 0**: Better than perfect (impossible, indicates error)
+
+The plot shows:
+
+- **Black curve**: Observed ROC
+- **Red dashed line**: Perfect ROC given the maximum false alarm rate
+- **Shaded area**: Deviation from perfect performance
+
+### Compare DPP Between Groups
+
+```{r dpp-comparison}
+# Compare procedures (using datasets from BREE section)
+dpp_comparison <- compare_dpp(
+  data_proc_a,
+  data_proc_b,
+  lineup_size = 6
+)
+
+print(dpp_comparison)
+
+# Plot comparison side-by-side
+plot_dpp_comparison(dpp_comparison)
+```
+
+### When to Use DPP
+
+Use DPP when:
+
+- You have confidence-based ROC data
+- ROC curves are truncated (witnesses may not use full scale)
+- You want a single performance metric comparable across studies
+- You need to compare procedures with different confidence distributions
+
+## 5. ANRI: Adjusted Normalized Resolution Index
+
+ANRI corrects NRI for small-sample bias, making it more appropriate for hypothesis testing and group comparisons.
+
+### Basic ANRI
+
+```{r anri}
+# Compute ANRI
+anri_result <- compute_anri(
+  lineup_example,
+  confidence_bins = c(0, 60, 80, 100)
+)
+
+print(anri_result)
+```
+
+ANRI is always ≤ NRI because it removes positive bias. The bias correction is larger when:
+
+- Sample size N is small
+- Number of bins J is large
+- The ratio J/N is high
+
+### Bootstrap Confidence Intervals
+
+```{r anri-bootstrap}
+# Compute ANRI with bootstrap CIs
+anri_boot <- bootstrap_anri(
+  lineup_example,
+  confidence_bins = c(0, 60, 80, 100),
+  n_bootstrap = 2000,  # Use 2000+ for publications
+  conf_level = 0.95,
+  seed = 123
+)
+
+print(anri_boot)
+
+cat("\nANRI:", round(anri_boot$anri, 3), "\n")
+cat("95% CI: [", round(anri_boot$ci_lower, 3), ",",
+    round(anri_boot$ci_upper, 3), "]\n")
+```
+
+### Compare Groups
+
+```{r anri-comparison}
+# Compare ANRI between procedures
+anri_comparison <- compare_anri(
+  lineup_example,
+  group_var = "procedure",
+  confidence_bins = c(0, 60, 80, 100),
+  n_bootstrap = 1000,
+  seed = 456
+)
+
+print(anri_comparison)
+
+# Plot comparison
+plot_anri_comparison(anri_comparison)
+
+# Plot bootstrap distribution
+plot_anri_difference_distribution(anri_comparison)
+```
+
+The comparison provides:
+
+- **Point estimates** for each group
+- **Difference with CI**: Tests whether groups differ
+- **Significance test**: CI excludes 0 = significant difference
+- **Bootstrap distributions**: For diagnostic checks
+
+### When to Use ANRI vs NRI
+
+Use ANRI when:
+
+- Sample size is modest (N < 200)
+- Number of bins is small (J = 3-5)
+- Comparing across studies with different bin counts
+- Conducting formal statistical tests
+
+Use NRI when:
+
+- Sample size is very large (N > 500)
+- You're only reporting descriptive statistics
+- Comparing to older studies that reported NRI
+
+## Integrating Multiple Methods
+
+For a comprehensive analysis, combine these methods:
+
+```{r comprehensive-analysis, eval=FALSE}
+# 1. Calibration: Are witnesses well-calibrated?
+cal <- make_calibration(data, confidence_bins = c(0, 60, 80, 100))
+
+# 2. DPP: Overall discriminability
+dpp <- make_dpp(data, lineup_size = 6)
+
+# 3. ANRI: Resolution with inference
+anri <- bootstrap_anri(data, confidence_bins = c(0, 60, 80, 100),
+                       n_bootstrap = 2000)
+
+# 4. Utility: Policy decisions
+util <- make_utility_curves(data, base_rate = 0.5,
+                            utility_matrix = utility_matrix)
+
+# 5. Bayesian: Information value
+bayes <- make_bayes_curves(data, response_categories = "confidence",
+                           confidence_bins = c(0, 60, 80, 100))
+```
+
+## Reporting Results
+
+### Example Write-Up
+
+"We analyzed identification performance using calibration analysis, DPP, and ANRI with bootstrap inference. Witnesses showed moderate calibration (C = 0.12, O/U = -0.05), indicating slight overconfidence. The DPP was 0.34 (95% CI [0.28, 0.41]), indicating performance well above chance but below perfection. Resolution, measured by ANRI, was 0.25 (95% CI [0.15, 0.36]), demonstrating that confidence ratings provided meaningful discrimination between correct and incorrect identifications.
+
+Expected utility analysis revealed that a confidence threshold of 75% maximized utility (EU = 0.42) given a base rate of 50% and the specified cost matrix. Bayesian analysis showed that high-confidence suspect identifications provided the most information gain (mean IG = 0.48 bits), substantially reducing uncertainty about guilt."
+
+## References
+
+**Calibration:**
+- Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity of confidence in eyewitness identification. *Journal of Experimental Psychology: Learning, Memory, and Cognition, 22*(5), 1304-1316.
+
+**Bayesian Analysis:**
+- Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect-equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
+
+**Expected Utility:**
+- Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in eyewitness identification practice. *Journal of Applied Research in Memory and Cognition, 8*(1), 29-38.
+
+**DPP:**
+- Mickes, L. (2015). Receiver operating characteristic analysis and confidence-accuracy characteristic analysis in investigations of system variables and estimator variables that affect eyewitness memory. *Journal of Applied Research in Memory and Cognition, 4*(2), 93-102.
+
+**ANRI:**
+- Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of discrimination skill in probabilistic judgment. *Psychological Bulletin, 110*(3), 611-617.
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```
