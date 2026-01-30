@@ -1,6 +1,6 @@
 Package: r4lineups
 Title: Statistical Inference on Lineup Fairness
-Version: 0.1.2
+Version: 0.2.0
 Authors@R: c(
     person("Colin", "Tredoux", email = "colin.tredoux@uct.ac.za", role = c("aut", "cre")),
     person("Tamsyn", "Naylor", email = "tmnaylor@outlook.com", role = "aut"))
@@ -19,12 +19,14 @@ Imports:
     tibble,
     utils
 Suggests:
+    gridExtra,
     here,
     knitr,
     pander,
     patchwork,
     rmarkdown,
     Rtsne,
+    testthat (>= 3.0.0),
     umap
 License: CC0
 Encoding: UTF-8
