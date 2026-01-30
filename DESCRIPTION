@@ -22,6 +22,7 @@ Suggests:
     here,
     knitr,
     pander,
+    patchwork,
     rmarkdown,
     Rtsne,
     umap
