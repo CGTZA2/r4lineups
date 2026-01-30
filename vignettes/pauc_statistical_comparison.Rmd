@@ -1,0 +1,610 @@
+---
+title: "Statistical Comparison of ROC Curves (pAUC Analysis)"
+author: "r4lineups package"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Statistical Comparison of ROC Curves (pAUC Analysis)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+When evaluating eyewitness identification procedures, we often need to statistically compare ROC curves between conditions. For example:
+
+- Do simultaneous lineups provide better discriminability than sequential lineups?
+- Does increasing lineup size improve or impair performance?
+- Do different retention intervals affect discriminability?
+
+This vignette demonstrates how to use r4lineups' `compare_pauc()` function to rigorously test for differences in partial Area Under the Curve (pAUC) between conditions using bootstrap-based standard errors and z-tests.
+
+## Statistical Framework
+
+### The Z-Test for pAUC Differences
+
+The comparison uses the following statistical framework:
+
+**Test statistic:**
+$$Z = \frac{pAUC_1 - pAUC_2}{SE(pAUC_1 - pAUC_2)}$$
+
+**Standard errors:**
+- Computed via bootstrap resampling (non-parametric)
+- Typically 1000-2000 bootstrap samples
+
+**P-value:**
+- Two-tailed test from standard normal distribution
+- Null hypothesis: pAUC₁ = pAUC₂
+
+**Confidence interval:**
+$$CI = (pAUC_1 - pAUC_2) \pm Z_{α/2} \times SE(difference)$$
+
+### Why pAUC?
+
+Partial AUC (pAUC) is preferred over full AUC for several reasons:
+
+1. **Policy relevance**: Focus on acceptable false ID rates (e.g., ≤20%)
+2. **Practical constraints**: Avoid unrealistic operating points
+3. **Precision**: More stable estimates in the relevant region
+4. **Comparison**: Ensures fair comparison at same false ID rates
+
+## Basic pAUC Comparison
+
+### Loading Data
+
+```{r load_data}
+library(r4lineups)
+
+# We'll use simulated data for demonstration
+set.seed(2026)
+
+# Condition 1: Strong discriminability
+condition1 <- simulate_lineup_data(
+  n_tp = 150,
+  n_ta = 150,
+  d_prime = 2.0,
+  lineup_size = 6,
+  conf_levels = 5
+)
+
+# Condition 2: Moderate discriminability
+condition2 <- simulate_lineup_data(
+  n_tp = 150,
+  n_ta = 150,
+  d_prime = 1.5,
+  lineup_size = 6,
+  conf_levels = 5
+)
+```
+
+### Comparing pAUC
+
+```{r basic_comparison}
+# Compare the two conditions
+comparison <- compare_pauc(
+  condition1,
+  condition2,
+  lineup_size = 6,
+  label1 = "Strong discriminability (d'=2.0)",
+  label2 = "Moderate discriminability (d'=1.5)",
+  n_bootstrap = 1000,  # Use 2000+ for publications
+  seed = 123
+)
+
+# View results
+print(comparison)
+```
+
+### Interpreting Results
+
+```{r interpretation}
+cat("Statistical Test Results:\n\n")
+cat("pAUC Difference:", round(comparison$pauc_diff, 4), "\n")
+cat("Z-score:", round(comparison$z_score, 3), "\n")
+cat("P-value:", format.pval(comparison$p_value, digits = 4), "\n")
+cat("95% CI: [", round(comparison$ci_diff["lower"], 4), ", ",
+    round(comparison$ci_diff["upper"], 4), "]\n\n", sep = "")
+
+if (comparison$p_value < 0.05) {
+  cat("Conclusion: Significant difference between conditions (p < 0.05)\n")
+} else {
+  cat("Conclusion: No significant difference between conditions (p ≥ 0.05)\n")
+}
+```
+
+### Detailed Summary
+
+```{r detailed_summary}
+# More detailed output including effect sizes
+summary(comparison)
+```
+
+### Visualization
+
+```{r visualization, fig.width=8, fig.height=6}
+# Side-by-side ROC curves with shaded pAUC regions
+plot(comparison, show_cutoff = TRUE, show_test_results = TRUE)
+```
+
+## Customizing the Comparison
+
+### Specifying False ID Rate Cutoff
+
+You can specify a policy-relevant false ID rate cutoff:
+
+```{r custom_cutoff}
+# Compare up to 20% false ID rate (common policy threshold)
+comparison_20 <- compare_pauc(
+  condition1,
+  condition2,
+  max_false_id_rate = 0.20,  # 20% cutoff
+  label1 = "Strong",
+  label2 = "Moderate",
+  n_bootstrap = 1000,
+  seed = 456
+)
+
+cat("pAUC up to 20% false ID rate:\n")
+print(comparison_20)
+```
+
+Common policy-relevant cutoffs:
+- **5% (0.05)**: Very conservative
+- **10% (0.10)**: Conservative
+- **20% (0.20)**: Moderate
+- **33% (0.33)**: Liberal
+
+### Adjusting Bootstrap Samples
+
+```{r bootstrap_samples}
+# Quick exploratory analysis (fewer samples)
+quick_comparison <- compare_pauc(
+  condition1,
+  condition2,
+  n_bootstrap = 500,  # Faster
+  seed = 789
+)
+
+cat("Quick comparison (500 bootstrap samples):\n")
+cat("  p-value:", format.pval(quick_comparison$p_value), "\n")
+
+# Vs. publication-quality (more samples)
+# publication_comparison <- compare_pauc(
+#   condition1,
+#   condition2,
+#   n_bootstrap = 2000,  # More stable
+#   seed = 789
+# )
+```
+
+Recommendations:
+- **Exploratory**: 500-1000 samples
+- **Planning**: 1000-1500 samples
+- **Publication**: 2000+ samples
+
+## Real-World Examples
+
+### Example 1: Simultaneous vs. Sequential Lineups
+
+```{r example_simultaneous_sequential}
+# Simulate simultaneous lineup (potentially better)
+simultaneous <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.8,
+  lineup_size = 6
+)
+
+# Simulate sequential lineup (potentially worse)
+sequential <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.5,
+  lineup_size = 6
+)
+
+# Compare
+lineup_comparison <- compare_pauc(
+  simultaneous,
+  sequential,
+  label1 = "Simultaneous",
+  label2 = "Sequential",
+  n_bootstrap = 1000,
+  seed = 111
+)
+
+print(lineup_comparison)
+plot(lineup_comparison)
+```
+
+### Example 2: Lineup Size Comparison
+
+```{r example_lineup_size}
+# 6-person lineup
+lineup_6 <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 1.6,
+  lineup_size = 6
+)
+
+# 8-person lineup (harder task)
+lineup_8 <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 1.6,
+  lineup_size = 8
+)
+
+# Compare at same false ID rate
+size_comparison <- compare_pauc(
+  lineup_6,
+  lineup_8,
+  max_false_id_rate = 0.15,
+  label1 = "6-person lineup",
+  label2 = "8-person lineup",
+  n_bootstrap = 1000,
+  seed = 222
+)
+
+summary(size_comparison)
+```
+
+### Example 3: Retention Interval
+
+```{r example_retention}
+# Immediate test (better memory)
+immediate <- simulate_lineup_data(
+  n_tp = 180, n_ta = 180,
+  d_prime = 2.0,
+  lineup_size = 6
+)
+
+# Delayed test (worse memory)
+delayed <- simulate_lineup_data(
+  n_tp = 180, n_ta = 180,
+  d_prime = 1.3,
+  lineup_size = 6
+)
+
+# Compare
+retention_comparison <- compare_pauc(
+  immediate,
+  delayed,
+  label1 = "Immediate test",
+  label2 = "1-week delay",
+  n_bootstrap = 1000,
+  seed = 333
+)
+
+print(retention_comparison)
+```
+
+## Multiple Comparisons
+
+### Pairwise Comparisons with Adjustment
+
+When comparing multiple conditions, adjust for multiple testing:
+
+```{r multiple_comparisons}
+# Three conditions
+high_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 2.0, lineup_size = 6)
+med_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 1.5, lineup_size = 6)
+low_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 1.0, lineup_size = 6)
+
+# All pairwise comparisons
+comp_high_med <- compare_pauc(high_d, med_d, label1 = "High", label2 = "Medium",
+                               n_bootstrap = 500, seed = 441)
+comp_high_low <- compare_pauc(high_d, low_d, label1 = "High", label2 = "Low",
+                               n_bootstrap = 500, seed = 442)
+comp_med_low <- compare_pauc(med_d, low_d, label1 = "Medium", label2 = "Low",
+                              n_bootstrap = 500, seed = 443)
+
+# Create summary table
+comparison_table <- data.frame(
+  Comparison = c("High vs Medium", "High vs Low", "Medium vs Low"),
+  pAUC_diff = c(comp_high_med$pauc_diff, comp_high_low$pauc_diff, comp_med_low$pauc_diff),
+  Z = c(comp_high_med$z_score, comp_high_low$z_score, comp_med_low$z_score),
+  p_value = c(comp_high_med$p_value, comp_high_low$p_value, comp_med_low$p_value),
+  stringsAsFactors = FALSE
+)
+
+# Apply Bonferroni correction
+comparison_table$p_adjusted <- p.adjust(comparison_table$p_value, method = "bonferroni")
+
+# Display results
+cat("Multiple Comparison Results:\n")
+print(comparison_table, row.names = FALSE)
+
+cat("\nInterpretation:\n")
+cat("  Use p_adjusted for significance testing\n")
+cat("  Bonferroni correction: α = 0.05 / 3 comparisons = 0.0167\n")
+```
+
+## Advanced Topics
+
+### Accessing Bootstrap Distributions
+
+```{r bootstrap_distributions}
+# Access bootstrap results
+boot_dist <- comparison$bootstrap_results
+
+# Summary statistics
+cat("Bootstrap Distribution Summary:\n\n")
+cat("Condition 1 pAUC:\n")
+cat("  Mean:", round(mean(boot_dist$pauc1_boot), 4), "\n")
+cat("  SD:", round(sd(boot_dist$pauc1_boot), 4), "\n\n")
+
+cat("Condition 2 pAUC:\n")
+cat("  Mean:", round(mean(boot_dist$pauc2_boot), 4), "\n")
+cat("  SD:", round(sd(boot_dist$pauc2_boot), 4), "\n\n")
+
+cat("Difference:\n")
+cat("  Mean:", round(mean(boot_dist$diff_boot), 4), "\n")
+cat("  SD:", round(sd(boot_dist$diff_boot), 4), "\n")
+```
+
+### Visualizing Bootstrap Distributions
+
+```{r bootstrap_visualization, fig.width=8, fig.height=5}
+# Create histogram of bootstrap differences
+library(ggplot2)
+
+boot_diff_df <- data.frame(
+  diff = comparison$bootstrap_results$diff_boot
+)
+
+ggplot(boot_diff_df, aes(x = diff)) +
+  geom_histogram(bins = 50, fill = "steelblue", color = "black", alpha = 0.7) +
+  geom_vline(xintercept = comparison$pauc_diff,
+             color = "red", size = 1, linetype = "dashed") +
+  geom_vline(xintercept = 0, color = "gray50", linetype = "dotted") +
+  theme_bw() +
+  labs(
+    title = "Bootstrap Distribution of pAUC Difference",
+    x = "pAUC Difference (Condition 1 - Condition 2)",
+    y = "Frequency",
+    caption = paste0("Red line = observed difference (",
+                    round(comparison$pauc_diff, 4), ")\n",
+                    "Gray line = null hypothesis (difference = 0)")
+  )
+```
+
+### Confidence Level Adjustment
+
+```{r confidence_level}
+# Use 99% confidence interval instead of 95%
+comparison_99 <- compare_pauc(
+  condition1,
+  condition2,
+  conf_level = 0.99,  # 99% CI
+  n_bootstrap = 1000,
+  seed = 555
+)
+
+cat("95% CI:", round(comparison$ci_diff["lower"], 4), "to",
+    round(comparison$ci_diff["upper"], 4), "\n")
+cat("99% CI:", round(comparison_99$ci_diff["lower"], 4), "to",
+    round(comparison_99$ci_diff["upper"], 4), "\n")
+cat("\nNote: 99% CI is wider (more conservative)\n")
+```
+
+## Power Analysis for pAUC Comparisons
+
+Determine required sample size for detecting pAUC differences:
+
+```{r power_analysis}
+# Simulate various sample sizes
+sample_sizes <- c(50, 100, 150, 200, 300)
+power_results <- data.frame(
+  n = sample_sizes,
+  power = numeric(length(sample_sizes))
+)
+
+# For each sample size, run multiple comparisons
+for (i in seq_along(sample_sizes)) {
+  n <- sample_sizes[i]
+
+  # Run 50 simulations (use 100+ for real studies)
+  significant_count <- 0
+  for (sim in 1:50) {
+    # Simulate data
+    data1 <- simulate_lineup_data(n, n, d_prime = 1.8, lineup_size = 6)
+    data2 <- simulate_lineup_data(n, n, d_prime = 1.5, lineup_size = 6)
+
+    # Test
+    comp <- compare_pauc(data1, data2, n_bootstrap = 200, seed = sim)
+
+    if (comp$p_value < 0.05) {
+      significant_count <- significant_count + 1
+    }
+  }
+
+  power_results$power[i] <- significant_count / 50
+}
+
+# Display results
+cat("Power Analysis Results:\n")
+print(power_results)
+
+cat("\nFor 80% power, recommend n ≥", min(power_results$n[power_results$power >= 0.8]), "\n")
+```
+
+## Interpretation Guidelines
+
+### Understanding Z-Scores
+
+- **|Z| < 1.96**: Not significant at α = 0.05 (two-tailed)
+- **|Z| ≥ 1.96**: Significant at α = 0.05
+- **|Z| ≥ 2.58**: Significant at α = 0.01
+- **|Z| ≥ 3.29**: Significant at α = 0.001
+
+### Understanding P-Values
+
+```{r pvalue_interpretation}
+cat("P-value Interpretation:\n\n")
+cat("p < 0.001:  Very strong evidence against null hypothesis (***)\n")
+cat("p < 0.01:   Strong evidence (**)\n")
+cat("p < 0.05:   Moderate evidence (*)\n")
+cat("p ≥ 0.05:   Insufficient evidence (ns)\n\n")
+cat("Note: Always report exact p-value, not just '< 0.05'\n")
+```
+
+### Effect Size Interpretation
+
+The summary() function provides Cohen's d equivalent:
+
+```{r effect_size}
+# Effect size from summary
+# summary(comparison)
+
+cat("Cohen's d Interpretation:\n\n")
+cat("d ≈ 0.2:  Small effect\n")
+cat("d ≈ 0.5:  Medium effect\n")
+cat("d ≈ 0.8:  Large effect\n")
+```
+
+## Best Practices
+
+### 1. Pre-registration
+
+Specify comparison plans before data collection:
+
+```{r best_practice_prereg}
+cat("Pre-register:\n")
+cat("  • Primary comparison (e.g., simultaneous vs. sequential)\n")
+cat("  • False ID rate cutoff (e.g., 20%)\n")
+cat("  • Number of bootstrap samples (e.g., 2000)\n")
+cat("  • Alpha level (typically 0.05)\n")
+cat("  • Sample size (based on power analysis)\n")
+```
+
+### 2. Report Complete Results
+
+Always report:
+
+```{r best_practice_reporting}
+cat("In your paper, report:\n")
+cat("  • pAUC for each condition with SE\n")
+cat("  • pAUC difference with 95% CI\n")
+cat("  • Z-score and exact p-value\n")
+cat("  • Effect size (Cohen's d)\n")
+cat("  • Number of bootstrap samples\n")
+cat("  • False ID rate cutoff used\n")
+cat("  • Sample sizes for each condition\n")
+```
+
+### 3. Check Assumptions
+
+```{r best_practice_assumptions}
+cat("Check:\n")
+cat("  • Adequate sample sizes (n ≥ 100 per condition)\n")
+cat("  • Bootstrap distributions are approximately normal\n")
+cat("  • No extreme outliers in bootstrap samples\n")
+cat("  • Sufficient bootstrap samples (≥ 1000)\n")
+```
+
+### 4. Visualize Results
+
+```{r best_practice_visualization}
+cat("Always create:\n")
+cat("  • Side-by-side ROC curves\n")
+cat("  • Shaded pAUC regions\n")
+cat("  • Cutoff line if applicable\n")
+cat("  • Test statistics on plot\n")
+cat("  • Bootstrap distribution (supplementary)\n")
+```
+
+## Common Pitfalls
+
+### 1. Insufficient Bootstrap Samples
+
+```{r pitfall_bootstrap}
+cat("Too few bootstrap samples lead to unstable SE estimates:\n\n")
+
+# Compare with different bootstrap samples
+comp_100 <- compare_pauc(condition1, condition2, n_bootstrap = 100, seed = 666)
+comp_1000 <- compare_pauc(condition1, condition2, n_bootstrap = 1000, seed = 666)
+
+cat("100 samples:  SE =", round(comp_100$se_diff, 5), "\n")
+cat("1000 samples: SE =", round(comp_1000$se_diff, 5), "\n")
+cat("\nUse ≥ 1000 samples for stable estimates\n")
+```
+
+### 2. Ignoring Multiple Testing
+
+```{r pitfall_multiple_testing}
+cat("When making multiple comparisons, adjust alpha:\n\n")
+cat("3 comparisons: α = 0.05 / 3 = 0.0167\n")
+cat("5 comparisons: α = 0.05 / 5 = 0.010\n")
+cat("10 comparisons: α = 0.05 / 10 = 0.005\n\n")
+cat("Or use: p.adjust(p_values, method = 'bonferroni')\n")
+```
+
+### 3. Inappropriate Cutoff
+
+```{r pitfall_cutoff}
+cat("Choosing inappropriate false ID rate cutoffs:\n\n")
+cat("✗ Too high (e.g., 0.50): Includes impractical operating points\n")
+cat("✗ Too low (e.g., 0.01): May miss most of the ROC curve\n")
+cat("✓ Policy-relevant (e.g., 0.20): Balances coverage and practicality\n")
+```
+
+### 4. Small Sample Sizes
+
+```{r pitfall_sample_size}
+cat("Insufficient sample sizes lead to:\n")
+cat("  • Low power to detect real differences\n")
+cat("  • Unreliable pAUC estimates\n")
+cat("  • Unstable bootstrap distributions\n\n")
+cat("Minimum recommended: n ≥ 100 per condition\n")
+cat("Preferred: n ≥ 150-200 per condition\n")
+```
+
+## Summary
+
+**Key Functions:**
+- `compare_pauc()`: Statistical comparison of ROC curves
+- `print.pauc_comparison()`: Display results
+- `summary.pauc_comparison()`: Detailed output with effect sizes
+- `plot.pauc_comparison()`: Visualization
+
+**Statistical Framework:**
+- Z-test for pAUC differences
+- Bootstrap-based standard errors
+- Confidence intervals
+- Effect size (Cohen's d)
+
+**Best Practices:**
+- Use ≥ 1000 bootstrap samples (2000+ for publication)
+- Specify policy-relevant false ID rate cutoffs
+- Adjust for multiple comparisons
+- Report complete results including effect sizes
+- Visualize comparisons
+
+**Common Applications:**
+- Comparing lineup procedures
+- Evaluating system variables
+- Testing estimator variables
+- Policy decision-making
+
+## References
+
+Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0: A python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
+
+Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should abandon probative value and embrace receiver operating characteristic analysis. *Perspectives on Psychological Science, 7*(3), 275-278.
+
+Gronlund, S. D., Wixted, J. T., & Mickes, L. (2014). Evaluating eyewitness identification procedures using receiver operating characteristic analysis. *Current Directions in Psychological Science, 23*(1), 3-10.
+
+## Further Reading
+
+- See `?compare_pauc` for complete parameter documentation
+- See vignette("simulation_power_analysis") for power analysis
+- See vignette("model_comparison") for comparing different models

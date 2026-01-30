@@ -1,0 +1,535 @@
+---
+title: "Data Simulation and Power Analysis for Lineup Studies"
+author: "r4lineups package"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data Simulation and Power Analysis for Lineup Studies}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+This vignette demonstrates how to use r4lineups' data simulation and power analysis tools for planning eyewitness identification studies. These tools help researchers:
+
+- **Plan studies**: Determine required sample sizes for detecting effects
+- **Validate methods**: Test if analyses recover known parameters
+- **Explore scenarios**: Compare different experimental designs
+- **Teach concepts**: Demonstrate signal detection theory principles
+
+The simulation framework implements a Signal Detection Theory (SDT) model with the MAX decision rule, following the methodology used in eyewitness identification research (Wixted et al., 2018).
+
+## Signal Detection Model
+
+The simulation generates data using the following SDT framework:
+
+**Memory strength distributions:**
+- Targets (guilty suspects): Normal(d', 1)
+- Lures (foils/innocent suspects): Normal(0, 1)
+
+**MAX decision rule:**
+- The witness selects the lineup member with the highest memory strength
+- If all memory strengths are below criterion c, the lineup is rejected
+
+**Parameters:**
+- `d_prime`: Discriminability between targets and lures (higher = better memory)
+- `c_criterion`: Decision criterion (higher = more conservative)
+- `lineup_size`: Number of lineup members
+- `conf_levels`: Number of confidence scale points
+
+## Basic Data Simulation
+
+### Simulating a Single Dataset
+
+```{r basic_simulation}
+library(r4lineups)
+
+# Set seed for reproducibility
+set.seed(2026)
+
+# Simulate lineup data with moderate discriminability
+sim_data <- simulate_lineup_data(
+  n_tp = 200,           # 200 target-present lineups
+  n_ta = 200,           # 200 target-absent lineups
+  d_prime = 1.5,        # Moderate discriminability
+  c_criterion = 0.5,    # Neutral criterion
+  lineup_size = 6,      # Standard 6-person lineup
+  conf_levels = 5       # 5-point confidence scale
+)
+
+# View structure
+head(sim_data)
+
+# Summary
+table(sim_data$target_present, sim_data$identification)
+```
+
+The simulated data has the standard format required by r4lineups functions:
+- `target_present`: TRUE (guilty suspect) or FALSE (innocent suspect)
+- `identification`: "suspect", "filler", or "reject"
+- `confidence`: Confidence rating (1 to conf_levels)
+- `response_time`: Simulated response time (optional)
+
+### Exploring Discriminability Levels
+
+```{r discriminability_levels}
+# Weak discriminability
+weak_data <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 1.0,
+  lineup_size = 6
+)
+
+# Strong discriminability
+strong_data <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 2.5,
+  lineup_size = 6
+)
+
+# Compare suspect ID rates
+cat("Weak d' = 1.0:\n")
+cat("  TP suspect IDs:",
+    mean(weak_data$target_present & weak_data$identification == "suspect"), "\n")
+cat("  TA suspect IDs:",
+    mean(!weak_data$target_present & weak_data$identification == "suspect"), "\n\n")
+
+cat("Strong d' = 2.5:\n")
+cat("  TP suspect IDs:",
+    mean(strong_data$target_present & strong_data$identification == "suspect"), "\n")
+cat("  TA suspect IDs:",
+    mean(!strong_data$target_present & strong_data$identification == "suspect"), "\n")
+```
+
+As expected, higher discriminability leads to:
+- More correct IDs (target-present suspect IDs)
+- Fewer false IDs (target-absent suspect IDs)
+
+## Power Analysis for Study Planning
+
+### Simple Power Analysis
+
+Use `simulate_power_analysis()` to determine the sample size needed to detect an effect:
+
+```{r power_analysis_basic}
+# Power analysis for detecting d' = 1.5 with ROC pAUC
+power_result <- simulate_power_analysis(
+  sample_sizes = c(50, 100, 150, 200, 300),
+  d_prime = 1.5,
+  effect_measure = "pauc",
+  n_simulations = 100,  # Use 500+ for real studies
+  alpha = 0.05,
+  seed = 123
+)
+
+# View results
+print(power_result)
+
+# Plot power curve
+plot(power_result)
+```
+
+The power analysis shows how power increases with sample size. For 80% power to detect d' = 1.5, we typically need 150-200 participants per condition.
+
+### Comparing Two Conditions
+
+Power analysis for comparing two different discriminability levels:
+
+```{r power_comparison}
+# Power to detect difference between d' = 1.5 and d' = 2.0
+power_diff <- simulate_power_analysis(
+  sample_sizes = c(100, 150, 200, 250, 300),
+  d_prime = c(1.5, 2.0),  # Two conditions
+  comparison_type = "between",
+  n_simulations = 100,
+  seed = 456
+)
+
+print(power_diff)
+plot(power_diff)
+```
+
+### Custom Effect Measure
+
+You can use different effect measures for power analysis:
+
+```{r power_custom}
+# Power analysis using suspect ID rate
+power_id_rate <- simulate_power_analysis(
+  sample_sizes = seq(50, 300, by = 50),
+  d_prime = 1.5,
+  effect_measure = "suspect_id_rate",
+  n_simulations = 100
+)
+
+# Power analysis using diagnosticity ratio
+power_diag <- simulate_power_analysis(
+  sample_sizes = seq(50, 300, by = 50),
+  d_prime = 1.5,
+  effect_measure = "diagnosticity",
+  n_simulations = 100
+)
+```
+
+## Integration with r4lineups Analyses
+
+Simulated data works seamlessly with all r4lineups functions:
+
+### ROC Analysis
+
+```{r roc_analysis}
+# Generate data
+sim_roc <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.8,
+  conf_levels = 5
+)
+
+# Compute ROC curve
+roc_result <- make_roc(sim_roc, lineup_size = 6)
+print(roc_result)
+```
+
+### CAC Analysis
+
+```{r cac_analysis}
+# Confidence-Accuracy Characteristic
+cac_result <- make_cac(sim_roc)
+print(cac_result)
+```
+
+### RAC Analysis
+
+```{r rac_analysis}
+# Generate data with response times
+sim_rac <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.5,
+  include_response_time = TRUE
+)
+
+# Response Time-Accuracy Characteristic
+rac_result <- make_rac(
+  sim_rac,
+  time_bins = c(0, 5000, 10000, 15000, 20000)
+)
+print(rac_result)
+```
+
+### Full ROC Analysis
+
+```{r fullroc_analysis}
+# Full ROC using all responses
+fullroc_result <- make_fullroc(sim_roc)
+print(fullroc_result)
+```
+
+## Method Validation: Parameter Recovery
+
+Use simulation to test if your analyses can recover known parameters:
+
+```{r parameter_recovery}
+# Simulate data with known d' = 2.0
+true_dprime <- 2.0
+recovery_data <- simulate_lineup_data(
+  n_tp = 300, n_ta = 300,
+  d_prime = true_dprime,
+  lineup_size = 6
+)
+
+# Fit 2-HT model and check if we recover similar discriminability
+model_2ht <- fit_winter_2ht(
+  recovery_data,
+  lineup_size = 6,
+  target_present = "target_present",
+  identification = "identification"
+)
+
+cat("True d':", true_dprime, "\n")
+cat("Recovered dP (detection):", round(model_2ht$parameters["dP"], 3), "\n")
+cat("Expected: Higher d' should lead to higher dP parameter\n")
+```
+
+## Comparing Experimental Designs
+
+Use simulation to compare different lineup configurations:
+
+```{r design_comparison}
+# Standard 6-person lineup
+lineup_6 <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.5,
+  lineup_size = 6
+)
+
+# Smaller 4-person lineup (potentially easier)
+lineup_4 <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.5,
+  lineup_size = 4
+)
+
+# Larger 8-person lineup (potentially harder)
+lineup_8 <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.5,
+  lineup_size = 8
+)
+
+# Compare suspect ID rates
+compare_lineups <- data.frame(
+  Lineup_Size = c(4, 6, 8),
+  TP_Suspect_ID = c(
+    mean(lineup_4$target_present & lineup_4$identification == "suspect"),
+    mean(lineup_6$target_present & lineup_6$identification == "suspect"),
+    mean(lineup_8$target_present & lineup_8$identification == "suspect")
+  ),
+  TA_Suspect_ID = c(
+    mean(!lineup_4$target_present & lineup_4$identification == "suspect"),
+    mean(!lineup_6$target_present & lineup_6$identification == "suspect"),
+    mean(!lineup_8$target_present & lineup_8$identification == "suspect")
+  )
+)
+
+print(compare_lineups)
+```
+
+## Advanced: Custom Simulation Parameters
+
+### Varying Decision Criterion
+
+```{r criterion_comparison}
+# Liberal criterion (low c)
+liberal_data <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 1.5,
+  c_criterion = 0.0  # More liberal
+)
+
+# Conservative criterion (high c)
+conservative_data <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 1.5,
+  c_criterion = 1.0  # More conservative
+)
+
+# Compare rejection rates
+cat("Liberal criterion:\n")
+cat("  Rejection rate:", mean(liberal_data$identification == "reject"), "\n\n")
+
+cat("Conservative criterion:\n")
+cat("  Rejection rate:", mean(conservative_data$identification == "reject"), "\n")
+```
+
+### Multiple Confidence Levels
+
+```{r confidence_levels}
+# 3-point scale
+conf_3 <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 1.5,
+  conf_levels = 3
+)
+
+# 7-point scale
+conf_7 <- simulate_lineup_data(
+  n_tp = 150, n_ta = 150,
+  d_prime = 1.5,
+  conf_levels = 7
+)
+
+cat("3-point scale: unique values =", length(unique(conf_3$confidence)), "\n")
+cat("7-point scale: unique values =", length(unique(conf_7$confidence)), "\n")
+```
+
+## Practical Examples
+
+### Example 1: Planning a Lineup Procedure Study
+
+Research question: Do simultaneous lineups provide better discriminability than sequential lineups?
+
+```{r planning_example}
+# Assumptions:
+# - Simultaneous: d' = 1.8
+# - Sequential: d' = 1.5
+# - We want 80% power to detect this difference
+
+# Power analysis
+lineup_power <- simulate_power_analysis(
+  sample_sizes = seq(50, 300, by = 25),
+  d_prime = c(1.8, 1.5),
+  comparison_type = "between",
+  n_simulations = 200,
+  alpha = 0.05
+)
+
+plot(lineup_power)
+
+# Result: We need approximately 150 participants per condition for 80% power
+```
+
+### Example 2: Testing a New Analysis Method
+
+Verify that your new analysis recovers the correct underlying parameters:
+
+```{r method_validation}
+# Simulate data with known parameters
+validation_data <- simulate_lineup_data(
+  n_tp = 500, n_ta = 500,
+  d_prime = 2.0,
+  lineup_size = 6,
+  seed = 999
+)
+
+# Run your analysis
+eig_result <- compute_eig(validation_data, prior_guilt = 0.5)
+
+cat("EIG (Expected Information Gain):", round(eig_result$eig, 4), "bits\n")
+cat("Interpretation: Higher d' should produce higher EIG\n")
+```
+
+## Best Practices
+
+### 1. Sample Size Selection
+
+- Use power analysis to determine minimum sample sizes
+- Aim for 80% power (β = 0.20)
+- Account for potential dropout/exclusions
+- Consider practical constraints (time, resources)
+
+### 2. Simulation Parameters
+
+Choose realistic parameter values:
+- **d' values**:
+  - Weak: 0.8 - 1.2
+  - Moderate: 1.3 - 1.8
+  - Strong: 1.9 - 2.5
+  - Very strong: > 2.5
+
+- **Criterion**:
+  - Liberal: 0.0 - 0.3
+  - Neutral: 0.4 - 0.6
+  - Conservative: 0.7 - 1.2
+
+- **Lineup size**:
+  - Typical: 6 (most common)
+  - Range: 4 - 8
+
+### 3. Number of Simulations
+
+- Exploratory: 100-200 simulations
+- Planning: 500-1000 simulations
+- Publication: 1000-2000 simulations
+
+### 4. Reproducibility
+
+Always set a seed for reproducibility:
+
+```{r reproducibility}
+# Set seed at the start
+set.seed(2026)
+
+# Your simulation code here
+reproducible_data <- simulate_lineup_data(
+  n_tp = 100, n_ta = 100,
+  d_prime = 1.5
+)
+```
+
+## Interpretation Guidelines
+
+### Understanding d' (Discriminability)
+
+- **d' = 0**: No discriminability (chance performance)
+- **d' = 1.0**: Weak discriminability
+- **d' = 1.5**: Moderate discriminability
+- **d' = 2.0**: Strong discriminability
+- **d' = 2.5+**: Very strong discriminability
+
+### Understanding c (Criterion)
+
+- **c < 0**: Liberal (high ID rate, high false ID rate)
+- **c = 0**: Neutral (balanced)
+- **c > 0**: Conservative (low ID rate, low false ID rate)
+
+## Common Pitfalls
+
+### 1. Insufficient Sample Size
+
+```{r pitfall_sample_size}
+# Too small for reliable estimates
+small_sample <- simulate_lineup_data(n_tp = 20, n_ta = 20, d_prime = 1.5)
+
+# ROC will be unreliable
+roc_small <- make_roc(small_sample)
+cat("Small sample pAUC:", round(roc_small$pauc, 3),
+    "(unreliable with n=40)\n")
+```
+
+### 2. Unrealistic Parameter Values
+
+```{r pitfall_parameters}
+# Unrealistically high d' (rarely observed in real studies)
+unrealistic <- simulate_lineup_data(
+  n_tp = 100, n_ta = 100,
+  d_prime = 4.0  # Too high!
+)
+
+cat("Suspect ID rate:",
+    mean(unrealistic$target_present & unrealistic$identification == "suspect"),
+    "\n")
+cat("This is unrealistically high for real eyewitness data\n")
+```
+
+### 3. Ignoring Multiple Testing
+
+When running many simulations, adjust for multiple comparisons:
+
+```{r pitfall_multiple_testing}
+# If testing 5 different conditions, use Bonferroni correction
+alpha_corrected <- 0.05 / 5
+cat("Adjusted alpha for 5 comparisons:", alpha_corrected, "\n")
+```
+
+## Summary
+
+Key functions demonstrated:
+
+- `simulate_lineup_data()`: Generate lineup identification data
+- `simulate_power_analysis()`: Determine required sample sizes
+- Integration with all r4lineups analyses (ROC, CAC, RAC, Full ROC, models)
+
+Key takeaways:
+
+1. Use simulation for study planning and power analysis
+2. Validate methods with parameter recovery
+3. Choose realistic parameter values
+4. Use sufficient bootstrap/simulation samples
+5. Always report your assumptions and seed values
+
+## References
+
+Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup memory. *Cognitive Psychology, 105*, 81-114.
+
+Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0: A python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
+
+Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should abandon probative value and embrace receiver operating characteristic analysis. *Perspectives on Psychological Science, 7*(3), 275-278.
+
+## Further Reading
+
+- See `?simulate_lineup_data` for complete parameter documentation
+- See `?simulate_power_analysis` for power analysis options
+- See vignette("model_comparison") for comparing different models
+- See vignette("pauc_comparison") for statistical comparison of ROC curves

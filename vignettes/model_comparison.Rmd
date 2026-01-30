@@ -1,0 +1,575 @@
+---
+title: "Comparing Models for Eyewitness Identification Data"
+author: "r4lineups package"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparing Models for Eyewitness Identification Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+Eyewitness identification data can be analyzed using multiple theoretical frameworks, each providing unique insights. This vignette demonstrates how to use r4lineups' model comparison framework to fit and compare:
+
+1. **2-HT Model** (Winter et al., 2022): Multinomial Processing Tree model
+2. **EIG** (Starns et al., 2023): Expected Information Gain
+3. **Full ROC** (Smith & Yang, 2020): Receiver Operating Characteristic
+
+The `compare_models()` function provides a unified interface for fitting all models and generating comparison tables and visualizations.
+
+## The Three Models
+
+### 2-HT Model: Latent Cognitive Processes
+
+The Two-High Threshold (2-HT) model is a multinomial processing tree (MPT) that separates identification decisions into distinct latent processes:
+
+**Parameters:**
+- **dP**: Detection of culprit presence (0-1)
+- **dA**: Detection of culprit absence (0-1)
+- **b**: Biased suspect selection (0-1)
+- **g**: Guessing-based selection (0-1)
+
+**Model equations** (target-present):
+- P(suspect ID) = dP + (1-dP) × [b + (1-b) × g × (1/L)]
+- P(filler ID) = (1-dP) × (1-b) × g × ((L-1)/L)
+- P(reject) = (1-dP) × (1-b) × (1-g)
+
+**Use when:**
+- You want to understand underlying cognitive mechanisms
+- Testing theories about detection vs. guessing
+- Comparing conditions with different bias levels
+
+### EIG: Information-Theoretic Measure
+
+Expected Information Gain quantifies how much information witness responses provide about guilt vs. innocence using Shannon entropy:
+
+**Formula:**
+EIG = Σ p(x) × [H(prior) - H(p(guilty|x))]
+
+where x = response category (e.g., "suspect_high_confidence")
+
+**Interpretation:**
+- EIG = 0: No information (responses don't distinguish guilty/innocent)
+- EIG = 1: Perfect information (complete resolution of uncertainty)
+- Higher EIG = more diagnostic procedure
+
+**Use when:**
+- Evaluating overall diagnosticity of procedures
+- Comparing different identification methods
+- Assessing policy-relevant cutoffs
+
+### Full ROC: Investigator Discriminability
+
+Full ROC uses ALL witness responses (suspect IDs, filler IDs, rejections) to compute a threshold-free measure of discriminability:
+
+**Measure:**
+- AUC (Area Under the Curve)
+- Range: 0.5 (chance) to 1.0 (perfect)
+
+**Use when:**
+- Measuring investigator discriminability
+- Comparing system variables (lineup procedures)
+- Need threshold-free performance measure
+
+## Basic Model Comparison
+
+### Loading Data
+
+```{r load_data}
+library(r4lineups)
+
+# Load example dataset
+data("nortje2012", package = "r4lineups")
+
+# View structure
+head(nortje2012)
+str(nortje2012)
+```
+
+### Comparing All Models
+
+```{r compare_all_models}
+# Fit all three models
+comparison <- compare_models(
+  nortje2012,
+  models = c("2ht", "eig", "fullroc"),
+  lineup_size = 6,
+  prior_guilt = 0.5
+)
+
+# View comparison table
+print(comparison)
+```
+
+### Detailed Summary
+
+```{r detailed_summary}
+# More detailed output
+summary(comparison)
+```
+
+### Visualizing Model Comparisons
+
+```{r visualize_models, fig.width=8, fig.height=6}
+# Side-by-side plots
+plot(comparison, ncol = 2)
+```
+
+## Individual Model Access
+
+### 2-HT Model Results
+
+```{r model_2ht}
+# Access 2-HT model
+model_2ht <- comparison$fitted_models$`2ht`
+
+# View parameters
+cat("2-HT Parameters:\n")
+print(round(model_2ht$parameters, 3))
+
+# Standard errors
+cat("\nStandard Errors:\n")
+print(round(model_2ht$se, 3))
+
+# Model fit
+cat("\nModel Fit:\n")
+cat("  AIC:", round(model_2ht$aic, 2), "\n")
+cat("  BIC:", round(model_2ht$bic, 2), "\n")
+cat("  Log-likelihood:", round(model_2ht$loglik, 2), "\n")
+```
+
+**Interpreting 2-HT parameters:**
+
+- **dP = `r round(model_2ht$parameters["dP"], 2)`**: Probability of detecting guilty suspect
+- **dA = `r round(model_2ht$parameters["dA"], 2)`**: Probability of detecting innocent suspect
+- **b = `r round(model_2ht$parameters["b"], 2)`**: Bias toward suspect
+- **g = `r round(model_2ht$parameters["g"], 2)`**: Tendency to guess vs. reject
+
+### EIG Results
+
+```{r model_eig}
+# Access EIG model
+model_eig <- comparison$fitted_models$eig
+
+# View EIG value
+cat("Expected Information Gain:", round(model_eig$eig, 4), "bits\n")
+cat("Information Efficiency:",
+    round(model_eig$eig / model_eig$prior_entropy * 100, 1), "%\n")
+
+# Most informative responses
+cat("\nTop 5 most informative response categories:\n")
+print(head(model_eig$response_data[, c("response", "information_gain",
+                                        "posterior_guilty")], 5))
+```
+
+**Interpreting EIG:**
+
+- Total information provided: `r round(model_eig$eig, 3)` bits
+- Efficiency: `r round(model_eig$eig / model_eig$prior_entropy * 100, 1)`% of maximum possible
+- Most informative responses push posterior beliefs strongly toward guilt or innocence
+
+### Full ROC Results
+
+```{r model_fullroc}
+# Access Full ROC model
+model_fullroc <- comparison$fitted_models$fullroc
+
+# View AUC
+cat("Full ROC AUC:", round(model_fullroc$auc, 4), "\n")
+cat("Operating Points:", model_fullroc$summary$n_operating_points, "\n")
+
+# View diagnosticity table (top 10 points)
+cat("\nTop 10 most diagnostic evidence categories:\n")
+print(head(model_fullroc$diagnosticity_table[, c("evidence_label",
+                                                  "diagnosticity_ratio")], 10))
+```
+
+**Interpreting Full ROC:**
+
+- AUC = `r round(model_fullroc$auc, 3)`: Investigator's ability to discriminate
+- Values closer to 1.0 indicate better discriminability
+- All witness responses contribute to overall discriminability
+
+## Model Selection Guidance
+
+### When to Use Each Model
+
+**Use 2-HT when:**
+- Testing cognitive theories (detection, guessing, bias)
+- Need to separate memory from response bias
+- Comparing procedures that might differ in bias
+- Want to understand latent psychological processes
+
+**Use EIG when:**
+- Evaluating overall diagnosticity
+- Comparing identification procedures
+- Need a single summary measure
+- Want information-theoretic interpretation
+
+**Use Full ROC when:**
+- Need threshold-free discriminability measure
+- Comparing system variables
+- Want to use all available information
+- Policy/practical decision-making focus
+
+### Comparing Model Fits
+
+For parametric models (2-HT), use AIC/BIC:
+
+```{r model_selection}
+if ("2ht" %in% comparison$models_fit) {
+  cat("2-HT Model Fit:\n")
+  cat("  AIC:", round(comparison$fitted_models$`2ht`$aic, 2), "\n")
+  cat("  BIC:", round(comparison$fitted_models$`2ht`$bic, 2), "\n")
+  cat("\nLower values indicate better fit\n")
+}
+```
+
+## Advanced Usage
+
+### Fitting Specific Models Only
+
+```{r specific_models}
+# Fit only 2-HT and EIG (skip Full ROC)
+comparison_subset <- compare_models(
+  nortje2012,
+  models = c("2ht", "eig"),
+  lineup_size = 6,
+  prior_guilt = 0.5
+)
+
+print(comparison_subset)
+```
+
+### Using Confidence Bins
+
+```{r confidence_bins}
+# Bin confidence for EIG and Full ROC
+comparison_binned <- compare_models(
+  nortje2012,
+  models = c("eig", "fullroc"),
+  lineup_size = 6,
+  confidence_bins = c(0, 40, 70, 100)  # Low, medium, high
+)
+
+cat("Binned confidence results:\n")
+print(comparison_binned)
+```
+
+### Custom Prior for EIG
+
+```{r custom_prior}
+# Use different prior probability for EIG
+comparison_prior <- compare_models(
+  nortje2012,
+  models = "eig",
+  prior_guilt = 0.3  # Assume 30% base rate
+)
+
+cat("EIG with prior = 0.3:\n")
+print(comparison_prior$fitted_models$eig$eig)
+```
+
+## Simulated Data Example
+
+### Comparing Models with Known Parameters
+
+```{r simulation_example}
+# Simulate data with known d' = 1.5
+set.seed(2026)
+sim_data <- simulate_lineup_data(
+  n_tp = 200,
+  n_ta = 200,
+  d_prime = 1.5,
+  lineup_size = 6,
+  conf_levels = 5
+)
+
+# Fit all models
+sim_comparison <- compare_models(
+  sim_data,
+  models = c("2ht", "eig", "fullroc"),
+  lineup_size = 6
+)
+
+print(sim_comparison)
+```
+
+### Parameter Recovery Check
+
+```{r parameter_recovery}
+# Check if 2-HT model recovers reasonable parameters
+if ("2ht" %in% sim_comparison$models_fit) {
+  cat("Known d' = 1.5 (moderate discriminability)\n")
+  cat("Recovered dP =", round(sim_comparison$fitted_models$`2ht`$parameters["dP"], 3), "\n")
+  cat("Expected: Moderate dP for moderate d'\n")
+}
+```
+
+## Practical Examples
+
+### Example 1: Evaluating a Lineup Procedure
+
+Research question: How well does this lineup procedure discriminate between guilty and innocent suspects?
+
+```{r example_procedure}
+# Fit all models to assess procedure
+procedure_eval <- compare_models(
+  nortje2012,
+  models = c("2ht", "eig", "fullroc")
+)
+
+# Interpretation
+cat("Procedure Evaluation:\n\n")
+
+if ("2ht" %in% procedure_eval$models_fit) {
+  cat("2-HT: dP =", round(procedure_eval$fitted_models$`2ht`$parameters["dP"], 2),
+      "\n  → Detection ability is",
+      ifelse(procedure_eval$fitted_models$`2ht`$parameters["dP"] > 0.5, "good", "moderate"), "\n\n")
+}
+
+if ("eig" %in% procedure_eval$models_fit) {
+  cat("EIG =", round(procedure_eval$fitted_models$eig$eig, 3), "bits\n")
+  cat("  → Provides",
+      round(procedure_eval$fitted_models$eig$eig /
+              procedure_eval$fitted_models$eig$prior_entropy * 100, 0),
+      "% of maximum information\n\n")
+}
+
+if ("fullroc" %in% procedure_eval$models_fit) {
+  cat("Full ROC AUC =", round(procedure_eval$fitted_models$fullroc$auc, 3), "\n")
+  cat("  → Discriminability is",
+      ifelse(procedure_eval$fitted_models$fullroc$auc > 0.75, "good", "moderate"), "\n")
+}
+```
+
+### Example 2: Identifying Sources of Bias
+
+Use 2-HT model to check for bias:
+
+```{r example_bias}
+if ("2ht" %in% comparison$models_fit) {
+  bias_param <- comparison$fitted_models$`2ht`$parameters["b"]
+
+  cat("Bias Parameter (b) =", round(bias_param, 3), "\n\n")
+
+  if (bias_param < 0.1) {
+    cat("Interpretation: Low bias - suspect does not stand out unfairly\n")
+  } else if (bias_param > 0.3) {
+    cat("Interpretation: High bias - suspect may stand out unfairly\n")
+    cat("Consider: Lineup construction, suspect appearance\n")
+  } else {
+    cat("Interpretation: Moderate bias level\n")
+  }
+}
+```
+
+### Example 3: Comparing Detection vs. Guessing
+
+```{r example_detection}
+if ("2ht" %in% comparison$models_fit) {
+  dP <- comparison$fitted_models$`2ht`$parameters["dP"]
+  g <- comparison$fitted_models$`2ht`$parameters["g"]
+
+  cat("Detection (dP) =", round(dP, 3), "\n")
+  cat("Guessing (g) =", round(g, 3), "\n\n")
+
+  cat("Interpretation:\n")
+  if (dP > g) {
+    cat("  Memory-based identification dominates\n")
+  } else {
+    cat("  Guessing plays a significant role\n")
+  }
+}
+```
+
+## Formatted Comparison Tables
+
+### Console Format
+
+```{r table_console}
+# Console-friendly table
+table_console <- format_comparison_table(comparison, format = "console")
+print(table_console)
+```
+
+### Markdown Format
+
+```{r table_markdown, results='asis'}
+# Markdown format for reports
+if (requireNamespace("knitr", quietly = TRUE)) {
+  table_md <- format_comparison_table(comparison, format = "markdown")
+  cat(table_md)
+}
+```
+
+## Interpretation Guidelines
+
+### 2-HT Parameters
+
+**dP (Detection of Presence)**
+- 0.0-0.3: Poor detection
+- 0.3-0.5: Moderate detection
+- 0.5-0.7: Good detection
+- 0.7-1.0: Excellent detection
+
+**dA (Detection of Absence)**
+- 0.0-0.2: Poor rejection ability
+- 0.2-0.4: Moderate rejection ability
+- 0.4+: Good rejection ability
+
+**b (Bias)**
+- 0.0-0.1: Low bias (good lineup)
+- 0.1-0.3: Moderate bias
+- 0.3+: High bias (problematic lineup)
+
+**g (Guessing)**
+- 0.0-0.3: Conservative (prefer rejection)
+- 0.3-0.7: Moderate
+- 0.7-1.0: Liberal (prefer selection)
+
+### EIG Values
+
+- **0.0-0.1 bits**: Very low diagnosticity
+- **0.1-0.3 bits**: Low diagnosticity
+- **0.3-0.5 bits**: Moderate diagnosticity
+- **0.5-0.7 bits**: Good diagnosticity
+- **0.7+ bits**: Excellent diagnosticity
+
+### Full ROC AUC
+
+- **0.50**: Chance performance
+- **0.50-0.60**: Poor discriminability
+- **0.60-0.70**: Fair discriminability
+- **0.70-0.80**: Good discriminability
+- **0.80-0.90**: Very good discriminability
+- **0.90-1.00**: Excellent discriminability
+
+## Common Pitfalls
+
+### 1. Insufficient Sample Size
+
+```{r pitfall_sample_size}
+# Small sample may lead to unreliable estimates
+small_data <- simulate_lineup_data(n_tp = 30, n_ta = 30, d_prime = 1.5)
+
+small_comparison <- compare_models(
+  small_data,
+  models = c("2ht", "eig"),
+  show_warnings = FALSE
+)
+
+cat("Warning: Small samples (n=60) may produce unstable parameter estimates\n")
+cat("Recommend: n ≥ 100 per condition for reliable model fitting\n")
+```
+
+### 2. Model Convergence Issues
+
+If 2-HT model fails to converge:
+- Check data quality (sufficient variability)
+- Try different starting parameters
+- Ensure adequate sample size
+- Consider data preprocessing
+
+### 3. Comparing Non-Comparable Measures
+
+```{r pitfall_comparison}
+cat("Important: Don't directly compare across models!\n\n")
+cat("✗ Wrong: 'dP = 0.6 is better than EIG = 0.4'\n")
+cat("  → These are different scales and constructs\n\n")
+cat("✓ Right: 'dP = 0.6 indicates good detection AND\n")
+cat("          EIG = 0.4 indicates moderate diagnosticity'\n")
+cat("  → Each model provides unique insights\n")
+```
+
+## Best Practices
+
+### 1. Fit Multiple Models
+
+Don't rely on a single model—each provides unique insights:
+
+```{r best_practice_multiple}
+# Always fit at least 2-3 models
+comprehensive <- compare_models(
+  nortje2012,
+  models = c("2ht", "eig", "fullroc")
+)
+
+cat("Fitting multiple models provides:\n")
+cat("  • Process-level understanding (2-HT)\n")
+cat("  • Overall diagnosticity (EIG)\n")
+cat("  • Threshold-free performance (Full ROC)\n")
+```
+
+### 2. Report All Model Results
+
+When publishing, report results from all fitted models:
+
+```{r best_practice_reporting}
+cat("In your paper, report:\n")
+cat("  • 2-HT: Parameters with SE, AIC/BIC, convergence\n")
+cat("  • EIG: Value in bits, efficiency percentage\n")
+cat("  • Full ROC: AUC, number of operating points\n")
+cat("  • Interpretation of each model's insights\n")
+```
+
+### 3. Check Model Assumptions
+
+```{r best_practice_assumptions}
+if ("2ht" %in% comparison$models_fit) {
+  # Check goodness of fit
+  cat("2-HT Goodness of Fit:\n")
+  summary(comparison$fitted_models$`2ht`)
+
+  cat("\nIf χ² p-value < 0.05: Model may not fit well\n")
+  cat("Consider: Data quality, model assumptions\n")
+}
+```
+
+## Summary
+
+**Key Functions:**
+- `compare_models()`: Fit multiple models
+- `print.model_comparison()`: View comparison table
+- `summary.model_comparison()`: Detailed results
+- `plot.model_comparison()`: Visualizations
+- `format_comparison_table()`: Publication tables
+
+**When to Use Each Model:**
+- **2-HT**: Understanding cognitive processes
+- **EIG**: Overall diagnosticity assessment
+- **Full ROC**: Threshold-free discriminability
+
+**Best Practices:**
+- Fit multiple models for comprehensive analysis
+- Report all model results
+- Check model fit and convergence
+- Use adequate sample sizes (n ≥ 100 per condition)
+- Interpret each model's unique insights
+
+## References
+
+Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental validation of a multinomial processing tree model for analyzing eyewitness identification decisions. *Scientific Reports, 12*, 15571.
+
+Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical conclusions via the data they should have produced: A priori comparison of eyewitness identification decision processes using quantitative predictions of the expected information gain. *Psychological Review*.
+
+Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability: A method for creating full receiver operating characteristic curves of lineup identification performance. *Perspectives on Psychological Science, 15*(3), 589-607.
+
+## Further Reading
+
+- See `?compare_models` for complete parameter documentation
+- See vignette("simulation_power_analysis") for data simulation
+- See vignette("pauc_comparison") for statistical comparison of conditions
