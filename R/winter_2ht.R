@@ -284,12 +284,12 @@ fit_winter_2ht <- function(data,
   ta_counts <- count_outcomes(ta_data, identification)
 
   return(c(
-    n_tp_suspect = tp_counts["suspect"],
-    n_tp_filler = tp_counts["filler"],
-    n_tp_reject = tp_counts["reject"],
-    n_ta_suspect = ta_counts["suspect"],
-    n_ta_filler = ta_counts["filler"],
-    n_ta_reject = ta_counts["reject"]
+    n_tp_suspect = unname(tp_counts["suspect"]),
+    n_tp_filler = unname(tp_counts["filler"]),
+    n_tp_reject = unname(tp_counts["reject"]),
+    n_ta_suspect = unname(ta_counts["suspect"]),
+    n_ta_filler = unname(ta_counts["filler"]),
+    n_ta_reject = unname(ta_counts["reject"])
   ))
 }
 
