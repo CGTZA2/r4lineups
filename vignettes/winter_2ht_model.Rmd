@@ -1,0 +1,96 @@
+---
+title: "Winter 2-HT Model"
+subtitle: "Modeling Full Lineup Outcomes"
+author:
+- "Colin G. Tredoux"
+- "Tamsyn M. Naylor"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Winter 2-HT Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+This vignette demonstrates the **two-high-threshold (2-HT) model** for lineup data described by Winter et al. The model estimates four parameters from full 2 × 3 outcomes (target-present/target-absent by suspect ID/filler ID/rejection):
+
+- **dP**: detection probability for target-present lineups
+- **dA**: detection probability for target-absent lineups
+- **b**: biased suspect selection
+- **g**: guessing rate
+
+The implementation in **r4lineups** accepts either raw data (data frame) or aggregated counts.
+
+## Data format
+
+We use the built-in `lineup_example` dataset, which already contains the required columns:
+
+```{r}
+library(r4lineups)
+data(lineup_example)
+head(lineup_example)
+```
+
+## 1. Fit the model using counts
+
+First, convert the data to the 2 × 3 count format expected by `fit_winter_2ht()`:
+
+```{r}
+counts <- c(
+  n_tp_suspect = sum(lineup_example$target_present & lineup_example$identification == "suspect"),
+  n_tp_filler = sum(lineup_example$target_present & lineup_example$identification == "filler"),
+  n_tp_reject = sum(lineup_example$target_present & lineup_example$identification == "reject"),
+  n_ta_suspect = sum(!lineup_example$target_present & lineup_example$identification == "suspect"),
+  n_ta_filler = sum(!lineup_example$target_present & lineup_example$identification == "filler"),
+  n_ta_reject = sum(!lineup_example$target_present & lineup_example$identification == "reject")
+)
+
+fit <- fit_winter_2ht(counts, lineup_size = 6)
+fit$parameters
+```
+
+## 2. Model diagnostics and plots
+
+```{r, eval=FALSE}
+# Parameter plot (with CI if bootstrapped)
+plot_2ht_parameters(fit)
+
+# Observed vs. predicted response proportions
+plot_2ht_fit(fit)
+```
+
+## 3. Bootstrap confidence intervals
+
+```{r}
+set.seed(123)
+boot_fit <- boot_winter_2ht(
+  counts,
+  lineup_size = 6,
+  nboot = 200,
+  conf_level = 0.95,
+  method = "percentile"
+)
+
+boot_fit$ci
+```
+
+## 4. Notes and interpretation
+
+- **dP** and **dA** index detection rates for guilty and innocent lineups, respectively.
+- **b** reflects biased suspect selection beyond guessing.
+- **g** indexes guessing when no detection is made.
+
+For larger datasets, increase `nboot` to 1000 or more for stable confidence intervals.

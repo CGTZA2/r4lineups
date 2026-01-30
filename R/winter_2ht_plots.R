@@ -2,13 +2,13 @@
 #'
 #' @description
 #' Creates a visual display of the parameter estimates from a fitted 2-HT model,
-#' with error bars showing 95% confidence intervals.
+#' with error bars showing 95\% confidence intervals.
 #'
 #' @param x A winter_2ht object from fit_winter_2ht()
 #' @param ... Additional arguments passed to plotting functions
 #' @param which Character vector specifying which parameters to plot.
 #'   Default is c("dP", "dA", "b", "g") (all parameters).
-#' @param show_ci Logical indicating whether to show 95% confidence intervals. Default is TRUE.
+#' @param show_ci Logical indicating whether to show 95\% confidence intervals. Default is TRUE.
 #'
 #' @return A ggplot object
 #'

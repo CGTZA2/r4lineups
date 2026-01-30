@@ -1,0 +1,107 @@
+---
+title: "Information and Error-Rate Metrics"
+subtitle: "EIG and PPV-Range for Lineup Decisions"
+author:
+- "Colin G. Tredoux"
+- "Tamsyn M. Naylor"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Information and Error-Rate Metrics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+This vignette demonstrates two complementary approaches for evaluating lineup evidence:
+
+1. **Expected Information Gain (EIG)** following Starns et al., which quantifies how much a response reduces uncertainty about guilt.
+2. **PPV-range estimation** following Fitzgerald, Tredoux, and Juncu, which reports how positive predictive value changes under different corrections for lineup size.
+
+Both methods use the same data format as ROC/CAC analyses: a data frame with `target_present`, `identification`, and `confidence` columns.
+
+```{r}
+library(r4lineups)
+data(lineup_example)
+head(lineup_example)
+```
+
+## 1. Expected Information Gain (EIG)
+
+EIG summarizes how informative lineup responses are about guilt. Higher values indicate greater uncertainty reduction. You can compute EIG with or without confidence binning.
+
+```{r}
+# Compute EIG with binned confidence
+ eig_obj <- make_eig(
+  lineup_example,
+  confidence_bins = c(0, 60, 80, 100),
+  show_plot = FALSE
+)
+
+# EIG value (bits)
+eig_obj$eig
+```
+
+### Response-level information gain
+
+The EIG object includes per-response information gain and posterior probabilities.
+
+```{r}
+head(eig_obj$response_data)
+```
+
+### Plots
+
+```{r, eval=FALSE}
+# Information gain by response category
+plot_eig(eig_obj)
+
+# Posterior probability of guilt by response category
+plot_eig_posteriors(eig_obj)
+```
+
+## 2. PPV-range estimation
+
+PPV-range estimation compares **nominal-size**, **effective-size**, and **no correction** assumptions about false IDs. This yields a range of plausible PPV values rather than a single estimate.
+
+```{r}
+ppv_range <- make_ppv_range(
+  lineup_example,
+  lineup_size = 6,
+  show_plots = FALSE
+)
+
+# Overall PPV under each correction
+ppv_range$ppv_nominal$overall_ppv
+ppv_range$ppv_effective$overall_ppv
+ppv_range$ppv_none$overall_ppv
+```
+
+### Plots
+
+```{r, eval=FALSE}
+# PPV range across confidence bins
+plot_ppv_range(ppv_range)
+
+# Effective size (confidence-based) used in corrections
+plot_effective_size_conf(ppv_range)
+```
+
+## Interpretation guidance
+
+- **EIG** is best for comparing how much information each response category provides (e.g., high-confidence suspect IDs vs. low-confidence IDs).
+- **PPV range** is useful when false-identification rates are uncertain and lineup size corrections materially affect the PPV estimate.
+
+These tools are intended to complement ROC/CAC analyses, not replace them.
