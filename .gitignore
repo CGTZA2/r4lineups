@@ -3,3 +3,11 @@
 .RData
 .Ruserdata
 inst/doc
+.Rcheck/
+..Rcheck/
+*.Rcheck/
+*.tar.gz
+notes/
+vignettes/*.html
+vignettes/*.R
+vignettes/*.Rmd

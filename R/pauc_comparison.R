@@ -484,7 +484,7 @@ plot.pauc_comparison <- function(x, show_cutoff = TRUE, show_test_results = TRUE
                              ifelse(x$p_value < 0.05, "*", "ns")))
 
     test_text <- paste0(
-      "Δ pAUC = ", round(x$pauc_diff, 4), "\n",
+      "Delta pAUC = ", round(x$pauc_diff, 4), "\n",
       "Z = ", round(x$z_score, 2), ", ",
       "p = ", format.pval(x$p_value, digits = 3), " ", sig_stars
     )

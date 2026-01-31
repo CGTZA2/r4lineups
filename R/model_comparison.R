@@ -1,3 +1,6 @@
+# Declare global variables used in ggplot2 aes()
+utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
+
 #' Compare Multiple Models for Lineup Identification Data
 #'
 #' Fits and compares multiple models (2-HT, EIG, Full ROC) to the same lineup
@@ -378,7 +381,7 @@ summary.model_comparison <- function(object, ...) {
   cat("  - 2-HT: Use AIC/BIC for parametric model comparison\n")
   cat("  - EIG: Higher values = more informative procedure\n")
   cat("  - Full ROC: Higher AUC = better investigator discriminability\n")
-  cat("\nEach model provides different insights—consider using multiple models.\n")
+  cat("\nEach model provides different insights -- consider using multiple models.\n")
 
   invisible(object)
 }

@@ -88,7 +88,7 @@ All vignettes include:
 
 ## Dependencies
 
-* Added `gridExtra` to Suggests (used by `plot.model_comparison()`)
+* Added `gridExtra` to Imports (used by `plot.model_comparison()`)
 * Added `testthat (>= 3.0.0)` to Suggests for unit testing
 
 ## References

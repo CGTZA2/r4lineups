@@ -83,6 +83,7 @@
 #' )
 #' }
 #'
+#' @importFrom stats rnorm
 #' @export
 simulate_lineup_data <- function(n_tp = 100,
                                   n_ta = 100,
@@ -99,13 +100,16 @@ simulate_lineup_data <- function(n_tp = 100,
 
   # Validate inputs
   if (n_tp < 1 || n_ta < 1) {
-    stop("n_tp and n_ta must be positive integers")
+    stop("n_tp and n_ta must be positive")
   }
   if (d_prime < 0) {
     stop("d_prime must be non-negative")
   }
-  if (lineup_size < 1) {
-    stop("lineup_size must be at least 1")
+  if (lineup_size < 2) {
+    stop("lineup_size must be at least 2")
+  }
+  if (!is.null(conf_levels) && conf_levels < 2) {
+    stop("conf_levels must be at least 2")
   }
 
   # Initialize results
@@ -265,7 +269,7 @@ print.simulated_lineup_data <- function(x, ...) {
   cat("Simulation Parameters:\n")
   cat("  Target-present lineups:", params$n_tp, "\n")
   cat("  Target-absent lineups:", params$n_ta, "\n")
-  cat("  d-prime:", params$d_prime, "\n")
+  cat("  d':", params$d_prime, "\n")
   cat("  Criterion:", params$c_criterion, "\n")
   cat("  Lineup size:", params$lineup_size, "\n")
   if (!is.null(params$conf_levels)) {
@@ -405,6 +409,9 @@ simulate_power_analysis <- function(sample_sizes,
   return(result_df)
 }
 
+
+# Declare global variables used in ggplot2 aes()
+utils::globalVariables(c("sample_size", "power"))
 
 #' Plot Power Analysis Results
 #' @param x A power_analysis object

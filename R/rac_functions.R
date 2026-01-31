@@ -1,3 +1,6 @@
+# Declare global variables used in ggplot2 aes()
+utils::globalVariables("time_numeric")
+
 #' Compute RAC (Response Time-Accuracy Characteristic) Data
 #'
 #' Computes response time-accuracy data for lineup identifications following
