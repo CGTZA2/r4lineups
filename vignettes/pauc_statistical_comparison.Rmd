@@ -202,14 +202,16 @@ Recommendations:
 simultaneous <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 1.8,
-  lineup_size = 6
+  lineup_size = 6,
+  conf_levels = 5
 )
 
 # Simulate sequential lineup (potentially worse)
 sequential <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 1.5,
-  lineup_size = 6
+  lineup_size = 6,
+  conf_levels = 5
 )
 
 # Compare
@@ -233,14 +235,16 @@ plot(lineup_comparison)
 lineup_6 <- simulate_lineup_data(
   n_tp = 150, n_ta = 150,
   d_prime = 1.6,
-  lineup_size = 6
+  lineup_size = 6,
+  conf_levels = 5
 )
 
 # 8-person lineup (harder task)
 lineup_8 <- simulate_lineup_data(
   n_tp = 150, n_ta = 150,
   d_prime = 1.6,
-  lineup_size = 8
+  lineup_size = 8,
+  conf_levels = 5
 )
 
 # Compare at same false ID rate
@@ -264,14 +268,16 @@ summary(size_comparison)
 immediate <- simulate_lineup_data(
   n_tp = 180, n_ta = 180,
   d_prime = 2.0,
-  lineup_size = 6
+  lineup_size = 6,
+  conf_levels = 5
 )
 
 # Delayed test (worse memory)
 delayed <- simulate_lineup_data(
   n_tp = 180, n_ta = 180,
   d_prime = 1.3,
-  lineup_size = 6
+  lineup_size = 6,
+  conf_levels = 5
 )
 
 # Compare
@@ -295,9 +301,9 @@ When comparing multiple conditions, adjust for multiple testing:
 
 ```{r multiple_comparisons}
 # Three conditions
-high_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 2.0, lineup_size = 6)
-med_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 1.5, lineup_size = 6)
-low_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 1.0, lineup_size = 6)
+high_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 2.0, lineup_size = 6, conf_levels = 5)
+med_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 1.5, lineup_size = 6, conf_levels = 5)
+low_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 1.0, lineup_size = 6, conf_levels = 5)
 
 # All pairwise comparisons
 comp_high_med <- compare_pauc(high_d, med_d, label1 = "High", label2 = "Medium",
@@ -416,8 +422,8 @@ for (i in seq_along(sample_sizes)) {
   significant_count <- 0
   for (sim in 1:50) {
     # Simulate data
-    data1 <- simulate_lineup_data(n, n, d_prime = 1.8, lineup_size = 6)
-    data2 <- simulate_lineup_data(n, n, d_prime = 1.5, lineup_size = 6)
+    data1 <- simulate_lineup_data(n, n, d_prime = 1.8, lineup_size = 6, conf_levels = 5)
+    data2 <- simulate_lineup_data(n, n, d_prime = 1.5, lineup_size = 6, conf_levels = 5)
 
     # Test
     comp <- compare_pauc(data1, data2, n_bootstrap = 200, seed = sim)

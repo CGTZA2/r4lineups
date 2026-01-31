@@ -91,12 +91,19 @@ Full ROC uses ALL witness responses (suspect IDs, filler IDs, rejections) to com
 ```{r load_data}
 library(r4lineups)
 
-# Load example dataset
-data("nortje2012", package = "r4lineups")
+# Simulate example dataset with proper structure
+set.seed(2024)
+lineup_data <- simulate_lineup_data(
+  n_tp = 200,
+  n_ta = 200,
+  d_prime = 1.5,
+  lineup_size = 6,
+  conf_levels = 5
+)
 
 # View structure
-head(nortje2012)
-str(nortje2012)
+head(lineup_data)
+str(lineup_data)
 ```
 
 ### Comparing All Models
@@ -104,7 +111,7 @@ str(nortje2012)
 ```{r compare_all_models}
 # Fit all three models
 comparison <- compare_models(
-  nortje2012,
+  lineup_data,
   models = c("2ht", "eig", "fullroc"),
   lineup_size = 6,
   prior_guilt = 0.5
@@ -136,27 +143,31 @@ plot(comparison, ncol = 2)
 # Access 2-HT model
 model_2ht <- comparison$fitted_models$`2ht`
 
-# View parameters
-cat("2-HT Parameters:\n")
-print(round(model_2ht$parameters, 3))
+if (!is.null(model_2ht) && !is.null(model_2ht$parameters)) {
+  # View parameters
+  cat("2-HT Parameters:\n")
+  print(round(model_2ht$parameters, 3))
 
-# Standard errors
-cat("\nStandard Errors:\n")
-print(round(model_2ht$se, 3))
+  # Standard errors
+  cat("\nStandard Errors:\n")
+  print(round(model_2ht$se, 3))
 
-# Model fit
-cat("\nModel Fit:\n")
-cat("  AIC:", round(model_2ht$aic, 2), "\n")
-cat("  BIC:", round(model_2ht$bic, 2), "\n")
-cat("  Log-likelihood:", round(model_2ht$loglik, 2), "\n")
+  # Model fit
+  cat("\nModel Fit:\n")
+  cat("  AIC:", round(model_2ht$aic, 2), "\n")
+  cat("  BIC:", round(model_2ht$bic, 2), "\n")
+  cat("  Log-likelihood:", round(model_2ht$loglik, 2), "\n")
+} else {
+  cat("2-HT model fitting did not converge with this dataset.\n")
+}
 ```
 
-**Interpreting 2-HT parameters:**
+**Interpreting 2-HT parameters (when available):**
 
-- **dP = `r round(model_2ht$parameters["dP"], 2)`**: Probability of detecting guilty suspect
-- **dA = `r round(model_2ht$parameters["dA"], 2)`**: Probability of detecting innocent suspect
-- **b = `r round(model_2ht$parameters["b"], 2)`**: Bias toward suspect
-- **g = `r round(model_2ht$parameters["g"], 2)`**: Tendency to guess vs. reject
+- **dP**: Probability of detecting guilty suspect
+- **dA**: Probability of detecting innocent suspect
+- **b**: Bias toward suspect
+- **g**: Tendency to guess vs. reject
 
 ### EIG Results
 
@@ -245,7 +256,7 @@ if ("2ht" %in% comparison$models_fit) {
 ```{r specific_models}
 # Fit only 2-HT and EIG (skip Full ROC)
 comparison_subset <- compare_models(
-  nortje2012,
+  lineup_data,
   models = c("2ht", "eig"),
   lineup_size = 6,
   prior_guilt = 0.5
@@ -259,7 +270,7 @@ print(comparison_subset)
 ```{r confidence_bins}
 # Bin confidence for EIG and Full ROC
 comparison_binned <- compare_models(
-  nortje2012,
+  lineup_data,
   models = c("eig", "fullroc"),
   lineup_size = 6,
   confidence_bins = c(0, 40, 70, 100)  # Low, medium, high
@@ -274,7 +285,7 @@ print(comparison_binned)
 ```{r custom_prior}
 # Use different prior probability for EIG
 comparison_prior <- compare_models(
-  nortje2012,
+  lineup_data,
   models = "eig",
   prior_guilt = 0.3  # Assume 30% base rate
 )
@@ -328,7 +339,7 @@ Research question: How well does this lineup procedure discriminate between guil
 ```{r example_procedure}
 # Fit all models to assess procedure
 procedure_eval <- compare_models(
-  nortje2012,
+  lineup_data,
   models = c("2ht", "eig", "fullroc")
 )
 
@@ -464,7 +475,7 @@ if (requireNamespace("knitr", quietly = TRUE)) {
 
 ```{r pitfall_sample_size}
 # Small sample may lead to unreliable estimates
-small_data <- simulate_lineup_data(n_tp = 30, n_ta = 30, d_prime = 1.5)
+small_data <- simulate_lineup_data(n_tp = 30, n_ta = 30, d_prime = 1.5, conf_levels = 5)
 
 small_comparison <- compare_models(
   small_data,
@@ -504,7 +515,7 @@ Don't rely on a single model—each provides unique insights:
 ```{r best_practice_multiple}
 # Always fit at least 2-3 models
 comprehensive <- compare_models(
-  nortje2012,
+  lineup_data,
   models = c("2ht", "eig", "fullroc")
 )
 

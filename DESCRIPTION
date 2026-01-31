@@ -21,6 +21,7 @@ Imports:
     utils
 Suggests:
     here,
+    jsonlite,
     knitr,
     pander,
     patchwork,

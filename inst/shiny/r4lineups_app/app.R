@@ -45,6 +45,99 @@ round_df <- function(df, digits = 3) {
   df
 }
 
+app_storage_dir <- function() {
+  dir <- Sys.getenv("R4LINEUPS_APP_DATA", unset = NA_character_)
+  if (is.na(dir) || !nzchar(dir)) {
+    dir <- tools::R_user_dir("r4lineups", which = "data")
+  }
+  if (!dir.exists(dir)) {
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  dir
+}
+
+with_counter_lock <- function(lock_path, code) {
+  on.exit(if (file.exists(lock_path)) unlink(lock_path), add = TRUE)
+  tries <- 0
+  while (file.exists(lock_path) && tries < 20) {
+    Sys.sleep(0.05)
+    tries <- tries + 1
+  }
+  ok <- file.create(lock_path)
+  if (!ok) {
+    return(code())
+  }
+  code()
+}
+
+increment_app_counter <- function() {
+  dir <- app_storage_dir()
+  counter_path <- file.path(dir, "app_counter.rds")
+  lock_path <- file.path(dir, "app_counter.lock")
+  with_counter_lock(lock_path, function() {
+    current <- 0
+    if (file.exists(counter_path)) {
+      current <- tryCatch(readRDS(counter_path), error = function(e) 0)
+    }
+    current <- current + 1
+    tmp <- paste0(counter_path, ".tmp")
+    saveRDS(current, tmp)
+    file.rename(tmp, counter_path)
+    current
+  })
+}
+
+read_app_counter <- function() {
+  counter_path <- file.path(app_storage_dir(), "app_counter.rds")
+  if (file.exists(counter_path)) {
+    tryCatch(readRDS(counter_path), error = function(e) NA_integer_)
+  } else {
+    NA_integer_
+  }
+}
+
+fetch_cran_downloads <- function(pkg, date_end = Sys.Date()) {
+  if (!requireNamespace("jsonlite", quietly = TRUE)) {
+    return(NA_integer_)
+  }
+  url <- sprintf("https://cranlogs.r-pkg.org/downloads/total/1900-01-01/%s/%s",
+                 date_end, pkg)
+  out <- jsonlite::fromJSON(url)
+  as.integer(out$downloads)
+}
+
+fetch_github_downloads <- function(repo) {
+  if (!requireNamespace("jsonlite", quietly = TRUE)) {
+    return(NA_integer_)
+  }
+  url <- sprintf("https://api.github.com/repos/%s/releases", repo)
+  releases <- jsonlite::fromJSON(url)
+  if (is.null(releases) || nrow(releases) == 0) {
+    return(NA_integer_)
+  }
+  assets <- releases$assets
+  if (is.null(assets) || nrow(assets) == 0) {
+    return(0L)
+  }
+  sum(assets$download_count, na.rm = TRUE)
+}
+
+get_download_counts <- function(pkg = "r4lineups", repo = "CGTZA2/r4lineups", cache_hours = 24) {
+  dir <- app_storage_dir()
+  cache_path <- file.path(dir, "download_counts.rds")
+  if (file.exists(cache_path)) {
+    cached <- tryCatch(readRDS(cache_path), error = function(e) NULL)
+    if (!is.null(cached) && difftime(Sys.time(), cached$timestamp, units = "hours") < cache_hours) {
+      return(cached)
+    }
+  }
+  cran <- tryCatch(fetch_cran_downloads(pkg), error = function(e) NA_integer_)
+  gh <- tryCatch(fetch_github_downloads(repo), error = function(e) NA_integer_)
+  result <- list(cran = cran, github = gh, timestamp = Sys.time())
+  saveRDS(result, cache_path)
+  result
+}
+
 build_lineup_table <- function(values, input_type, k) {
   if (length(values) == 0) {
     return(NULL)
@@ -130,15 +223,19 @@ prep_face_paths <- function(target_path, foil_paths, width) {
 
 ui <- navbarPage(
   "r4lineups Studio",
-  header = tags$head(
-    tags$style(HTML(
-      "body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-       .panel-heading { font-weight: 600; }
-       .help-block { font-size: 12px; color: #555; }
-       .download-btn { margin-top: 6px; }
-       .section-title { margin-top: 10px; font-weight: 600; }
-       .tab-author { font-size: 13px; margin-left: 6px; color: #555; font-weight: 700; }"
-    ))
+  header = tagList(
+    tags$head(
+      tags$style(HTML(
+        "body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+         .panel-heading { font-weight: 600; }
+         .help-block { font-size: 12px; color: #555; }
+         .download-btn { margin-top: 6px; }
+         .section-title { margin-top: 10px; font-weight: 600; }
+         .tab-author { font-size: 13px; margin-left: 6px; color: #555; font-weight: 700; }
+         .app-counts { position: absolute; right: 20px; top: 8px; font-size: 12px; color: #555; }"
+      ))
+    ),
+    tags$div(class = "navbar-text app-counts", uiOutput("header_counts"))
   ),
   tabPanel(
     "Setup",
@@ -177,6 +274,8 @@ ui <- navbarPage(
         helpText("Summary reports the target-position proportion with bootstrap CI and the chance rate (1/k)."),
         tags$div(class = "section-title", "Summary"),
         verbatimTextOutput("bias_summary"),
+        tags$div(class = "section-title", "Bootstrap distribution"),
+        plotOutput("bias_boot_plot"),
         tags$div(class = "section-title", "All proportions"),
         DTOutput("bias_allprop"),
         tags$div(class = "section-title", "Plot"),
@@ -195,15 +294,23 @@ ui <- navbarPage(
         textAreaInput("esize_vec", "Lineup input", rows = 5,
                       placeholder = "Vector: 3,2,5,6,1,3,3,5,6,4  |  Table: 2,5,1,0,3,1"),
         numericInput("esize_k", "Nominal lineup size (k)", value = 6, min = 2),
-        selectInput("esize_ci_type", "Tredoux E' CI type",
-                    choices = c("Bootstrap (percentile)" = "boot", "Normal (95%)" = "normal")),
+        selectInput("esize_metric", "Effective size statistic",
+                    choices = c("E (Tredoux, 1998)" = "tredoux",
+                                "E (Malpass, 1981)" = "malpass")),
+        conditionalPanel(
+          condition = "input.esize_metric == 'tredoux'",
+          selectInput("esize_ci_type", "Tredoux E' CI type",
+                      choices = c("Bootstrap (percentile)" = "boot", "Normal (95%)" = "normal"))
+        ),
         numericInput("esize_boot", "Bootstrap R", value = 1000, min = 100, step = 100),
         actionButton("esize_example", "Load example (nortje2012$lineup_1)")
       ),
       mainPanel(
-        helpText("Summary includes Malpass effective size (original & adjusted) and Tredoux E' with selectable CI method. Malpass CIs use bootstrap only."),
+        helpText("Summary includes the selected effective size statistic with confidence intervals. Malpass uses bootstrap CIs."),
         tags$div(class = "section-title", "Summary"),
         DTOutput("esize_summary"),
+        tags$div(class = "section-title", "Bootstrap distribution"),
+        plotOutput("esize_boot_plot"),
         downloadButton("esize_download_csv", "Download CSV", class = "download-btn")
       )
     )
@@ -309,6 +416,21 @@ ui <- navbarPage(
 )
 
 server <- function(input, output, session) {
+  session_count <- increment_app_counter()
+  download_counts <- reactiveVal(NULL)
+
+  observe({
+    download_counts(get_download_counts())
+  })
+
+  output$header_counts <- renderUI({
+    counts <- download_counts()
+    cran <- if (is.null(counts) || is.na(counts$cran)) "CRAN: n/a" else paste0("CRAN: ", format(counts$cran, big.mark = ","))
+    gh <- if (is.null(counts) || is.na(counts$github)) "GitHub: n/a" else paste0("GitHub: ", format(counts$github, big.mark = ","))
+    app <- if (is.na(session_count)) "App sessions: n/a" else paste0("App sessions: ", format(session_count, big.mark = ","))
+    tags$span(paste(app, cran, gh, sep = " | "))
+  })
+
   setup_status <- reactiveVal("Click 'Check Python deps' to validate deepface setup.")
 
   observeEvent(input$setup_check, {
@@ -397,6 +519,12 @@ server <- function(input, output, session) {
     rep(as.integer(names(tab)), as.integer(tab))
   })
 
+  bias_boot_obj <- reactive({
+    vec <- bias_vector_expanded()
+    validate(need(length(vec) > 1, "Need at least two selections for bootstrap."))
+    boot::boot(vec, lineup_prop_boot, target_pos = input$bias_target, R = input$bias_boot)
+  })
+
   bias_allprop <- reactive({
     tab <- bias_table()
     props <- as.numeric(tab) / sum(tab)
@@ -417,26 +545,34 @@ server <- function(input, output, session) {
 
   output$bias_summary <- renderPrint({
     tab <- bias_table()
-    vec <- bias_vector_expanded()
     k <- input$bias_k
     target <- input$bias_target
     validate(need(target >= 1 && target <= k, "Target position must be between 1 and k."))
     target_count <- if (as.character(target) %in% names(tab)) tab[[as.character(target)]] else 0
     prop <- if (sum(tab) > 0) target_count / sum(tab) else NA_real_
     ci <- c(NA_real_, NA_real_)
-    if (length(vec) > 1) {
-      boot_obj <- boot::boot(vec, lineup_prop_boot, target_pos = target, R = input$bias_boot)
-      ci <- tryCatch(boot::boot.ci(boot_obj, type = "perc")$percent[4:5],
-                     error = function(e) c(NA_real_, NA_real_))
-    }
+    boot_obj <- bias_boot_obj()
+    ci <- tryCatch(boot::boot.ci(boot_obj, type = "perc")$percent[4:5],
+                   error = function(e) c(NA_real_, NA_real_))
     list(
-      n_witnesses = length(vec),
+      n_witnesses = length(bias_vector_expanded()),
       target_count = target_count,
       target_proportion = round(prop, 3),
       ci_lower = round(ci[1], 3),
       ci_upper = round(ci[2], 3),
       chance = round(1 / k, 3)
     )
+  })
+
+  output$bias_boot_plot <- renderPlot({
+    boot_obj <- bias_boot_obj()
+    df <- data.frame(value = boot_obj$t)
+    ggplot(df, aes(x = value)) +
+      geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "#4c78a8", alpha = 0.6) +
+      geom_density(color = "#1f2d3d", linewidth = 1) +
+      labs(x = "Target proportion", y = "Density",
+           title = "Bootstrap distribution of target proportion") +
+      theme_minimal(base_size = 12)
   })
 
   output$bias_allprop <- renderDT({
@@ -475,50 +611,106 @@ server <- function(input, output, session) {
     vec <- rep(as.integer(names(tab)), as.integer(tab))
     e_t <- esize_T(tab)
     malpass <- compute_malpass_sizes(tab, k)
+    metric_choice <- input$esize_metric
 
-    ci_type <- input$esize_ci_type
+    ci_type <- if (identical(metric_choice, "tredoux")) input$esize_ci_type else "boot"
     ci_tredoux <- c(NA_real_, NA_real_)
     ci_label <- "Bootstrap (percentile)"
     if (identical(ci_type, "normal")) {
       ci_norm <- esize_T_ci_n(tab, 0.95)
       ci_tredoux <- c(ci_norm$ci_low, ci_norm$ci_high)
       ci_label <- "Normal (95%)"
-    } else if (length(vec) > 1) {
+    }
+
+    malpass_ci <- c(NA_real_, NA_real_)
+    if (length(vec) > 1) {
+      if (identical(metric_choice, "tredoux") && !identical(ci_type, "normal")) {
+        esize_t_boot_vec <- function(lineup_vec, d) {
+          boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
+          esize_T(boot_tab)
+        }
+        boot_obj <- boot::boot(vec, esize_t_boot_vec, R = input$esize_boot)
+        ci_tredoux <- tryCatch(boot::boot.ci(boot_obj, type = "perc")$percent[4:5],
+                               error = function(e) c(NA_real_, NA_real_))
+      }
+      if (identical(metric_choice, "malpass")) {
+        malpass_boot <- function(lineup_vec, d, k) {
+          boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
+          sizes <- compute_malpass_sizes(boot_tab, k)
+          sizes$adjusted
+        }
+        boot_obj_m <- boot::boot(vec, malpass_boot, k = k, R = input$esize_boot)
+        malpass_ci <- tryCatch(
+          boot::boot.ci(boot_obj_m, type = "perc")$percent[4:5],
+          error = function(e) c(NA_real_, NA_real_)
+        )
+      }
+    }
+
+    if (identical(metric_choice, "malpass")) {
+      data.frame(
+        metric = "E (Malpass, 1981)",
+        estimate = round(malpass$adjusted, 3),
+        ci_lower = round(malpass_ci[1], 3),
+        ci_upper = round(malpass_ci[2], 3),
+        ci_type = "Bootstrap (percentile)",
+        nominal_size = k
+      )
+    } else {
+      data.frame(
+        metric = "E (Tredoux, 1998)",
+        estimate = round(e_t, 3),
+        ci_lower = round(ci_tredoux[1], 3),
+        ci_upper = round(ci_tredoux[2], 3),
+        ci_type = ci_label,
+        nominal_size = k
+      )
+    }
+  })
+
+  esize_boot_dists <- reactive({
+    vals <- esize_vals()
+    validate(need(length(vals) > 0, "Enter a lineup vector or table."))
+    k <- input$esize_k
+    tab <- build_lineup_table(vals, input$esize_input_type, k)
+    validate(need(!is.null(tab), "Invalid lineup input."))
+    validate(need(sum(tab) > 0, "Lineup input has no selections."))
+    vec <- rep(as.integer(names(tab)), as.integer(tab))
+    validate(need(length(vec) > 1, "Need at least two selections for bootstrap."))
+    metric_choice <- input$esize_metric
+
+    if (identical(metric_choice, "malpass")) {
+      malpass_boot <- function(lineup_vec, d, k) {
+        boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
+        sizes <- compute_malpass_sizes(boot_tab, k)
+        sizes$adjusted
+      }
+      boot_obj_m <- boot::boot(vec, malpass_boot, k = k, R = input$esize_boot)
+      data.frame(
+        metric = "E (Malpass, 1981)",
+        value = boot_obj_m$t
+      )
+    } else {
       esize_t_boot_vec <- function(lineup_vec, d) {
         boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
         esize_T(boot_tab)
       }
-      boot_obj <- boot::boot(vec, esize_t_boot_vec, R = input$esize_boot)
-      ci_tredoux <- tryCatch(boot::boot.ci(boot_obj, type = "perc")$percent[4:5],
-                             error = function(e) c(NA_real_, NA_real_))
-    }
-
-    malpass_ci <- list(original = c(NA_real_, NA_real_), adjusted = c(NA_real_, NA_real_))
-    if (length(vec) > 1) {
-      malpass_boot <- function(lineup_vec, d, k) {
-        boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
-        sizes <- compute_malpass_sizes(boot_tab, k)
-        c(sizes$original, sizes$adjusted)
-      }
-      boot_obj_m <- boot::boot(vec, malpass_boot, k = k, R = input$esize_boot)
-      malpass_ci$original <- tryCatch(
-        boot::boot.ci(boot_obj_m, type = "perc", index = 1)$percent[4:5],
-        error = function(e) c(NA_real_, NA_real_)
-      )
-      malpass_ci$adjusted <- tryCatch(
-        boot::boot.ci(boot_obj_m, type = "perc", index = 2)$percent[4:5],
-        error = function(e) c(NA_real_, NA_real_)
+      boot_obj_t <- boot::boot(vec, esize_t_boot_vec, R = input$esize_boot)
+      data.frame(
+        metric = "E (Tredoux, 1998)",
+        value = boot_obj_t$t
       )
     }
+  })
 
-    data.frame(
-      metric = c("Malpass E (original)", "Malpass E (adjusted)", "Tredoux E'"),
-      estimate = round(c(malpass$original, malpass$adjusted, e_t), 3),
-      ci_lower = round(c(malpass_ci$original[1], malpass_ci$adjusted[1], ci_tredoux[1]), 3),
-      ci_upper = round(c(malpass_ci$original[2], malpass_ci$adjusted[2], ci_tredoux[2]), 3),
-      ci_type = c("Bootstrap (percentile)", "Bootstrap (percentile)", ci_label),
-      nominal_size = k
-    )
+  output$esize_boot_plot <- renderPlot({
+    df <- esize_boot_dists()
+    ggplot(df, aes(x = value)) +
+      geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "#72b7b2", alpha = 0.6) +
+      geom_density(color = "#1f2d3d", linewidth = 1) +
+      labs(x = "Effective size", y = "Density",
+           title = "Bootstrap distributions of effective size") +
+      theme_minimal(base_size = 12)
   })
 
   output$esize_summary <- renderDT({
