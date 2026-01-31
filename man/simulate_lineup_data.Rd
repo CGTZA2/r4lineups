@@ -10,7 +10,7 @@ simulate_lineup_data(
   d_prime = 1.5,
   c_criterion = 0,
   lineup_size = 6,
-  conf_levels = NULL,
+  conf_levels = 5,
   include_response_time = FALSE,
   seed = NULL
 )
@@ -31,7 +31,7 @@ value or vector for multiple confidence bins (default = 0)}
 \item{lineup_size}{Integer. Number of lineup members (default = 6)}
 
 \item{conf_levels}{Integer. Number of confidence levels to simulate. If NULL,
-returns binary decision only (default = NULL)}
+returns binary decision only (default = 5)}
 
 \item{include_response_time}{Logical. Whether to simulate response times
 correlated with memory strength (default = FALSE)}

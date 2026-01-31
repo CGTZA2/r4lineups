@@ -11,7 +11,7 @@ test_that("simulate_lineup_data basic functionality", {
 
   expect_s3_class(sim_data, "simulated_lineup_data")
   expect_equal(nrow(sim_data), 200)
-  expect_true(all(c("target_present", "identification") %in% names(sim_data)))
+  expect_true(all(c("target_present", "identification", "confidence") %in% names(sim_data)))
 })
 
 test_that("simulate_lineup_data generates correct proportions", {

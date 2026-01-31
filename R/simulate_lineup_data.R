@@ -13,7 +13,7 @@
 #'   value or vector for multiple confidence bins (default = 0)
 #' @param lineup_size Integer. Number of lineup members (default = 6)
 #' @param conf_levels Integer. Number of confidence levels to simulate. If NULL,
-#'   returns binary decision only (default = NULL)
+#'   returns binary decision only (default = 5)
 #' @param include_response_time Logical. Whether to simulate response times
 #'   correlated with memory strength (default = FALSE)
 #' @param seed Integer. Random seed for reproducibility (default = NULL)
@@ -90,7 +90,7 @@ simulate_lineup_data <- function(n_tp = 100,
                                   d_prime = 1.5,
                                   c_criterion = 0,
                                   lineup_size = 6,
-                                  conf_levels = NULL,
+                                  conf_levels = 5,
                                   include_response_time = FALSE,
                                   seed = NULL) {
 
@@ -359,14 +359,14 @@ simulate_power_analysis <- function(sample_sizes,
 
   # Default statistic: pAUC from ROC
   if (is.null(stat_function)) {
-    stat_function <- function(data) {
+    stat_function <- function(data, ...) {
       # Simple pAUC calculation
       roc_obj <- tryCatch(
-        make_roc(data, show_plot = FALSE),
+        make_roc(data, lineup_size = 6, show_plot = FALSE),
         error = function(e) NULL
       )
       if (is.null(roc_obj)) return(NA)
-      return(roc_obj$pAUC)
+      return(roc_obj$pauc)
     }
   }
 

@@ -450,7 +450,7 @@ reproducible_data <- simulate_lineup_data(
 small_sample <- simulate_lineup_data(n_tp = 20, n_ta = 20, d_prime = 1.5)
 
 # ROC will be unreliable
-roc_small <- make_roc(small_sample)
+roc_small <- make_roc(small_sample, lineup_size = 6, show_plot = FALSE)
 cat("Small sample pAUC:", round(roc_small$pauc, 3),
     "(unreliable with n=40)\n")
 ```
