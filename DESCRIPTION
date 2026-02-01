@@ -23,6 +23,7 @@ Suggests:
     here,
     jsonlite,
     knitr,
+    lme4,
     pander,
     patchwork,
     DT,
