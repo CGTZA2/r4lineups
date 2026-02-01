@@ -57,6 +57,28 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
 * Comprehensive examples and documentation
 * 24 unit tests ensuring reliability
 
+### Standardized Data Format and Validation
+
+* `validate_lineup_data()`: Comprehensive data validation
+  * Checks required columns (target_present, identification, confidence)
+  * Validates data types and value ranges
+  * Detects missing values and invalid identification categories
+  * Warns about common data quality issues
+  * Strict mode option for error-on-failure behavior
+* `standardize_lineup_data()`: Convert data from various formats
+  * Auto-detects common column names (tp, culprit_present, choice, etc.)
+  * Recodes identification values to standard terms
+  * Handles messy real-world data gracefully
+  * Generates participant IDs if missing
+  * Returns "lineup_data" S3 class with print method
+* `create_example_lineup_data()`: Generate example data for testing
+  * Configurable sample size and trial distribution
+  * Optional confidence ratings and response times
+  * Produces realistic identification patterns
+  * Useful for demonstrations and method validation
+* 76 unit tests covering validation, standardization, and integration
+* Comprehensive example script with 10 real-world scenarios
+
 ### Response Time-Accuracy (RAC) Analysis
 
 * `make_rac()`: Response time-accuracy characteristic analysis
