@@ -4,7 +4,7 @@ Statistical tools for assessing lineup fairness, confidence‑accuracy analyses,
 
 ## What this package includes
 
-- **Lineup bias & proportions**: target‑position proportions, all‑member proportions, bootstrap CIs
+- **Lineup bias & proportions**: target‑position proportions, all‑member proportions, bootstrap CIs + distributions
 - **Effective size**: E (Tredoux, 1998) and E (Malpass, 1981, adjusted)
 - **Functional size & diagnosticity**: functional size, diagnosticity ratios, homogeneity tests
 - **ROC / CAC / RAC**: confidence‑accuracy methods for lineup data
@@ -59,6 +59,13 @@ lineup_prop_vec(lineup_vec, target_pos = 3, k = 6)
 
 # Effective size (Tredoux)
 esize_T(lineup_table)
+
+# Bootstrap distributions
+bias_dist <- lineup_bias_boot_dist(lineup_vec, target_pos = 3, k = 6, R = 1000)
+plot_lineup_bias_distribution(bias_dist, target_pos = 3)
+
+esize_dist <- esize_boot_dist(lineup_vec, k = 6, metric = "tredoux", R = 1000)
+plot_esize_distribution(esize_dist, metric = "E (Tredoux, 1998)")
 ```
 
 ### ROC / CAC
