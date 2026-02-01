@@ -11,3 +11,6 @@ notes/
 vignettes/*.html
 vignettes/*.R
 vignettes/*.Rmd
+!vignettes/sdt_summary_comparisons.Rmd
+/doc/
+/Meta/

@@ -13,3 +13,5 @@
 ^test_.*\.png$
 ^Rplots\.pdf$
 ^notes$
+^doc$
+^Meta$
