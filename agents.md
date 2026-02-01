@@ -7,9 +7,9 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `R/` — all function implementations (exported + internal helpers)
 - `man/` — Rd documentation (auto‑generated from roxygen in `R/`)
 - `data/` — bundled datasets (`line73`, `lineup_example`, `mickwick`, `mockdata`, `nortje2012`)
-- `vignettes/` — HTML/Rmd vignettes (core + advanced + full ROC + calibration/decision + new EIG/PPV + 2‑HT)
+- `vignettes/` — Rmd vignettes (core + full ROC + calibration/decision + EIG/PPV + 2‑HT + SDT GLM)
 - `notes/` — working notes, PDFs, and test scripts (not part of package build)
-- `inst/` — packaged docs (vignette outputs in `inst/doc` after build)
+- `inst/` — packaged docs (vignette outputs in `inst/doc` after build), plus Shiny app in `inst/shiny/r4lineups_app`
 
 ## Exported functions (grouped, concise definitions)
 
@@ -157,6 +157,11 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `has_valid_face()` — quick face‑detection check.
 - `rot_vector()` — helper for landmark rotation.
 
+### SDT via GLM / GLMM (Wright et al.)
+- `fit_sdt_glm()` — SDT GLM for old/new recognition (probit → d′, logit → lnOR).
+- `fit_sdt_glmm()` — multilevel SDT GLMM with subject/item random effects (requires `lme4`).
+- `extract_sdt_metrics()` — extract d′/lnOR and criterion from model fits.
+
 ### Simulation & power
 - `simulate_lineup_data()` — synthetic lineup data generator.
 - `simulate_power_analysis()` — power simulation (ROC/lineup comparisons).
@@ -180,6 +185,7 @@ These wrappers combine data creation, analysis, and plotting:
 - **DPP**: `make_dpp()`/`compute_dpp()` + `plot_dpp()`; `compare_dpp()` + `plot_dpp_comparison()`
 - **Winter 2‑HT**: `fit_winter_2ht()` + `plot_2ht_parameters()` + `plot_2ht_fit()`; `boot_winter_2ht()` for CIs
 - **Face similarity**: `get_embedding()`/`batch_embeddings()` + `lineup_similarity()` + plots (`plot_lineup_similarity()`, `plot_embedding_space()`)
+- **SDT GLM/GLMM**: `fit_sdt_glm()`/`fit_sdt_glmm()` + `extract_sdt_metrics()`
 
 ## Vignettes (current)
 
@@ -189,6 +195,24 @@ These wrappers combine data creation, analysis, and plotting:
 - `information_error_rate_analysis.Rmd` — EIG + PPV‑range
 - `winter_2ht_model.Rmd` — Winter 2‑HT model
 - `face_similarity.Rmd` — pending face similarity walkthrough
+- `sdt_glm_analysis.Rmd` — SDT via GLM/GLMM (old/new recognition)
+
+## Current status and TODO (high‑level)
+
+**Implemented & stable**
+- Core lineup fairness metrics (bias, effective size, functional size, diagnosticity).
+- ROC/CAC/RAC + full ROC + pAUC comparison.
+- EIG, PPV range, calibration, ANRI, DPP, utility, Bayesian curves, Winter 2‑HT.
+- Face similarity tooling + Shiny app integration.
+- SDT via GLM/GLMM (Wright et al.) + vignette.
+
+**Remaining / future work**
+- Multilevel multinomial lineup model (Wright & Sparks) with system vs estimator covariates.
+- MUD (mixed unknown distributions) nonparametric mixture test (Wright & Skagerberg, 2008).
+- Additional SDT models (BEST‑REST, ensemble/integration) + z‑ROC estimation.
+- Standardized data‑format helper for confidence‑based analyses.
+- Showup‑specific handling.
+- Expanded unit tests + edge‑case validation for recent additions.
 
 ## Notes for agents
 
