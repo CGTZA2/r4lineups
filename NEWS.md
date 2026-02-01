@@ -29,7 +29,12 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
 ### Data Simulation and Power Analysis
 
 * `simulate_lineup_data()`: Generate lineup identification data
-  * Signal Detection Theory (SDT) model with MAX decision rule
+  * Signal Detection Theory (SDT) model with multiple decision rules:
+    * **MAX** (Independent Observations Model) - Default
+    * **BEST-REST** - Compare best match vs average of rest
+    * **Ensemble** - Average memory strength across lineup members
+    * **Integration** - Sum memory strengths across all members
+  * Based on Wixted et al. (2018) and pyWitness implementations
   * Flexible parameters: d', criterion, lineup size, confidence levels
   * Optional response time simulation
   * S3 class with print method
@@ -38,6 +43,19 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
   * Customizable effect measures and comparison types
   * Power curve visualization
 * Full integration with all r4lineups analyses
+
+### z-ROC and SDT Parameter Estimation
+
+* `fit_sdt_roc()`: Extract d', criteria, and variance ratio from ROC data
+  * Equal and unequal variance SDT models
+  * z-transformed ROC analysis following Macmillan & Creelman (2005)
+  * Log-linear correction for extreme hit/false alarm rates
+  * Bootstrap confidence intervals for parameter estimates
+  * Model fit diagnostics (R-squared, residuals)
+  * S3 class with `print()`, `plot()`, `summary()` methods
+* Integration with `make_rocdata()` for seamless workflow
+* Comprehensive examples and documentation
+* 24 unit tests ensuring reliability
 
 ### Response Time-Accuracy (RAC) Analysis
 

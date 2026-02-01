@@ -1,3 +1,82 @@
+#' Apply Decision Rule to Lineup Strengths
+#'
+#' Internal helper function that computes decision variable based on
+#' different decision strategies.
+#'
+#' @param strengths Numeric vector of memory strengths for all lineup members
+#' @param rule Character. Decision rule to apply
+#' @param lineup_size Integer. Number of lineup members
+#' @param d_prime Numeric. Used for some rule calculations
+#'
+#' @return List with decision_value and chosen_position
+#' @keywords internal
+.apply_decision_rule <- function(strengths, rule, lineup_size, d_prime) {
+
+  if (rule == "max") {
+    # Independent Observations Model - MAX rule
+    # Choose lineup member with highest memory strength
+    decision_value <- max(strengths)
+    chosen_position <- which.max(strengths)
+
+  } else if (rule == "best_rest") {
+    # BEST-REST Model
+    # Compare best match vs average of remaining members
+    # Based on Wixted et al. (2018) and pyWitness implementation
+
+    # Find best match
+    max_idx <- which.max(strengths)
+    best_strength <- strengths[max_idx]
+
+    # Compute average of rest
+    rest_strengths <- strengths[-max_idx]
+    rest_mean <- mean(rest_strengths)
+
+    # Decision variable: best - average(rest)
+    # Adjusted by lineup size as per pyWitness formula
+    decision_value <- best_strength - rest_mean
+    chosen_position <- max_idx
+
+  } else if (rule == "ensemble") {
+    # Ensemble Model
+    # Average memory strength across all lineup members
+    # Based on Wixted et al. (2018) ensemble coding
+
+    # Find best match first
+    max_idx <- which.max(strengths)
+    best_strength <- strengths[max_idx]
+
+    # Compute ensemble average excluding the chosen member
+    # Formula from pyWitness: (w*(n-1) - sum(others))/n
+    other_strengths <- strengths[-max_idx]
+    ensemble_avg <- (best_strength * (lineup_size - 1) - sum(other_strengths)) / lineup_size
+
+    decision_value <- ensemble_avg
+    chosen_position <- max_idx
+
+  } else if (rule == "integration") {
+    # Integration Model
+    # Sum memory strengths across all members
+    # Based on Wixted et al. (2018)
+
+    # Find best match
+    max_idx <- which.max(strengths)
+
+    # Decision variable: sum of all strengths
+    # This represents integration of evidence across lineup
+    decision_value <- sum(strengths)
+    chosen_position <- max_idx
+
+  } else {
+    stop("Unknown decision rule: ", rule)
+  }
+
+  return(list(
+    decision_value = decision_value,
+    chosen_position = chosen_position
+  ))
+}
+
+
 #' Simulate Lineup Identification Data
 #'
 #' Generates simulated eyewitness lineup data based on signal detection theory
@@ -14,6 +93,13 @@
 #' @param lineup_size Integer. Number of lineup members (default = 6)
 #' @param conf_levels Integer. Number of confidence levels to simulate. If NULL,
 #'   returns binary decision only (default = 5)
+#' @param decision_rule Character. Decision strategy for lineup choices:
+#'   \itemize{
+#'     \item "max" - Independent observations, choose highest strength (default)
+#'     \item "best_rest" - Compare best match vs average of remaining members
+#'     \item "ensemble" - Average memory strength across all lineup members
+#'     \item "integration" - Sum memory strengths across all members
+#'   }
 #' @param include_response_time Logical. Whether to simulate response times
 #'   correlated with memory strength (default = FALSE)
 #' @param seed Integer. Random seed for reproducibility (default = NULL)
@@ -28,18 +114,30 @@
 #'   }
 #'
 #' @details
-#' This function implements a simple signal detection model:
+#' This function implements signal detection models with multiple decision rules:
 #' \itemize{
 #'   \item Target distribution: Normal(d_prime, 1)
 #'   \item Lure distribution: Normal(0, 1)
-#'   \item Decision: Sample memory strength, compare to criterion
+#'   \item Decision: Depends on decision_rule parameter
+#' }
+#'
+#' **Decision Rules:**
+#' \itemize{
+#'   \item **MAX** (default): Independent observations model. Choose lineup member
+#'     with highest memory strength (Clark, 2003).
+#'   \item **BEST-REST**: Compare best match against average of remaining members.
+#'     Decision variable = best - mean(others) (Wixted et al., 2018).
+#'   \item **Ensemble**: Average memory strength across lineup members using
+#'     ensemble coding principles. More holistic evaluation (Wixted et al., 2018).
+#'   \item **Integration**: Sum memory strengths across all lineup members.
+#'     Represents complete integration of evidence (Wixted et al., 2018).
 #' }
 #'
 #' The simulation assumes:
 #' \itemize{
-#'   \item Independent observations (each lineup member sampled independently)
 #'   \item Fair lineups (all fillers equally similar to description)
 #'   \item Perfect attention (no guessing without memory)
+#'   \item Normal distributions for memory strength
 #' }
 #'
 #' Response times (if simulated):
@@ -59,21 +157,43 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Basic simulation: strong memory
+#' # Basic simulation: strong memory with MAX rule (default)
 #' strong_memory <- simulate_lineup_data(
 #'   n_tp = 200, n_ta = 200,
 #'   d_prime = 2.0,
 #'   conf_levels = 3
 #' )
 #'
-#' # Weak memory with response times
-#' weak_memory <- simulate_lineup_data(
+#' # Ensemble decision rule
+#' ensemble_data <- simulate_lineup_data(
 #'   n_tp = 200, n_ta = 200,
-#'   d_prime = 1.0,
+#'   d_prime = 1.5,
+#'   decision_rule = "ensemble",
+#'   conf_levels = 5
+#' )
+#'
+#' # BEST-REST decision rule
+#' best_rest_data <- simulate_lineup_data(
+#'   n_tp = 200, n_ta = 200,
+#'   d_prime = 1.5,
+#'   decision_rule = "best_rest",
+#'   conf_levels = 5
+#' )
+#'
+#' # Integration model with response times
+#' integration_data <- simulate_lineup_data(
+#'   n_tp = 200, n_ta = 200,
+#'   d_prime = 1.5,
+#'   decision_rule = "integration",
 #'   conf_levels = 5,
 #'   include_response_time = TRUE,
 #'   seed = 42
 #' )
+#'
+#' # Compare ROC curves across decision rules
+#' roc_max <- make_roc(strong_memory, lineup_size = 6)
+#' roc_ensemble <- make_roc(ensemble_data, lineup_size = 6)
+#' roc_best_rest <- make_roc(best_rest_data, lineup_size = 6)
 #'
 #' # Power analysis: vary sample size
 #' power_results <- simulate_power_analysis(
@@ -91,12 +211,16 @@ simulate_lineup_data <- function(n_tp = 100,
                                   c_criterion = 0,
                                   lineup_size = 6,
                                   conf_levels = 5,
+                                  decision_rule = c("max", "best_rest", "ensemble", "integration"),
                                   include_response_time = FALSE,
                                   seed = NULL) {
 
   if (!is.null(seed)) {
     set.seed(seed)
   }
+
+  # Match decision_rule argument
+  decision_rule <- match.arg(decision_rule)
 
   # Validate inputs
   if (n_tp < 1 || n_ta < 1) {
@@ -121,11 +245,18 @@ simulate_lineup_data <- function(n_tp = 100,
     # Target: N(d', 1), Fillers: N(0, 1)
     target_strength <- rnorm(1, mean = d_prime, sd = 1)
     filler_strengths <- rnorm(lineup_size - 1, mean = 0, sd = 1)
-
-    # MAX rule: Choose lineup member with highest strength
     all_strengths <- c(target_strength, filler_strengths)
-    max_strength <- max(all_strengths)
-    max_position <- which.max(all_strengths)
+
+    # Apply decision rule to compute decision variable
+    decision_result <- .apply_decision_rule(
+      all_strengths,
+      decision_rule,
+      lineup_size,
+      d_prime
+    )
+
+    max_strength <- decision_result$decision_value
+    max_position <- decision_result$chosen_position
 
     # Decision: ID if max exceeds criterion, otherwise reject
     if (!is.null(conf_levels)) {
@@ -179,9 +310,16 @@ simulate_lineup_data <- function(n_tp = 100,
     # All lineup members are fillers: N(0, 1)
     filler_strengths <- rnorm(lineup_size, mean = 0, sd = 1)
 
-    # MAX rule: Choose lineup member with highest strength
-    max_strength <- max(filler_strengths)
-    max_position <- which.max(filler_strengths)
+    # Apply decision rule to compute decision variable
+    decision_result <- .apply_decision_rule(
+      filler_strengths,
+      decision_rule,
+      lineup_size,
+      d_prime
+    )
+
+    max_strength <- decision_result$decision_value
+    max_position <- decision_result$chosen_position
 
     # Decision: ID if max exceeds criterion, otherwise reject
     if (!is.null(conf_levels)) {
@@ -250,6 +388,7 @@ simulate_lineup_data <- function(n_tp = 100,
     c_criterion = c_criterion,
     lineup_size = lineup_size,
     conf_levels = conf_levels,
+    decision_rule = decision_rule,
     seed = seed
   )
 
@@ -272,6 +411,9 @@ print.simulated_lineup_data <- function(x, ...) {
   cat("  d':", params$d_prime, "\n")
   cat("  Criterion:", params$c_criterion, "\n")
   cat("  Lineup size:", params$lineup_size, "\n")
+  if (!is.null(params$decision_rule)) {
+    cat("  Decision rule:", params$decision_rule, "\n")
+  }
   if (!is.null(params$conf_levels)) {
     cat("  Confidence levels:", params$conf_levels, "\n")
   }

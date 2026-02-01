@@ -162,6 +162,11 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `fit_sdt_glmm()` — multilevel SDT GLMM with subject/item random effects (requires `lme4`).
 - `extract_sdt_metrics()` — extract d′/lnOR and criterion from model fits.
 
+### SDT summary‑level comparisons (Gourevitch/Miller/Suero)
+- `sdt_summary_from_counts()` — d′, c, β from 2×2 counts with extreme‑rate correction.
+- `sdt_summary_variance()` — variance estimates for d′/c (Miller exact‑binomial, Gourevitch delta, or bootstrap).
+- `compare_sdt_summary()` — z‑test for d′/c/lnβ between two conditions using summary counts.
+
 ### Simulation & power
 - `simulate_lineup_data()` — synthetic lineup data generator.
 - `simulate_power_analysis()` — power simulation (ROC/lineup comparisons).
@@ -196,6 +201,7 @@ These wrappers combine data creation, analysis, and plotting:
 - `winter_2ht_model.Rmd` — Winter 2‑HT model
 - `face_similarity.Rmd` — pending face similarity walkthrough
 - `sdt_glm_analysis.Rmd` — SDT via GLM/GLMM (old/new recognition)
+- `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from counts
 
 ## Current status and TODO (high‑level)
 

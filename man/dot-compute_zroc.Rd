@@ -4,7 +4,7 @@
 \alias{.compute_zroc}
 \title{Compute z-ROC Transformations}
 \usage{
-.compute_zroc(roc_data)
+.compute_zroc(roc_data, n_tp, n_ta)
 }
 \description{
 Compute z-ROC Transformations

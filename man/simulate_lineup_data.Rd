@@ -11,6 +11,7 @@ simulate_lineup_data(
   c_criterion = 0,
   lineup_size = 6,
   conf_levels = 5,
+  decision_rule = c("max", "best_rest", "ensemble", "integration"),
   include_response_time = FALSE,
   seed = NULL
 )
@@ -33,6 +34,14 @@ value or vector for multiple confidence bins (default = 0)}
 \item{conf_levels}{Integer. Number of confidence levels to simulate. If NULL,
 returns binary decision only (default = 5)}
 
+\item{decision_rule}{Character. Decision strategy for lineup choices:
+\itemize{
+  \item "max" - Independent observations, choose highest strength (default)
+  \item "best_rest" - Compare best match vs average of remaining members
+  \item "ensemble" - Average memory strength across all lineup members
+  \item "integration" - Sum memory strengths across all members
+}}
+
 \item{include_response_time}{Logical. Whether to simulate response times
 correlated with memory strength (default = FALSE)}
 
@@ -53,18 +62,30 @@ Generates simulated eyewitness lineup data based on signal detection theory
 parameters. Useful for power analysis, method validation, and teaching.
 }
 \details{
-This function implements a simple signal detection model:
+This function implements signal detection models with multiple decision rules:
 \itemize{
   \item Target distribution: Normal(d_prime, 1)
   \item Lure distribution: Normal(0, 1)
-  \item Decision: Sample memory strength, compare to criterion
+  \item Decision: Depends on decision_rule parameter
+}
+
+**Decision Rules:**
+\itemize{
+  \item **MAX** (default): Independent observations model. Choose lineup member
+    with highest memory strength (Clark, 2003).
+  \item **BEST-REST**: Compare best match against average of remaining members.
+    Decision variable = best - mean(others) (Wixted et al., 2018).
+  \item **Ensemble**: Average memory strength across lineup members using
+    ensemble coding principles. More holistic evaluation (Wixted et al., 2018).
+  \item **Integration**: Sum memory strengths across all lineup members.
+    Represents complete integration of evidence (Wixted et al., 2018).
 }
 
 The simulation assumes:
 \itemize{
-  \item Independent observations (each lineup member sampled independently)
   \item Fair lineups (all fillers equally similar to description)
   \item Perfect attention (no guessing without memory)
+  \item Normal distributions for memory strength
 }
 
 Response times (if simulated):
@@ -76,21 +97,43 @@ Response times (if simulated):
 }
 \examples{
 \dontrun{
-# Basic simulation: strong memory
+# Basic simulation: strong memory with MAX rule (default)
 strong_memory <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 2.0,
   conf_levels = 3
 )
 
-# Weak memory with response times
-weak_memory <- simulate_lineup_data(
+# Ensemble decision rule
+ensemble_data <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
-  d_prime = 1.0,
+  d_prime = 1.5,
+  decision_rule = "ensemble",
+  conf_levels = 5
+)
+
+# BEST-REST decision rule
+best_rest_data <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.5,
+  decision_rule = "best_rest",
+  conf_levels = 5
+)
+
+# Integration model with response times
+integration_data <- simulate_lineup_data(
+  n_tp = 200, n_ta = 200,
+  d_prime = 1.5,
+  decision_rule = "integration",
   conf_levels = 5,
   include_response_time = TRUE,
   seed = 42
 )
+
+# Compare ROC curves across decision rules
+roc_max <- make_roc(strong_memory, lineup_size = 6)
+roc_ensemble <- make_roc(ensemble_data, lineup_size = 6)
+roc_best_rest <- make_roc(best_rest_data, lineup_size = 6)
 
 # Power analysis: vary sample size
 power_results <- simulate_power_analysis(

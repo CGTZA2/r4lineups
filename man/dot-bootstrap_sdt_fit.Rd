@@ -4,7 +4,7 @@
 \alias{.bootstrap_sdt_fit}
 \title{Bootstrap SDT Parameter Estimates}
 \usage{
-.bootstrap_sdt_fit(roc_data, model, n_bootstrap, conf_level)
+.bootstrap_sdt_fit(roc_data, n_tp, n_ta, model, n_bootstrap, conf_level)
 }
 \description{
 Bootstrap SDT Parameter Estimates
