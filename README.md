@@ -9,6 +9,7 @@ Statistical tools for assessing lineup fairness, confidence‑accuracy analyses,
 - **Functional size & diagnosticity**: functional size, diagnosticity ratios, homogeneity tests
 - **ROC / CAC / RAC**: confidence‑accuracy methods for lineup data
 - **SDT summary comparisons**: d′/c/β from counts, variance estimates (Miller/Gourevitch/bootstrap), z‑tests
+- **mSDT (multi‑item SDT)**: max filler distribution, parameter estimation from rejection rates, joint plots
 - **Full ROC (Smith & Yang)**: full ROC data and plots
 - **EIG & PPV range**: information‑gain and PPV‑range analyses
 - **Calibration & ANRI**: calibration metrics, ANRI and bootstrap comparisons
@@ -104,6 +105,7 @@ For deployment, the app lives at `inst/shiny/r4lineups_app`.
 - `face_similarity.Rmd` — face similarity walkthrough (in progress)
 - `sdt_glm_analysis.Rmd` — SDT via GLM/GLMM (old/new recognition)
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from counts
+- `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions
 
 ## Notes
 

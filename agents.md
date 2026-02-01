@@ -167,6 +167,14 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `sdt_summary_variance()` — variance estimates for d′/c (Miller exact‑binomial, Gourevitch delta, or bootstrap).
 - `compare_sdt_summary()` — z‑test for d′/c/lnβ between two conditions using summary counts.
 
+### mSDT (multi‑item SDT; Yang et al. 2025)
+- `dmax_filler()` / `pmax_filler()` / `qmax_filler()` / `rmax_filler()` — max filler distribution (IID normal fillers).
+- `max_filler_moments()` — mean/var/skewness of max filler distribution (numeric).
+- `msdt_gamma_from_rej()` — estimate decision criterion from TA rejection rate.
+- `msdt_dprime_from_rej()` — estimate d′ from TP rejection rate + gamma.
+- `estimate_msdt_params()` — convenience wrapper for gamma + d′.
+- `plot_msdt_joint()` — joint density contour plot (suspect vs max filler).
+
 ### Simulation & power
 - `simulate_lineup_data()` — synthetic lineup data generator.
 - `simulate_power_analysis()` — power simulation (ROC/lineup comparisons).
@@ -202,6 +210,7 @@ These wrappers combine data creation, analysis, and plotting:
 - `face_similarity.Rmd` — pending face similarity walkthrough
 - `sdt_glm_analysis.Rmd` — SDT via GLM/GLMM (old/new recognition)
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from counts
+- `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions
 
 ## Current status and TODO (high‑level)
 
