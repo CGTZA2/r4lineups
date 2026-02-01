@@ -1,6 +1,6 @@
 ---
-title: "r4lineups"
-subtitle: "Statistical Inference on Measures of Lineup Fairness"
+title: "r4lineups: Statistical Inference on Lineup Fairness"
+subtitle: "Measures of Lineup Fairness"
 author: 
 - "Colin G. Tredoux"
 - "Tamsyn M. Naylor"
