@@ -73,8 +73,8 @@
 #'
 
 ln_diag_ratio <- function(linedf){
-    d   <- (linedf$n11+0.5/((linedf$n11+linedf$n21)+0.5))/
-           (linedf$n12+0.5/((linedf$n12+linedf$n22)+0.5))
+    d   <- ((linedf$n11+0.5)/(linedf$n11+linedf$n21+0.5)) /
+           ((linedf$n12+0.5)/(linedf$n12+linedf$n22+0.5))
     lnd <- log(d)
     lnd <- as.data.frame(lnd)
     return(lnd)

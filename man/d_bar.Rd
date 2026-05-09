@@ -64,7 +64,7 @@ wi <- d_weights(linedf)
 
 #Bind ln(d), variance of ln(d) and weights into one df (of 3 rows & x observations)
 #(see Details above):
-df <- t(cbind(ratio, var, wi))
+df <- t(cbind(var, ratio, wi))
 
 #Call:
 d_bar(df)

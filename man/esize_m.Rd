@@ -7,14 +7,13 @@
 esize_m(lineup_table, k, both = FALSE)
 }
 \arguments{
-\item{lineup_table}{A table of lineup choices}
+\item{lineup_table}{A table of lineup choices.}
 
-\item{k}{Number of members in lineup. Must be specified by user (scalar).}
+\item{k}{Number of members in the lineup. Must be specified by the user (scalar).}
 
-\item{both}{Defaults to FALSE. Returns Tredoux's adjusted effective size estimate.
-
-                If TRUE, provides both Malpass's (1981) and Makpass's adjusted (see: Tredoux, 1998)
-                calculations of effective size.}
+\item{both}{Logical. Defaults to FALSE, returning Tredoux's adjusted effective
+size estimate only. If TRUE, both Malpass's (1981) original formulation and
+Malpass's adjusted version (Tredoux, 1998) are printed to the console.}
 }
 \value{
 Malpass's original & adjusted estimates of effective size

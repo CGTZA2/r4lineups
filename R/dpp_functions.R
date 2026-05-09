@@ -19,6 +19,7 @@
 #'     \item dpp: Deviation from Perfect Performance (0 = perfect, 1 = worst)
 #'     \item auc_observed: Area under observed ROC curve
 #'     \item auc_perfect: Area under perfect ROC curve (for same FA range)
+#'     \item auc_gap: Raw area gap, \eqn{AUC_{perfect} - AUC_{observed}}
 #'     \item roc_data: ROC curve data
 #'     \item max_fa: Maximum false alarm rate in observed data
 #'   }
@@ -105,7 +106,8 @@ make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE) {
   # This is a rectangle with width = max_fa and height = 1
   auc_perfect <- max_fa * 1.0
 
-  # Compute DPP
+  # Compute raw area gap and normalized DPP
+  auc_gap <- auc_perfect - auc_observed
   if (auc_perfect == 0) {
     # Special case: If max_fa = 0, check if we have perfect performance
     # If hit rate is 1.0 at FA=0, then DPP = 0 (perfect)
@@ -130,6 +132,7 @@ make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE) {
     dpp = dpp,
     auc_observed = auc_observed,
     auc_perfect = auc_perfect,
+    auc_gap = auc_gap,
     roc_data = roc_sorted,
     perfect_roc = perfect_roc,
     max_fa = max_fa,
@@ -373,7 +376,8 @@ plot_dpp_comparison <- function(compare_obj,
 #' @param show_plot Logical. Whether to display plot (default = TRUE)
 #' @param ... Additional arguments passed to plot_dpp()
 #'
-#' @return A list containing DPP results and plot
+#' @return A list containing the DPP result, raw AUC gap, AUC values, ROC data,
+#'   perfect-performance ROC data, maximum false-alarm rate, and plot.
 #'
 #' @examples
 #' \dontrun{
@@ -399,6 +403,7 @@ compute_dpp <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
     dpp = dpp_obj$dpp,
     auc_observed = dpp_obj$auc_observed,
     auc_perfect = dpp_obj$auc_perfect,
+    auc_gap = dpp_obj$auc_gap,
     roc_data = dpp_obj$roc_data,
     perfect_roc = dpp_obj$perfect_roc,
     max_fa = dpp_obj$max_fa
@@ -421,6 +426,7 @@ print.lineup_dpp <- function(x, ...) {
 
   cat("Area under observed ROC:  ", sprintf("%.4f", x$auc_observed), "\n")
   cat("Area under perfect ROC:   ", sprintf("%.4f", x$auc_perfect), "\n")
+  cat("Raw AUC gap:              ", sprintf("%.4f", x$auc_gap), "\n")
   cat("Maximum FA rate observed: ", sprintf("%.4f", x$max_fa), "\n\n")
 
   cat("ROC Data:\n")

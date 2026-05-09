@@ -63,8 +63,8 @@
 
 homog_diag <- function(lineup_pres_list, lineup_abs_list, pos_list, k){
   linedf <- suppressWarnings(diag_param(lineup_pres_list, lineup_abs_list, pos_list, k))
-  par1 <- ln_diag_ratio(linedf)
-  par2 <- var_lnd(linedf)
+  par1 <- var_lnd(linedf)
+  par2 <- ln_diag_ratio(linedf)
   par3 <- d_weights(linedf)
   par4 <- t(cbind(par1, par2, par3))
   par5 <- chi_diag(par4)

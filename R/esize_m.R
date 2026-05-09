@@ -1,12 +1,11 @@
 #'Effective Size
 #'
 #'Function for computing Effective Size
-#' @param lineup_table A table of lineup choices
-#' @param both Defaults to FALSE. Returns Tredoux's adjusted effective size estimate.
-#'
-#'                 If TRUE, provides both Malpass's (1981) and Makpass's adjusted (see: Tredoux, 1998)
-#'                 calculations of effective size.
-#'@param k Number of members in lineup. Must be specified by user (scalar).
+#' @param lineup_table A table of lineup choices.
+#' @param k Number of members in the lineup. Must be specified by the user (scalar).
+#' @param both Logical. Defaults to FALSE, returning Tredoux's adjusted effective
+#'   size estimate only. If TRUE, both Malpass's (1981) original formulation and
+#'   Malpass's adjusted version (Tredoux, 1998) are printed to the console.
 #' @details Reduces the size of a lineup from a (corrected) nominal starting
 #'          value by the degree to which members are, in sum, chosen below
 #'          the level of chance expectation.

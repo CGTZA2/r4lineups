@@ -1,11 +1,18 @@
-#'Effective Size with Confidence Intervals from Normal Theory (Tredoux, 1998)
+#' Effective Size with Confidence Intervals from Normal Theory (Tredoux, 1998)
 #'
-#'Function for generating Effective Size (Tredoux, 1998) with CIs from normal theory
-#'@param lineup_table A table of lineup choices
-#'@param alpha Alpha level to be declared by user (scalar)
-#'@details Reduces the size of a lineup from a (corrected) nominal starting
-#'          value by the degree to which members are, in sum, chosen below
-#'          the level of chance expectation
+#' Computes Tredoux's effective size E' together with a confidence interval
+#' derived from the normal-theory variance formula in Tredoux (1998).
+#'
+#' @param lineup_table A table of lineup choices.
+#' @param alpha Confidence level as a decimal (e.g., 0.95 for a 95-percent CI).
+#' @details
+#'   The variance of the diversity index I is estimated via Tredoux's (1998)
+#'   closed-form expression:
+#'   \deqn{\mathrm{Var}(I) \approx \frac{4}{N}\left(\sum_i p_i^3 - \left(\sum_i p_i^2\right)^2\right).}
+#'   Normal quantiles are applied to I and the resulting bounds are back-transformed
+#'   to the E' scale via \eqn{E' = 1/(1-I)}. For small samples or skewed distributions,
+#'   bootstrap methods (\code{\link{esize_boot_dist}}) or the Bayesian posterior
+#'   (\code{\link{esize_T_bayes}}) may be preferred.
 #'@references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'
@@ -44,4 +51,5 @@ esize_T_ci_n <- function(lineup_table, alpha){
     ci_low <- i_esize_T(lineup_table) + qnorm((1-alpha)/2)*sd_i
     ci_high <- i_esize_T(lineup_table) + qnorm(alpha+((1-alpha)/2))*sd_i
     e_ci <- list(ci_low = 1/(1-ci_low), ci_high = 1/(1-ci_high))
+    return(e_ci)
 }

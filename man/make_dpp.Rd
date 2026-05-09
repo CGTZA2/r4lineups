@@ -25,6 +25,7 @@ A list containing:
     \item dpp: Deviation from Perfect Performance (0 = perfect, 1 = worst)
     \item auc_observed: Area under observed ROC curve
     \item auc_perfect: Area under perfect ROC curve (for same FA range)
+    \item auc_gap: Raw area gap, \eqn{AUC_{perfect} - AUC_{observed}}
     \item roc_data: ROC curve data
     \item max_fa: Maximum false alarm rate in observed data
   }

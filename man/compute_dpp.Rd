@@ -16,7 +16,8 @@ compute_dpp(data, lineup_size = 6, show_plot = TRUE, ...)
 \item{...}{Additional arguments passed to plot_dpp()}
 }
 \value{
-A list containing DPP results and plot
+A list containing the DPP result, raw AUC gap, AUC values, ROC data,
+  perfect-performance ROC data, maximum false-alarm rate, and plot.
 }
 \description{
 Main wrapper function to compute and plot DPP analysis.

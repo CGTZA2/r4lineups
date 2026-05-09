@@ -3,9 +3,12 @@
 #' Base function for generating boostrapped Effective Size (Tredoux, 1998)
 #' @param lineup_table A table of lineup choices
 #' @param d Indices for bootstrap resampling
-#' @details Reduces the size of a lineup from a (corrected) nominal starting
-#'          value by the degree to which members are, in sum, chosen below
-#'          the level of chance expectation.
+#' @details
+#'   This is the statistic function passed to \code{boot::boot()} for
+#'   bootstrapping Tredoux's E'. The data argument should be a table of
+#'   lineup counts; \code{d} is the index vector supplied by \code{boot::boot}.
+#'   For a higher-level interface that accepts raw lineup vectors, see
+#'   \code{\link{esize_boot_dist}}.
 #' @seealso \code{\link[boot:boot]{boot}}: https://cran.r-project.org/web/packages/boot/boot.pdf
 #' @references Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their
 #'             application}. Cambridge University Press.

@@ -7,17 +7,22 @@
 esize_T_ci_n(lineup_table, alpha)
 }
 \arguments{
-\item{lineup_table}{A table of lineup choices}
+\item{lineup_table}{A table of lineup choices.}
 
-\item{alpha}{Alpha level to be declared by user (scalar)}
+\item{alpha}{Confidence level as a decimal (e.g., 0.95 for a 95-percent CI).}
 }
 \description{
-Function for generating Effective Size (Tredoux, 1998) with CIs from normal theory
+Computes Tredoux's effective size E' together with a confidence interval
+derived from the normal-theory variance formula in Tredoux (1998).
 }
 \details{
-Reduces the size of a lineup from a (corrected) nominal starting
-         value by the degree to which members are, in sum, chosen below
-         the level of chance expectation
+The variance of the diversity index I is estimated via Tredoux's (1998)
+  closed-form expression:
+  \deqn{\mathrm{Var}(I) \approx \frac{4}{N}\left(\sum_i p_i^3 - \left(\sum_i p_i^2\right)^2\right).}
+  Normal quantiles are applied to I and the resulting bounds are back-transformed
+  to the E' scale via \eqn{E' = 1/(1-I)}. For small samples or skewed distributions,
+  bootstrap methods (\code{\link{esize_boot_dist}}) or the Bayesian posterior
+  (\code{\link{esize_T_bayes}}) may be preferred.
 }
 \examples{
 #Data:

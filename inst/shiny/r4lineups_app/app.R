@@ -300,7 +300,15 @@ ui <- navbarPage(
         conditionalPanel(
           condition = "input.esize_metric == 'tredoux'",
           selectInput("esize_ci_type", "Tredoux E' CI type",
-                      choices = c("Bootstrap (percentile)" = "boot", "Normal (95%)" = "normal"))
+                      choices = c("Bootstrap (percentile)" = "boot",
+                                  "Normal (95%)" = "normal",
+                                  "Bayesian (Dirichlet)" = "bayes"))
+        ),
+        conditionalPanel(
+          condition = "input.esize_metric == 'tredoux' && input.esize_ci_type == 'bayes'",
+          numericInput("esize_bayes_alpha", "Dirichlet prior α (0.5 = Jeffreys)", value = 0.5, min = 0.01, step = 0.1),
+          numericInput("esize_bayes_S", "Posterior draws (S)", value = 5000, min = 500, step = 500),
+          numericInput("esize_bayes_threshold", "Threshold for P(E' < t) (optional, NA = skip)", value = NA, min = 1)
         ),
         numericInput("esize_boot", "Bootstrap R", value = 1000, min = 100, step = 100),
         actionButton("esize_example", "Load example (nortje2012$lineup_1)")
@@ -616,15 +624,31 @@ server <- function(input, output, session) {
     ci_type <- if (identical(metric_choice, "tredoux")) input$esize_ci_type else "boot"
     ci_tredoux <- c(NA_real_, NA_real_)
     ci_label <- "Bootstrap (percentile)"
+    threshold_prob_col <- NA_real_
+
     if (identical(ci_type, "normal")) {
       ci_norm <- esize_T_ci_n(tab, 0.95)
       ci_tredoux <- c(ci_norm$ci_low, ci_norm$ci_high)
       ci_label <- "Normal (95%)"
+    } else if (identical(ci_type, "bayes")) {
+      threshold_val <- input$esize_bayes_threshold
+      if (is.null(threshold_val) || is.na(threshold_val)) threshold_val <- NULL
+      bayes_res <- esize_T_bayes(
+        tab,
+        alpha        = input$esize_bayes_alpha,
+        S            = as.integer(input$esize_bayes_S),
+        credible_mass = 0.95,
+        threshold    = threshold_val
+      )
+      ci_tredoux <- c(bayes_res$credible_interval[1], bayes_res$credible_interval[2])
+      ci_label   <- "Bayesian (95% credible)"
+      if (!is.null(bayes_res$threshold_probs))
+        threshold_prob_col <- round(bayes_res$threshold_probs$P_below, 4)
     }
 
     malpass_ci <- c(NA_real_, NA_real_)
     if (length(vec) > 1) {
-      if (identical(metric_choice, "tredoux") && !identical(ci_type, "normal")) {
+      if (identical(metric_choice, "tredoux") && identical(ci_type, "boot")) {
         esize_t_boot_vec <- function(lineup_vec, d) {
           boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
           esize_T(boot_tab)
@@ -656,6 +680,18 @@ server <- function(input, output, session) {
         ci_type = "Bootstrap (percentile)",
         nominal_size = k
       )
+    } else if (identical(ci_type, "bayes")) {
+      df_out <- data.frame(
+        metric = "E (Tredoux, 1998)",
+        estimate = round(e_t, 3),
+        ci_lower = round(ci_tredoux[1], 3),
+        ci_upper = round(ci_tredoux[2], 3),
+        ci_type = ci_label,
+        nominal_size = k
+      )
+      if (!is.na(threshold_prob_col))
+        df_out$P_below_threshold <- threshold_prob_col
+      df_out
     } else {
       data.frame(
         metric = "E (Tredoux, 1998)",
@@ -690,6 +726,20 @@ server <- function(input, output, session) {
         metric = "E (Malpass, 1981)",
         value = boot_obj_m$t
       )
+    } else if (identical(input$esize_ci_type, "bayes")) {
+      threshold_val <- input$esize_bayes_threshold
+      if (is.null(threshold_val) || is.na(threshold_val)) threshold_val <- NULL
+      bayes_res <- esize_T_bayes(
+        tab,
+        alpha         = input$esize_bayes_alpha,
+        S             = as.integer(input$esize_bayes_S),
+        credible_mass = 0.95,
+        threshold     = threshold_val
+      )
+      data.frame(
+        metric = "E (Tredoux, 1998) — posterior",
+        value  = bayes_res$E_draws
+      )
     } else {
       esize_t_boot_vec <- function(lineup_vec, d) {
         boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
@@ -704,12 +754,15 @@ server <- function(input, output, session) {
   })
 
   output$esize_boot_plot <- renderPlot({
-    df <- esize_boot_dists()
+    df   <- esize_boot_dists()
+    is_bayes <- identical(input$esize_metric, "tredoux") &&
+                identical(input$esize_ci_type, "bayes")
+    plot_title <- if (is_bayes) "Posterior distribution of effective size" else
+                  "Bootstrap distribution of effective size"
     ggplot(df, aes(x = value)) +
       geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "#72b7b2", alpha = 0.6) +
       geom_density(color = "#1f2d3d", linewidth = 1) +
-      labs(x = "Effective size", y = "Density",
-           title = "Bootstrap distributions of effective size") +
+      labs(x = "Effective size", y = "Density", title = plot_title) +
       theme_minimal(base_size = 12)
   })
 
