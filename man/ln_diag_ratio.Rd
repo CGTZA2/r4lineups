@@ -13,23 +13,29 @@ ln_diag_ratio(linedf)
 Computes ln of diagnosticity ratio: ln(d)
 }
 \details{
-\strong{To get linedf, use the diag_param helper function}
+The Haldane (1940) continuity correction adds 0.5 to each cell count and to
+  each marginal total before computing the ratio:
+  \deqn{d = \frac{(n_{11}+0.5)/(n_{11}+n_{21}+0.5)}{(n_{12}+0.5)/(n_{12}+n_{22}+0.5)}}
+  \eqn{\ln(d)} is then returned.  The correction avoids undefined log ratios when a
+  cell count is zero and stabilises variance estimates in small samples.
 
-         \emph{diag_param} returns a dataframe containing the following:
+  \strong{To get linedf, use the diag_param helper function}
 
-         \itemize{
-         \item \emph{n11}: Number of mock witnesses who identified the suspect in the target
-              present condition
+  \emph{diag_param} returns a dataframe containing the following:
 
-         \item \emph{n21}: Number of mock witnesses who did not identify the suspect in the
-             target present condition
+  \itemize{
+  \item \emph{n11}: Number of mock witnesses who identified the suspect in the target
+       present condition
 
-         \item \emph{n12}: Number of mock witnesses who identified the suspect in the target
-             absent condition
+  \item \emph{n21}: Number of mock witnesses who did not identify the suspect in the
+      target present condition
 
-         \item \emph{n13}: Number of mock witnesses who did not identify the suspect in the
-             target absent condition
-             }
+  \item \emph{n12}: Number of mock witnesses who identified the suspect in the target
+      absent condition
+
+  \item \emph{n22}: Number of mock witnesses who did not identify the suspect in the
+      target absent condition
+      }
 }
 \examples{
 #Target present data:
