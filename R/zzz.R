@@ -38,7 +38,7 @@ init_python <- function() {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(
       "Python is not available. Please install Python and ensure it's on your PATH.\n",
-      "See ?install_faceR_python for setup instructions.",
+      "See ?install_r4lineups_python for setup instructions.",
       call. = FALSE
     )
   }
@@ -59,7 +59,7 @@ init_python <- function() {
   if (length(missing) > 0) {
     stop(
       "Missing required Python packages: ", paste(missing, collapse = ", "), "\n",
-      "Run install_faceR_python() to install them, or manually:\n",
+      "Run install_r4lineups_python() to install them, or manually:\n",
       "  pip install deepface opencv-python numpy tf-keras",
       call. = FALSE
     )

@@ -174,15 +174,19 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
   }
 
   # --- chi-squared objective ---
+  # Cells are a proper multinomial partition of each lineup type:
+  #   TP: correct ID | filler ID (= chose - hit) | reject
+  #   TA: false alarm | reject
+  # (Using n_tp_choose itself as a cell double-counts hits, which are nested in it.)
   obs1 <- c(n_hit       = n_hit,
-            n_tp_choose = n_tp_choose,
+            n_filler_tp = n_tp_choose - n_hit,
             n_reject_tp = N_tp - n_tp_choose,
             n_fa        = n_fa,
             n_reject_ta = N_ta - n_fa)
 
   if (two_cond) {
     obs2 <- c(n_hit       = n_hit_2,
-              n_tp_choose = n_tp_choose_2,
+              n_filler_tp = n_tp_choose_2 - n_hit_2,
               n_reject_tp = N_tp_2 - n_tp_choose_2,
               n_fa        = n_fa_2,
               n_reject_ta = N_ta_2 - n_fa_2)
@@ -193,17 +197,19 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
     pt  <- tpc_prob(d, lambda)
     pf  <- fa_prob(lambda)
     c(n_hit       = ph * N_tp_i,
-      n_tp_choose = pt * N_tp_i,
+      n_filler_tp = (pt - ph) * N_tp_i,
       n_reject_tp = (1 - pt) * N_tp_i,
       n_fa        = pf * N_ta_i,
       n_reject_ta = (1 - pf) * N_ta_i)
   }
 
   chisq_one <- function(obs, pred) {
-    # exclude zero-expected cells
-    keep <- pred > 0.5
-    if (!any(keep)) return(1e9)
-    sum((obs[keep] - pred[keep])^2 / pred[keep])
+    # Floor the expected counts rather than excluding low-expected cells.
+    # Excluding cells (the old `pred > 0.5` rule) let the optimiser hide on a flat
+    # plateau at low lambda, where reject predictions collapse to ~0 and dropped
+    # out of the objective -- producing a spurious boundary fit.
+    pred <- pmax(pred, 1e-8)
+    sum((obs - pred)^2 / pred)
   }
 
   # parameter layout depends on constraints
@@ -274,22 +280,46 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
     names(start) <- c("d", "lambda")
   }
 
-  opt <- optim(par = start, fn = obj,
-               method = "L-BFGS-B", lower = lower, upper = upper)
-  # fallback to Nelder-Mead if L-BFGS-B fails
-  if (opt$convergence != 0L) {
-    opt2 <- optim(par = start, fn = obj, method = "Nelder-Mead",
-                  control = list(maxit = 5000))
-    if (opt2$value < opt$value) opt <- opt2
-    opt$convergence <- 0L   # Nelder-Mead reports 0 or 1
+  # Deterministic multistart. The chi-squared surface is multimodal (a flat plateau
+  # at low lambda, a spike near lambda = 0), so a single start can converge to a
+  # non-global / boundary solution. Run L-BFGS-B from a grid spanning the box --
+  # finer on the criterion (lambda) dimensions, which carry the multimodality --
+  # then polish the best point with Nelder-Mead. No RNG, so the fit is reproducible.
+  axis_for <- function(lo, hi) {
+    if (lo < 0) seq(-2, 2, by = 1) else c(0.5, 1.5, 3)
   }
+  start_grid <- as.matrix(expand.grid(Map(axis_for, lower, upper)))
+  candidates <- c(list(start), lapply(seq_len(nrow(start_grid)),
+                                      function(r) start_grid[r, ]))
+  opt <- NULL
+  for (s in candidates) {
+    s <- pmin(upper, pmax(lower, as.numeric(s)))
+    names(s) <- names(start)
+    cand <- tryCatch(
+      optim(par = s, fn = obj, method = "L-BFGS-B", lower = lower, upper = upper),
+      error = function(e) NULL
+    )
+    if (!is.null(cand) && (is.null(opt) || cand$value < opt$value)) opt <- cand
+  }
+  if (is.null(opt))
+    stop("Optimisation failed from all starting values.", call. = FALSE)
+  # Polish; report convergence honestly (do not mask a non-converged result).
+  opt_nm <- tryCatch(
+    optim(par = opt$par, fn = obj, method = "Nelder-Mead",
+          control = list(maxit = 5000)),
+    error = function(e) NULL
+  )
+  if (!is.null(opt_nm) && opt_nm$value < opt$value) opt <- opt_nm
 
   phat <- opt$par
   chisq_val <- opt$value
 
-  # GoF df = (n_cells - n_free_params)
-  n_cells <- if (!two_cond) 5L else 10L
-  df_gof  <- n_cells - np
+  # GoF df = (independent cells) - (free params). Each condition contributes a
+  # 3-category TP multinomial (2 df) + a 2-category TA multinomial (1 df) = 3,
+  # because the row totals N_tp and N_ta are fixed. The raw cell count (5 or 10)
+  # would over-state df by one per fixed total.
+  indep_cells <- 3L * (if (two_cond) 2L else 1L)
+  df_gof  <- indep_cells - np
   p_gof   <- pchisq(chisq_val, df = df_gof, lower.tail = FALSE)
 
   # reconstruct estimates by name
@@ -398,23 +428,22 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
                                n, constrain_d, constrain_c,
                                hit_prob, tpc_prob, fa_prob) {
   two_cond <- !is.null(n_hit_2)
-  obs1 <- c(n_hit = n_hit, n_tp_choose = n_tp_choose,
+  obs1 <- c(n_hit = n_hit, n_filler_tp = n_tp_choose - n_hit,
             n_reject_tp = N_tp - n_tp_choose,
             n_fa = n_fa, n_reject_ta = N_ta - n_fa)
   if (two_cond)
-    obs2 <- c(n_hit = n_hit_2, n_tp_choose = n_tp_choose_2,
+    obs2 <- c(n_hit = n_hit_2, n_filler_tp = n_tp_choose_2 - n_hit_2,
               n_reject_tp = N_tp_2 - n_tp_choose_2,
               n_fa = n_fa_2, n_reject_ta = N_ta_2 - n_fa_2)
 
   pred_f <- function(d, lam, Ntp, Nta) {
     ph <- hit_prob(d, lam); pt <- tpc_prob(d, lam); pf <- fa_prob(lam)
-    c(n_hit = ph*Ntp, n_tp_choose = pt*Ntp, n_reject_tp = (1-pt)*Ntp,
+    c(n_hit = ph*Ntp, n_filler_tp = (pt-ph)*Ntp, n_reject_tp = (1-pt)*Ntp,
       n_fa = pf*Nta, n_reject_ta = (1-pf)*Nta)
   }
   csq <- function(obs, pred) {
-    keep <- pred > 0.5
-    if (!any(keep)) return(1e9)
-    sum((obs[keep]-pred[keep])^2/pred[keep])
+    pred <- pmax(pred, 1e-8)
+    sum((obs-pred)^2/pred)
   }
 
   if (!two_cond) {

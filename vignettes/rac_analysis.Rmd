@@ -1,0 +1,369 @@
+---
+title: "RAC Analysis: Response Time-Accuracy Characteristics"
+author: "Colin Tredoux"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{RAC Analysis: Response Time-Accuracy Characteristics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+# Introduction
+
+This vignette demonstrates **RAC (Response Time-Accuracy Characteristic) analysis** for eyewitness lineup data, a new feature in r4lineups inspired by pyWitness (Mickes et al., 2024).
+
+## What is RAC Analysis?
+
+RAC analysis examines the relationship between **response time** and **accuracy** in lineup identifications. It plots suspect ID accuracy as a function of response time, similar to how CAC analysis plots accuracy as a function of confidence.
+
+## Why Use RAC?
+
+Response time is an important variable in eyewitness research because:
+
+1. **Fast responses often indicate strong memory** - Witnesses with strong memory of the culprit can identify them quickly
+2. **Response time is objective** - Unlike confidence, it cannot be influenced by post-event information or verbal overshadowing
+3. **Complementary to confidence** - RAC and CAC together provide a fuller picture of memory strength
+4. **Forensically useful** - Response time can be recorded automatically in video-based lineups
+
+## Key References
+
+- **Seale-Carlisle et al. (2019)**. Confidence and response time as indicators of eyewitness identification accuracy in the lab and in the real world. *Journal of Applied Research in Memory and Cognition, 8*(4), 420-428.
+
+- **Mickes et al. (2024)**. pyWitness 1.0: A python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
+
+# Setup
+
+```{r load_package}
+library(r4lineups)
+library(ggplot2)
+```
+
+# Simulating Data with Response Times
+
+Since most existing datasets don't include response times, we'll simulate realistic data:
+
+```{r simulate_data}
+set.seed(123)
+
+# Simulate 500 lineup trials
+# Target-present trials
+tp_data <- data.frame(
+  target_present = TRUE,
+  # 200 correct IDs (fast, mean = 7s)
+  identification = c(rep("suspect", 200), rep("filler", 40), rep("reject", 60)),
+  response_time = c(
+    rnorm(200, mean = 7000, sd = 2500),  # Correct IDs: fast
+    rnorm(40, mean = 11000, sd = 3000),   # Filler picks: slower
+    rnorm(60, mean = 14000, sd = 4000)    # Rejections: slowest
+  )
+)
+
+# Target-absent trials
+ta_data <- data.frame(
+  target_present = FALSE,
+  # Innocent suspect picks are slower (weaker memory)
+  identification = c(rep("suspect", 50), rep("filler", 100), rep("reject", 50)),
+  response_time = c(
+    rnorm(50, mean = 12000, sd = 3500),   # False IDs: slow
+    rnorm(100, mean = 10000, sd = 3000),  # Filler picks
+    rnorm(50, mean = 13000, sd = 4000)    # Correct rejections
+  )
+)
+
+# Combine and ensure positive times
+lineup_data <- rbind(tp_data, ta_data)
+lineup_data$response_time <- pmax(1000, lineup_data$response_time)
+
+# Shuffle rows
+lineup_data <- lineup_data[sample(nrow(lineup_data)), ]
+
+# Summary
+table(lineup_data$target_present, lineup_data$identification)
+summary(lineup_data$response_time)
+```
+
+# Basic RAC Analysis
+
+## Define Time Bins
+
+Response time is typically continuous, so we need to bin it:
+
+```{r time_bins}
+# Define bins in milliseconds (0-5s, 5-10s, 10-15s, 15-20s, 20s+)
+time_bins <- c(0, 5000, 10000, 15000, 20000, 99999)
+```
+
+## Compute RAC
+
+```{r compute_rac}
+rac_result <- make_rac(
+  data = lineup_data,
+  lineup_size = 6,
+  time_bins = time_bins,
+  show_plot = FALSE
+)
+
+# Print results
+print(rac_result)
+```
+
+## Interpret the Results
+
+The RAC data shows:
+
+- **Accuracy** decreases as response time increases
+- **Fastest responses** (0-5s): ~`r round(rac_result$rac_data$accuracy[1], 2)` accuracy
+- **Slowest responses** (15-20s): ~`r round(rac_result$rac_data$accuracy[4], 2)` accuracy
+
+This pattern is consistent with the "strong memory = fast and accurate" principle.
+
+## Visualize the RAC Curve
+
+```{r plot_rac, fig.width=7, fig.height=5}
+# Display the plot
+print(rac_result$plot + theme_minimal(base_size = 12))
+```
+
+# RAC vs CAC Comparison
+
+Let's compare RAC with CAC analysis using data where confidence and response time are correlated.
+
+## Add Confidence Ratings
+
+```{r add_confidence}
+# Simulate confidence negatively correlated with response time
+# Fast = high confidence, Slow = low confidence
+lineup_data$confidence <- 100 - (lineup_data$response_time / 200) +
+                          rnorm(nrow(lineup_data), 0, 10)
+lineup_data$confidence <- pmin(100, pmax(0, lineup_data$confidence))
+
+# Check correlation
+cor(lineup_data$response_time, lineup_data$confidence)
+```
+
+## Compute Both Analyses
+
+```{r rac_vs_cac}
+# RAC analysis
+rac <- make_rac(
+  data = lineup_data,
+  time_bins = time_bins,
+  show_plot = FALSE
+)
+
+# CAC analysis
+cac <- make_cac(
+  data = lineup_data,
+  confidence_bins = c(0, 60, 80, 100),
+  show_plot = FALSE
+)
+
+# Display both
+print(rac$plot + ggtitle("RAC: Response Time-Accuracy"))
+print(cac$plot + ggtitle("CAC: Confidence-Accuracy"))
+```
+
+## Key Differences
+
+| Feature | RAC | CAC |
+|---------|-----|-----|
+| **X-axis** | Response time | Confidence |
+| **Measure** | Objective (automatic) | Subjective (self-report) |
+| **Interpretation** | Faster = stronger memory | Higher confidence = stronger memory |
+| **Robustness** | Not affected by verbal overshadowing | Can be influenced by post-event info |
+| **Use case** | Video lineups, lab studies | Court testimony, field studies |
+
+# Fine-Grained Analysis
+
+Using finer time bins reveals more detail:
+
+```{r fine_bins, fig.width=7, fig.height=5}
+# Create bins every 2.5 seconds
+fine_bins <- seq(0, 25000, by = 2500)
+
+rac_fine <- make_rac(
+  data = lineup_data,
+  time_bins = fine_bins,
+  show_plot = TRUE,
+  show_errorbars = TRUE,
+  show_n = TRUE
+)
+
+# Note: Check sample sizes (n) - some bins may be small
+print(rac_fine$rac_data[, c("response_time", "n_total", "accuracy")])
+```
+
+**Warning**: Finer bins provide more detail but reduce sample sizes per bin. Always check the `n_total` column to ensure adequate samples.
+
+# Practical Applications
+
+## 1. Identifying Optimal Decision Time
+
+RAC analysis can help identify response time thresholds for high accuracy:
+
+```{r threshold}
+# Find time bins with accuracy > 0.80
+high_accuracy_bins <- rac_result$rac_data[rac_result$rac_data$accuracy > 0.80, ]
+print(high_accuracy_bins[, c("response_time", "mean_time", "accuracy", "n_total")])
+```
+
+## 2. Comparing Conditions
+
+RAC can compare different experimental conditions:
+
+```{r compare_conditions, eval=FALSE}
+# Example structure (not run)
+condition1_rac <- make_rac(data_condition1, time_bins = time_bins)
+condition2_rac <- make_rac(data_condition2, time_bins = time_bins)
+
+# Compare visually or statistically
+# (bootstrap methods for significance testing)
+```
+
+## 3. Custom Analysis
+
+Access the raw RAC data for custom analyses:
+
+```{r custom_analysis}
+# Extract data
+rac_data <- rac_result$rac_data
+
+# Custom plot with smoothing
+ggplot(rac_data, aes(x = mean_time / 1000, y = accuracy)) +
+  geom_point(aes(size = n_total), color = "darkblue", alpha = 0.6) +
+  geom_smooth(method = "loess", se = TRUE, color = "red") +
+  theme_bw(base_size = 14) +
+  labs(
+    x = "Mean Response Time (seconds)",
+    y = "Accuracy",
+    title = "RAC with LOESS Smoothing",
+    size = "N Suspect IDs"
+  ) +
+  scale_y_continuous(limits = c(0, 1)) +
+  geom_hline(yintercept = 0.5, linetype = "dashed")
+```
+
+# Technical Details
+
+## How RAC is Computed
+
+For each response time bin:
+
+$$\text{Accuracy} = \frac{\text{Correct Suspect IDs}}{\text{Correct Suspect IDs} + \text{Incorrect Suspect IDs}}$$
+
+Where:
+- **Correct Suspect IDs**: Target-present lineups where suspect was identified
+- **Incorrect Suspect IDs**: Target-absent lineups where suspect was identified + (filler IDs / lineup size)
+
+## Standard Errors
+
+Standard errors are computed assuming binomial distribution:
+
+$$SE = \sqrt{\frac{p(1-p)}{n}}$$
+
+where $p$ is the accuracy and $n$ is the total number of suspect IDs.
+
+# Real Data Considerations
+
+When using RAC with real eyewitness data:
+
+1. **Time Units**: Ensure response times are in the same units (ms or seconds)
+
+2. **Binning Strategy**:
+   - Too few bins → loss of detail
+   - Too many bins → small samples, high variance
+   - Recommended: 4-6 bins
+
+3. **Extreme Values**: Consider removing or capping extreme outliers
+
+4. **Missing Data**: Handle trials without response times appropriately
+
+5. **Sequential Lineups**: Response time may have different meaning than in simultaneous lineups
+
+# Example with Real Data Structure
+
+```{r real_data_structure, eval=FALSE}
+# Your data should look like this:
+my_data <- data.frame(
+  target_present = c(TRUE, FALSE, TRUE, ...),   # Logical
+  identification = c("suspect", "filler", ...),  # Character
+  response_time = c(8234, 12456, 6789, ...)     # Numeric (ms)
+)
+
+# Run analysis
+result <- make_rac(
+  data = my_data,
+  lineup_size = 6,
+  time_bins = c(0, 5000, 10000, 15000, 20000, 30000),
+  time_units = "ms"
+)
+
+# View
+print(result)
+result$plot
+```
+
+# Exporting RAC Data
+
+Export for use in other software or publications:
+
+```{r export, eval=FALSE}
+# As CSV
+write.csv(rac_result$rac_data, "rac_analysis.csv", row.names = FALSE)
+
+# As table for manuscript
+library(knitr)
+kable(rac_result$rac_data, digits = 3, caption = "RAC Analysis Results")
+```
+
+# Summary
+
+RAC analysis is a valuable tool for eyewitness research:
+
+✓ **Complements CAC analysis** - Objective measure of memory strength
+✓ **Easy to implement** - Simple function call with time bins
+✓ **Robust to bias** - Not influenced by verbal overshadowing
+✓ **Forensically relevant** - Applicable to video lineups
+
+## Recommended Workflow
+
+1. Collect response time data during lineup administration
+2. Choose appropriate time bins (4-6 bins recommended)
+3. Run `make_rac()` with your data
+4. Interpret the speed-accuracy relationship
+5. Compare with CAC analysis
+6. Report both in publications for completeness
+
+## Next Steps
+
+- Explore **CAC analysis** with `make_cac()`
+- Try **ROC analysis** with `make_roc()` or `make_fullroc()`
+- Conduct **bootstrap comparisons** between conditions
+- Examine **individual differences** in response time patterns
+
+# References
+
+1. Seale-Carlisle, T. M., Colloff, M. F., Flowe, H. D., Wells, W., Wixted, J. T., & Mickes, L. (2019). Confidence and response time as indicators of eyewitness identification accuracy in the lab and in the real world. *Journal of Applied Research in Memory and Cognition, 8*(4), 420-428.
+
+2. Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0: A python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
+
+3. Mickes, L. (2015). Receiver operating characteristic analysis and confidence-accuracy characteristic analysis in investigations of system variables and estimator variables that affect eyewitness memory. *Journal of Applied Research in Memory and Cognition, 4*(2), 93-102.
+
+4. Wixted, J. T., & Wells, G. L. (2017). The relationship between eyewitness confidence and identification accuracy: A new synthesis. *Psychological Science in the Public Interest, 18*(1), 10-65.
+
+---
+
+*This vignette was created for r4lineups version `r packageVersion("r4lineups")`*

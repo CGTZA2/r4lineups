@@ -17,6 +17,9 @@
 #'   If FALSE, analyze all responses (including fillers and rejections).
 #' @param lineup_size Integer. Number of people in lineup (default = 6).
 #'   Used for estimating incorrect suspect IDs from filler choices in target-absent lineups.
+#' @param confidence_scale How the confidence scale is interpreted: "auto" (default;
+#'   max <= 1 treated as 0-1, otherwise as 0-100, with a warning for ambiguous
+#'   Likert/0-10 scales), "0-1", or "0-100". C and O/U require a 0-1/0-100 probability scale.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -63,7 +66,10 @@
 #' @export
 #' @import tibble
 make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = TRUE,
-                                   lineup_size = 6) {
+                                   lineup_size = 6,
+                                   confidence_scale = c("auto", "0-1", "0-100")) {
+
+  confidence_scale <- match.arg(confidence_scale)
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "confidence")
@@ -139,17 +145,36 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     ))
   }
 
-  # Convert mean_confidence to proportion scale if needed (0-1)
-  # Detect if confidence is on 0-100 scale
-  if (max(data_filtered$confidence, na.rm = TRUE) > 1) {
-    calibration_results$mean_confidence_prop <- calibration_results$mean_confidence / 100
-    data_filtered$confidence_prop <- data_filtered$confidence / 100
-    conf_scale <- 100
-  } else {
-    calibration_results$mean_confidence_prop <- calibration_results$mean_confidence
-    data_filtered$confidence_prop <- data_filtered$confidence
+  # Put mean confidence on the 0-1 probability scale that C and O/U require.
+  # `confidence_scale` controls how the raw scale is interpreted:
+  #   "auto"  - max <= 1 -> already 0-1; otherwise treat as 0-100 (divide by 100),
+  #             but WARN when the max looks like a non-percentage (Likert/0-10) scale,
+  #             which the old silent "> 1 => /100" rule corrupted without notice.
+  #   "0-1"   - use as-is.  "0-100" - divide by 100.
+  max_conf <- max(data_filtered$confidence, na.rm = TRUE)
+  if (confidence_scale == "auto") {
+    if (max_conf <= 1) {
+      conf_scale <- 1
+    } else {
+      conf_scale <- 100
+      if (max_conf < 20) {
+        warning(
+          "Confidence max is ", round(max_conf, 2),
+          ": 'auto' is treating it as a 0-100 scale (dividing by 100), which is likely ",
+          "wrong for a Likert/0-10 scale. Calibration (C) and over/underconfidence (O/U) ",
+          "require confidence on a 0-1 or 0-100 probability scale. Set ",
+          "`confidence_scale` explicitly or rescale your confidence values.",
+          call. = FALSE
+        )
+      }
+    }
+  } else if (confidence_scale == "0-1") {
     conf_scale <- 1
+  } else {  # "0-100"
+    conf_scale <- 100
   }
+  calibration_results$mean_confidence_prop <- calibration_results$mean_confidence / conf_scale
+  data_filtered$confidence_prop <- data_filtered$confidence / conf_scale
 
   # Compute overall statistics
   N <- nrow(data_filtered)
@@ -199,6 +224,8 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 #' @param confidence_bins Numeric vector of bin edges (optional)
 #' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
+#' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
+#'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -223,7 +250,10 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 make_calibration_by_condition <- function(data, condition_vars,
                                           confidence_bins = NULL,
                                           choosers_only = TRUE,
-                                          lineup_size = 6) {
+                                          lineup_size = 6,
+                                          confidence_scale = c("auto", "0-1", "0-100")) {
+
+  confidence_scale <- match.arg(confidence_scale)
 
   # Validate condition variables exist
   missing_vars <- setdiff(condition_vars, names(data))
@@ -253,7 +283,8 @@ make_calibration_by_condition <- function(data, condition_vars,
         cond_data,
         confidence_bins = confidence_bins,
         choosers_only = choosers_only,
-        lineup_size = lineup_size
+        lineup_size = lineup_size,
+        confidence_scale = confidence_scale
       )
 
       results_by_condition[[cond]] <- cal_result
@@ -458,6 +489,8 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 #' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
 #' @param show_plot Logical. Whether to display the plot (default = TRUE)
+#' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
+#'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
 #' @param ... Additional arguments passed to make_calibration_gg()
 #'
 #' @return A list containing calibration data, statistics, and plot
@@ -472,14 +505,18 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 #'
 #' @export
 make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
-                            lineup_size = 6, show_plot = TRUE, ...) {
+                            lineup_size = 6, show_plot = TRUE,
+                            confidence_scale = c("auto", "0-1", "0-100"), ...) {
+
+  confidence_scale <- match.arg(confidence_scale)
 
   # Compute calibration data
   cal_obj <- make_calibration_data(
     data,
     confidence_bins = confidence_bins,
     choosers_only = choosers_only,
-    lineup_size = lineup_size
+    lineup_size = lineup_size,
+    confidence_scale = confidence_scale
   )
 
   # Create plot

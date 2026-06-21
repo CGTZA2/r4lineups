@@ -13,6 +13,8 @@
 #' @param choosers_only Logical. If \code{TRUE} (default), only suspect
 #'   identifications are included (standard eyewitness calibration practice).
 #' @param lineup_size Integer. Number of lineup members (default 6).
+#' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
+#'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
 #' @param alpha Prior concentration for the Beta prior on per-bin accuracy.
 #'   Default 0.5 (Jeffreys). Named shortcuts: \code{"jeffreys"}, \code{"uniform"},
 #'   \code{"weak"}.
@@ -71,7 +73,9 @@ calibration_bayes <- function(data,
                                lineup_size     = 6,
                                alpha           = 0.5,
                                S               = 10000,
-                               credible_mass   = 0.95) {
+                               credible_mass   = 0.95,
+                               confidence_scale = c("auto", "0-1", "0-100")) {
+  confidence_scale <- match.arg(confidence_scale)
   alpha_val <- .resolve_alpha_scalar(alpha)
   if (!is.numeric(S) || S < 1)
     stop("S must be a positive integer.", call. = FALSE)
@@ -81,7 +85,8 @@ calibration_bayes <- function(data,
   freq <- make_calibration_data(data,
                                 confidence_bins = confidence_bins,
                                 choosers_only   = choosers_only,
-                                lineup_size     = lineup_size)
+                                lineup_size     = lineup_size,
+                                confidence_scale = confidence_scale)
   bin_df <- freq$calibration_data
   N      <- freq$n_total
   conf_scale <- freq$confidence_scale

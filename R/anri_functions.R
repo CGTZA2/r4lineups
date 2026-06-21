@@ -13,6 +13,8 @@
 #' @param confidence_bins Numeric vector of bin edges (required for ANRI)
 #' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
 #' @param lineup_size Integer. Lineup size (default = 6)
+#' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
+#'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -64,7 +66,10 @@
 compute_anri <- function(data,
                         confidence_bins,
                         choosers_only = TRUE,
-                        lineup_size = 6) {
+                        lineup_size = 6,
+                        confidence_scale = c("auto", "0-1", "0-100")) {
+
+  confidence_scale <- match.arg(confidence_scale)
 
   if (is.null(confidence_bins)) {
     stop("confidence_bins must be provided for ANRI calculation")
@@ -75,7 +80,8 @@ compute_anri <- function(data,
     data,
     confidence_bins = confidence_bins,
     choosers_only = choosers_only,
-    lineup_size = lineup_size
+    lineup_size = lineup_size,
+    confidence_scale = confidence_scale
   )
 
   N <- cal_obj$n_total
@@ -112,6 +118,8 @@ compute_anri <- function(data,
 #' @param confidence_bins Numeric vector of bin edges
 #' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
 #' @param lineup_size Integer. Lineup size (default = 6)
+#' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
+#'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
 #' @param n_bootstrap Integer. Number of bootstrap replications (default = 1000)
 #' @param conf_level Numeric. Confidence level for CIs (default = 0.95)
 #' @param seed Integer. Random seed for reproducibility (default = NULL)
@@ -147,7 +155,10 @@ bootstrap_anri <- function(data,
                           lineup_size = 6,
                           n_bootstrap = 1000,
                           conf_level = 0.95,
-                          seed = NULL) {
+                          seed = NULL,
+                          confidence_scale = c("auto", "0-1", "0-100")) {
+
+  confidence_scale <- match.arg(confidence_scale)
 
   # Set seed for reproducibility if provided
   if (!is.null(seed)) {
@@ -155,13 +166,15 @@ bootstrap_anri <- function(data,
   }
 
   # Compute point estimate
-  anri_point <- compute_anri(data, confidence_bins, choosers_only, lineup_size)
+  anri_point <- compute_anri(data, confidence_bins, choosers_only, lineup_size,
+                             confidence_scale = confidence_scale)
 
   # Bootstrap function
   bootstrap_anri_once <- function(indices) {
     boot_data <- data[indices, ]
     tryCatch({
-      boot_anri <- compute_anri(boot_data, confidence_bins, choosers_only, lineup_size)
+      boot_anri <- compute_anri(boot_data, confidence_bins, choosers_only, lineup_size,
+                                confidence_scale = confidence_scale)
       boot_anri$anri
     }, error = function(e) {
       NA_real_
@@ -212,6 +225,8 @@ bootstrap_anri <- function(data,
 #' @param confidence_bins Numeric vector of bin edges
 #' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
 #' @param lineup_size Integer. Lineup size (default = 6)
+#' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
+#'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
 #' @param n_bootstrap Integer. Number of bootstrap replications (default = 1000)
 #' @param conf_level Numeric. Confidence level for CIs (default = 0.95)
 #' @param seed Integer. Random seed for reproducibility (default = NULL)
@@ -252,7 +267,10 @@ compare_anri <- function(data,
                         lineup_size = 6,
                         n_bootstrap = 1000,
                         conf_level = 0.95,
-                        seed = NULL) {
+                        seed = NULL,
+                        confidence_scale = c("auto", "0-1", "0-100")) {
+
+  confidence_scale <- match.arg(confidence_scale)
 
   # Validate group variable
   if (!group_var %in% names(data)) {
@@ -281,7 +299,8 @@ compare_anri <- function(data,
     lineup_size = lineup_size,
     n_bootstrap = n_bootstrap,
     conf_level = conf_level,
-    seed = if (!is.null(seed)) seed else NULL
+    seed = if (!is.null(seed)) seed else NULL,
+    confidence_scale = confidence_scale
   )
 
   boot_group2 <- bootstrap_anri(
@@ -291,7 +310,8 @@ compare_anri <- function(data,
     lineup_size = lineup_size,
     n_bootstrap = n_bootstrap,
     conf_level = conf_level,
-    seed = if (!is.null(seed)) seed + 1 else NULL
+    seed = if (!is.null(seed)) seed + 1 else NULL,
+    confidence_scale = confidence_scale
   )
 
   # Compute bootstrap distribution of difference

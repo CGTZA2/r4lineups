@@ -405,13 +405,13 @@ make_roc(lineup_example)
 
 Following some ideas suggested by Tredoux (2002), this function computes the degree to which each face in a set of faces loads onto a common factor computed from numeric representations of the faces. 
 
-The images used in this example can be found at https://github.com/tmnaylor/malpass_foils, and can be loaded 
-    by calling `image_read` from the `magick` package: 
-```{r}
-foil1 <- magick::image_read('https://raw.githubusercontent.com/tmnaylor/malpass_foils/master/malp1.jpg')
+The images used in this example can be found at https://github.com/tmnaylor/malpass_foils. To keep package checks reproducible and network-free, the download step is shown but not executed:
+
+```{r, eval=FALSE, purl=FALSE}
+foil1 <- magick::image_read("https://raw.githubusercontent.com/tmnaylor/malpass_foils/master/malp1.jpg")
 ```
 
-```{r, fig.align='center'}
+```{r, eval=FALSE, purl=FALSE, fig.align='center'}
 print(foil1)
 ```
 

@@ -252,9 +252,13 @@ ppv_by_confidence <- function(data,
             # Distribute fillers evenly across remaining positions
             if (n_ta_filler > 0) {
               filler_per_pos <- n_ta_filler / (lineup_size - 1)
+              # pseudo_table is the per-position choice count vector (innocent
+              # suspect + fillers spread evenly). Pass it straight to esize_T:
+              # wrapping it in table() tabulated the *values*, collapsing the
+              # effective size to a near-constant ~1.4 regardless of the data.
               pseudo_table <- c(n_ta_suspect, rep(filler_per_pos, lineup_size - 1))
               names(pseudo_table) <- 1:lineup_size
-              eff_size <- esize_T(table(pseudo_table))
+              eff_size <- esize_T(pseudo_table)
             } else {
               eff_size <- 1  # All chose suspect
             }

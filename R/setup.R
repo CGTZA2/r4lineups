@@ -1,4 +1,4 @@
-#' Install Python Dependencies for faceR
+#' Install Python Dependencies for r4lineups
 #'
 #' Installs the required Python packages using pip. This function should be run
 #' once after installing the r4lineups package.
@@ -27,7 +27,7 @@
 #' install_r4lineups_python()
 #'
 #' # Install to a virtual environment
-#' install_r4lineups_python(envname = "faceR-env")
+#' install_r4lineups_python(envname = "r4lineups-face-env")
 #'
 #' # Install with GPU support
 #' install_r4lineups_python(gpu = TRUE)

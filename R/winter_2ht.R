@@ -382,14 +382,23 @@ summary.winter_2ht <- function(object, ...) {
   rownames(ta_table) <- c("Suspect ID", "Filler ID", "Reject")
   print(ta_table)
 
-  # Chi-square goodness of fit
-  chi_sq <- sum((object$observed_counts$tp - object$expected_counts$tp)^2 / object$expected_counts$tp) +
-            sum((object$observed_counts$ta - object$expected_counts$ta)^2 / object$expected_counts$ta)
-  df <- 6 - 4  # 6 categories - 4 parameters
-  p_value <- 1 - stats::pchisq(chi_sq, df)
-
-  cat(sprintf("\nGoodness-of-fit test:\n"))
-  cat(sprintf("  Chi-square = %.2f, df = %d, p = %.4f\n", chi_sq, df, p_value))
+  # Model identification note. With a single target-present / target-absent
+  # condition the 2-HT model is SATURATED (just-identified): 4 free parameters fit
+  # the 4 independent data points (each 3-cell multinomial has 2 df given its fixed
+  # total), leaving 0 residual df. Absolute goodness of fit therefore cannot be
+  # tested from one condition -- the model reproduces the data by construction, so a
+  # chi-square test would always (mis)report near-perfect fit. Testing the 2-HT model
+  # requires multiple conditions or parameter constraints (Winter et al., 2022).
+  resid_discrepancy <- sum((object$observed_counts$tp - object$expected_counts$tp)^2 /
+                             object$expected_counts$tp) +
+                       sum((object$observed_counts$ta - object$expected_counts$ta)^2 /
+                             object$expected_counts$ta)
+  cat("\nModel identification:\n")
+  cat("  Saturated (just-identified): 4 parameters, 4 data df, 0 residual df.\n")
+  cat("  Absolute fit is not testable from a single condition (the model reproduces the\n")
+  cat("  data by construction); use multiple conditions or constraints to test fit.\n")
+  cat(sprintf("  Residual obs-vs-expected discrepancy = %.4g (~= 0 confirms convergence).\n",
+              resid_discrepancy))
 
   if (object$convergence != 0) {
     cat(sprintf("\nWarning: Optimization did not converge (code %d)\n", object$convergence))

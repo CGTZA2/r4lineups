@@ -2,6 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+.quarto/
+_quarto.yml
 inst/doc
 .Rcheck/
 ..Rcheck/
@@ -10,8 +12,6 @@ inst/doc
 notes/
 vignettes/*.html
 vignettes/*.R
-vignettes/*.Rmd
-!vignettes/sdt_summary_comparisons.Rmd
-!vignettes/msdt_model.Rmd
+vignettes/test.Rmd
 /doc/
 /Meta/

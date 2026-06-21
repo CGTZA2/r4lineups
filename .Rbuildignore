@@ -1,5 +1,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.claude$
+^\.quarto$
+^_quarto\.yml$
+^.*\.Rcheck$
+^\.\.Rcheck$
+^.*\.tar\.gz$
+^[^/]+_files$
+^[^/]+\.aux$
+^[^/]+\.log$
 ^FULLROC_QUICK_REFERENCE\.md$
 ^FULLROC_README\.md$
 ^PACKAGE_CHECK_FIXES\.md$
@@ -15,3 +24,4 @@
 ^notes$
 ^doc$
 ^Meta$
+^vignettes/test\.Rmd$

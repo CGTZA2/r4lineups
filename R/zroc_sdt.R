@@ -87,6 +87,7 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' sdt_uv$variance_ratio
 #' }
 #'
+#' @importFrom stats coef fitted lm residuals
 #' @export
 fit_sdt_roc <- function(data,
                         lineup_size = NULL,
@@ -343,16 +344,16 @@ print.sdt_roc_fit <- function(x, ...) {
   if (x$dprime < 0.5) {
     cat("  - Poor discriminability (d' < 0.5)\n")
   } else if (x$dprime < 1.0) {
-    cat("  - Weak discriminability (0.5 ≤ d' < 1.0)\n")
+    cat("  - Weak discriminability (0.5 <= d' < 1.0)\n")
   } else if (x$dprime < 2.0) {
-    cat("  - Moderate discriminability (1.0 ≤ d' < 2.0)\n")
+    cat("  - Moderate discriminability (1.0 <= d' < 2.0)\n")
   } else {
-    cat("  - Strong discriminability (d' ≥ 2.0)\n")
+    cat("  - Strong discriminability (d' >= 2.0)\n")
   }
 
   mean_c <- mean(x$criteria, na.rm = TRUE)
   if (abs(mean_c) < 0.2) {
-    cat("  - Approximately unbiased responding (mean c ≈ 0)\n")
+    cat("  - Approximately unbiased responding (mean c ~= 0)\n")
   } else if (mean_c > 0) {
     cat("  - Conservative bias (mean c > 0)\n")
   } else {
@@ -392,7 +393,7 @@ plot.sdt_roc_fit <- function(x, ...) {
       title = "z-ROC Plot with Fitted SDT Model",
       subtitle = paste0("d' = ", round(x$dprime, 2),
                        ", Slope = ", round(x$slope, 2),
-                       ", R² = ", round(x$fit_diagnostics$r_squared, 2)),
+                       ", R^2 = ", round(x$fit_diagnostics$r_squared, 2)),
       x = "z(False Alarm Rate)",
       y = "z(Hit Rate)"
     ) +

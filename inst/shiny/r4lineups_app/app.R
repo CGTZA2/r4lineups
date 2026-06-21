@@ -324,6 +324,86 @@ ui <- navbarPage(
     )
   ),
   tabPanel(
+    "Bayesian Inference",
+    sidebarLayout(
+      sidebarPanel(
+        helpText("Posterior analyses for lineup fairness, diagnosticity, calibration, and SDT summaries."),
+        selectInput(
+          "bayes_analysis",
+          "Analysis",
+          choices = c(
+            "Tredoux effective size E'" = "esize",
+            "Functional size" = "func",
+            "Diagnosticity ratio" = "diag",
+            "Calibration" = "calibration",
+            "SDT d' comparison" = "sdt"
+          )
+        ),
+        numericInput("bayes_alpha", "Prior alpha", value = 0.5, min = 0.01, step = 0.1),
+        numericInput("bayes_S", "Posterior draws (S)", value = 5000, min = 500, step = 500),
+        conditionalPanel(
+          condition = "input.bayes_analysis == 'esize'",
+          radioButtons("bayes_esize_input_type", "Input type", choices = c("Vector", "Table"), inline = TRUE),
+          textAreaInput("bayes_esize_input", "Lineup input", rows = 4,
+                        placeholder = "Vector: 3,2,5,6,1,3  |  Table: 2,5,1,0,3,1"),
+          numericInput("bayes_esize_k", "Nominal lineup size (k)", value = 6, min = 2),
+          numericInput("bayes_esize_threshold", "Threshold for P(E' < t) (optional, NA = skip)", value = NA, min = 1)
+        ),
+        conditionalPanel(
+          condition = "input.bayes_analysis == 'func'",
+          textAreaInput("bayes_func_vec", "Lineup vector", rows = 4,
+                        placeholder = "3,2,5,6,1,3,3,5,6,4"),
+          numericInput("bayes_func_target", "Suspect/target position", value = 3, min = 1),
+          numericInput("bayes_func_threshold", "Threshold for P(F < t) (optional, NA = skip)", value = NA, min = 1)
+        ),
+        conditionalPanel(
+          condition = "input.bayes_analysis == 'diag'",
+          textAreaInput("bayes_diag_tp", "Target-present choices", rows = 3,
+                        placeholder = "3,2,5,6,1,3,3,5,6,4"),
+          textAreaInput("bayes_diag_ta", "Target-absent choices", rows = 3,
+                        placeholder = "3,2,5,6,1,3,3,5,6,4"),
+          numericInput("bayes_diag_pos_tp", "Suspect position in TP lineup", value = 3, min = 1),
+          numericInput("bayes_diag_pos_ta", "Suspect position in TA lineup", value = 3, min = 1),
+          numericInput("bayes_diag_k_tp", "TP lineup size", value = 6, min = 2),
+          numericInput("bayes_diag_k_ta", "TA lineup size", value = 6, min = 2),
+          numericInput("bayes_diag_threshold", "Threshold for P(DR < t) (optional, NA = skip)", value = 1, min = 0)
+        ),
+        conditionalPanel(
+          condition = "input.bayes_analysis == 'calibration'",
+          fileInput("bayes_calib_file", "Data CSV", accept = c(".csv")),
+          textInput("bayes_calib_bins", "Confidence bins", value = "0, 60, 80, 100"),
+          numericInput("bayes_calib_lineup_size", "Lineup size", value = 6, min = 2),
+          shinyWidgets::switchInput("bayes_calib_choosers", "Choosers only", value = TRUE),
+          selectInput("bayes_calib_metric", "Plot metric", choices = c("C", "OU", "NRI"))
+        ),
+        conditionalPanel(
+          condition = "input.bayes_analysis == 'sdt'",
+          textInput("bayes_sdt_label_A", "Condition A label", value = "A"),
+          numericInput("bayes_sdt_hits_A", "A hits", value = 45, min = 0),
+          numericInput("bayes_sdt_misses_A", "A misses", value = 55, min = 0),
+          numericInput("bayes_sdt_fas_A", "A false alarms", value = 12, min = 0),
+          numericInput("bayes_sdt_crs_A", "A correct rejections", value = 88, min = 0),
+          textInput("bayes_sdt_label_B", "Condition B label", value = "B"),
+          numericInput("bayes_sdt_hits_B", "B hits", value = 38, min = 0),
+          numericInput("bayes_sdt_misses_B", "B misses", value = 62, min = 0),
+          numericInput("bayes_sdt_fas_B", "B false alarms", value = 10, min = 0),
+          numericInput("bayes_sdt_crs_B", "B correct rejections", value = 90, min = 0)
+        ),
+        actionButton("bayes_example", "Load example")
+      ),
+      mainPanel(
+        tags$div(class = "section-title", "Summary"),
+        DTOutput("bayes_summary"),
+        tags$div(class = "section-title", "Posterior plot"),
+        plotOutput("bayes_plot"),
+        tags$div(class = "section-title", "Posterior draws"),
+        DTOutput("bayes_draws"),
+        downloadButton("bayes_download_summary", "Download Summary", class = "download-btn"),
+        downloadButton("bayes_download_draws", "Download Draws", class = "download-btn")
+      )
+    )
+  ),
+  tabPanel(
     "Face Similarity",
     sidebarLayout(
       sidebarPanel(
@@ -496,6 +576,42 @@ server <- function(input, output, session) {
     data(nortje2012)
     updateTextAreaInput(session, "esize_vec", value = paste(nortje2012$lineup_1, collapse = ", "))
     updateNumericInput(session, "esize_k", value = max(nortje2012$lineup_1, na.rm = TRUE))
+  })
+
+  observeEvent(input$bayes_example, {
+    if (identical(input$bayes_analysis, "esize")) {
+      data(nortje2012)
+      updateTextAreaInput(session, "bayes_esize_input", value = paste(nortje2012$lineup_1, collapse = ", "))
+      updateNumericInput(session, "bayes_esize_k", value = max(nortje2012$lineup_1, na.rm = TRUE))
+      updateNumericInput(session, "bayes_esize_threshold", value = max(nortje2012$lineup_1, na.rm = TRUE))
+    } else if (identical(input$bayes_analysis, "func")) {
+      data(nortje2012)
+      updateTextAreaInput(session, "bayes_func_vec", value = paste(nortje2012$lineup_1, collapse = ", "))
+      updateNumericInput(session, "bayes_func_target", value = 3)
+      updateNumericInput(session, "bayes_func_threshold", value = max(nortje2012$lineup_1, na.rm = TRUE))
+    } else if (identical(input$bayes_analysis, "diag")) {
+      data(nortje2012)
+      tp <- nortje2012$lineup_1
+      ta <- nortje2012$lineup_2
+      updateTextAreaInput(session, "bayes_diag_tp", value = paste(tp, collapse = ", "))
+      updateTextAreaInput(session, "bayes_diag_ta", value = paste(ta, collapse = ", "))
+      updateNumericInput(session, "bayes_diag_k_tp", value = max(tp, na.rm = TRUE))
+      updateNumericInput(session, "bayes_diag_k_ta", value = max(ta, na.rm = TRUE))
+    } else if (identical(input$bayes_analysis, "calibration")) {
+      updateTextInput(session, "bayes_calib_bins", value = "0, 60, 80, 100")
+      showNotification("Using lineup_example data for Bayesian calibration.", type = "message")
+    } else if (identical(input$bayes_analysis, "sdt")) {
+      updateTextInput(session, "bayes_sdt_label_A", value = "A")
+      updateNumericInput(session, "bayes_sdt_hits_A", value = 45)
+      updateNumericInput(session, "bayes_sdt_misses_A", value = 55)
+      updateNumericInput(session, "bayes_sdt_fas_A", value = 12)
+      updateNumericInput(session, "bayes_sdt_crs_A", value = 88)
+      updateTextInput(session, "bayes_sdt_label_B", value = "B")
+      updateNumericInput(session, "bayes_sdt_hits_B", value = 38)
+      updateNumericInput(session, "bayes_sdt_misses_B", value = 62)
+      updateNumericInput(session, "bayes_sdt_fas_B", value = 10)
+      updateNumericInput(session, "bayes_sdt_crs_B", value = 90)
+    }
   })
 
   observeEvent(input$roc_example, {
@@ -774,6 +890,203 @@ server <- function(input, output, session) {
     filename = function() "effective_size_summary.csv",
     content = function(file) {
       write.csv(esize_summary(), file, row.names = FALSE)
+    }
+  )
+
+  bayes_threshold <- function(x) {
+    if (is.null(x) || is.na(x)) NULL else x
+  }
+
+  bayes_calib_data <- reactive({
+    if (isTruthy(input$bayes_calib_file)) {
+      read.csv(input$bayes_calib_file$datapath, stringsAsFactors = FALSE)
+    } else {
+      data(lineup_example)
+      lineup_example
+    }
+  })
+
+  bayes_result <- reactive({
+    analysis <- input$bayes_analysis
+    alpha <- input$bayes_alpha
+    S <- as.integer(input$bayes_S)
+
+    if (identical(analysis, "esize")) {
+      vals <- parse_numeric_vector(input$bayes_esize_input)
+      validate(need(length(vals) > 0, "Enter a lineup vector or table, or load the example."))
+      tab <- build_lineup_table(vals, input$bayes_esize_input_type, input$bayes_esize_k)
+      validate(need(!is.null(tab), "Invalid lineup input."))
+      res <- esize_T_bayes(
+        tab,
+        alpha = alpha,
+        S = S,
+        threshold = bayes_threshold(input$bayes_esize_threshold)
+      )
+      summary <- data.frame(
+        analysis = "Tredoux effective size E'",
+        n = res$n,
+        k = res$k,
+        posterior_mean = res$posterior_mean,
+        posterior_median = res$posterior_median,
+        ci_lower = res$credible_interval["lower"],
+        ci_upper = res$credible_interval["upper"],
+        P_below_threshold = if (is.null(res$threshold_probs)) NA_real_ else res$threshold_probs$P_below,
+        P_above_threshold = if (is.null(res$threshold_probs)) NA_real_ else res$threshold_probs$P_above
+      )
+      draws <- data.frame(E_prime = res$E_draws)
+      return(list(summary = summary, draws = draws, plot = plot(res)))
+    }
+
+    if (identical(analysis, "func")) {
+      vec <- parse_numeric_vector(input$bayes_func_vec)
+      validate(need(length(vec) > 0, "Enter a lineup vector, or load the example."))
+      res <- func_size_bayes(
+        vec,
+        target_pos = input$bayes_func_target,
+        alpha = alpha,
+        S = S,
+        threshold = bayes_threshold(input$bayes_func_threshold)
+      )
+      summary <- data.frame(
+        analysis = "Functional size",
+        n = res$n,
+        suspect_ids = res$n_suspect,
+        posterior_mean = res$posterior_mean,
+        posterior_median = res$posterior_median,
+        ci_lower = res$credible_interval["lower"],
+        ci_upper = res$credible_interval["upper"],
+        P_below_threshold = if (is.null(res$threshold_probs)) NA_real_ else res$threshold_probs$P_below,
+        P_above_threshold = if (is.null(res$threshold_probs)) NA_real_ else res$threshold_probs$P_above
+      )
+      draws <- data.frame(functional_size = res$F_draws)
+      return(list(summary = summary, draws = draws, plot = plot(res)))
+    }
+
+    if (identical(analysis, "diag")) {
+      tp <- parse_numeric_vector(input$bayes_diag_tp)
+      ta <- parse_numeric_vector(input$bayes_diag_ta)
+      validate(need(length(tp) > 0 && length(ta) > 0, "Enter TP and TA lineup vectors, or load the example."))
+      res <- diag_ratio_T_bayes(
+        tp,
+        ta,
+        pos_pres = input$bayes_diag_pos_tp,
+        pos_abs = input$bayes_diag_pos_ta,
+        k1 = input$bayes_diag_k_tp,
+        k2 = input$bayes_diag_k_ta,
+        alpha = alpha,
+        S = S,
+        threshold = bayes_threshold(input$bayes_diag_threshold)
+      )
+      summary <- data.frame(
+        analysis = "Diagnosticity ratio",
+        n_tp = res$n_tp,
+        n_ta = res$n_ta,
+        tp_suspect_ids = res$n_tp_suspect,
+        ta_suspect_ids = res$n_ta_suspect,
+        posterior_mean = res$posterior_mean,
+        posterior_median = res$posterior_median,
+        ci_lower = res$credible_interval["lower"],
+        ci_upper = res$credible_interval["upper"],
+        P_below_threshold = if (is.null(res$threshold_probs)) NA_real_ else res$threshold_probs$P_below,
+        P_above_threshold = if (is.null(res$threshold_probs)) NA_real_ else res$threshold_probs$P_above
+      )
+      draws <- data.frame(DR = res$DR_draws, lnDR = res$lnDR_draws)
+      return(list(summary = summary, draws = draws, plot = plot(res)))
+    }
+
+    if (identical(analysis, "calibration")) {
+      df <- bayes_calib_data()
+      validate(
+        need(all(c("target_present", "identification", "confidence") %in% names(df)),
+             "Data must include target_present, identification, confidence columns.")
+      )
+      res <- calibration_bayes(
+        df,
+        confidence_bins = parse_bins(input$bayes_calib_bins),
+        choosers_only = isTRUE(input$bayes_calib_choosers),
+        lineup_size = input$bayes_calib_lineup_size,
+        alpha = alpha,
+        S = S
+      )
+      summary <- data.frame(
+        analysis = "Calibration",
+        n = res$n_total,
+        bins = nrow(res$bin_data),
+        C_mean = res$C_mean,
+        C_median = res$C_median,
+        C_ci_lower = res$C_ci["lower"],
+        C_ci_upper = res$C_ci["upper"],
+        OU_mean = res$OU_mean,
+        OU_median = res$OU_median,
+        OU_ci_lower = res$OU_ci["lower"],
+        OU_ci_upper = res$OU_ci["upper"],
+        NRI_mean = res$NRI_mean,
+        NRI_median = res$NRI_median,
+        NRI_ci_lower = res$NRI_ci["lower"],
+        NRI_ci_upper = res$NRI_ci["upper"]
+      )
+      draws <- data.frame(C = res$C_draws, OU = res$OU_draws, NRI = res$NRI_draws)
+      return(list(summary = summary, draws = draws, plot = plot(res, metric = input$bayes_calib_metric)))
+    }
+
+    res <- sdt_compare(
+      hits_A = input$bayes_sdt_hits_A,
+      misses_A = input$bayes_sdt_misses_A,
+      fas_A = input$bayes_sdt_fas_A,
+      crs_A = input$bayes_sdt_crs_A,
+      hits_B = input$bayes_sdt_hits_B,
+      misses_B = input$bayes_sdt_misses_B,
+      fas_B = input$bayes_sdt_fas_B,
+      crs_B = input$bayes_sdt_crs_B,
+      label_A = input$bayes_sdt_label_A,
+      label_B = input$bayes_sdt_label_B,
+      alpha = alpha,
+      S = S
+    )
+    summary <- data.frame(
+      analysis = "SDT dprime comparison",
+      label_A = res$label_A,
+      label_B = res$label_B,
+      dprime_A_mean = res$dprime_A_mean,
+      dprime_B_mean = res$dprime_B_mean,
+      delta_mean = res$posterior_mean,
+      delta_median = res$posterior_median,
+      delta_ci_lower = res$credible_interval["lower"],
+      delta_ci_upper = res$credible_interval["upper"],
+      P_A_greater = res$P_A_greater,
+      P_B_greater = res$P_B_greater
+    )
+    draws <- data.frame(
+      dprime_A = res$dprime_A_draws,
+      dprime_B = res$dprime_B_draws,
+      delta_dprime = res$delta_dprime_draws
+    )
+    list(summary = summary, draws = draws, plot = plot(res))
+  })
+
+  output$bayes_summary <- renderDT({
+    datatable(round_df(bayes_result()$summary), options = list(pageLength = 10, scrollX = TRUE))
+  })
+
+  output$bayes_plot <- renderPlot({
+    bayes_result()$plot
+  })
+
+  output$bayes_draws <- renderDT({
+    datatable(round_df(head(bayes_result()$draws, 1000)), options = list(pageLength = 10, scrollX = TRUE))
+  })
+
+  output$bayes_download_summary <- downloadHandler(
+    filename = function() paste0("bayesian_", input$bayes_analysis, "_summary.csv"),
+    content = function(file) {
+      write.csv(bayes_result()$summary, file, row.names = FALSE)
+    }
+  )
+
+  output$bayes_download_draws <- downloadHandler(
+    filename = function() paste0("bayesian_", input$bayes_analysis, "_draws.csv"),
+    content = function(file) {
+      write.csv(bayes_result()$draws, file, row.names = FALSE)
     }
   )
 

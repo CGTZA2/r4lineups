@@ -1,22 +1,6 @@
-#' Compute Entropy for a Probability
-#'
-#' Helper function to compute binary entropy H(p) = -[p*log2(p) + (1-p)*log2(1-p)]
-#'
-#' @param p Probability value between 0 and 1
-#'
-#' @return Entropy value in bits
-#'
-#' @details
-#' Entropy measures uncertainty in a binary outcome. It ranges from 0 (complete certainty)
-#' to 1 (maximum uncertainty at p=0.5). Returns 0 when p is 0 or 1 (no uncertainty).
-#'
-#' @keywords internal
-entropy <- function(p) {
-  if (p <= 0 || p >= 1) {
-    return(0)
-  }
-  -(p * log2(p) + (1 - p) * log2(1 - p))
-}
+# `entropy()` is defined once in R/eig_functions.R (entropy(p, base = 2)); the
+# calls below resolve to it (base defaults to 2). A second definition previously
+# lived here, which collided in the package namespace and duplicated entropy.Rd.
 
 
 #' Compute Bayesian Prior-Posterior and Information Gain Curves

@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @importFrom stats density
 #' @importFrom utils globalVariables
 utils::globalVariables(c(
   # ggplot2 aesthetics used in plotting functions
@@ -26,6 +27,7 @@ utils::globalVariables(c(
   "evidence_label",
   "expected_utility",
   "false_id_rate",
+  "fsmax",
   "foil_name",
   "group",
   "highlighted",
@@ -48,6 +50,8 @@ utils::globalVariables(c(
   "response_label",
   "se",
   "similarity",
+  "ss",
   "stats_label",
-  "target_present"
+  "target_present",
+  "z"
 ))

@@ -129,6 +129,8 @@ max_filler_moments <- function(lineup_size,
 #'
 #' @param pr_rej_I Rejection rate in culprit-absent lineups.
 #' @param pr_rej_G Rejection rate in culprit-present lineups.
+#' @param gamma Decision criterion estimated from culprit-absent rejection
+#'   rates, typically returned by \code{msdt_gamma_from_rej()}.
 #' @param lineup_size Lineup size (suspect + fillers), must be >= 2.
 #' @param eps Small value used to avoid probabilities of 0 or 1.
 #'

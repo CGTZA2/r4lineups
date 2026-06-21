@@ -23,6 +23,9 @@ Statistical tools for assessing lineup fairness, confidence‑accuracy analyses,
 This repository is an R package. From R:
 
 ```r
+# from GitHub
+remotes::install_github("ctredoux/r4lineups")
+
 # from local source
 devtools::install()
 ```
@@ -93,7 +96,11 @@ plot_lineup_similarity(lineup)
 
 ## Shiny app
 
-The app bundles key analyses (bias, effective size, ROC/CAC, EIG/PPV, face similarity).
+The app bundles key analyses (bias, effective size, Bayesian inference, ROC/CAC,
+EIG/PPV, face similarity). It is an interactive companion to the package, not a
+complete replacement for the R API.
+
+A hosted instance is available at <https://r4lineups.cogbook.org/>.
 
 ```r
 library(r4lineups)
@@ -105,6 +112,7 @@ For deployment, the app lives at `inst/shiny/r4lineups_app`.
 ## Vignettes
 
 - `Vignette.Rmd` — core lineup fairness measures + ROC basics
+- `bayesian_inference.Rmd` — Bayesian posterior summaries for effective size, functional size, diagnosticity, calibration, and SDT comparisons
 - `fullroc_analysis.Rmd` — full ROC (Smith & Yang)
 - `calibration_decision_analysis.Rmd` — calibration, Bayesian curves, utility, DPP, ANRI
 - `information_error_rate_analysis.Rmd` — EIG + PPV‑range
@@ -118,3 +126,4 @@ For deployment, the app lives at `inst/shiny/r4lineups_app`.
 
 - `notes/` contains working papers and test scripts and is **not** part of the package build.
 - For face similarity, Python dependencies are managed via `install_r4lineups_python()`.
+- Tests can be run with `testthat::test_dir("tests/testthat")`; package checks use standard `R CMD build` and `R CMD check` workflows.

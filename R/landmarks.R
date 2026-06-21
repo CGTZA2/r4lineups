@@ -97,7 +97,7 @@ detect_faces <- function(img_path, detector = "retinaface") {
 #' dimensions. The z coordinate represents depth relative to the face center.
 #'
 #' @note Requires MediaPipe to be installed (installed by default with
-#'   install_faceR_python()).
+#'   install_r4lineups_python()).
 #'
 #' @examples
 #' \dontrun{

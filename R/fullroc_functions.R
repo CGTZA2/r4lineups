@@ -179,14 +179,19 @@ make_fullroc_data <- function(data,
       levels = c("suspect", "filler", "reject")
     )
 
+    # Confidence rank within a decision. Use the bin INDEX (1 = lowest bin), not
+    # as.numeric() of the label: with conf_bins the labels are "conf_1", "conf_2", ...
+    # which as.numeric() turns into NA, silently breaking the ordering.
+    conf_rank <- as.integer(factor(diagnosticity_table$conf_bin, levels = conf_levels))
+
     # For suspect: high confidence first
     # For filler and reject: low confidence first (more diagnostic of innocence when rare)
     diagnosticity_table <- diagnosticity_table[
       order(
         diagnosticity_table$decision_order,
         ifelse(diagnosticity_table$decision == "suspect",
-               -as.numeric(diagnosticity_table$conf_bin),  # High conf first for suspect
-               as.numeric(diagnosticity_table$conf_bin))   # Low conf first for filler/reject
+               -conf_rank,   # High conf first for suspect
+               conf_rank)    # Low conf first for filler/reject
       ),
     ]
   }
@@ -363,7 +368,7 @@ plot_fullroc <- function(fullroc_obj,
 
   # Create base plot
   p <- ggplot(roc_data, aes(x = cumulative_false_alarm_rate, y = cumulative_hit_rate)) +
-    geom_line(size = 1, color = "darkblue") +
+    geom_line(linewidth = 1, color = "darkblue") +
     geom_point(shape = 21, color = "black", fill = "steelblue", size = 3) +
     geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
     theme_bw(base_size = 14) +

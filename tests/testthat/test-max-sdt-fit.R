@@ -79,17 +79,19 @@ test_that("p_value is in (0,1)", {
   expect_lte(res$p_value, 1)
 })
 
-test_that("single-condition df == 3 (5 cells - 2 params)", {
+test_that("single-condition df == 1 (3 independent cells - 2 params)", {
+  # TP is a 3-category multinomial (2 df) + TA a 2-category (1 df) = 3 independent
+  # cells given the fixed row totals; minus 2 free params => df = 1.
   res <- fit_max_sdt(n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100)
-  expect_equal(res$df, 3L)
+  expect_equal(res$df, 1L)
 })
 
-test_that("two-condition unconstrained df == 6 (10 cells - 4 params)", {
+test_that("two-condition unconstrained df == 2 (6 independent cells - 4 params)", {
   res <- fit_max_sdt(
     n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
     n_hit_2=40, n_tp_choose_2=65, n_fa_2=20, N_tp_2=100, N_ta_2=100
   )
-  expect_equal(res$df, 6L)
+  expect_equal(res$df, 2L)
 })
 
 # --- two-condition models ---
