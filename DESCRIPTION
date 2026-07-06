@@ -1,6 +1,8 @@
 Package: r4lineups
 Title: Statistical Inference on Lineup Fairness
-Version: 0.2.0
+Version: 2.0.0
+URL: https://github.com/CGTZA2/r4lineups, https://cgtza2.github.io/r4lineups/
+BugReports: https://github.com/CGTZA2/r4lineups/issues
 Authors@R: c(
     person("Colin", "Tredoux", email = "colin.tredoux@uct.ac.za", role = c("aut", "cre")),
     person("Tamsyn", "Naylor", email = "tmnaylor@outlook.com", role = "aut"))

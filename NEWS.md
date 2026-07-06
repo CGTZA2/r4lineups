@@ -1,4 +1,8 @@
-# r4lineups 0.2.0 (2026-01-30)
+# r4lineups 2.0.0 (2026-07-06)
+
+Major release: a substantial expansion of the package from the 0.1.x
+fairness-measure toolkit into a full analysis suite for eyewitness
+identification research, plus a package-wide statistical audit.
 
 ## Major New Features (pyWitness-inspired)
 
@@ -88,6 +92,103 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
 * Complementary to CAC analysis for objective memory assessment
 * Follows Seale-Carlisle et al. (2019) methodology
 
+### Full ROC, EIG, and PPV-Range Analysis
+
+* `make_fullroc()` / `make_fullroc_data()` / `plot_fullroc()`: full ROC analysis
+  using all lineup responses (Smith & Yang, 2020), with diagnosticity-ratio or
+  a-priori ordering
+* `compute_eig()` / `make_eig()` / `make_eig_data()` / `plot_eig()`: Expected
+  Information Gain analysis (Starns et al., 2023)
+* `ppv_by_confidence()` / `ppv_range_by_confidence()` / `make_ppv_range()` /
+  `plot_ppv_range()`: positive predictive value across confidence levels, with
+  nominal- and effective-size corrections
+
+### Winter 2-HT Multinomial Processing Tree Model
+
+* `fit_winter_2ht()`: two-high-threshold MPT model for the full 2x3 outcome
+  table (Winter et al., 2022), with `print()`, `summary()`, and `plot()` methods
+* `boot_winter_2ht()`: bootstrap confidence intervals for 2-HT parameters
+
+### Calibration, ANRI, and Decision Analysis
+
+* `make_calibration()` / `make_calibration_by_condition()` /
+  `make_calibration_data()`: confidence-accuracy calibration (C, O/U, NRI)
+* `compute_anri()` / `bootstrap_anri()` / `compare_anri()`: Adjusted Normalized
+  Resolution Index with bootstrap inference
+* `make_bayes_curves()`, `make_bree_curve()`: Bayesian prior-posterior curves
+* `make_utility_curves()`, `make_utility_difference()`, `compare_utility()`:
+  expected-utility analysis (Lampinen et al., 2019)
+* `make_dpp()`, `compare_dpp()`: Deviation from Perfect Performance
+  (Smith et al., 2018)
+
+### Bayesian Beta-Binomial Inference
+
+* Posterior inference for core fairness measures: `esize_T_bayes()`,
+  `func_size_bayes()`, `diag_ratio_T_bayes()`, `calibration_bayes()`
+* `sdt_compare()`: Bayesian comparison of SDT parameters between conditions
+
+### mSDT and MAX SDT Compound-Decision Models
+
+* Multi-item signal detection (mSDT) core functions: `pmax_filler()`,
+  `dmax_filler()`, `qmax_filler()`, `rmax_filler()`, `max_filler_moments()`,
+  `estimate_msdt_params()` (method-of-moments from rejection rates)
+* `fit_max_sdt()` / `compare_max_sdt()`: full-information maximum-likelihood
+  fitting of the compound MAX decision rule, with bootstrap CIs
+
+### SDT Summary-Level Comparisons and GLM Estimation
+
+* `sdt_summary_from_counts()`, `sdt_summary_variance()`, `compare_sdt_summary()`:
+  SDT comparisons when only summary counts are available (Miller/Gourevitch or
+  bootstrap variance)
+* `fit_sdt_glm()` / `fit_sdt_glmm()` / `extract_sdt_metrics()`: SDT parameter
+  estimation via probit/logit (mixed) models
+
+### Face Similarity via Deep Learning
+
+* `face_similarity()`, `lineup_similarity()`, `batch_embeddings()`, and related
+  helpers compute facial similarity with deep embeddings (ArcFace, FaceNet, ...)
+  through Python's deepface library (optional; requires `reticulate`)
+* `install_r4lineups_python()` / `check_python_deps()` for setup
+
+### Shiny App
+
+* `run_r4lineups_app()`: interactive Shiny interface to the main analyses
+
+### Core Fairness Measures
+
+* Bootstrap distributions for lineup bias and effective size
+  (`lineup_boot_allprop()`, `esize_boot_dist()` and friends)
+* Data standardization is now the recommended entry point for all analyses
+  (`standardize_lineup_data()`)
+
+## Statistical Audit (June 2026)
+
+A component-by-component numerical audit of the statistical routines was
+completed for this release. Fixes:
+
+* **MAX SDT fitter** (`fit_max_sdt()`): replaced the single boundary-prone
+  optimizer start with a deterministic multistart grid plus Nelder-Mead polish;
+  corrected the chi-square objective to use a proper outcome partition
+  (correct-ID / filler-ID / reject); floored expected counts instead of dropping
+  cells; corrected goodness-of-fit degrees of freedom (df = 3 x n_conditions -
+  n_params); convergence is now reported honestly
+* **Full ROC**: fixed `order = "apriori"` with `conf_bins` (labels were coerced
+  to `NA`, silently breaking within-decision ordering)
+* **PPV**: `ppv_by_confidence(correction = "effective")` computed the wrong
+  effective size in the no-member-data fallback; now uses the pseudo-table
+  counts directly
+* **Calibration**: added a `confidence_scale = c("auto", "0-1", "0-100")`
+  argument to `make_calibration_data()` and all callers; `auto` now warns when
+  confidence looks like a Likert/0-10 scale instead of silently dividing by 100
+* **Winter 2-HT**: removed the invalid single-condition goodness-of-fit
+  chi-square test (the model is saturated, df = 0); `summary()` now reports a
+  saturation note and the observed-vs-expected discrepancy as a convergence
+  check
+* **Diagnosticity ratio**: fixed diagnosticity-ratio bugs and documented the
+  Haldane correction in `ln_diag_ratio()`
+* Removed a duplicate internal `entropy()` definition that relied on file
+  collation order
+
 ## Documentation
 
 ### New Vignettes
@@ -96,6 +197,15 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
 * `model_comparison.Rmd`: Comprehensive model comparison workflows
 * `pauc_statistical_comparison.Rmd`: Statistical testing of ROC curves
 * `rac_analysis.Rmd`: Response time-accuracy analysis
+* `fullroc_analysis.Rmd`: Full ROC methodology
+* `information_error_rate_analysis.Rmd`: EIG and PPV-range analysis
+* `calibration_decision_analysis.Rmd`: Calibration, utility, DPP, and ANRI
+* `winter_2ht_model.Rmd`: Winter 2-HT model
+* `bayesian_inference.Rmd`: Bayesian posterior inference for lineup measures
+* `msdt_model.Rmd`: Multi-item signal detection theory
+* `sdt_summary_comparisons.Rmd`: SDT comparisons from summary counts
+* `sdt_glm_analysis.Rmd`: SDT via GLM/GLMM
+* `face_similarity.Rmd`: Deep-learning face similarity
 
 All vignettes include:
 * Complete workflows from start to finish

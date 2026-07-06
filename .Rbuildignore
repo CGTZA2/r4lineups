@@ -24,4 +24,11 @@
 ^notes$
 ^doc$
 ^Meta$
-^vignettes/test\.Rmd$
+^AUDIT_FINDINGS\.md$
+^cran-comments\.md$
+^CONTRIBUTING\.md$
+^agents\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
