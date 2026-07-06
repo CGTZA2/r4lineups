@@ -57,6 +57,16 @@ Use the helper:
 estimate_msdt_params(pr_rej_I = 0.25, pr_rej_G = 0.15, lineup_size = 6)
 ```
 
+**Scope of this estimator.** `estimate_msdt_params()` is a method-of-moments
+estimator that is exactly identified from the two rejection rates: the
+culprit-absent rejection rate fixes \(\gamma\), and the culprit-absent vs
+culprit-present rejection gap fixes \(d'\). It is information-lossy — it
+ignores the composition of choices (suspect-ID vs filler-ID) and the spread of
+filler choices, which are the most diagnostic outcomes. If you have the full
+response breakdown (suspect/filler/reject counts for both lineup types),
+prefer the likelihood-based fitter `fit_max_sdt()`, which uses all outcome
+counts, or the 2-HT model (`fit_winter_2ht()`).
+
 # Joint distribution plots
 
 ```{r}

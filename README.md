@@ -117,7 +117,11 @@ For deployment, the app lives at `inst/shiny/r4lineups_app`.
 - `calibration_decision_analysis.Rmd` — calibration, Bayesian curves, utility, DPP, ANRI
 - `information_error_rate_analysis.Rmd` — EIG + PPV‑range
 - `winter_2ht_model.Rmd` — Winter 2‑HT model
-- `face_similarity.Rmd` — face similarity walkthrough (in progress)
+- `model_comparison.Rmd` — comparing 2‑HT, EIG, and full ROC via `compare_models()`
+- `pauc_statistical_comparison.Rmd` — statistical comparison of ROC curves (pAUC)
+- `simulation_power_analysis.Rmd` — data simulation and power analysis
+- `rac_analysis.Rmd` — response time–accuracy (RAC) analysis
+- `face_similarity.Rmd` — face similarity walkthrough (requires optional Python setup; code chunks not evaluated at build time)
 - `sdt_glm_analysis.Rmd` — SDT via GLM/GLMM (old/new recognition)
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from counts
 - `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions

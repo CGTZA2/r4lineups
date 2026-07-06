@@ -162,7 +162,13 @@ result <- make_fullroc(data, order = "diagnosticity")
 - DR ≈ 1.0: Neutral evidence
 - Low DR (e.g., 0.1): Strong evidence of innocence (e.g., high-confidence rejection)
 
-**This is the recommended method** as it's data-driven.
+**Caution — optimistic bias.** Because the ordering is chosen from the *sample*
+diagnosticity ratios, the curve is bowed upward by noise alone: even identical
+target-present and target-absent response distributions produce an AUC slightly
+above 0.5. The bias grows with the number of decision × confidence cells and
+shrinks with sample size. Diagnosticity ordering is useful for exploration, but
+for inference or comparisons across conditions prefer a-priori ordering (below)
+or benchmark against a permutation baseline.
 
 ### A-priori Ordering
 
@@ -180,6 +186,11 @@ Order (from evidence of guilt → evidence of innocence):
 Rationale:
 - High-confidence suspect IDs are strong evidence of guilt
 - Low-confidence filler IDs/rejections are strong evidence of innocence (rare when guilty, common when innocent)
+
+Because the ordering is fixed in advance rather than estimated from the data,
+a-priori ordering does not suffer from the optimistic bias described above and
+is the safer choice for hypothesis tests and between-condition comparisons
+(this is why Smith & Yang, 2020, offer it).
 
 ## Understanding the Output
 
