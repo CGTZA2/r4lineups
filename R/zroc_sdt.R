@@ -66,12 +66,12 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' Research in Memory and Cognition, 4(2), 93-102.
 #'
 #' @examples
-#' \dontrun{
 #' # Simulate data
 #' sim_data <- simulate_lineup_data(
 #'   n_tp = 200, n_ta = 200,
 #'   d_prime = 1.5,
-#'   conf_levels = 5
+#'   conf_levels = 5,
+#'   seed = 123
 #' )
 #'
 #' # Fit equal-variance SDT model
@@ -85,7 +85,6 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' # Fit unequal-variance model
 #' sdt_uv <- fit_sdt_roc(sim_data, lineup_size = 6, model = "unequal_variance")
 #' sdt_uv$variance_ratio
-#' }
 #'
 #' @importFrom stats coef fitted lm residuals
 #' @export

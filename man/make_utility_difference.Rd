@@ -66,6 +66,17 @@ Lampinen et al. (2019) show that ROC dominance does not guarantee utility
 dominance. A procedure with a lower pAUC might have higher utility at
 certain base rates and cost structures.
 }
+\examples{
+\donttest{
+data(lineup_example)
+odd <- seq(1, nrow(lineup_example), by = 2)
+util_diff <- make_utility_difference(lineup_example[odd, ],
+                                     lineup_example[-odd, ],
+                                     base_rate_grid = seq(0.1, 0.9, 0.1))
+util_diff$difference_curve
+}
+
+}
 \references{
 Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
 eyewitness identification practice: Dissociations between receiver operating

@@ -20,6 +20,9 @@ msdt_dprime_from_rej(pr_rej_G, gamma, lineup_size, eps = 1e-06)
 \item{lineup_size}{Lineup size (suspect + fillers), must be >= 2.}
 
 \item{eps}{Small value used to avoid probabilities of 0 or 1.}
+
+\item{gamma}{Decision criterion estimated from culprit-absent rejection
+rates, typically returned by \code{msdt_gamma_from_rej()}.}
 }
 \value{
 A list with gamma and dprime.

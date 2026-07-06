@@ -36,11 +36,10 @@ due to unknown lineup fairness conditions. The effective size estimate typically
 falls within this range and provides a more realistic middle ground.
 }
 \examples{
-\dontrun{
-ppv_range <- ppv_range_by_confidence(lineup_data,
-                                      confidence_bins = c(0, 60, 80, 100))
+data(lineup_example)
+ppv_range <- ppv_range_by_confidence(lineup_example,
+                                     confidence_bins = c(0, 60, 80, 100))
 plot_ppv_range(ppv_range)
-}
 
 }
 \references{

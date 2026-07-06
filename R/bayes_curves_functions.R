@@ -59,6 +59,11 @@
 #' Bayesian information gain, base-rate effect-equivalency curves, and reasonable
 #' suspicion. \emph{Law and Human Behavior, 39}(2), 99-122.
 #'
+#' @examples
+#' data(lineup_example)
+#' bayes <- make_bayes_curves(lineup_example)
+#' bayes$likelihoods
+#'
 #' @export
 #' @import tibble
 make_bayes_curves <- function(data,
@@ -235,6 +240,12 @@ make_bayes_curves <- function(data,
 #' Bayesian information gain, base-rate effect-equivalency curves, and reasonable
 #' suspicion. \emph{Law and Human Behavior, 39}(2), 99-122.
 #'
+#' @examples
+#' data(lineup_example)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
+#' bree <- make_bree_curve(lineup_example[odd, ], lineup_example[-odd, ])
+#' head(bree$bree_curve)
+#'
 #' @export
 #' @import tibble
 make_bree_curve <- function(data_proc_a,
@@ -365,6 +376,11 @@ make_bree_curve <- function(data_proc_a,
 #' the diagonal indicate responses that increase belief in guilt, while curves
 #' below decrease belief in guilt.
 #'
+#' @examples
+#' data(lineup_example)
+#' bayes <- make_bayes_curves(lineup_example)
+#' plot_bayes_prior_posterior(bayes)
+#'
 #' @export
 #' @import ggplot2
 plot_bayes_prior_posterior <- function(bayes_obj,
@@ -419,6 +435,11 @@ plot_bayes_prior_posterior <- function(bayes_obj,
 #' indicate more diagnostic responses. Information gain is maximized when the
 #' prior is near 0.5 (maximum uncertainty).
 #'
+#' @examples
+#' data(lineup_example)
+#' bayes <- make_bayes_curves(lineup_example)
+#' plot_bayes_information_gain(bayes)
+#'
 #' @export
 #' @import ggplot2
 plot_bayes_information_gain <- function(bayes_obj,
@@ -467,6 +488,12 @@ plot_bayes_information_gain <- function(bayes_obj,
 #' Positive delta: Procedure A is more diagnostic (B needs higher base rate to match)
 #' Negative delta: Procedure B is more diagnostic (B needs lower base rate to match)
 #' Zero delta: Procedures are equally diagnostic
+#'
+#' @examples
+#' data(lineup_example)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
+#' bree <- make_bree_curve(lineup_example[odd, ], lineup_example[-odd, ])
+#' plot_bree(bree)
 #'
 #' @export
 #' @import ggplot2

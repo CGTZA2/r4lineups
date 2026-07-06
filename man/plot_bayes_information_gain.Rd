@@ -24,3 +24,9 @@ for each response type across different prior probabilities. Higher values
 indicate more diagnostic responses. Information gain is maximized when the
 prior is near 0.5 (maximum uncertainty).
 }
+\examples{
+data(lineup_example)
+bayes <- make_bayes_curves(lineup_example)
+plot_bayes_information_gain(bayes)
+
+}

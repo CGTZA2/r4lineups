@@ -134,7 +134,20 @@ max_filler_moments <- function(lineup_size,
 #' @param lineup_size Lineup size (suspect + fillers), must be >= 2.
 #' @param eps Small value used to avoid probabilities of 0 or 1.
 #'
+#' @details
+#' This is a \strong{method-of-moments estimator} that is exactly identified
+#' from the two rejection rates alone: Pr(REJ|I) fixes gamma, and the gap
+#' between culprit-absent and culprit-present rejection rates fixes d'. It is
+#' \strong{information-lossy}: it ignores the composition of choices
+#' (suspect-ID vs filler-ID) and the spread of filler choices, which are the
+#' most diagnostic outcomes. If you have the full response breakdown
+#' (suspect/filler/reject counts for both lineup types), prefer the
+#' likelihood-based fitter \code{\link{fit_max_sdt}} or the 2-HT model
+#' (\code{\link{fit_winter_2ht}}), which use all outcome counts.
+#'
 #' @return A list with gamma and dprime.
+#' @seealso \code{\link{fit_max_sdt}} for full-information maximum-likelihood
+#'   fitting; \code{\link{fit_winter_2ht}} for the 2-HT MPT model.
 #' @export
 #'
 #' @examples
@@ -180,6 +193,9 @@ msdt_dprime_from_rej <- function(pr_rej_G, gamma, lineup_size, eps = 1e-6) {
 #' @param show_decision Logical. If TRUE, overlays MAX rule boundaries.
 #'
 #' @return A ggplot object.
+#' @examples
+#' # Joint distribution for a culprit-present 6-person lineup
+#' plot_msdt_joint(dprime = 1.5, gamma = 0.8, lineup_size = 6)
 #' @export
 plot_msdt_joint <- function(dprime,
                             gamma,

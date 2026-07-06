@@ -36,10 +36,9 @@ A horizontal line at the nominal lineup size provides a reference. Values
 below this line indicate bias; values at or above indicate fair lineups.
 }
 \examples{
-\dontrun{
-ppv_range <- ppv_range_by_confidence(lineup_data,
-                                      confidence_bins = c(0, 60, 80, 100))
+data(lineup_example)
+ppv_range <- ppv_range_by_confidence(lineup_example,
+                                     confidence_bins = c(0, 60, 80, 100))
 plot_effective_size_conf(ppv_range)
-}
 
 }

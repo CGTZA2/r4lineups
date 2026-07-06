@@ -32,3 +32,9 @@ The diagonal line represents no update (posterior = prior). Curves above
 the diagonal indicate responses that increase belief in guilt, while curves
 below decrease belief in guilt.
 }
+\examples{
+data(lineup_example)
+bayes <- make_bayes_curves(lineup_example)
+plot_bayes_prior_posterior(bayes)
+
+}

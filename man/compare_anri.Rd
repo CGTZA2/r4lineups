@@ -12,7 +12,8 @@ compare_anri(
   lineup_size = 6,
   n_bootstrap = 1000,
   conf_level = 0.95,
-  seed = NULL
+  seed = NULL,
+  confidence_scale = c("auto", "0-1", "0-100")
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ compare_anri(
 \item{conf_level}{Numeric. Confidence level for CIs (default = 0.95)}
 
 \item{seed}{Integer. Random seed for reproducibility (default = NULL)}
+
+\item{confidence_scale}{How the confidence scale is interpreted: "auto" (default),
+"0-1", or "0-100". See \code{\link{make_calibration_data}}.}
 }
 \value{
 A list containing:
@@ -63,4 +67,23 @@ This function:
   \item Negative difference: Group 2 has higher resolution
   \item CI excludes 0: Statistically significant difference
 }
+}
+\examples{
+\donttest{
+set.seed(123)
+n <- 300
+data <- data.frame(
+  target_present = rep(c(TRUE, FALSE), each = n / 2),
+  identification = sample(c("suspect", "filler", "reject"), n,
+                          replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+  confidence = round(runif(n, 0, 100)),
+  condition = rep(c("sequential", "simultaneous"), times = n / 2)
+)
+cmp <- compare_anri(data, group_var = "condition",
+                    confidence_bins = seq(0, 100, 20),
+                    n_bootstrap = 100, seed = 1)
+cmp$difference
+c(cmp$ci_lower, cmp$ci_upper)
+}
+
 }

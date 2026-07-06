@@ -23,3 +23,12 @@ A ggplot object
 Creates a visual display of the parameter estimates from a fitted 2-HT model,
 with error bars showing 95\% confidence intervals.
 }
+\examples{
+counts <- c(
+  n_tp_suspect = 147, n_tp_filler = 94, n_tp_reject = 141,
+  n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
+)
+fit <- fit_winter_2ht(counts, lineup_size = 6)
+plot_2ht_parameters(fit)
+
+}

@@ -12,6 +12,14 @@
 #'
 #' @return A ggplot object
 #'
+#' @examples
+#' counts <- c(
+#'   n_tp_suspect = 147, n_tp_filler = 94, n_tp_reject = 141,
+#'   n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
+#' )
+#' fit <- fit_winter_2ht(counts, lineup_size = 6)
+#' plot_2ht_parameters(fit)
+#'
 #' @export
 plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci = TRUE) {
 
@@ -62,7 +70,7 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
     p <- p + ggplot2::geom_errorbar(
       ggplot2::aes(ymin = pmax(lower, 0), ymax = pmin(upper, 1)),
       width = 0.2,
-      size = 0.8
+      linewidth = 0.8
     )
   }
 
@@ -88,14 +96,12 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
 #' @return A ggplot object
 #'
 #' @examples
-#' \dontrun{
 #' counts <- c(
 #'   n_tp_suspect = 147, n_tp_filler = 94, n_tp_reject = 141,
 #'   n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
 #' )
 #' fit <- fit_winter_2ht(counts, lineup_size = 6)
 #' plot_2ht_fit(fit)
-#' }
 #'
 #' @export
 plot_2ht_fit <- function(x, ...) {

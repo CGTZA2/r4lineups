@@ -54,3 +54,10 @@ A list with estimates, standard error, z, and p-value.
 Performs a large-sample z-test comparing d' (or criterion or ln beta)
 between two independent conditions using summary counts only.
 }
+\examples{
+cmp <- compare_sdt_summary(hits_a = 70, fas_a = 20, misses_a = 30, cr_a = 80,
+                           hits_b = 60, fas_b = 35, misses_b = 40, cr_b = 65,
+                           metric = "dprime")
+cmp$z
+cmp$p_value
+}

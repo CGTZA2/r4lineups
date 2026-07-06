@@ -30,11 +30,10 @@
 #' \emph{Law and Human Behavior}.
 #'
 #' @examples
-#' \dontrun{
-#' ppv_range <- ppv_range_by_confidence(lineup_data,
-#'                                       confidence_bins = c(0, 60, 80, 100))
+#' data(lineup_example)
+#' ppv_range <- ppv_range_by_confidence(lineup_example,
+#'                                      confidence_bins = c(0, 60, 80, 100))
 #' plot_ppv_range(ppv_range)
-#' }
 #'
 #' @export
 #' @import ggplot2
@@ -49,7 +48,7 @@ plot_ppv_range <- function(ppv_range_obj,
   plot_data <- ppv_range_obj$ppv_range_data
 
   # Create numeric x-axis
-  plot_data$conf_numeric <- 1:nrow(plot_data)
+  plot_data$conf_numeric <- seq_len(nrow(plot_data))
 
   # Reshape for ggplot2
   plot_data_long <- data.frame(
@@ -143,11 +142,10 @@ plot_ppv_range <- function(ppv_range_obj,
 #' below this line indicate bias; values at or above indicate fair lineups.
 #'
 #' @examples
-#' \dontrun{
-#' ppv_range <- ppv_range_by_confidence(lineup_data,
-#'                                       confidence_bins = c(0, 60, 80, 100))
+#' data(lineup_example)
+#' ppv_range <- ppv_range_by_confidence(lineup_example,
+#'                                      confidence_bins = c(0, 60, 80, 100))
 #' plot_effective_size_conf(ppv_range)
-#' }
 #'
 #' @export
 #' @import ggplot2
@@ -172,7 +170,7 @@ plot_effective_size_conf <- function(ppv_range_obj,
   }
 
   # Create numeric x-axis
-  plot_data$conf_numeric <- 1:nrow(plot_data)
+  plot_data$conf_numeric <- seq_len(nrow(plot_data))
 
   # Base plot
   p <- ggplot(plot_data, aes(x = conf_numeric, y = effective_size))
@@ -238,11 +236,10 @@ plot_effective_size_conf <- function(ppv_range_obj,
 #' (better calibration).
 #'
 #' @examples
-#' \dontrun{
-#' ppv_range <- ppv_range_by_confidence(lineup_data,
-#'                                       confidence_bins = c(0, 60, 80, 100))
+#' data(lineup_example)
+#' ppv_range <- ppv_range_by_confidence(lineup_example,
+#'                                      confidence_bins = c(0, 60, 80, 100))
 #' plot_error_rate_conf(ppv_range)
-#' }
 #'
 #' @export
 #' @import ggplot2
@@ -263,7 +260,7 @@ plot_error_rate_conf <- function(ppv_range_obj, show_points = TRUE) {
   }
 
   # Create numeric x-axis
-  plot_data$conf_numeric <- 1:nrow(plot_data)
+  plot_data$conf_numeric <- seq_len(nrow(plot_data))
 
   # Base plot
   p <- ggplot(plot_data, aes(x = conf_numeric, y = error_rate)) +
@@ -313,17 +310,13 @@ plot_error_rate_conf <- function(ppv_range_obj, show_points = TRUE) {
 #'   }
 #'
 #' @examples
-#' \dontrun{
-#' # Basic usage
-#' result <- make_ppv_range(lineup_data)
-#'
+#' data(lineup_example)
 #' # With confidence binning
-#' result <- make_ppv_range(lineup_data, confidence_bins = c(0, 60, 80, 100))
+#' result <- make_ppv_range(lineup_example, confidence_bins = c(0, 60, 80, 100))
 #'
 #' # Access plots
 #' result$plot_ppv_range
 #' result$plot_effective_size
-#' }
 #'
 #' @export
 make_ppv_range <- function(data,

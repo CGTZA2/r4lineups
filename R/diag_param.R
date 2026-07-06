@@ -101,7 +101,7 @@ diag_param <- function(lineup_pres_list, lineup_abs_list, pos_list, k){
   diagdf1 <- as.data.frame(matrix(ncol = 2,
                                   nrow = length(lineup_pres_list)))
 
-  for (i in 1:length(lineup_pres_list)){
+  for (i in seq_along(lineup_pres_list)){
     diagdf1[i,1]= sum(lineup_pres_list[[i]] == pos_list[[i]])
     diagdf1[i,2] = sum(lineup_pres_list[[i]] != pos_list[[i]])
 
@@ -110,7 +110,7 @@ diag_param <- function(lineup_pres_list, lineup_abs_list, pos_list, k){
 
   diagdf2 <- as.data.frame(matrix(ncol = 2,
                                   nrow = length(lineup_abs_list)))
-  for (i in 1:length(lineup_abs_list)){
+  for (i in seq_along(lineup_abs_list)){
     diagdf2[i,1]= sum(lineup_abs_list[[i]] == pos_list[[i]])
     diagdf2[i,2] = sum(lineup_abs_list[[i]] != pos_list[[i]])
 

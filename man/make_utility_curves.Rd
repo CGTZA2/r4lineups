@@ -85,6 +85,12 @@ Lampinen et al. (2019) show that comparing procedures by ROC curves alone
 can be misleading. Utility analysis incorporates base rates and the relative
 costs of errors, providing a more complete evaluation.
 }
+\examples{
+data(lineup_example)
+util <- make_utility_curves(lineup_example)
+util$max_utility
+
+}
 \references{
 Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
 eyewitness identification practice: Dissociations between receiver operating

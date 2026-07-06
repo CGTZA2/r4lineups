@@ -63,14 +63,17 @@
 #' \emph{Perspectives on Psychological Science, 7}(3), 275-278.
 #'
 #' @examples
-#' \dontrun{
-#' # Compare simultaneous vs. sequential lineups
+#' \donttest{
+#' # Compare two lineup procedures (halves of the example data)
+#' data(lineup_example)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
 #' comparison <- compare_pauc(
-#'   simultaneous_data,
-#'   sequential_data,
-#'   label1 = "Simultaneous",
-#'   label2 = "Sequential",
-#'   n_bootstrap = 2000
+#'   lineup_example[odd, ],
+#'   lineup_example[-odd, ],
+#'   label1 = "Procedure A",
+#'   label2 = "Procedure B",
+#'   n_bootstrap = 200,
+#'   seed = 123
 #' )
 #'
 #' print(comparison)
@@ -421,7 +424,7 @@ plot.pauc_comparison <- function(x, show_cutoff = TRUE, show_test_results = TRUE
   # Create base plot
   p <- ggplot(combined_data, aes(x = false_id_rate, y = correct_id_rate,
                                   color = condition, fill = condition)) +
-    geom_line(size = 1.2) +
+    geom_line(linewidth = 1.2) +
     geom_point(shape = 21, size = 3, color = "black", aes(fill = condition)) +
     geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
     theme_bw(base_size = 14) +

@@ -4,7 +4,13 @@
 \alias{compute_anri}
 \title{Compute ANRI (Adjusted Normalized Resolution Index)}
 \usage{
-compute_anri(data, confidence_bins, choosers_only = TRUE, lineup_size = 6)
+compute_anri(
+  data,
+  confidence_bins,
+  choosers_only = TRUE,
+  lineup_size = 6,
+  confidence_scale = c("auto", "0-1", "0-100")
+)
 }
 \arguments{
 \item{data}{A dataframe with the following columns:
@@ -19,6 +25,9 @@ compute_anri(data, confidence_bins, choosers_only = TRUE, lineup_size = 6)
 \item{choosers_only}{Logical. Whether to analyze only suspect IDs (default = TRUE)}
 
 \item{lineup_size}{Integer. Lineup size (default = 6)}
+
+\item{confidence_scale}{How the confidence scale is interpreted: "auto" (default),
+"0-1", or "0-100". See \code{\link{make_calibration_data}}.}
 }
 \value{
 A list containing:
@@ -62,6 +71,19 @@ Where:
 
 ANRI provides a less biased estimate of the population resolution, making it
 more appropriate for hypothesis testing and group comparisons.
+}
+\examples{
+set.seed(123)
+n <- 200
+data <- data.frame(
+  target_present = rep(c(TRUE, FALSE), each = n / 2),
+  identification = sample(c("suspect", "filler", "reject"), n,
+                          replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+  confidence = round(runif(n, 0, 100))
+)
+result <- compute_anri(data, confidence_bins = seq(0, 100, 20))
+result$anri
+
 }
 \references{
 Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of discrimination

@@ -33,3 +33,9 @@ The plot shows:
 
 A smaller shaded area (lower DPP) indicates better performance.
 }
+\examples{
+data(lineup_example)
+dpp <- make_dpp(lineup_example)
+plot_dpp(dpp)
+
+}

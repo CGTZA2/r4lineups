@@ -31,3 +31,9 @@ Creates a histogram or density plot showing the distribution of
 face similarities, useful for understanding the range of similarities
 in a lineup or database.
 }
+\examples{
+set.seed(123)
+similarities <- rbeta(100, 2, 5)
+plot_similarity_distribution(similarities, threshold = 0.6)
+
+}

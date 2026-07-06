@@ -37,9 +37,13 @@ Main wrapper function to compute and plot utility comparison between
 two lineup procedures.
 }
 \examples{
-\dontrun{
-comparison <- compare_utility(sequential_data, simultaneous_data,
-                             utility_type = "max")
+\donttest{
+data(lineup_example)
+odd <- seq(1, nrow(lineup_example), by = 2)
+comparison <- compare_utility(lineup_example[odd, ],
+                              lineup_example[-odd, ],
+                              base_rate_grid = seq(0.1, 0.9, 0.1),
+                              utility_type = "max")
 print(comparison)
 }
 

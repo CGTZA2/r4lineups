@@ -32,14 +32,11 @@ Generate example lineup identification data in standardized format.
 Useful for testing, demonstrations, and learning r4lineups functions.
 }
 \examples{
-\dontrun{
 # Basic example data
-example_data <- create_example_lineup_data(n_trials = 200)
+example_data <- create_example_lineup_data(n_trials = 200, seed = 123)
 print(example_data)
 
 # Use in analysis
 roc <- make_roc(example_data, lineup_size = 6)
-cac <- make_cac(example_data, lineup_size = 6)
-}
 
 }

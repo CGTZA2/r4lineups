@@ -49,6 +49,13 @@ utils::globalVariables("time_numeric")
 #' pyWitness 1.0: A python eyewitness identification analysis toolkit.
 #' \emph{Behavior Research Methods, 56}, 1533-1550.
 #'
+#' @examples
+#' data <- create_example_lineup_data(n_trials = 200,
+#'                                    include_response_time = TRUE,
+#'                                    seed = 123)
+#' rac <- make_racdata(data, time_bins = c(0, 4000, 8000, 12000, 20000))
+#' rac$rac_data
+#'
 #' @export
 #' @import tibble
 make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
@@ -184,6 +191,13 @@ make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
 #'
 #' @return A ggplot2 object
 #'
+#' @examples
+#' data <- create_example_lineup_data(n_trials = 200,
+#'                                    include_response_time = TRUE,
+#'                                    seed = 123)
+#' rac <- make_racdata(data, time_bins = c(0, 4000, 8000, 12000, 20000))
+#' make_rac_gg(rac)
+#'
 #' @export
 #' @import ggplot2
 make_rac_gg <- function(racobj_list, show_errorbars = TRUE, show_n = TRUE,
@@ -192,15 +206,15 @@ make_rac_gg <- function(racobj_list, show_errorbars = TRUE, show_n = TRUE,
   rac_data <- racobj_list$rac_data
 
   # Create numeric x-axis for plotting
-  rac_data$time_numeric <- 1:nrow(rac_data)
+  rac_data$time_numeric <- seq_len(nrow(rac_data))
 
   # Base plot
   p <- ggplot(rac_data, aes(x = time_numeric, y = accuracy)) +
-    geom_line(size = 1, color = "steelblue") +
+    geom_line(linewidth = 1, color = "steelblue") +
     geom_point(size = 3, color = "steelblue") +
     theme_bw(base_size = 14) +
     scale_x_continuous(
-      breaks = 1:nrow(rac_data),
+      breaks = seq_len(nrow(rac_data)),
       labels = rac_data$response_time
     ) +
     scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.1)) +
@@ -250,13 +264,14 @@ make_rac_gg <- function(racobj_list, show_errorbars = TRUE, show_n = TRUE,
 #' @return A list containing RAC data and plot
 #'
 #' @examples
-#' \dontrun{
 #' # Example with binned response times (in milliseconds)
+#' lineup_data <- create_example_lineup_data(n_trials = 200,
+#'                                           include_response_time = TRUE,
+#'                                           seed = 123)
 #' rac_result <- make_rac(lineup_data,
-#'                        time_bins = c(0, 5000, 10000, 15000, 20000, 99999))
+#'                        time_bins = c(0, 5000, 10000, 15000, 20000))
 #' print(rac_result)
 #' rac_result$plot
-#' }
 #'
 #' @export
 make_rac <- function(data, lineup_size = 6, time_bins = NULL,

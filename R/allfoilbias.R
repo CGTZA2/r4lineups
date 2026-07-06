@@ -21,7 +21,7 @@ allfoilbias <- function (lineup_table, target_pos, k){
     linedf <- as.data.frame(matrix(ncol = length(lineup_table),
                                    nrow = length(lineup_table)))
     linebias <- NULL
-    for (i in 1:length(lineup_table)){
+    for (i in seq_along(lineup_table)){
         linebias[i] = lineup_prop_tab(lineup_table,target_pos)
         linedf[,i] = rot_vector(lineup_table)
         linetab = linedf[,i]

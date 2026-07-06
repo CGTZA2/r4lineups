@@ -25,3 +25,14 @@ base rates. Regions above zero favor Procedure A, while regions below zero
 favor Procedure B. Crossover points indicate base rates where procedures
 are equivalent.
 }
+\examples{
+\donttest{
+data(lineup_example)
+odd <- seq(1, nrow(lineup_example), by = 2)
+util_diff <- make_utility_difference(lineup_example[odd, ],
+                                     lineup_example[-odd, ],
+                                     base_rate_grid = seq(0.1, 0.9, 0.1))
+plot_utility_difference(util_diff)
+}
+
+}

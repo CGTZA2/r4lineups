@@ -11,7 +11,8 @@ calibration_bayes(
   lineup_size = 6,
   alpha = 0.5,
   S = 10000,
-  credible_mass = 0.95
+  credible_mass = 0.95,
+  confidence_scale = c("auto", "0-1", "0-100")
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ Default 0.5 (Jeffreys). Named shortcuts: \code{"jeffreys"}, \code{"uniform"},
 \item{S}{Number of posterior draws per bin. Default 10000.}
 
 \item{credible_mass}{Width of equal-tailed credible intervals. Default 0.95.}
+
+\item{confidence_scale}{How the confidence scale is interpreted: "auto" (default),
+"0-1", or "0-100". See \code{\link{make_calibration_data}}.}
 }
 \value{
 An object of class \code{"calibration_bayes"} containing:

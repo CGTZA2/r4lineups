@@ -5,19 +5,23 @@
 #'@param sumlineup Number of members in a lineup
 #'@references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
+#'@examples
+#' # Upper CI bounds for the choice proportions of three lineup members,
+#' # based on 20 mock witnesses
+#' allfoil_cihigh(c(0.5, 0.3, 0.2), 20)
 #'@export
 
 allfoil_cihigh <- function(linetabprops, sumlineup){
-    z <- 1:length(linetabprops)
-    for (i in 1:length(linetabprops)){
+    z <- seq_along(linetabprops)
+    for (i in seq_along(linetabprops)){
         z[i] <-  boot0975(linetabprops[i],sumlineup)
     }
     z
 }
 
 allfoil_cilow <- function(linetabprops, sumlineup){
-    z <- 1:length(linetabprops)
-    for (i in 1:length(linetabprops)){
+    z <- seq_along(linetabprops)
+    for (i in seq_along(linetabprops)){
         z[i] <-  boot025(linetabprops[i],sumlineup)
     }
     z

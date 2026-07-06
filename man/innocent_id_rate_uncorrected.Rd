@@ -23,6 +23,11 @@ This represents the "worst case" estimate, treating every mistaken ID as
 an innocent-suspect identification. Provides an upper bound on innocent-suspect
 risk. The formula is simply: innocent_id_rate = error_rate
 }
+\examples{
+# Worst case: all mistaken IDs treated as innocent-suspect IDs
+innocent_id_rate_uncorrected(0.30)
+
+}
 \references{
 Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
 eyewitness error rates in fair and biased lineups.

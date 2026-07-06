@@ -345,6 +345,11 @@ display_lineup <- function(target_path,
 #'
 #' @return A ggplot2 object.
 #'
+#' @examples
+#' set.seed(123)
+#' similarities <- rbeta(100, 2, 5)
+#' plot_similarity_distribution(similarities, threshold = 0.6)
+#'
 #' @export
 plot_similarity_distribution <- function(similarities,
                                          type = c("histogram", "density"),

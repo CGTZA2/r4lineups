@@ -43,17 +43,16 @@ Conducts power analysis by simulating data across different sample sizes
 and computing a statistic of interest (e.g., pAUC, d').
 }
 \examples{
-\dontrun{
+\donttest{
 # Power to detect d' = 1.5 with pAUC
 power_res <- simulate_power_analysis(
-  sample_sizes = c(50, 100, 200, 500),
+  sample_sizes = c(50, 100),
   d_prime = 1.5,
-  n_simulations = 500,
+  n_simulations = 100,
   conf_levels = 5,
   seed = 123
 )
 print(power_res)
-plot(power_res)
 }
 
 }

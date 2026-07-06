@@ -9,7 +9,8 @@ make_calibration_by_condition(
   condition_vars,
   confidence_bins = NULL,
   choosers_only = TRUE,
-  lineup_size = 6
+  lineup_size = 6,
+  confidence_scale = c("auto", "0-1", "0-100")
 )
 }
 \arguments{
@@ -24,6 +25,9 @@ plus one or more condition variables}
 \item{choosers_only}{Logical. Whether to analyze only suspect IDs (default = TRUE)}
 
 \item{lineup_size}{Integer. Number of people in lineup (default = 6)}
+
+\item{confidence_scale}{How the confidence scale is interpreted: "auto" (default),
+"0-1", or "0-100". See \code{\link{make_calibration_data}}.}
 }
 \value{
 A list containing:
@@ -42,6 +46,21 @@ This function splits the data by the specified condition variables and computes
 calibration statistics separately for each combination. Useful for examining
 questions like "Does calibration improve with biased vs unbiased instructions?"
 or "How does foil similarity affect over/underconfidence?"
+}
+\examples{
+set.seed(123)
+n <- 300
+data <- data.frame(
+  target_present = rep(c(TRUE, FALSE), each = n / 2),
+  identification = sample(c("suspect", "filler", "reject"), n,
+                          replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+  confidence = round(runif(n, 0, 100)),
+  instruction = rep(c("biased", "unbiased"), times = n / 2)
+)
+by_cond <- make_calibration_by_condition(data, condition_vars = "instruction",
+                                         confidence_bins = c(0, 60, 80, 100))
+by_cond$condition_summary
+
 }
 \references{
 Brewer, N., & Wells, G. L. (2006). The confidence-accuracy relationship in

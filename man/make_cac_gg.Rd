@@ -20,3 +20,9 @@ A ggplot2 object
 Creates a ggplot2 visualization of CAC data showing the relationship
 between confidence and accuracy.
 }
+\examples{
+data(lineup_example)
+cac <- make_cacdata(lineup_example, confidence_bins = c(0, 60, 80, 100))
+make_cac_gg(cac)
+
+}

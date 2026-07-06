@@ -66,11 +66,23 @@
 #' can be misleading. Utility analysis incorporates base rates and the relative
 #' costs of errors, providing a more complete evaluation.
 #'
+#' \strong{Note on the false-alarm estimate:} the innocent-suspect ID rate is
+#' estimated as direct innocent-suspect picks \emph{plus} filler picks divided
+#' by lineup size. This hybrid is strictly appropriate for designs with no
+#' designated innocent suspect; when target-absent lineups \emph{do} contain a
+#' designated innocent suspect, it double counts (direct picks plus a
+#' filler-derived estimate) and slightly overstates the false-alarm rate.
+#'
 #' @references
 #' Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
 #' eyewitness identification practice: Dissociations between receiver operating
 #' characteristic analysis and expected utility analysis. \emph{Law and Human
 #' Behavior, 43}(1), 26-44.
+#'
+#' @examples
+#' data(lineup_example)
+#' util <- make_utility_curves(lineup_example)
+#' util$max_utility
 #'
 #' @export
 #' @import tibble
@@ -248,6 +260,16 @@ make_utility_curves <- function(data,
 #' characteristic analysis and expected utility analysis. \emph{Law and Human
 #' Behavior, 43}(1), 26-44.
 #'
+#' @examples
+#' \donttest{
+#' data(lineup_example)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
+#' util_diff <- make_utility_difference(lineup_example[odd, ],
+#'                                      lineup_example[-odd, ],
+#'                                      base_rate_grid = seq(0.1, 0.9, 0.1))
+#' util_diff$difference_curve
+#' }
+#'
 #' @export
 #' @import tibble
 make_utility_difference <- function(data_proc_a,
@@ -344,6 +366,11 @@ make_utility_difference <- function(data_proc_a,
 #' rates. The optimal criterion maximizes expected utility given the base rate
 #' and cost structure.
 #'
+#' @examples
+#' data(lineup_example)
+#' util <- make_utility_curves(lineup_example)
+#' plot_utility_curves(util)
+#'
 #' @export
 #' @import ggplot2
 plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE) {
@@ -408,6 +435,16 @@ plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE
 #' base rates. Regions above zero favor Procedure A, while regions below zero
 #' favor Procedure B. Crossover points indicate base rates where procedures
 #' are equivalent.
+#'
+#' @examples
+#' \donttest{
+#' data(lineup_example)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
+#' util_diff <- make_utility_difference(lineup_example[odd, ],
+#'                                      lineup_example[-odd, ],
+#'                                      base_rate_grid = seq(0.1, 0.9, 0.1))
+#' plot_utility_difference(util_diff)
+#' }
 #'
 #' @export
 #' @import ggplot2
@@ -474,9 +511,13 @@ plot_utility_difference <- function(util_diff_obj, show_crossover = TRUE) {
 #' @return A list containing difference curve data and plot
 #'
 #' @examples
-#' \dontrun{
-#' comparison <- compare_utility(sequential_data, simultaneous_data,
-#'                              utility_type = "max")
+#' \donttest{
+#' data(lineup_example)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
+#' comparison <- compare_utility(lineup_example[odd, ],
+#'                               lineup_example[-odd, ],
+#'                               base_rate_grid = seq(0.1, 0.9, 0.1),
+#'                               utility_type = "max")
 #' print(comparison)
 #' }
 #'

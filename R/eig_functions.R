@@ -58,6 +58,11 @@ entropy <- function(p, base = 2) {
 #' eyewitness identification decision processes using quantitative predictions
 #' of the expected information gain. \emph{Psychological Review}.
 #'
+#' @examples
+#' data(lineup_example)
+#' eig_data <- make_eig_data(lineup_example, confidence_bins = c(0, 60, 80, 100))
+#' eig_data$response_data
+#'
 #' @export
 #' @import tibble
 make_eig_data <- function(data, confidence_bins = NULL) {
@@ -190,13 +195,12 @@ make_eig_data <- function(data, confidence_bins = NULL) {
 #' of the expected information gain. \emph{Psychological Review}.
 #'
 #' @examples
-#' \dontrun{
 #' # Compute EIG with binned confidence
-#' eig_result <- compute_eig(lineup_data,
+#' data(lineup_example)
+#' eig_result <- compute_eig(lineup_example,
 #'                           prior_guilt = 0.5,
 #'                           confidence_bins = c(0, 60, 80, 100))
 #' print(eig_result)
-#' }
 #'
 #' @export
 compute_eig <- function(eig_data, prior_guilt = 0.5, confidence_bins = NULL) {
@@ -225,7 +229,7 @@ compute_eig <- function(eig_data, prior_guilt = 0.5, confidence_bins = NULL) {
   response_data$information_gain <- NA
 
   # For each response category
-  for (i in 1:nrow(response_data)) {
+  for (i in seq_len(nrow(response_data))) {
     p_x_g <- response_data$p_x_given_guilty[i]
     p_x_i <- response_data$p_x_given_innocent[i]
 
@@ -343,7 +347,7 @@ summary.lineup_eig <- function(object, ...) {
   # Most informative response categories
   cat("Most informative responses:\n")
   top_3 <- utils::head(object$response_data, 3)
-  for (i in 1:nrow(top_3)) {
+  for (i in seq_len(nrow(top_3))) {
     cat("  ", i, ". ", top_3$response[i],
         " (IG = ", round(top_3$information_gain[i], 4),
         " bits, p = ", round(top_3$p_response[i], 3), ")\n", sep = "")
@@ -371,6 +375,11 @@ summary.lineup_eig <- function(object, ...) {
 #' category. Response categories are ordered by IG (descending), with the most
 #' informative responses shown first. Colors distinguish different identification
 #' decisions (suspect/filler/reject).
+#'
+#' @examples
+#' data(lineup_example)
+#' eig_result <- compute_eig(lineup_example, confidence_bins = c(0, 60, 80, 100))
+#' plot_eig(eig_result)
 #'
 #' @export
 #' @import ggplot2
@@ -447,6 +456,11 @@ plot_eig <- function(eig_obj, max_responses = 15, color_by = "identification") {
 #' for each response category. The prior probability is shown as a dashed line
 #' for reference. Response categories that push beliefs toward guilt (posterior > prior)
 #' are colored red, while those pushing toward innocence are colored blue.
+#'
+#' @examples
+#' data(lineup_example)
+#' eig_result <- compute_eig(lineup_example, confidence_bins = c(0, 60, 80, 100))
+#' plot_eig_posteriors(eig_result)
 #'
 #' @export
 #' @import ggplot2
@@ -533,17 +547,13 @@ plot_eig_posteriors <- function(eig_obj, max_responses = 15, show_prior = TRUE) 
 #'   }
 #'
 #' @examples
-#' \dontrun{
-#' # Basic usage
-#' result <- make_eig(lineup_data)
-#'
+#' data(lineup_example)
 #' # With confidence binning
-#' result <- make_eig(lineup_data, confidence_bins = c(0, 60, 80, 100))
+#' result <- make_eig(lineup_example, confidence_bins = c(0, 60, 80, 100))
 #'
 #' # Access plots
 #' result$plot_ig
 #' result$plot_posteriors
-#' }
 #'
 #' @export
 make_eig <- function(data, prior_guilt = 0.5, confidence_bins = NULL,

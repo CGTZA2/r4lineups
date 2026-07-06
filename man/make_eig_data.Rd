@@ -38,6 +38,12 @@ Response categories are defined as combinations of identification decision
 the frequency of each response category separately for target-present
 (guilty) and target-absent (innocent) lineups.
 }
+\examples{
+data(lineup_example)
+eig_data <- make_eig_data(lineup_example, confidence_bins = c(0, 60, 80, 100))
+eig_data$response_data
+
+}
 \references{
 Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
 conclusions via the data they should have produced: A priori comparison of

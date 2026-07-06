@@ -85,7 +85,7 @@
 #' print(result2)
 #'
 #' # Plot the posterior
-#' \dontrun{plot(result)}
+#' plot(result)
 #'
 #' @importFrom stats rgamma quantile median
 #' @export
@@ -288,7 +288,7 @@ utils::globalVariables(c("E_prime", "delta"))
 #'
 #' result <- esize_T_bayes_compare(tab_a, tab_b)
 #' print(result)
-#' \dontrun{plot(result)}
+#' plot(result)
 #'
 #' @importFrom stats quantile median
 #' @export

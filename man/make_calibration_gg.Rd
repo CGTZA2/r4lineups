@@ -33,3 +33,16 @@ for each confidence bin. Points on the diagonal indicate perfect calibration.
 Points above the diagonal indicate underconfidence, while points below indicate
 overconfidence.
 }
+\examples{
+set.seed(123)
+n <- 200
+data <- data.frame(
+  target_present = rep(c(TRUE, FALSE), each = n / 2),
+  identification = sample(c("suspect", "filler", "reject"), n,
+                          replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+  confidence = round(runif(n, 0, 100))
+)
+cal <- make_calibration_data(data, confidence_bins = c(0, 60, 80, 100))
+make_calibration_gg(cal)
+
+}

@@ -11,7 +11,8 @@ bootstrap_anri(
   lineup_size = 6,
   n_bootstrap = 1000,
   conf_level = 0.95,
-  seed = NULL
+  seed = NULL,
+  confidence_scale = c("auto", "0-1", "0-100")
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ bootstrap_anri(
 \item{conf_level}{Numeric. Confidence level for CIs (default = 0.95)}
 
 \item{seed}{Integer. Random seed for reproducibility (default = NULL)}
+
+\item{confidence_scale}{How the confidence scale is interpreted: "auto" (default),
+"0-1", or "0-100". See \code{\link{make_calibration_data}}.}
 }
 \value{
 A list containing:
@@ -53,6 +57,22 @@ Bootstrap resampling procedure:
 
 The percentile method uses the empirical quantiles of the bootstrap
 distribution. For a 95% CI, we use the 2.5th and 97.5th percentiles.
+}
+\examples{
+\donttest{
+set.seed(123)
+n <- 200
+data <- data.frame(
+  target_present = rep(c(TRUE, FALSE), each = n / 2),
+  identification = sample(c("suspect", "filler", "reject"), n,
+                          replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+  confidence = round(runif(n, 0, 100))
+)
+boot_result <- bootstrap_anri(data, confidence_bins = seq(0, 100, 20),
+                              n_bootstrap = 200, seed = 1)
+c(boot_result$ci_lower, boot_result$ci_upper)
+}
+
 }
 \references{
 Efron, B., & Tibshirani, R. J. (1994). \emph{An Introduction to the Bootstrap}.

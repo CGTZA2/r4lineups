@@ -8,7 +8,8 @@ make_calibration_data(
   data,
   confidence_bins = NULL,
   choosers_only = TRUE,
-  lineup_size = 6
+  lineup_size = 6,
+  confidence_scale = c("auto", "0-1", "0-100")
 )
 }
 \arguments{
@@ -28,6 +29,10 @@ If FALSE, analyze all responses (including fillers and rejections).}
 
 \item{lineup_size}{Integer. Number of people in lineup (default = 6).
 Used for estimating incorrect suspect IDs from filler choices in target-absent lineups.}
+
+\item{confidence_scale}{How the confidence scale is interpreted: "auto" (default;
+max <= 1 treated as 0-1, otherwise as 0-100, with a warning for ambiguous
+Likert/0-10 scales), "0-1", or "0-100". C and O/U require a 0-1/0-100 probability scale.}
 }
 \value{
 A list containing:
@@ -65,6 +70,20 @@ correct from incorrect responses:
 When \code{choosers_only = TRUE}, only suspect identifications are included (standard
 for eyewitness calibration analysis). When \code{choosers_only = FALSE}, all responses
 are included with fillers and rejections counted as incorrect.
+}
+\examples{
+set.seed(123)
+n <- 200
+data <- data.frame(
+  target_present = rep(c(TRUE, FALSE), each = n / 2),
+  identification = sample(c("suspect", "filler", "reject"), n,
+                          replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+  confidence = round(runif(n, 0, 100))
+)
+cal <- make_calibration_data(data, confidence_bins = c(0, 60, 80, 100))
+cal$C
+cal$calibration_data
+
 }
 \references{
 Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity

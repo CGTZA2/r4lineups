@@ -68,6 +68,12 @@ The perfect ROC is constrained to the same FA range as the observed data,
 making DPP a fair measure even when procedures produce different confidence
 distributions (and thus different ROC truncation points).
 }
+\examples{
+data(lineup_example)
+dpp <- make_dpp(lineup_example)
+dpp$dpp
+
+}
 \references{
 Smith, A. M., Wilford, M. M., Quigley-McBride, A., & Wells, G. L. (2019).
 Mistaken eyewitness identification rates increase when either witnessing or

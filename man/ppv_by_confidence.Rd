@@ -61,17 +61,16 @@ Different correction methods estimate innocent_suspect_IDs differently:
 }
 }
 \examples{
-\dontrun{
+data(lineup_example)
 # Nominal correction (assumes fair lineup)
-ppv_result <- ppv_by_confidence(lineup_data,
-                                 correction = "nominal",
-                                 confidence_bins = c(0, 60, 80, 100))
+ppv_result <- ppv_by_confidence(lineup_example,
+                                correction = "nominal",
+                                confidence_bins = c(0, 60, 80, 100))
 
 # Effective size correction (accounts for bias)
-ppv_result <- ppv_by_confidence(lineup_data,
-                                 correction = "effective",
-                                 confidence_bins = c(0, 60, 80, 100))
-}
+ppv_result <- ppv_by_confidence(lineup_example,
+                                correction = "effective",
+                                confidence_bins = c(0, 60, 80, 100))
 
 }
 \references{

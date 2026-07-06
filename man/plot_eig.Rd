@@ -28,3 +28,9 @@ category. Response categories are ordered by IG (descending), with the most
 informative responses shown first. Colors distinguish different identification
 decisions (suspect/filler/reject).
 }
+\examples{
+data(lineup_example)
+eig_result <- compute_eig(lineup_example, confidence_bins = c(0, 60, 80, 100))
+plot_eig(eig_result)
+
+}

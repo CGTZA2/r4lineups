@@ -70,21 +70,13 @@ the ability to distinguish guilty from innocent suspects using ALL available
 eyewitness evidence.
 }
 \examples{
-\dontrun{
-# Example data structure:
-lineup_data <- data.frame(
-  target_present = c(rep(TRUE, 50), rep(FALSE, 50)),
-  identification = sample(c("suspect", "filler", "reject"), 100, replace = TRUE),
-  confidence = sample(c(20, 40, 60, 80, 100), 100, replace = TRUE)
-)
-
+data(lineup_example)
 # Compute full ROC with diagnosticity ordering
-fullroc_result <- make_fullroc_data(lineup_data)
+fullroc_result <- make_fullroc_data(lineup_example)
 print(fullroc_result$auc)
 
 # Compute full ROC with specified confidence bins
-fullroc_binned <- make_fullroc_data(lineup_data, conf_bins = c(0, 60, 80, 100))
-}
+fullroc_binned <- make_fullroc_data(lineup_example, conf_bins = c(0, 60, 80, 100))
 
 }
 \references{

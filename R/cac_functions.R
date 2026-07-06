@@ -46,6 +46,11 @@
 #' from the low confidence-accuracy correlation. \emph{Journal of Experimental
 #' Psychology: Learning, Memory, and Cognition, 22}(5), 1304-1316.
 #'
+#' @examples
+#' data(lineup_example)
+#' cac <- make_cacdata(lineup_example, confidence_bins = c(0, 60, 80, 100))
+#' cac$cac_data
+#'
 #' @export
 #' @import tibble
 make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
@@ -172,6 +177,11 @@ make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
 #'
 #' @return A ggplot2 object
 #'
+#' @examples
+#' data(lineup_example)
+#' cac <- make_cacdata(lineup_example, confidence_bins = c(0, 60, 80, 100))
+#' make_cac_gg(cac)
+#'
 #' @export
 #' @import ggplot2
 make_cac_gg <- function(cacobj_list, show_errorbars = TRUE, show_n = TRUE) {
@@ -179,15 +189,15 @@ make_cac_gg <- function(cacobj_list, show_errorbars = TRUE, show_n = TRUE) {
   cac_data <- cacobj_list$cac_data
 
   # Create numeric x-axis for plotting
-  cac_data$conf_numeric <- 1:nrow(cac_data)
+  cac_data$conf_numeric <- seq_len(nrow(cac_data))
 
   # Base plot
   p <- ggplot(cac_data, aes(x = conf_numeric, y = accuracy)) +
-    geom_line(size = 1, color = "darkgreen") +
+    geom_line(linewidth = 1, color = "darkgreen") +
     geom_point(size = 3, color = "darkgreen") +
     theme_bw(base_size = 14) +
     scale_x_continuous(
-      breaks = 1:nrow(cac_data),
+      breaks = seq_len(nrow(cac_data)),
       labels = cac_data$confidence
     ) +
     scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.1)) +
@@ -236,11 +246,9 @@ make_cac_gg <- function(cacobj_list, show_errorbars = TRUE, show_n = TRUE) {
 #' @return A list containing CAC data and plot
 #'
 #' @examples
-#' \dontrun{
-#' # Example with binned confidence
-#' cac_result <- make_cac(lineup_data, confidence_bins = c(0, 60, 80, 100))
+#' data(lineup_example)
+#' cac_result <- make_cac(lineup_example, confidence_bins = c(0, 60, 80, 100))
 #' print(cac_result)
-#' }
 #'
 #' @export
 make_cac <- function(data, lineup_size = 6, confidence_bins = NULL,

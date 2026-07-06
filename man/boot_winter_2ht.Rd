@@ -61,7 +61,7 @@ Two types of confidence intervals are available:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 counts <- c(
   n_tp_suspect = 147, n_tp_filler = 94, n_tp_reject = 141,
   n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
@@ -69,7 +69,7 @@ counts <- c(
 fit <- fit_winter_2ht(counts, lineup_size = 6)
 
 # Bootstrap CIs
-boot_fit <- boot_winter_2ht(fit, nboot = 500)
+boot_fit <- boot_winter_2ht(fit, nboot = 200, seed = 123)
 print(boot_fit)
 plot(boot_fit)
 }

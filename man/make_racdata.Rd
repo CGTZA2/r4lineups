@@ -47,6 +47,14 @@ RAC analysis is useful for examining the speed-accuracy tradeoff in
 eyewitness identifications. Faster responses typically indicate stronger
 memory, and RAC curves often show higher accuracy for faster response times.
 }
+\examples{
+data <- create_example_lineup_data(n_trials = 200,
+                                   include_response_time = TRUE,
+                                   seed = 123)
+rac <- make_racdata(data, time_bins = c(0, 4000, 8000, 12000, 20000))
+rac$rac_data
+
+}
 \references{
 Seale-Carlisle, T. M., Colloff, M. F., Flowe, H. D., Wells, W., Wixted, J. T.,
 & Mickes, L. (2019). Confidence and response time as indicators of eyewitness

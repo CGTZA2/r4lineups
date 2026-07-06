@@ -74,12 +74,12 @@ If bootstrap = TRUE, resamples data with replacement to estimate
 standard errors and confidence intervals for all parameters.
 }
 \examples{
-\dontrun{
 # Simulate data
 sim_data <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 1.5,
-  conf_levels = 5
+  conf_levels = 5,
+  seed = 123
 )
 
 # Fit equal-variance SDT model
@@ -93,7 +93,6 @@ sdt_fit$dprime
 # Fit unequal-variance model
 sdt_uv <- fit_sdt_roc(sim_data, lineup_size = 6, model = "unequal_variance")
 sdt_uv$variance_ratio
-}
 
 }
 \references{

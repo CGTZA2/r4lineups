@@ -27,3 +27,9 @@ A ggplot2 object
 Creates a ggplot2 visualization of full ROC data from lineup identification
 experiments using the Smith & Yang (2020) method.
 }
+\examples{
+data(lineup_example)
+fullroc_result <- make_fullroc_data(lineup_example)
+plot_fullroc(fullroc_result)
+
+}

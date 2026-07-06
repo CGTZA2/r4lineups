@@ -66,6 +66,12 @@ where H(p) is binary entropy.
 The information gain quantifies how much uncertainty is reduced by observing
 response x. Positive values indicate the response is diagnostic.
 }
+\examples{
+data(lineup_example)
+bayes <- make_bayes_curves(lineup_example)
+bayes$likelihoods
+
+}
 \references{
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect-equivalency curves, and reasonable

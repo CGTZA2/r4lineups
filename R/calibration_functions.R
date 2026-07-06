@@ -63,6 +63,19 @@
 #' and target-absent base rates. \emph{Journal of Experimental Psychology:
 #' Applied, 12}(1), 11-30.
 #'
+#' @examples
+#' set.seed(123)
+#' n <- 200
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100))
+#' )
+#' cal <- make_calibration_data(data, confidence_bins = c(0, 60, 80, 100))
+#' cal$C
+#' cal$calibration_data
+#'
 #' @export
 #' @import tibble
 make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = TRUE,
@@ -245,6 +258,20 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 #' and target-absent base rates. \emph{Journal of Experimental Psychology:
 #' Applied, 12}(1), 11-30.
 #'
+#' @examples
+#' set.seed(123)
+#' n <- 300
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100)),
+#'   instruction = rep(c("biased", "unbiased"), times = n / 2)
+#' )
+#' by_cond <- make_calibration_by_condition(data, condition_vars = "instruction",
+#'                                          confidence_bins = c(0, 60, 80, 100))
+#' by_cond$condition_summary
+#'
 #' @export
 #' @import tibble
 make_calibration_by_condition <- function(data, condition_vars,
@@ -330,6 +357,18 @@ make_calibration_by_condition <- function(data, condition_vars,
 #' Points above the diagonal indicate underconfidence, while points below indicate
 #' overconfidence.
 #'
+#' @examples
+#' set.seed(123)
+#' n <- 200
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100))
+#' )
+#' cal <- make_calibration_data(data, confidence_bins = c(0, 60, 80, 100))
+#' make_calibration_gg(cal)
+#'
 #' @export
 #' @import ggplot2
 make_calibration_gg <- function(cal_obj, show_stats = TRUE, show_n = TRUE,
@@ -349,7 +388,7 @@ make_calibration_gg <- function(cal_obj, show_stats = TRUE, show_n = TRUE,
   # Create base plot
   p <- ggplot(cal_data, aes(x = mean_confidence_plot, y = accuracy)) +
     geom_point(aes(size = n), color = "darkblue", alpha = 0.7) +
-    geom_line(color = "darkblue", size = 0.8) +
+    geom_line(color = "darkblue", linewidth = 0.8) +
     theme_bw(base_size = 14) +
     labs(
       x = x_label,
@@ -408,6 +447,20 @@ make_calibration_gg <- function(cal_obj, show_stats = TRUE, show_n = TRUE,
 #'
 #' @return A ggplot2 object
 #'
+#' @examples
+#' set.seed(123)
+#' n <- 300
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100)),
+#'   instruction = rep(c("biased", "unbiased"), times = n / 2)
+#' )
+#' by_cond <- make_calibration_by_condition(data, condition_vars = "instruction",
+#'                                          confidence_bins = c(0, 60, 80, 100))
+#' make_calibration_by_condition_gg(by_cond)
+#'
 #' @export
 #' @import ggplot2
 make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
@@ -436,9 +489,9 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
   p <- ggplot(combined_data, aes(x = mean_confidence_plot, y = accuracy,
                                   color = condition, group = condition)) +
     geom_point(aes(size = n), alpha = 0.7) +
-    geom_line(size = 0.8) +
+    geom_line(linewidth = 0.8) +
     geom_abline(slope = 1, intercept = 0, linetype = "dashed",
-                color = "gray50", size = 0.6) +
+                color = "gray50", linewidth = 0.6) +
     theme_bw(base_size = 14) +
     labs(
       x = "Mean Confidence (proportion)",
@@ -496,12 +549,17 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 #' @return A list containing calibration data, statistics, and plot
 #'
 #' @examples
-#' \dontrun{
-#' # Example with binned confidence
+#' set.seed(123)
+#' n <- 200
+#' lineup_data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100))
+#' )
 #' cal_result <- make_calibration(lineup_data,
 #'                                confidence_bins = c(0, 60, 80, 100))
 #' print(cal_result)
-#' }
 #'
 #' @export
 make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,

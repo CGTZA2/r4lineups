@@ -27,3 +27,9 @@ Creates a publication-ready table with key statistics for each model:
   \item Full ROC: AUC
 }
 }
+\examples{
+data(lineup_example)
+comparison <- compare_models(lineup_example)
+format_comparison_table(comparison)
+
+}

@@ -66,6 +66,11 @@
 #' the diagnostic utility of eyewitness lineups but partial area under the
 #' ROC does not. \emph{Journal of Applied Research in Memory and Cognition}.
 #'
+#' @examples
+#' data(lineup_example)
+#' dpp <- make_dpp(lineup_example)
+#' dpp$dpp
+#'
 #' @export
 #' @import tibble
 make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE) {
@@ -171,6 +176,13 @@ make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE) {
 #'   \item pAUC comparisons might be misleading
 #' }
 #'
+#' @examples
+#' data(lineup_example)
+#' # Compare two halves of the example data (odd vs even rows)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
+#' cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
+#' cmp$dpp_difference
+#'
 #' @export
 compare_dpp <- function(data_proc_a, data_proc_b, lineup_size = 6) {
 
@@ -209,6 +221,11 @@ compare_dpp <- function(data_proc_a, data_proc_b, lineup_size = 6) {
 #' }
 #'
 #' A smaller shaded area (lower DPP) indicates better performance.
+#'
+#' @examples
+#' data(lineup_example)
+#' dpp <- make_dpp(lineup_example)
+#' plot_dpp(dpp)
 #'
 #' @export
 #' @import ggplot2
@@ -289,6 +306,12 @@ plot_dpp <- function(dpp_obj, show_perfect = TRUE, show_dpp = TRUE,
 #' @param proc_b_label Character. Label for procedure B (default = "Procedure B")
 #'
 #' @return A ggplot2 object
+#'
+#' @examples
+#' data(lineup_example)
+#' odd <- seq(1, nrow(lineup_example), by = 2)
+#' cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
+#' plot_dpp_comparison(cmp)
 #'
 #' @export
 #' @import ggplot2
@@ -380,10 +403,9 @@ plot_dpp_comparison <- function(compare_obj,
 #'   perfect-performance ROC data, maximum false-alarm rate, and plot.
 #'
 #' @examples
-#' \dontrun{
-#' dpp_result <- compute_dpp(lineup_data)
+#' data(lineup_example)
+#' dpp_result <- compute_dpp(lineup_example)
 #' print(dpp_result)
-#' }
 #'
 #' @export
 compute_dpp <- function(data, lineup_size = 6, show_plot = TRUE, ...) {

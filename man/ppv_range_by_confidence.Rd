@@ -46,17 +46,16 @@ The range between nominal and none represents the uncertainty in PPV due to
 unknown lineup fairness conditions.
 }
 \examples{
-\dontrun{
+data(lineup_example)
 # Compute full PPV range
-ppv_range <- ppv_range_by_confidence(lineup_data,
-                                      confidence_bins = c(0, 60, 80, 100))
+ppv_range <- ppv_range_by_confidence(lineup_example,
+                                     confidence_bins = c(0, 60, 80, 100))
 print(ppv_range)
 
 # Access individual corrections
 ppv_range$ppv_nominal$overall_ppv
 ppv_range$ppv_effective$overall_ppv
 ppv_range$ppv_none$overall_ppv
-}
 
 }
 \references{

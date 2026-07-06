@@ -25,10 +25,8 @@ Main function to compute and plot CAC (Confidence-Accuracy Characteristic)
 for eyewitness lineup data.
 }
 \examples{
-\dontrun{
-# Example with binned confidence
-cac_result <- make_cac(lineup_data, confidence_bins = c(0, 60, 80, 100))
+data(lineup_example)
+cac_result <- make_cac(lineup_example, confidence_bins = c(0, 60, 80, 100))
 print(cac_result)
-}
 
 }

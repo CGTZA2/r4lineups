@@ -23,9 +23,8 @@ A list containing the DPP result, raw AUC gap, AUC values, ROC data,
 Main wrapper function to compute and plot DPP analysis.
 }
 \examples{
-\dontrun{
-dpp_result <- compute_dpp(lineup_data)
+data(lineup_example)
+dpp_result <- compute_dpp(lineup_example)
 print(dpp_result)
-}
 
 }

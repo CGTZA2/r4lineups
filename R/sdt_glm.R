@@ -13,6 +13,15 @@
 #' @param interactions Logical. If TRUE, include is_old interactions with covariates.
 #'
 #' @return A \code{glm} object with SDT attributes.
+#' @examples
+#' set.seed(123)
+#' n <- 200
+#' is_old <- rep(c(0, 1), each = n / 2)
+#' # d' of about 1: higher hit rate for old items
+#' said_old <- rbinom(n, 1, ifelse(is_old == 1, 0.7, 0.3))
+#' df <- data.frame(is_old = is_old, said_old = said_old)
+#' fit <- fit_sdt_glm(df, is_old = "is_old", said_old = "said_old")
+#' extract_sdt_metrics(fit)
 #' @export
 fit_sdt_glm <- function(data,
                         is_old,
@@ -84,6 +93,20 @@ fit_sdt_glm <- function(data,
 #' @param interactions Logical. If TRUE, include is_old interactions with covariates.
 #'
 #' @return A \code{glmerMod} object with SDT attributes.
+#' @examples
+#' \donttest{
+#' if (requireNamespace("lme4", quietly = TRUE)) {
+#'   set.seed(123)
+#'   n_subj <- 20
+#'   n_trial <- 20
+#'   df <- expand.grid(subject = seq_len(n_subj), trial = seq_len(n_trial))
+#'   df$is_old <- rep(c(0, 1), length.out = nrow(df))
+#'   df$said_old <- rbinom(nrow(df), 1, ifelse(df$is_old == 1, 0.7, 0.3))
+#'   fit <- fit_sdt_glmm(df, is_old = "is_old", said_old = "said_old",
+#'                       subject_id = "subject", random_slope = FALSE)
+#'   extract_sdt_metrics(fit)
+#' }
+#' }
 #' @export
 fit_sdt_glmm <- function(data,
                          is_old,
@@ -173,6 +196,15 @@ fit_sdt_glmm <- function(data,
 #' @param link Optional. If NULL, inferred from the model family.
 #'
 #' @return A list containing d' or ln(OR), criterion (if available), and metadata.
+#' @examples
+#' set.seed(123)
+#' n <- 200
+#' is_old <- rep(c(0, 1), each = n / 2)
+#' said_old <- rbinom(n, 1, ifelse(is_old == 1, 0.7, 0.3))
+#' df <- data.frame(is_old = is_old, said_old = said_old)
+#' fit <- fit_sdt_glm(df, is_old = "is_old", said_old = "said_old")
+#' metrics <- extract_sdt_metrics(fit)
+#' metrics$estimate  # d' under the probit link
 #' @export
 extract_sdt_metrics <- function(model, link = NULL) {
   if (is.null(link)) {

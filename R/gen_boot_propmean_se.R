@@ -29,9 +29,9 @@
 
 
 gen_boot_propmean_se <- function (lineuprops){
-    mean_boot_prop = round(mean(lineuprops, na.rm = T), 3)
-    median_boot_prop = round(median(lineuprops, na.rm = T),3)
-    stdev_boot_prop = round(sd(lineuprops, na.rm = T),3)
+    mean_boot_prop = round(mean(lineuprops, na.rm = TRUE), 3)
+    median_boot_prop = round(median(lineuprops, na.rm = TRUE),3)
+    stdev_boot_prop = round(sd(lineuprops, na.rm = TRUE),3)
     n = length(lineuprops)
     std_error_boot_prop    = round(stdev_boot_prop/sqrt(n), 3)
     ci025 = gen_boot_propci(lineuprops,.025)

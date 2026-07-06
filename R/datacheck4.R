@@ -1,6 +1,6 @@
 datacheck4 <- function(pos_list, k){
 
-  for (i in 1:length(pos_list)){
+  for (i in seq_along(pos_list)){
 
     if (length(table(pos_list[i]))== k[[i]]){
       pos_list = pos_list

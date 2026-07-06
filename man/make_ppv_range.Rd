@@ -38,16 +38,12 @@ A list of class "lineup_ppv_range" containing:
 Convenience wrapper that computes PPV range and creates visualizations.
 }
 \examples{
-\dontrun{
-# Basic usage
-result <- make_ppv_range(lineup_data)
-
+data(lineup_example)
 # With confidence binning
-result <- make_ppv_range(lineup_data, confidence_bins = c(0, 60, 80, 100))
+result <- make_ppv_range(lineup_example, confidence_bins = c(0, 60, 80, 100))
 
 # Access plots
 result$plot_ppv_range
 result$plot_effective_size
-}
 
 }

@@ -27,3 +27,9 @@ Higher confidence criteria have lower hit rates but also lower false alarm
 rates. The optimal criterion maximizes expected utility given the base rate
 and cost structure.
 }
+\examples{
+data(lineup_example)
+util <- make_utility_curves(lineup_example)
+plot_utility_curves(util)
+
+}

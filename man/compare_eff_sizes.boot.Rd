@@ -22,6 +22,17 @@ The approach here is to compute the effective size of each lineup
         bootstrapped, and if the bootstrap does not contain 0, we
          conclude the effective size estimates are different at p = alpha
 }
+\examples{
+# Two independent lineups of 6 members, 50 mock witnesses each
+set.seed(1)
+linedf <- data.frame(lineup1 = sample(1:6, 50, replace = TRUE),
+                     lineup2 = sample(1:6, 50, replace = TRUE))
+# Difference in effective size for the observed data
+compare_eff_sizes.boot(linedf, seq_len(nrow(linedf)))
+# Bootstrap the difference
+boot_diff <- boot::boot(linedf, compare_eff_sizes.boot, R = 100)
+boot::boot.ci(boot_diff, type = "perc")
+}
 \references{
 Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their
            application}. Cambridge University Press.

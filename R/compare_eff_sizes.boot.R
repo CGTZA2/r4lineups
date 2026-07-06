@@ -30,6 +30,16 @@
 #'            Wells, G. L.,Leippe, M. R., & Ostrom, T. M. (1979). Guidelines for
 #'            empirically assessing the fairness of a lineup. \emph{Law and Human Behavior,
 #'            3}(4), 285-293.
+#'@examples
+#' # Two independent lineups of 6 members, 50 mock witnesses each
+#' set.seed(1)
+#' linedf <- data.frame(lineup1 = sample(1:6, 50, replace = TRUE),
+#'                      lineup2 = sample(1:6, 50, replace = TRUE))
+#' # Difference in effective size for the observed data
+#' compare_eff_sizes.boot(linedf, seq_len(nrow(linedf)))
+#' # Bootstrap the difference
+#' boot_diff <- boot::boot(linedf, compare_eff_sizes.boot, R = 100)
+#' boot::boot.ci(boot_diff, type = "perc")
 #'@export
 
 compare_eff_sizes.boot <- function(linedf, d){

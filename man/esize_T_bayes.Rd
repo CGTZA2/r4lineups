@@ -89,7 +89,7 @@ result2 <- esize_T_bayes(lineup_table, threshold = 4)
 print(result2)
 
 # Plot the posterior
-\dontrun{plot(result)}
+plot(result)
 
 }
 \references{

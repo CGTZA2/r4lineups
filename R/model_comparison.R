@@ -55,22 +55,18 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' data(lineup_example)
 #' # Fit all models
-#' comparison <- compare_models(lineup_data)
+#' comparison <- compare_models(lineup_example)
 #' print(comparison)
 #' summary(comparison)
 #'
 #' # Fit specific models
-#' comparison <- compare_models(lineup_data, models = c("2ht", "eig"))
+#' comparison <- compare_models(lineup_example, models = c("2ht", "eig"))
 #'
 #' # Access individual fitted models
 #' comparison$fitted_models$`2ht`
 #' comparison$fitted_models$eig
-#'
-#' # Plot side-by-side comparisons
-#' plot(comparison)
-#' }
 #'
 #' @references
 #' Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental validation
@@ -500,6 +496,11 @@ plot.model_comparison <- function(x, which = "all", ncol = 2, ...) {
 #'   \item EIG: Information gain, efficiency
 #'   \item Full ROC: AUC
 #' }
+#'
+#' @examples
+#' data(lineup_example)
+#' comparison <- compare_models(lineup_example)
+#' format_comparison_table(comparison)
 #'
 #' @export
 format_comparison_table <- function(comparison_obj, format = "console", digits = 3) {

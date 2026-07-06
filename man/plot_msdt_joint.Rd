@@ -36,3 +36,7 @@ A ggplot object.
 \description{
 Contour plot of the joint distribution of suspect signal and max filler signal.
 }
+\examples{
+# Joint distribution for a culprit-present 6-person lineup
+plot_msdt_joint(dprime = 1.5, gamma = 0.8, lineup_size = 6)
+}

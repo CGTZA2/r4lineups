@@ -28,10 +28,9 @@ Higher confidence should generally be associated with lower error rates
 (better calibration).
 }
 \examples{
-\dontrun{
-ppv_range <- ppv_range_by_confidence(lineup_data,
-                                      confidence_bins = c(0, 60, 80, 100))
+data(lineup_example)
+ppv_range <- ppv_range_by_confidence(lineup_example,
+                                     confidence_bins = c(0, 60, 80, 100))
 plot_error_rate_conf(ppv_range)
-}
 
 }

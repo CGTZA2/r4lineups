@@ -41,6 +41,13 @@ Mickes (2015). For each confidence level:
 When no innocent suspect is designated in target-absent lineups, filler IDs
 are divided by lineup size to estimate the false ID rate.
 }
+\examples{
+data(lineup_example)
+roc <- make_rocdata(lineup_example)
+roc$roc_data
+roc$pauc
+
+}
 \references{
 Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should
 abandon probative value and embrace receiver operating characteristic analysis.

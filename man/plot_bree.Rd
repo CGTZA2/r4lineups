@@ -27,3 +27,10 @@ Positive delta: Procedure A is more diagnostic (B needs higher base rate to matc
 Negative delta: Procedure B is more diagnostic (B needs lower base rate to match)
 Zero delta: Procedures are equally diagnostic
 }
+\examples{
+data(lineup_example)
+odd <- seq(1, nrow(lineup_example), by = 2)
+bree <- make_bree_curve(lineup_example[odd, ], lineup_example[-odd, ])
+plot_bree(bree)
+
+}

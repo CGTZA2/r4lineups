@@ -14,3 +14,8 @@ makevec_prop(prop, n)
 \description{
 Several helper functions that compute bootcis from proportions
 }
+\examples{
+# Expand a choice proportion of 0.25 among 20 mock witnesses into a
+# binary choice vector
+makevec_prop(0.25, 20)
+}

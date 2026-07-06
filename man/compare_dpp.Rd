@@ -38,3 +38,11 @@ DPP comparison is advantageous when:
   \item pAUC comparisons might be misleading
 }
 }
+\examples{
+data(lineup_example)
+# Compare two halves of the example data (odd vs even rows)
+odd <- seq(1, nrow(lineup_example), by = 2)
+cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
+cmp$dpp_difference
+
+}

@@ -23,6 +23,11 @@ assuming all lineup members are equally plausible (perfectly fair lineup).
 This represents the "best case" estimate assuming perfect lineup fairness.
 The formula is: innocent_id_rate = error_rate / lineup_size
 }
+\examples{
+# 30\% mistaken ID rate in a fair 6-person lineup
+innocent_id_rate_nominal(0.30, 6)
+
+}
 \references{
 Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
 eyewitness error rates in fair and biased lineups.

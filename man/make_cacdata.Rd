@@ -46,6 +46,12 @@ According to Mickes (2015), CAC analysis is most relevant for triers of fact
 retention interval). It shows how trustworthy an ID is at different confidence
 levels.
 }
+\examples{
+data(lineup_example)
+cac <- make_cacdata(lineup_example, confidence_bins = c(0, 60, 80, 100))
+cac$cac_data
+
+}
 \references{
 Mickes, L. (2015). Receiver operating characteristic analysis and
 confidence-accuracy characteristic analysis in investigations of system

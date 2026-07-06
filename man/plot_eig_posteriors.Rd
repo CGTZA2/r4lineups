@@ -26,3 +26,9 @@ for each response category. The prior probability is shown as a dashed line
 for reference. Response categories that push beliefs toward guilt (posterior > prior)
 are colored red, while those pushing toward innocence are colored blue.
 }
+\examples{
+data(lineup_example)
+eig_result <- compute_eig(lineup_example, confidence_bins = c(0, 60, 80, 100))
+plot_eig_posteriors(eig_result)
+
+}

@@ -10,6 +10,7 @@ make_calibration(
   choosers_only = TRUE,
   lineup_size = 6,
   show_plot = TRUE,
+  confidence_scale = c("auto", "0-1", "0-100"),
   ...
 )
 }
@@ -24,6 +25,9 @@ make_calibration(
 
 \item{show_plot}{Logical. Whether to display the plot (default = TRUE)}
 
+\item{confidence_scale}{How the confidence scale is interpreted: "auto" (default),
+"0-1", or "0-100". See \code{\link{make_calibration_data}}.}
+
 \item{...}{Additional arguments passed to make_calibration_gg()}
 }
 \value{
@@ -33,11 +37,16 @@ A list containing calibration data, statistics, and plot
 Main function to compute and plot calibration analysis for eyewitness lineup data.
 }
 \examples{
-\dontrun{
-# Example with binned confidence
+set.seed(123)
+n <- 200
+lineup_data <- data.frame(
+  target_present = rep(c(TRUE, FALSE), each = n / 2),
+  identification = sample(c("suspect", "filler", "reject"), n,
+                          replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+  confidence = round(runif(n, 0, 100))
+)
 cal_result <- make_calibration(lineup_data,
                                confidence_bins = c(0, 60, 80, 100))
 print(cal_result)
-}
 
 }

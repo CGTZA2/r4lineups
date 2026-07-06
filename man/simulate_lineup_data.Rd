@@ -96,12 +96,12 @@ Response times (if simulated):
 }
 }
 \examples{
-\dontrun{
 # Basic simulation: strong memory with MAX rule (default)
 strong_memory <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 2.0,
-  conf_levels = 3
+  conf_levels = 3,
+  seed = 42
 )
 
 # Ensemble decision rule
@@ -109,15 +109,8 @@ ensemble_data <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 1.5,
   decision_rule = "ensemble",
-  conf_levels = 5
-)
-
-# BEST-REST decision rule
-best_rest_data <- simulate_lineup_data(
-  n_tp = 200, n_ta = 200,
-  d_prime = 1.5,
-  decision_rule = "best_rest",
-  conf_levels = 5
+  conf_levels = 5,
+  seed = 42
 )
 
 # Integration model with response times
@@ -133,13 +126,13 @@ integration_data <- simulate_lineup_data(
 # Compare ROC curves across decision rules
 roc_max <- make_roc(strong_memory, lineup_size = 6)
 roc_ensemble <- make_roc(ensemble_data, lineup_size = 6)
-roc_best_rest <- make_roc(best_rest_data, lineup_size = 6)
 
+\donttest{
 # Power analysis: vary sample size
 power_results <- simulate_power_analysis(
-  sample_sizes = c(50, 100, 200, 500),
+  sample_sizes = c(50, 100),
   d_prime = 1.5,
-  n_simulations = 1000
+  n_simulations = 100
 )
 }
 

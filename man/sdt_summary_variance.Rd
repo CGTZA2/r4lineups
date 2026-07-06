@@ -40,3 +40,8 @@ Estimates the variance of d' (and criterion) from summary SDT counts using
 the Gourevitch & Galanter (1967) delta method, the Miller (1996)
 exact-binomial method, or a parametric bootstrap.
 }
+\examples{
+v <- sdt_summary_variance(hits = 70, fas = 20, misses = 30, cr = 80,
+                          method = "miller")
+v$var_dprime
+}

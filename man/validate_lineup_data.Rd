@@ -64,7 +64,6 @@ types and valid values.
 }
 }
 \examples{
-\dontrun{
 # Valid data
 valid_data <- data.frame(
   target_present = c(TRUE, TRUE, FALSE, FALSE),
@@ -83,6 +82,5 @@ print(result$messages)
 
 # Strict validation (errors on failure)
 validate_lineup_data(valid_data, strict = TRUE)
-}
 
 }

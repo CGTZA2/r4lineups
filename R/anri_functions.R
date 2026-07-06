@@ -61,6 +61,18 @@
 #' of confidence in eyewitness identification. \emph{Journal of Experimental
 #' Psychology: Learning, Memory, and Cognition, 22}(5), 1304-1316.
 #'
+#' @examples
+#' set.seed(123)
+#' n <- 200
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100))
+#' )
+#' result <- compute_anri(data, confidence_bins = seq(0, 100, 20))
+#' result$anri
+#'
 #' @export
 #' @import tibble
 compute_anri <- function(data,
@@ -147,6 +159,21 @@ compute_anri <- function(data,
 #' @references
 #' Efron, B., & Tibshirani, R. J. (1994). \emph{An Introduction to the Bootstrap}.
 #' Chapman & Hall/CRC.
+#'
+#' @examples
+#' \donttest{
+#' set.seed(123)
+#' n <- 200
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100))
+#' )
+#' boot_result <- bootstrap_anri(data, confidence_bins = seq(0, 100, 20),
+#'                               n_bootstrap = 200, seed = 1)
+#' c(boot_result$ci_lower, boot_result$ci_upper)
+#' }
 #'
 #' @export
 bootstrap_anri <- function(data,
@@ -258,6 +285,24 @@ bootstrap_anri <- function(data,
 #'   \item CI excludes 0: Statistically significant difference
 #' }
 #'
+#' @examples
+#' \donttest{
+#' set.seed(123)
+#' n <- 300
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100)),
+#'   condition = rep(c("sequential", "simultaneous"), times = n / 2)
+#' )
+#' cmp <- compare_anri(data, group_var = "condition",
+#'                     confidence_bins = seq(0, 100, 20),
+#'                     n_bootstrap = 100, seed = 1)
+#' cmp$difference
+#' c(cmp$ci_lower, cmp$ci_upper)
+#' }
+#'
 #' @export
 #' @import tibble
 compare_anri <- function(data,
@@ -364,6 +409,23 @@ compare_anri <- function(data,
 #' CIs for each group. Helps visualize the magnitude and uncertainty of
 #' group differences.
 #'
+#' @examples
+#' \donttest{
+#' set.seed(123)
+#' n <- 300
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100)),
+#'   condition = rep(c("sequential", "simultaneous"), times = n / 2)
+#' )
+#' cmp <- compare_anri(data, group_var = "condition",
+#'                     confidence_bins = seq(0, 100, 20),
+#'                     n_bootstrap = 100, seed = 1)
+#' plot_anri_comparison(cmp)
+#' }
+#'
 #' @export
 #' @import ggplot2 tibble
 plot_anri_comparison <- function(compare_obj) {
@@ -415,6 +477,23 @@ plot_anri_comparison <- function(compare_obj) {
 #' @param compare_obj List output from compare_anri()
 #'
 #' @return A ggplot2 object
+#'
+#' @examples
+#' \donttest{
+#' set.seed(123)
+#' n <- 300
+#' data <- data.frame(
+#'   target_present = rep(c(TRUE, FALSE), each = n / 2),
+#'   identification = sample(c("suspect", "filler", "reject"), n,
+#'                           replace = TRUE, prob = c(0.5, 0.25, 0.25)),
+#'   confidence = round(runif(n, 0, 100)),
+#'   condition = rep(c("sequential", "simultaneous"), times = n / 2)
+#' )
+#' cmp <- compare_anri(data, group_var = "condition",
+#'                     confidence_bins = seq(0, 100, 20),
+#'                     n_bootstrap = 100, seed = 1)
+#' plot_anri_difference_distribution(cmp)
+#' }
 #'
 #' @export
 #' @import ggplot2

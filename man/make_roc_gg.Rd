@@ -19,3 +19,9 @@ A ggplot2 object
 \description{
 Creates a ggplot2 visualization of ROC data from lineup identification experiments.
 }
+\examples{
+data(lineup_example)
+roc <- make_rocdata(lineup_example)
+make_roc_gg(roc)
+
+}

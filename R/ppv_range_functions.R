@@ -18,6 +18,10 @@
 #' eyewitness error rates in fair and biased lineups.
 #' \emph{Law and Human Behavior}.
 #'
+#' @examples
+#' # 30% mistaken ID rate in a fair 6-person lineup
+#' innocent_id_rate_nominal(0.30, 6)
+#'
 #' @export
 innocent_id_rate_nominal <- function(error_rate, lineup_size) {
   if (lineup_size <= 0) {
@@ -55,6 +59,10 @@ innocent_id_rate_nominal <- function(error_rate, lineup_size) {
 #' Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness.
 #' \emph{Law and Human Behavior, 22}(2), 217-237.
 #'
+#' @examples
+#' # 30% mistaken ID rate with an effective size of 4.2
+#' innocent_id_rate_effective(0.30, 4.2)
+#'
 #' @export
 innocent_id_rate_effective <- function(error_rate, effective_size) {
   if (effective_size <= 0) {
@@ -84,6 +92,10 @@ innocent_id_rate_effective <- function(error_rate, effective_size) {
 #' Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
 #' eyewitness error rates in fair and biased lineups.
 #' \emph{Law and Human Behavior}.
+#'
+#' @examples
+#' # Worst case: all mistaken IDs treated as innocent-suspect IDs
+#' innocent_id_rate_uncorrected(0.30)
 #'
 #' @export
 innocent_id_rate_uncorrected <- function(error_rate) {
@@ -134,23 +146,31 @@ innocent_id_rate_uncorrected <- function(error_rate) {
 #'   \item "none": assumes all errors are innocent-suspect IDs (error_rate)
 #' }
 #'
+#' \strong{Note on the implicit base rate:} PPV is computed from raw
+#' target-present and target-absent counts, so the prior probability of guilt
+#' is implicitly the experiment's TP:TA ratio (e.g., 0.5 for the usual balanced
+#' design). PPV is \emph{not} base-rate-free: at different real-world base
+#' rates the PPV of the same procedure will differ. When target-absent lineups
+#' have no designated innocent suspect, the correction also relies on the
+#' pseudo-distribution assumption of spreading filler choices over lineup
+#' members, which is a modeling approximation.
+#'
 #' @references
 #' Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
 #' eyewitness error rates in fair and biased lineups.
 #' \emph{Law and Human Behavior}.
 #'
 #' @examples
-#' \dontrun{
+#' data(lineup_example)
 #' # Nominal correction (assumes fair lineup)
-#' ppv_result <- ppv_by_confidence(lineup_data,
-#'                                  correction = "nominal",
-#'                                  confidence_bins = c(0, 60, 80, 100))
+#' ppv_result <- ppv_by_confidence(lineup_example,
+#'                                 correction = "nominal",
+#'                                 confidence_bins = c(0, 60, 80, 100))
 #'
 #' # Effective size correction (accounts for bias)
-#' ppv_result <- ppv_by_confidence(lineup_data,
-#'                                  correction = "effective",
-#'                                  confidence_bins = c(0, 60, 80, 100))
-#' }
+#' ppv_result <- ppv_by_confidence(lineup_example,
+#'                                 correction = "effective",
+#'                                 confidence_bins = c(0, 60, 80, 100))
 #'
 #' @export
 #' @import tibble
@@ -352,17 +372,16 @@ ppv_by_confidence <- function(data,
 #' \emph{Law and Human Behavior}.
 #'
 #' @examples
-#' \dontrun{
+#' data(lineup_example)
 #' # Compute full PPV range
-#' ppv_range <- ppv_range_by_confidence(lineup_data,
-#'                                       confidence_bins = c(0, 60, 80, 100))
+#' ppv_range <- ppv_range_by_confidence(lineup_example,
+#'                                      confidence_bins = c(0, 60, 80, 100))
 #' print(ppv_range)
 #'
 #' # Access individual corrections
 #' ppv_range$ppv_nominal$overall_ppv
 #' ppv_range$ppv_effective$overall_ppv
 #' ppv_range$ppv_none$overall_ppv
-#' }
 #'
 #' @export
 ppv_range_by_confidence <- function(data,

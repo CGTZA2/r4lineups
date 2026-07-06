@@ -21,6 +21,13 @@ This is the statistic function passed to \code{boot::boot()} for
   For a higher-level interface that accepts raw lineup vectors, see
   \code{\link{esize_boot_dist}}.
 }
+\examples{
+# Table of lineup choices from 50 mock witnesses to a 6-member lineup
+set.seed(1)
+lineup_table <- table(sample(1:6, 50, replace = TRUE))
+# E' for the observed data
+esize_T_boot(lineup_table, seq_along(lineup_table))
+}
 \references{
 Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their
             application}. Cambridge University Press.

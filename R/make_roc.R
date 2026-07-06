@@ -31,18 +31,9 @@
 #' CAC analysis instead (see \code{\link{make_cac}}).
 #'
 #' @examples
-#' \dontrun{
-#' # Example data structure:
-#' lineup_data <- data.frame(
-#'   target_present = c(TRUE, TRUE, FALSE, FALSE),
-#'   identification = c("suspect", "filler", "suspect", "reject"),
-#'   confidence = c(90, 70, 80, 50)
-#' )
-#'
-#' # Compute and plot ROC
-#' roc_result <- make_roc(lineup_data)
+#' data(lineup_example)
+#' roc_result <- make_roc(lineup_example)
 #' print(roc_result$pauc)
-#' }
 #'
 #' @references
 #' Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should

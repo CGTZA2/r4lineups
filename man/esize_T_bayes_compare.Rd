@@ -61,7 +61,7 @@ tab_b <- as.table(setNames(counts_b, 1:6))
 
 result <- esize_T_bayes_compare(tab_a, tab_b)
 print(result)
-\dontrun{plot(result)}
+plot(result)
 
 }
 \references{

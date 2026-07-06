@@ -47,7 +47,6 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Valid data
 #' valid_data <- data.frame(
 #'   target_present = c(TRUE, TRUE, FALSE, FALSE),
@@ -66,7 +65,6 @@
 #'
 #' # Strict validation (errors on failure)
 #' validate_lineup_data(valid_data, strict = TRUE)
-#' }
 #'
 #' @export
 validate_lineup_data <- function(data,
@@ -294,7 +292,6 @@ validate_lineup_data <- function(data,
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Data with non-standard column names
 #' raw_data <- data.frame(
 #'   tp = c(1, 1, 0, 0),
@@ -314,10 +311,7 @@ validate_lineup_data <- function(data,
 #'     "none" = "reject"
 #'   )
 #' )
-#'
-#' # Now ready for r4lineups analyses
-#' roc <- make_roc(std_data, lineup_size = 6)
-#' }
+#' print(std_data)
 #'
 #' @export
 standardize_lineup_data <- function(data,
@@ -514,15 +508,12 @@ print.lineup_data <- function(x, ...) {
 #' @return A lineup_data object with realistic example data
 #'
 #' @examples
-#' \dontrun{
 #' # Basic example data
-#' example_data <- create_example_lineup_data(n_trials = 200)
+#' example_data <- create_example_lineup_data(n_trials = 200, seed = 123)
 #' print(example_data)
 #'
 #' # Use in analysis
 #' roc <- make_roc(example_data, lineup_size = 6)
-#' cac <- make_cac(example_data, lineup_size = 6)
-#' }
 #'
 #' @export
 create_example_lineup_data <- function(n_trials = 100,

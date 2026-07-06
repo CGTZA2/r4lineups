@@ -50,22 +50,24 @@
 #' the ability to distinguish guilty from innocent suspects using ALL available
 #' eyewitness evidence.
 #'
-#' @examples
-#' \dontrun{
-#' # Example data structure:
-#' lineup_data <- data.frame(
-#'   target_present = c(rep(TRUE, 50), rep(FALSE, 50)),
-#'   identification = sample(c("suspect", "filler", "reject"), 100, replace = TRUE),
-#'   confidence = sample(c(20, 40, 60, 80, 100), 100, replace = TRUE)
-#' )
+#' \strong{Note on ordering and bias:} ordering cells by the \emph{sample}
+#' diagnosticity ratio (\code{order = "diagnosticity"}) bows the curve upward
+#' from noise alone, so the resulting AUC is optimistically biased — identical
+#' target-present and target-absent response distributions yield AUC slightly
+#' above 0.5, with the bias growing with the number of decision-by-confidence
+#' cells and shrinking with sample size. For inference or comparisons across
+#' conditions, prefer \code{order = "apriori"} (the theoretically fixed
+#' ordering suggested by Smith & Yang, 2020) or compare against a permutation
+#' baseline.
 #'
+#' @examples
+#' data(lineup_example)
 #' # Compute full ROC with diagnosticity ordering
-#' fullroc_result <- make_fullroc_data(lineup_data)
+#' fullroc_result <- make_fullroc_data(lineup_example)
 #' print(fullroc_result$auc)
 #'
 #' # Compute full ROC with specified confidence bins
-#' fullroc_binned <- make_fullroc_data(lineup_data, conf_bins = c(0, 60, 80, 100))
-#' }
+#' fullroc_binned <- make_fullroc_data(lineup_example, conf_bins = c(0, 60, 80, 100))
 #'
 #' @references
 #' Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator
@@ -129,7 +131,7 @@ make_fullroc_data <- function(data,
   diagnosticity_table$n_hits <- 0
   diagnosticity_table$n_false_alarms <- 0
 
-  for (i in 1:nrow(diagnosticity_table)) {
+  for (i in seq_len(nrow(diagnosticity_table))) {
     dec <- diagnosticity_table$decision[i]
     conf <- diagnosticity_table$conf_bin[i]
 
@@ -266,25 +268,13 @@ make_fullroc_data <- function(data,
 #' It calls make_fullroc_data() to compute the ROC, then plot_fullroc() to visualize it.
 #'
 #' @examples
-#' \dontrun{
-#' # Example with simulated data
-#' set.seed(123)
-#' lineup_data <- data.frame(
-#'   target_present = c(rep(TRUE, 100), rep(FALSE, 100)),
-#'   identification = c(
-#'     sample(c("suspect", "filler", "reject"), 100, replace = TRUE, prob = c(0.6, 0.2, 0.2)),
-#'     sample(c("suspect", "filler", "reject"), 100, replace = TRUE, prob = c(0.2, 0.3, 0.5))
-#'   ),
-#'   confidence = sample(seq(0, 100, by = 10), 200, replace = TRUE)
-#' )
-#'
+#' data(lineup_example)
 #' # Compute and plot full ROC
-#' result <- make_fullroc(lineup_data)
+#' result <- make_fullroc(lineup_example)
 #' print(result$auc)
 #'
 #' # With custom confidence bins
-#' result2 <- make_fullroc(lineup_data, conf_bins = c(0, 60, 80, 100))
-#' }
+#' result2 <- make_fullroc(lineup_example, conf_bins = c(0, 60, 80, 100))
 #'
 #' @references
 #' Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator
@@ -355,6 +345,11 @@ make_fullroc <- function(data,
 #' @param title Character. Plot title (default = "Full ROC Curve (Smith & Yang, 2020)")
 #'
 #' @return A ggplot2 object
+#'
+#' @examples
+#' data(lineup_example)
+#' fullroc_result <- make_fullroc_data(lineup_example)
+#' plot_fullroc(fullroc_result)
 #'
 #' @export
 #' @import ggplot2 ggrepel

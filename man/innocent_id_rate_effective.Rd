@@ -28,6 +28,11 @@ lineup members. The formula is: innocent_id_rate = error_rate / effective_size
 When effective size < nominal size, this indicates lineup bias and increases
 the estimated innocent-suspect risk.
 }
+\examples{
+# 30\% mistaken ID rate with an effective size of 4.2
+innocent_id_rate_effective(0.30, 4.2)
+
+}
 \references{
 Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
 eyewitness error rates in fair and biased lineups.

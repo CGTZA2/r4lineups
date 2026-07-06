@@ -3,6 +3,10 @@
 #'Several helper functions that compute bootcis from proportions
 #'@param prop A dataframe of bootstrapped proportions
 #'@param n Number of lineup members
+#'@examples
+#' # Expand a choice proportion of 0.25 among 20 mock witnesses into a
+#' # binary choice vector
+#' makevec_prop(0.25, 20)
 #'@export
 #'@importFrom purrr map
 #'@importFrom stats quantile

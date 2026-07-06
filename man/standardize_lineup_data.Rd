@@ -70,7 +70,6 @@ This function:
 }
 }
 \examples{
-\dontrun{
 # Data with non-standard column names
 raw_data <- data.frame(
   tp = c(1, 1, 0, 0),
@@ -90,9 +89,6 @@ std_data <- standardize_lineup_data(
     "none" = "reject"
   )
 )
-
-# Now ready for r4lineups analyses
-roc <- make_roc(std_data, lineup_size = 6)
-}
+print(std_data)
 
 }

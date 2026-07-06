@@ -59,6 +59,13 @@ Interpretation:
   \item Delta = 0: Procedures are equally diagnostic
 }
 }
+\examples{
+data(lineup_example)
+odd <- seq(1, nrow(lineup_example), by = 2)
+bree <- make_bree_curve(lineup_example[odd, ], lineup_example[-odd, ])
+head(bree$bree_curve)
+
+}
 \references{
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect-equivalency curves, and reasonable

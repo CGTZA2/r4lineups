@@ -38,16 +38,12 @@ A list of class "lineup_eig" containing:
 Convenience wrapper that computes EIG and creates visualizations.
 }
 \examples{
-\dontrun{
-# Basic usage
-result <- make_eig(lineup_data)
-
+data(lineup_example)
 # With confidence binning
-result <- make_eig(lineup_data, confidence_bins = c(0, 60, 80, 100))
+result <- make_eig(lineup_example, confidence_bins = c(0, 60, 80, 100))
 
 # Access plots
 result$plot_ig
 result$plot_posteriors
-}
 
 }

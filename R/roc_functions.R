@@ -45,6 +45,12 @@
 #' identification procedures using receiver operating characteristic analysis.
 #' \emph{Current Directions in Psychological Science, 23}(1), 3-10.
 #'
+#' @examples
+#' data(lineup_example)
+#' roc <- make_rocdata(lineup_example)
+#' roc$roc_data
+#' roc$pauc
+#'
 #' @export
 #' @import tibble
 make_rocdata <- function(data, lineup_size = 6) {
@@ -144,6 +150,11 @@ make_rocdata <- function(data, lineup_size = 6) {
 #'
 #' @return A ggplot2 object
 #'
+#' @examples
+#' data(lineup_example)
+#' roc <- make_rocdata(lineup_example)
+#' make_roc_gg(roc)
+#'
 #' @export
 #' @import ggplot2 ggrepel
 make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE) {
@@ -153,7 +164,7 @@ make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE) {
 
   # Create base plot
   p <- ggplot(roc_data, aes(x = false_id_rate, y = correct_id_rate)) +
-    geom_line(size = 1, color = "steelblue") +
+    geom_line(linewidth = 1, color = "steelblue") +
     geom_point(shape = 21, color = "black", fill = "white", size = 3) +
     geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
     theme_bw(base_size = 14) +

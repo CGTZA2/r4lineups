@@ -26,3 +26,10 @@ A ggplot2 object
 \description{
 Creates side-by-side or overlaid plots comparing DPP for two procedures.
 }
+\examples{
+data(lineup_example)
+odd <- seq(1, nrow(lineup_example), by = 2)
+cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
+plot_dpp_comparison(cmp)
+
+}

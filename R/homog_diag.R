@@ -68,7 +68,7 @@ homog_diag <- function(lineup_pres_list, lineup_abs_list, pos_list, k){
   par3 <- d_weights(linedf)
   par4 <- t(cbind(par1, par2, par3))
   par5 <- chi_diag(par4)
-  par6 <- pchisq(par5, df = ncol(linedf)-1, lower.tail=F)
+  par6 <- pchisq(par5, df = ncol(linedf)-1, lower.tail = FALSE)
   par7 <- d_bar(par4)
   cat("Mean diagnosticity ratio:", par7)
   cat("\n")

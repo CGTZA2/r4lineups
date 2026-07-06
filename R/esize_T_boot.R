@@ -28,6 +28,12 @@
 #'             Wells, G. L., Leippe, M. R., & Ostrom, T. M. (1979). Guidelines for
 #'                  empirically assessing the fairness of a lineup. \emph{Law and Human Behavior, 3}(4), 285-293.
 #'
+#'@examples
+#' # Table of lineup choices from 50 mock witnesses to a 6-member lineup
+#' set.seed(1)
+#' lineup_table <- table(sample(1:6, 50, replace = TRUE))
+#' # E' for the observed data
+#' esize_T_boot(lineup_table, seq_along(lineup_table))
 #'@export
 
 esize_T_boot <- function(lineup_table, d){

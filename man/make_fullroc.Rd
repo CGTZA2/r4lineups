@@ -48,25 +48,13 @@ This is the main user-facing function for computing full ROC curves.
 It calls make_fullroc_data() to compute the ROC, then plot_fullroc() to visualize it.
 }
 \examples{
-\dontrun{
-# Example with simulated data
-set.seed(123)
-lineup_data <- data.frame(
-  target_present = c(rep(TRUE, 100), rep(FALSE, 100)),
-  identification = c(
-    sample(c("suspect", "filler", "reject"), 100, replace = TRUE, prob = c(0.6, 0.2, 0.2)),
-    sample(c("suspect", "filler", "reject"), 100, replace = TRUE, prob = c(0.2, 0.3, 0.5))
-  ),
-  confidence = sample(seq(0, 100, by = 10), 200, replace = TRUE)
-)
-
+data(lineup_example)
 # Compute and plot full ROC
-result <- make_fullroc(lineup_data)
+result <- make_fullroc(lineup_example)
 print(result$auc)
 
 # With custom confidence bins
-result2 <- make_fullroc(lineup_data, conf_bins = c(0, 60, 80, 100))
-}
+result2 <- make_fullroc(lineup_example, conf_bins = c(0, 60, 80, 100))
 
 }
 \references{

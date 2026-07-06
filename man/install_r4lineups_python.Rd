@@ -2,7 +2,7 @@
 % Please edit documentation in R/setup.R
 \name{install_r4lineups_python}
 \alias{install_r4lineups_python}
-\title{Install Python Dependencies for faceR}
+\title{Install Python Dependencies for r4lineups}
 \usage{
 install_r4lineups_python(
   method = "auto",
@@ -43,7 +43,7 @@ This function installs:
 install_r4lineups_python()
 
 # Install to a virtual environment
-install_r4lineups_python(envname = "faceR-env")
+install_r4lineups_python(envname = "r4lineups-face-env")
 
 # Install with GPU support
 install_r4lineups_python(gpu = TRUE)

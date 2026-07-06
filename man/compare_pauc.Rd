@@ -81,14 +81,17 @@ retention intervals, etc.).
 }
 }
 \examples{
-\dontrun{
-# Compare simultaneous vs. sequential lineups
+\donttest{
+# Compare two lineup procedures (halves of the example data)
+data(lineup_example)
+odd <- seq(1, nrow(lineup_example), by = 2)
 comparison <- compare_pauc(
-  simultaneous_data,
-  sequential_data,
-  label1 = "Simultaneous",
-  label2 = "Sequential",
-  n_bootstrap = 2000
+  lineup_example[odd, ],
+  lineup_example[-odd, ],
+  label1 = "Procedure A",
+  label2 = "Procedure B",
+  n_bootstrap = 200,
+  seed = 123
 )
 
 print(comparison)

@@ -49,13 +49,12 @@ information gain (responses don't distinguish guilty from innocent).
 EIG = 1 means perfect information (complete resolution of uncertainty).
 }
 \examples{
-\dontrun{
 # Compute EIG with binned confidence
-eig_result <- compute_eig(lineup_data,
+data(lineup_example)
+eig_result <- compute_eig(lineup_example,
                           prior_guilt = 0.5,
                           confidence_bins = c(0, 60, 80, 100))
 print(eig_result)
-}
 
 }
 \references{

@@ -64,7 +64,6 @@
 #' decisions. Scientific Reports, 12, 15571. https://doi.org/10.1038/s41598-022-19513-w
 #'
 #' @examples
-#' \dontrun{
 #' # Example 1: Using count data directly
 #' counts <- c(
 #'   n_tp_suspect = 147, n_tp_filler = 94, n_tp_reject = 141,
@@ -75,14 +74,13 @@
 #' summary(fit)
 #'
 #' # Example 2: Using a data frame
-#' # Assuming you have data with columns 'target_present' and 'identification'
+#' data(lineup_example)
 #' fit <- fit_winter_2ht(
-#'   lineup_data,
+#'   lineup_example,
 #'   lineup_size = 6,
 #'   target_present = "target_present",
 #'   identification = "identification"
 #' )
-#' }
 #'
 #' @export
 fit_winter_2ht <- function(data,

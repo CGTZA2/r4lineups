@@ -9,6 +9,11 @@
 #' @param correction Correction for extreme rates ("loglinear", "half", or "none").
 #'
 #' @return A list with rates and SDT metrics.
+#' @examples
+#' # 70 hits, 30 misses; 20 false alarms, 80 correct rejections
+#' summ <- sdt_summary_from_counts(hits = 70, fas = 20, misses = 30, cr = 80)
+#' summ$dprime
+#' summ$c
 #' @export
 sdt_summary_from_counts <- function(hits,
                                     fas,
@@ -64,6 +69,10 @@ sdt_summary_from_counts <- function(hits,
 #' @param seed Optional random seed for bootstrap variance.
 #'
 #' @return A list with variance estimates for zH, zF, d', and c.
+#' @examples
+#' v <- sdt_summary_variance(hits = 70, fas = 20, misses = 30, cr = 80,
+#'                           method = "miller")
+#' v$var_dprime
 #' @export
 sdt_summary_variance <- function(hits,
                                  fas,
@@ -148,6 +157,12 @@ sdt_summary_variance <- function(hits,
 #' @param seed Optional random seed for bootstrap variance.
 #'
 #' @return A list with estimates, standard error, z, and p-value.
+#' @examples
+#' cmp <- compare_sdt_summary(hits_a = 70, fas_a = 20, misses_a = 30, cr_a = 80,
+#'                            hits_b = 60, fas_b = 35, misses_b = 40, cr_b = 65,
+#'                            metric = "dprime")
+#' cmp$z
+#' cmp$p_value
 #' @export
 compare_sdt_summary <- function(hits_a, fas_a, misses_a, cr_a,
                                 hits_b, fas_b, misses_b, cr_b,

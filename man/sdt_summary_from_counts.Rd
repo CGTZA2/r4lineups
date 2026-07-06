@@ -29,3 +29,9 @@ A list with rates and SDT metrics.
 \description{
 Compute d', criterion, and beta from 2x2 SDT counts (hits, false alarms, misses, correct rejections).
 }
+\examples{
+# 70 hits, 30 misses; 20 false alarms, 80 correct rejections
+summ <- sdt_summary_from_counts(hits = 70, fas = 20, misses = 30, cr = 80)
+summ$dprime
+summ$c
+}

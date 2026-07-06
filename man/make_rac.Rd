@@ -25,12 +25,13 @@ Main function to compute and plot RAC (Response Time-Accuracy Characteristic)
 for eyewitness lineup data.
 }
 \examples{
-\dontrun{
 # Example with binned response times (in milliseconds)
+lineup_data <- create_example_lineup_data(n_trials = 200,
+                                          include_response_time = TRUE,
+                                          seed = 123)
 rac_result <- make_rac(lineup_data,
-                       time_bins = c(0, 5000, 10000, 15000, 20000, 99999))
+                       time_bins = c(0, 5000, 10000, 15000, 20000))
 print(rac_result)
 rac_result$plot
-}
 
 }

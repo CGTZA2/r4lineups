@@ -8,11 +8,20 @@
 \description{
 Computes various properties of laboratory or police lineups for researchers in forensic psychology. The package includes functions for calculating lineup bias, functional size, effective size, diagnosticity ratio, homogeneity of the diagnosticity ratio, and ROC curves for confidence-accuracy data. Face similarity is computed using state-of-the-art deep learning embeddings (ArcFace, FaceNet, etc.) via Python's deepface library.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/CGTZA2/r4lineups}
+  \item Report bugs at \url{https://github.com/CGTZA2/r4lineups/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Colin Tredoux \email{colin.tredoux@uct.ac.za}
 
 Authors:
 \itemize{
+  \item Colin Tredoux \email{colin.tredoux@uct.ac.za}
   \item Tamsyn Naylor \email{tmnaylor@outlook.com}
 }
 
