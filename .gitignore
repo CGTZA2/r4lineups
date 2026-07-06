@@ -15,3 +15,5 @@ vignettes/*.R
 vignettes/test.Rmd
 /doc/
 /Meta/
+docs/
+Rplots.pdf

@@ -1,0 +1,262 @@
+url: https://cgtza2.github.io/r4lineups/
+
+template:
+  bootstrap: 5
+
+home:
+  title: r4lineups - Statistical Inference on Lineup Fairness
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+- title: "Data preparation and validation"
+  desc: "Validate, standardize, and simulate lineup data."
+  contents:
+  - create_example_lineup_data
+  - datacheck1
+  - datacheck2
+  - datacheck3
+  - line73
+  - lineup_example
+  - mickwick
+  - mockdata
+  - nortje2012
+  - plot.power_analysis
+  - print.lineup_data
+  - simulate_lineup_data
+  - simulate_power_analysis
+  - standardize_lineup_data
+  - validate_lineup_data
+- title: "Lineup bias and member proportions"
+  desc: "Proportions choosing each lineup member, foil bias, and bootstrap CIs."
+  contents:
+  - allfoil_cihigh
+  - allfoilbias
+  - allprop
+  - gen_boot_propci
+  - gen_boot_propmean_se
+  - gen_boot_samples
+  - gen_boot_samples_list
+  - lineup_boot_allprop
+  - lineup_prop_boot
+  - lineup_prop_tab
+  - lineup_prop_vec
+  - makevec_prop
+  - rot_vector
+- title: "Effective size"
+  desc: "Tredoux's E', Malpass's effective size, and inference on them."
+  contents:
+  - compare_eff_sizes.boot
+  - esize_boot_dist
+  - esize_m
+  - esize_m_boot
+  - esize_T
+  - esize_T_bayes
+  - esize_T_bayes_compare
+  - esize_T_boot
+  - esize_T_ci_n
+  - i_esize_T
+- title: "Functional size"
+  desc: "Functional size estimation and bootstrap/Bayesian inference."
+  contents:
+  - func_size
+  - func_size_bayes
+  - func_size_report
+  - func_size.boot
+- title: "Diagnosticity"
+  desc: "Diagnosticity ratios and homogeneity tests."
+  contents:
+  - chi_diag
+  - d_bar
+  - d_weights
+  - diag_param
+  - diag_ratio_T
+  - diag_ratio_T_bayes
+  - diag_ratio_T_bayes_compare
+  - diag_ratio_W
+  - homog_diag
+  - homog_diag_boot
+  - ln_diag_ratio
+  - var_diag_ratio
+  - var_lnd
+- title: "ROC, CAC, and RAC analysis"
+  desc: "Receiver operating characteristic, confidence-accuracy, and response time-accuracy analysis."
+  contents:
+  - make_cac
+  - make_cac_gg
+  - make_cacdata
+  - make_rac
+  - make_rac_gg
+  - make_racdata
+  - make_roc
+  - make_roc_gg
+  - make_rocdata
+  - print.lineup_cac
+  - print.lineup_rac
+  - print.lineup_roc
+- title: "Full ROC (Smith & Yang, 2020)"
+  desc: "Full ROC curves using all response categories."
+  contents:
+  - make_fullroc
+  - make_fullroc_data
+  - plot_fullroc
+  - print.lineup_fullroc
+- title: "pAUC and DPP comparisons"
+  desc: "Statistical comparison of ROC curves and deviation from perfect performance."
+  contents:
+  - compare_dpp
+  - compare_pauc
+  - compute_dpp
+  - make_dpp
+  - plot_dpp
+  - plot_dpp_comparison
+  - plot.pauc_comparison
+  - print.lineup_dpp
+  - print.pauc_comparison
+  - summary.pauc_comparison
+- title: "Expected information gain and PPV"
+  desc: "EIG (Starns et al., 2023) and positive predictive value ranges."
+  contents:
+  - compute_eig
+  - innocent_id_rate_effective
+  - innocent_id_rate_nominal
+  - innocent_id_rate_uncorrected
+  - make_eig
+  - make_eig_data
+  - make_ppv_range
+  - plot_eig
+  - plot_eig_posteriors
+  - plot_ppv_range
+  - ppv_by_confidence
+  - ppv_range_by_confidence
+  - print.lineup_eig
+  - print.lineup_ppv
+  - print.lineup_ppv_range
+  - summary.lineup_eig
+- title: "Calibration and ANRI"
+  desc: "Confidence-accuracy calibration, over/underconfidence, and adjusted normalized resolution index."
+  contents:
+  - bootstrap_anri
+  - calibration_bayes
+  - compare_anri
+  - compute_anri
+  - make_calibration
+  - make_calibration_by_condition
+  - make_calibration_by_condition_gg
+  - make_calibration_data
+  - make_calibration_gg
+  - plot_anri_comparison
+  - plot_anri_difference_distribution
+  - print.lineup_anri
+  - print.lineup_anri_comparison
+  - print.lineup_calibration
+- title: "Bayesian curves, utility, and BREE"
+  desc: "Prior-posterior curves, expected utility analysis, and base-rate effect-equivalency."
+  contents:
+  - compare_utility
+  - make_bayes_curves
+  - make_bree_curve
+  - make_utility_curves
+  - make_utility_difference
+  - plot_bayes_information_gain
+  - plot_bayes_prior_posterior
+  - plot_bree
+  - plot_utility_curves
+  - plot_utility_difference
+  - print.lineup_bayes_curves
+  - print.lineup_utility_comparison
+- title: "Winter 2-HT model"
+  desc: "Two-high-threshold multinomial processing tree model (Winter et al., 2022)."
+  contents:
+  - boot_winter_2ht
+  - fit_winter_2ht
+  - plot_2ht_fit
+  - plot_2ht_parameters
+  - plot.winter_2ht
+  - plot.winter_2ht_boot
+  - print.winter_2ht
+  - print.winter_2ht_boot
+  - summary.winter_2ht
+  - summary.winter_2ht_boot
+- title: "mSDT and MAX SDT models"
+  desc: "Multi-item signal detection theory and compound-decision MAX SDT fitting."
+  contents:
+  - compare_max_sdt
+  - dmax_filler
+  - estimate_msdt_params
+  - fit_max_sdt
+  - max_filler_moments
+  - plot_msdt_joint
+- title: "SDT estimation and comparison"
+  desc: "SDT parameters from ROC data, GLM/GLMM estimation, and summary-count comparisons."
+  contents:
+  - compare_sdt_summary
+  - extract_sdt_metrics
+  - fit_sdt_glm
+  - fit_sdt_glmm
+  - fit_sdt_roc
+  - plot.sdt_roc_fit
+  - print.sdt_roc_fit
+  - sdt_compare
+  - sdt_summary_from_counts
+  - sdt_summary_variance
+  - summary.sdt_roc_fit
+- title: "Model comparison"
+  desc: "Unified comparison of 2-HT, EIG, and full ROC models."
+  contents:
+  - compare_models
+  - format_comparison_table
+  - plot.model_comparison
+  - print.model_comparison
+  - summary.model_comparison
+- title: "Face similarity (Python/deepface)"
+  desc: "Deep-learning face similarity, embeddings, and landmarks (requires optional Python setup)."
+  contents:
+  - available_detectors
+  - available_models
+  - batch_embeddings
+  - check_python_deps
+  - cosine_to_similarity
+  - detect_faces
+  - display_lineup
+  - embedding_distance
+  - face_similarity
+  - get_embedding
+  - get_face_landmarks
+  - get_key_landmarks
+  - has_valid_face
+  - install_r4lineups_python
+  - lineup_similarity
+  - plot_embedding_space
+  - plot_lineup_bias_distribution
+  - plot_lineup_similarity
+  - plot_similarity_distribution
+  - print.lineup_similarity
+  - summary.lineup_similarity
+- title: "Shiny app"
+  desc: "Interactive Shiny interface."
+  contents:
+  - run_r4lineups_app
+- title: "Other helpers"
+  desc: "Additional helper functions."
+  contents:
+  - eff_size_per_foils
+  - effsize_compare
+  - gen_esize_m
+  - gen_esize_m_ci
+  - gen_lineup_prop
+  - gen_linevec
+  - lineup_bias_boot_dist
+  - lineup_pairwise_matrix
+  - plot_effective_size_conf
+  - plot_error_rate_conf
+  - plot_esize_distribution
+  - plot.esize_T_bayes
+  - plot.esize_T_bayes_compare
+  - print.esize_T_bayes
+  - print.esize_T_bayes_compare
+  - print.simulated_lineup_data
+  - rep_index
