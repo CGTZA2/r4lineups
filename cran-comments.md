@@ -18,10 +18,14 @@ component-by-component statistical audit.
 ## Test environments
 
 * local macOS Tahoe 26.6 (Darwin 25.6.0, arm64), R 4.6.1
+* GitHub Actions macOS, R release
+* GitHub Actions Windows, R release
+* GitHub Actions Ubuntu, R devel, release, and oldrel-1
 
-The repository contains an R-CMD-check workflow for macOS release, Windows
-release, and Linux devel/release/oldrel-1. Results for the final revision will
-be added here only after that workflow has run.
+All jobs passed on the final `main` revision in GitHub Actions run
+`31405897556`. The TeX-equipped job in that run also built the PDF reference
+manual successfully. The separate pinned-pyWitness parity suite passed on
+Linux, macOS, and Windows in run `31405924004`.
 
 ## R CMD check results
 
@@ -31,7 +35,8 @@ Local source-tarball check (`R CMD check --as-cran --no-manual`):
 
 The built tarball's tests, ordinary examples, `\donttest{}` examples, package
 installation, and all vignettes completed successfully. A PDF manual was not
-built locally because a TeX installation is unavailable.
+built locally because a TeX installation is unavailable; it was built
+successfully by the TeX-equipped GitHub Actions job described above.
 
 The final network-enabled run completed CRAN incoming feasibility checks. A
 separate URL/DOI audit returned zero failures.
