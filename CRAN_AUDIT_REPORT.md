@@ -7,13 +7,12 @@ CRAN receives only user-facing package material.
 
 ## Release verdict
 
-The package is locally CRAN-ready: the built source tarball installs, runs its
-tests and both classes of examples, rebuilds every evaluated vignette, and
-passes `R CMD check --as-cran --no-manual` with **0 errors, 0 warnings, and 0
-notes**. A TeX distribution is not installed on the audit machine, so the PDF
-reference manual was not built locally. The configured macOS/Windows/Linux
-GitHub Actions matrix must still be run against the final revision before the
-tarball is submitted.
+The package is CRAN-ready: the built source tarball installs, runs its tests and
+both classes of examples, rebuilds every evaluated vignette, and passes
+`R CMD check --as-cran --no-manual` locally with **0 errors, 0 warnings, and 0
+notes**. GitHub Actions run `31405897556` also passed on the final `main`
+revision for Linux R devel/release/oldrel-1, macOS release, and Windows release,
+and produced the PDF reference manual on a TeX-equipped runner.
 
 The audit covered 159 exports, 54 registered S3 methods, 96 implementation
 files, 216 help topics, 15 vignettes, and 23 test files. The final tests contain
@@ -39,8 +38,8 @@ and namespace/static checks.
 | Spelling | Reviewed; genuine typographical errors corrected; remaining candidates are names, abbreviations, and domain/API terms |
 | Final tarball | `r4lineups_2.1.0.tar.gz`; 2,155,732 bytes; SHA-256 `b83bec26b8ab0aaca3180b874b76ee2e1aedc7f5b5ce2b040492d2194ac7689d` |
 | Check | `R CMD check --as-cran --no-manual`: 0 errors, 0 warnings, 0 notes |
-| PDF manual | Not run: no local TeX executable |
-| Cross-platform final revision | Pending GitHub Actions matrix |
+| PDF manual | PASS on TeX-equipped GitHub runner (run `31405897556`) |
+| Cross-platform final revision | PASS: Linux devel/release/oldrel-1, macOS release, and Windows release (run `31405897556`) |
 
 The final check ran with live network access and completed CRAN incoming
 feasibility checks. A separate live `urlchecker` run resolved all declared URLs
@@ -51,6 +50,10 @@ The local opt-in suite also passed against pyWitness revision
 parameter recovery, equal- and unequal-variance fits, zero and estimated shared
 variance, sparse cells, BEST-Rest/Ensemble rescaling, probability partitions,
 and an intentional non-convergence path.
+
+The same pinned-pyWitness opt-in suite passed on Linux, macOS, and Windows in
+GitHub Actions run `31405924004` against final `main` commit
+`fbf30bf6a2bb14f054ba4b034bf71edd93ff08bb`.
 
 RNG-taking functions were tested for reproducibility and for restoration of the
 caller's `.Random.seed`. Vignette bootstrap and simulation counts were reduced
@@ -89,7 +92,7 @@ test files named below.
 | z-ROC | z(H)=intercept+slope*z(FA); unequal-variance d_a=sqrt(2)*intercept/sqrt(1+slope^2) | `fit_sdt_roc()`; direct coefficient identity, raw stratified bootstrap and extreme-rate boundaries | Corrected and algebraically verified |
 | mSDT rejection estimator | IID normal maximum-filler distribution; two rejection moments identify gamma and d' | `d/p/q/rmax_filler()`, moments, `estimate_msdt_params()`; density integration, CDF/quantile inversion, probability bounds and simulated recovery | Yang et al. source verified; method-of-moments limitation documented |
 | Restricted MAX-SDT fitter | Equal-variance Independent-Observations/MAX probabilities over aggregate suspect/filler/reject outcomes with one criterion | `fit_max_sdt()`/comparison; mutually exclusive probability sums, boundary/convergence and recovery tests | Source and supplied-script review completed; estimator is explicitly minimum-Pearson, not likelihood, and is not presented as the full Wixted model |
-| Confidence-based Wixted models | Wixted et al. (2018) Independent Observations, Ensemble/BEST-Rest, and Integration models as implemented by audited pyWitness revision `e726dcfc09423d0e0ff7f46c8e3a711040293eba` | `fit_lineup_models()`; direct-wrapper parity, probability partitions, BEST-Rest/Ensemble criterion rescaling, equal/unequal variance, zero/estimated shared variance, sparse cells, generating-model and parameter recovery | Reference-engine verified locally; cross-platform opt-in workflow remains a release gate |
+| Confidence-based Wixted models | Wixted et al. (2018) Independent Observations, Ensemble/BEST-Rest, and Integration models as implemented by audited pyWitness revision `e726dcfc09423d0e0ff7f46c8e3a711040293eba` | `fit_lineup_models()`; direct-wrapper parity, probability partitions, BEST-Rest/Ensemble criterion rescaling, equal/unequal variance, zero/estimated shared variance, sparse cells, generating-model and parameter recovery | Reference-engine verified locally and on Linux, macOS, and Windows |
 | Model comparison | Method-specific outputs; AIC/BIC only for compatible likelihoods on identical outcomes | `compare_models()`; contract tests prohibit a cross-estimand “best model” | Corrected; no invalid common ranking claim |
 | Simulation and power | Equal-variance independent-signal Independent Observations/MAX, Ensemble, and Integration rules plus repeated-analysis power estimates | `simulate_lineup_data()`/`simulate_power_analysis()`; algebraic BEST-Rest/Ensemble rescaling, criterion, probability-partition, reproducibility, and recovery tests | Corrected and source-verified; BEST-Rest is documented as an equivalent Ensemble parameterization |
 | Face embeddings/similarity | Euclidean distance; cosine distance=1-cos(theta); reported similarity=1-distance | `embedding_distance()`, `cosine_to_similarity()`, lineup helpers; identical/opposite/zero-vector identities and missing-file/dependency errors | Transformation verified; external neural models and their forensic validity are explicitly outside package validation |
@@ -142,8 +145,6 @@ test files named below.
   claim is made.
 * Full-ROC empirical diagnosticity ordering is sample-dependent and optimistic;
   a priori ordering should be used for confirmatory work.
-* Current-revision Windows/Linux/R-devel/R-oldrel results remain an external CI
-  release gate.
 
 ## Sources used
 
@@ -174,9 +175,9 @@ package.
 - [x] Local pinned-pyWitness direct parity and recovery suite passes
 - [x] MIT-relicensing consent recorded for both authors: Colin Tredoux
   confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09
-- [ ] PDF manual build on a TeX-equipped runner
-- [ ] Final GitHub Actions matrix: Linux devel/release/oldrel-1, macOS release, Windows release
-- [ ] Three-platform opt-in pyWitness workflow
-- [ ] Official JOSS/Inara PDF build
-- [ ] Replace the pending CI statements in `cran-comments.md` with verified results
+- [x] PDF manual build on a TeX-equipped runner
+- [x] Final GitHub Actions matrix: Linux devel/release/oldrel-1, macOS release, Windows release
+- [x] Three-platform opt-in pyWitness workflow
+- [x] Official JOSS/Open Journals draft PDF build
+- [x] Replace the pending CI statements in `cran-comments.md` with verified results
 - [ ] Submit the exact checked tarball; do not rebuild after CI without rechecking

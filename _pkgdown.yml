@@ -197,8 +197,6 @@ reference:
   - fit_lineup_models
   - install_pywitness
   - plot.lineup_model_comparison
-  - print.lineup_model_comparison
-  - summary.lineup_model_comparison
 - title: "SDT estimation and comparison"
   desc: "SDT parameters from ROC data, GLM/GLMM estimation, and summary-count comparisons."
   contents:

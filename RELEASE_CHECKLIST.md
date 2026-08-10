@@ -32,13 +32,13 @@ historical and must not be submitted.
 
 - [x] MIT-relicensing consent recorded for both authors: Colin Tredoux
   confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.
-- [ ] Push the exact finalized source revision without changing package inputs.
-- [ ] Require the R release/devel/oldrel-1 operating-system matrix to pass.
-- [ ] Require the Linux/macOS/Windows pinned-pyWitness workflow to pass.
-- [ ] Require the TeX-equipped reference-manual job to produce a PDF.
-- [ ] Require the official JOSS/Inara job to produce a clean `paper.pdf`.
-- [ ] Insert verified CI results in `cran-comments.md` and the audit report.
-- [ ] Confirm that the repository candidate tarball still matches the size and
+- [x] Push the exact finalized source revision without changing package inputs.
+- [x] Require the R release/devel/oldrel-1 operating-system matrix to pass.
+- [x] Require the Linux/macOS/Windows pinned-pyWitness workflow to pass.
+- [x] Require the TeX-equipped reference-manual job to produce a PDF.
+- [x] Require the official JOSS/Open Journals job to produce a clean `paper.pdf`.
+- [x] Insert verified CI results in `cran-comments.md` and the audit report.
+- [x] Confirm that the repository candidate tarball still matches the size and
   SHA-256 above; if package inputs changed, rebuild and repeat every check.
 - [ ] Submit that exact archive to CRAN. Do not submit either stale historical
   archive.
