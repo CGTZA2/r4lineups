@@ -240,13 +240,21 @@ embedding_distance <- function(emb1, emb2, metric = c("cosine", "euclidean", "eu
     stop("Embeddings must have the same length. Got ", length(emb1), " and ", length(emb2),
          call. = FALSE)
   }
+  if (!is.numeric(emb1) || !is.numeric(emb2) || length(emb1) == 0L ||
+      anyNA(emb1) || anyNA(emb2) || any(!is.finite(emb1)) || any(!is.finite(emb2))) {
+    stop("Embeddings must be non-empty finite numeric vectors.", call. = FALSE)
+  }
+  norm1 <- sqrt(sum(emb1^2))
+  norm2 <- sqrt(sum(emb2^2))
+  if (metric %in% c("cosine", "euclidean_l2") && (norm1 == 0 || norm2 == 0)) {
+    stop("Cosine and L2-normalized distances are undefined for zero vectors.",
+         call. = FALSE)
+  }
   
   switch(metric,
     "cosine" = {
       # Cosine distance = 1 - cosine_similarity
       dot_product <- sum(emb1 * emb2)
-      norm1 <- sqrt(sum(emb1^2))
-      norm2 <- sqrt(sum(emb2^2))
       cosine_sim <- dot_product / (norm1 * norm2)
       1 - cosine_sim
     },
@@ -255,8 +263,8 @@ embedding_distance <- function(emb1, emb2, metric = c("cosine", "euclidean", "eu
     },
     "euclidean_l2" = {
       # L2 normalize first
-      emb1_norm <- emb1 / sqrt(sum(emb1^2))
-      emb2_norm <- emb2 / sqrt(sum(emb2^2))
+      emb1_norm <- emb1 / norm1
+      emb2_norm <- emb2 / norm2
       sqrt(sum((emb1_norm - emb2_norm)^2))
     }
   )
@@ -265,11 +273,12 @@ embedding_distance <- function(emb1, emb2, metric = c("cosine", "euclidean", "eu
 
 #' Convert Cosine Distance to Similarity Score
 #'
-#' Converts cosine distance to a similarity score in [0, 1] range.
+#' Converts cosine distance to cosine similarity in [-1, 1].
 #'
 #' @param distance Numeric. Cosine distance value(s).
 #'
-#' @return Numeric similarity score(s) where 1 = identical, 0 = maximally different.
+#' @return Numeric cosine similarity score(s), where 1 means the same direction,
+#'   0 means orthogonal, and -1 means opposite directions.
 #'
 #' @examples
 #' # Distance of 0 -> similarity of 1

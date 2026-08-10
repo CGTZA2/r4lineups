@@ -16,11 +16,20 @@
 
 
 datacheck3 <- function(lineup_table, k){
-  if (length(lineup_table)== k){
-    lineup_table = lineup_table
+  if (!is.numeric(k) || length(k) != 1L || is.na(k) || k < 1 || k != as.integer(k)) {
+    stop("k must be a positive integer.", call. = FALSE)
   }
-  else{
-    stop("User-declared nominal size does not match observed nominal size. Please
-         check vector of target positions.")
+  counts <- as.numeric(lineup_table)
+  if (length(counts) > k || anyNA(counts) || any(!is.finite(counts)) || any(counts < 0)) {
+    stop("lineup_table must contain at most k finite non-negative counts.", call. = FALSE)
   }
+  if (!is.null(names(lineup_table))) {
+    positions <- suppressWarnings(as.integer(names(lineup_table)))
+    if (anyNA(positions) || any(positions < 1L | positions > k)) {
+      stop("Named lineup-table positions must be integers between 1 and k.", call. = FALSE)
+    }
+  } else if (length(counts) != k) {
+    stop("An unnamed lineup table must contain exactly k counts.", call. = FALSE)
+  }
+  invisible(TRUE)
 }

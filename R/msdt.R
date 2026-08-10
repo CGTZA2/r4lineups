@@ -142,12 +142,12 @@ max_filler_moments <- function(lineup_size,
 #' (suspect-ID vs filler-ID) and the spread of filler choices, which are the
 #' most diagnostic outcomes. If you have the full response breakdown
 #' (suspect/filler/reject counts for both lineup types), prefer the
-#' likelihood-based fitter \code{\link{fit_max_sdt}} or the 2-HT model
+#' minimum-Pearson fitter \code{\link{fit_max_sdt}} or the 2-HT model
 #' (\code{\link{fit_winter_2ht}}), which use all outcome counts.
 #'
 #' @return A list with gamma and dprime.
-#' @seealso \code{\link{fit_max_sdt}} for full-information maximum-likelihood
-#'   fitting; \code{\link{fit_winter_2ht}} for the 2-HT MPT model.
+#' @seealso \code{\link{fit_max_sdt}} for a full-outcome, minimum-Pearson fit;
+#'   \code{\link{fit_winter_2ht}} for the 2-HT MPT model.
 #' @export
 #'
 #' @examples

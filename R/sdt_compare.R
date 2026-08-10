@@ -152,7 +152,7 @@ print.sdt_compare <- function(x, digits = 3, ...) {
               x$label_B, x$label_A, x$P_B_greater))
   if (!is.null(x$frequentist)) {
     cat(sprintf("  (Frequentist z-test: z = %.3f, p = %.4f)\n",
-                x$frequentist$z, x$frequentist$p))
+                x$frequentist$z, x$frequentist$p_value))
   }
   invisible(x)
 }

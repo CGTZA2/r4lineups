@@ -121,17 +121,17 @@ This function requires three arguments: a vector of lineup data, the position of
 * _Compute bootstrapped estimates:_
 The original work on lineup bias suggested testing whether the computed proportion = 1/nominal_size using a z test of proportions, or a binomial probability (see Tredoux, 1998), or a confidence interval around the proportion (see Tredoux, 1998), but very few studies actually use enough mock witnesses to strongly warrant this approach, since it assumes approximation to a normal distribution, and the size of the lineup places hard limits that are often not observed by computed confidence intervals.
     We therefore recommend computing bootstrapped estimates of all lineup measures, and especially the sampling variability around estimates.
-    To calculate a boostrapped lineup proportion for a single lineup member, we pass the `lineup_prop_boot()` function as an argument to the `boot()` function supplied by the package 'boot'.  We do not work directly with the lineup_prop_boot function, all we need to know to bootstrap is the lineup vector, the position of the target (target_pos), and the number of bootstrap resamples we desire (R).
+    To calculate a bootstrapped lineup proportion for a single lineup member, we pass the `lineup_prop_boot()` function as an argument to the `boot()` function supplied by the package 'boot'.  We do not work directly with the lineup_prop_boot function, all we need to know to bootstrap is the lineup vector, the position of the target (target_pos), and the number of bootstrap resamples we desire (R).
 
 ```{r, indent = "  ", warning=FALSE,}
-bootobject <- boot::boot(lineup_vec, lineup_prop_boot, target_pos = 3, R = 1000)
+bootobject <- boot::boot(lineup_vec, lineup_prop_boot, target_pos = 3, R = 100)
 bootobject
 ```
 
     + _We then compute confidence intervals:_
 
 ```{r, indent = "  ", warning=FALSE}
-cis <- boot::boot.ci(bootobject, conf = 0.95, type = "bca")
+cis <- boot::boot.ci(bootobject, conf = 0.95, type = "bca", target_pos = 3)
 cis
 ```
 
@@ -151,10 +151,10 @@ The function then returns proportion of mock witnesses selecting each lineup mem
 
     We can generate bootstrap estimates for all the computed proportions, too, with `lineup_boot_allprop()`.
 
-    This function takes a vector of lineup data, a vector indexing target positions, and nominal size.
+    This function takes a vector of lineup data and the nominal lineup size.
 
 ```{r, indent = "  "}
-lineuprops.ci <- lineup_boot_allprop(lineup_vec, target_pos, k = 8)
+lineuprops.ci <- lineup_boot_allprop(lineup_vec, k = 8, R = 100)
 lineuprops.ci
 ```
 The object `lineuprops.ci` is a dataframe of 2 columns and k rows, in which columns 1 and 2 contain lower and upper confidence intervals, respectively, and the number of rows = nominal size. 
@@ -174,7 +174,7 @@ You can compute functional size by inverting the result of the `lineup_prop_vec(
 * To compute functional size with confidence intervals,  call `func_size_report()`, and pass a vector of lineup data, as well as one scalar indicating target position, and another indicating nominal size:
 
 ```{r, indent = "  "}
-func_size_report(lineup_vec, target_pos = 3, k = 8)
+func_size_report(lineup_vec, target_pos = 3, k = 8, R = 100)
 ```
 
    
@@ -200,7 +200,10 @@ This package allows you to calculate effective size in several different ways.
     
     Malpass' Effective size B = $k-\sum_{i=1}^{k}\frac{|o_{i}-e|}{2e}$ 
 
-    Both Malpass' measures of effective size can be computed by calling the `esize_m()` function and passing a table of lineup data. If 'both = FALSE' is passed as an argument, only Malpass's adjusted formula for effective size is used. If both = TRUE, both Malpass's original and adjusted calculations of effective size are returned. You must also specify nominal size.
+    Both Malpass measures can be displayed by calling `esize_m()` and passing
+    lineup choices (or a table) plus nominal size. The function always returns
+    the Tredoux-adjusted estimate; `both = TRUE` additionally prints the original
+    Malpass estimate for comparison.
 
 ```{r, indent = "  "}
 esize_m(table(lineup_vec), k = 8, both = TRUE)
@@ -209,7 +212,7 @@ esize_m(table(lineup_vec), k = 8, both = TRUE)
     
 * _Compute bootstrapped estimates (Malpass's adjusted):_
 
-    Tredoux (1998) argued that it is better to use the alternate measure of E', but this was in a time when bootrapping methods for statistical inference were not widely known, and we therefore include a function that allows you to compute bootstrap estimates of the measures, with confidence intervals.  
+    Tredoux (1998) argued that it is better to use the alternate measure of E', but this was in a time when bootstrapping methods for statistical inference were not widely known, and we therefore include a function that allows you to compute bootstrap estimates of the measures, with confidence intervals.
     
     To do this, one must first generate a bootstrap sample using the `gen_boot_samples()` function, the `gen_esize_m function()`, and the `gen_esize_m_ci()` function.  Their usage is shown below.
 
@@ -222,14 +225,14 @@ bootdata <- gen_boot_samples(lineup_vec, 1000)
 #Nominal size is again declared by user
 lineupsizes <- gen_esize_m(bootdata, k = 8)
 
-#Pass vector of boostrapped effective sizes to gen_esize_m_ci
+#Pass vector of bootstrapped effective sizes to gen_esize_m_ci
 #to calculate lower and upper CIs with desired level of alpha
 gen_esize_m_ci(lineupsizes, perc = .025)
 gen_esize_m_ci(lineupsizes, perc = .975)
 ```
 * _Compute bootstrap descriptive statistics (Malpass's adjusted effective size):_
 
-    This function allows you to calculate descriptive statistics for a boostrapped vector/df of effective sizes (see object `lineupsizes`, above). We pass this to `gen_boot_propmean_se()`. Descriptive statistics are reported in some detail. 
+    This function allows you to calculate descriptive statistics for a bootstrapped vector/df of effective sizes (see object `lineupsizes`, above). We pass this to `gen_boot_propmean_se()`. Descriptive statistics are reported in some detail.
 ```{r, indent = "  "}
 gen_boot_propmean_se(lineupsizes)
 ```
@@ -249,7 +252,7 @@ To compute Tredoux's measure of effective size, E', use the function esize_T.  W
 esize_T(lineup_table)
 
 #Compute bootstrapped effective size
-esize_boot <- boot::boot(lineup_table, esize_T_boot, R = 1000)
+esize_boot <- boot::boot(lineup_vec, esize_T_boot, R = 100)
 
 #View boot object
 esize_boot
@@ -268,7 +271,8 @@ esize_boot.ci
     To calculate effective size by counting the number of foils who fall within the CI for chance guessing, we pass a vector of lineup data, a vector of target positions and nominal size. This function returns effective size from a set of bootstrapped data. Default alpha is 0.05, but this can be adjusted as desired.
   
 ```{r}
-eff_size_per_foils(lineup_vec, target_pos, k = 8, conf = 0.95)
+eff_size_per_foils(lineup_vec, target_pos = seq_len(8), k = 8,
+                   conf = 0.95, R = 100)
 ```
 
 Applying this function to our data, we see that effective size for this lineup is 4.
@@ -332,27 +336,27 @@ To get the dataframe required by `homog_diag()`, we follow the following steps:
 
 ```{r, indent = "  "}
 #Target present data:
-TP_lineup1 <-       round(runif(100,1,6))
-TP_lineup2 <-       round(runif(70,1,5))
-TP_lineup3 <-       round(runif(20,1,4))
+TP_lineup1 <-       rep(1:6, length.out = 100)
+TP_lineup2 <-       rep(1:5, length.out = 70)
+TP_lineup3 <-       rep(1:4, length.out = 20)
 lineup_pres_list <- list(TP_lineup1, TP_lineup2, TP_lineup3)
 
 #Target absent data:
-TA_lineup1 <-       round(runif(100,1,6))
-TA_lineup2 <-       round(runif(70,1,5))
-TA_lineup3 <-       round(runif(20,1,4))
+TA_lineup1 <-       rep(6:1, length.out = 100)
+TA_lineup2 <-       rep(5:1, length.out = 70)
+TA_lineup3 <-       rep(4:1, length.out = 20)
 lineup_abs_list <-  list(TA_lineup1, TA_lineup2, TA_lineup3)
 
 ```
-2. Next, the function requires a list of target positions for each lineup pair. For each set of TP/TA data in the TP/TA lists, there should be a corresponding target position list.
+2. Next, the function requires the suspect position for each lineup pair. If
+the TP and TA suspect positions differ, supply a two-element vector in TP, TA
+order for that pair.
 
-    * Each target position indexes the position of each member in the lineup. Therefore, its length should = k for that lineup pair. 
+    * A single position can be supplied for each pair when it is shared by the
+      TP and TA lineups.
 
 ```{r}
-lineup1_pos <- c(1, 2, 3, 4, 5, 6)
-lineup2_pos <- c(1, 2, 3, 4, 5)
-lineup3_pos <- c(1, 2, 3, 4)
-pos_list    <- list(lineup1_pos, lineup2_pos, lineup3_pos)
+pos_list <- c(3, 2, 1)
 ```
 
 3. To ensure the data have been coded accurately, we then specify nominal size for each lineup pair. The order in which nominal size for each lineup pair is listed must also correspond with the positions of each respective lineup in the lineup lists (i.e., if lineup 1 has _k_ = 6, then the first element of vector 'k' = 6). Following the example above, we create our nominal size vector k by calling `k <- c(6, 5, 4)`
@@ -370,7 +374,8 @@ homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
 
 This function returns bootstrapped estimates of the homogeneity of k diagnosticity ratios, and therefore takes the same arguments as `homog_diag()` (which provides normal theory estimates). 
 
-This function does not require you to specify a list of target positions (this is generated from the data).
+This function also requires suspect positions: they cannot be inferred from
+the observed choices. Pass them with `pos_list` as above.
 
 Thus, we follow steps 1 and 3, outlined above, before calling `homog_diag_boot()`:
 

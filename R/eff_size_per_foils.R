@@ -6,6 +6,7 @@
 #'@param target_pos A numeric vector indexing all lineup members
 #'@param k Number of members in lineup. Must be specified by user (scalar).
 #'@param conf Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).
+#'@param R Number of bootstrap replications. Defaults to 1000.
 #'@examples
 #'#Data:
 #'lineup_vec <- round(runif(100, 1, 6))
@@ -22,10 +23,13 @@
 #'
 #'@export
 
-eff_size_per_foils <- function(lineup_vec, target_pos, k, conf = 0.95){
+eff_size_per_foils <- function(lineup_vec, target_pos, k, conf = 0.95, R = 1000){
   lineup_vec <- typecheck(lineup_vec)
-  ci <- lineup_boot_allprop(lineup_vec, k, conf = 0.95)
+  if (!setequal(as.integer(target_pos), seq_len(k))) {
+    stop("target_pos must contain each lineup member position exactly once.", call. = FALSE)
+  }
+  ci <- lineup_boot_allprop(lineup_vec, k, conf = conf, R = R)
   k0 <- 1/k
-  ci_count <- cbind(ci[,1] <= k0 & ci[,2] >= k0)
-  print(sum(ci_count == TRUE))
+  ci_count <- ci[, 1] <= k0 & ci[, 2] >= k0
+  sum(ci_count)
 }

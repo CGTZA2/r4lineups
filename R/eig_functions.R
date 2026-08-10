@@ -37,6 +37,8 @@ entropy <- function(p, base = 2) {
 #' @param confidence_bins Numeric vector of bin edges for grouping confidence
 #'   (e.g., c(0, 60, 80, 100) creates bins 0-60, 61-80, 81-100).
 #'   If NULL, uses individual confidence levels.
+#' @param lineup_size Nominal lineup size. Used to split target-absent filler
+#'   identifications when no designated innocent suspect is present.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -53,10 +55,9 @@ entropy <- function(p, base = 2) {
 #' (guilty) and target-absent (innocent) lineups.
 #'
 #' @references
-#' Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-#' conclusions via the data they should have produced: A priori comparison of
-#' eyewitness identification decision processes using quantitative predictions
-#' of the expected information gain. \emph{Psychological Review}.
+#' Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
+#' assessing the effectiveness of eyewitness identification procedures: Expected
+#' information gain. \emph{Psychological Review, 130}(3), 677--719.
 #'
 #' @examples
 #' data(lineup_example)
@@ -65,7 +66,12 @@ entropy <- function(p, base = 2) {
 #'
 #' @export
 #' @import tibble
-make_eig_data <- function(data, confidence_bins = NULL) {
+make_eig_data <- function(data, confidence_bins = NULL, lineup_size = 6) {
+  .validate_lineup_analysis(data)
+  if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
+      !is.finite(lineup_size) || lineup_size < 2) {
+    stop("lineup_size must be a finite number of at least 2.", call. = FALSE)
+  }
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "confidence")
@@ -114,6 +120,10 @@ make_eig_data <- function(data, confidence_bins = NULL) {
   # Count frequencies for each response category
   guilty_counts <- table(guilty_data$response_cat)
   innocent_counts <- table(innocent_data$response_cat)
+  innocent_method <- .innocent_suspect_method(innocent_data)
+  innocent_counts <- .adjust_innocent_response_counts(
+    innocent_counts, lineup_size, innocent_method
+  )
 
   # Get all possible response categories
   all_responses <- union(names(guilty_counts), names(innocent_counts))
@@ -144,7 +154,9 @@ make_eig_data <- function(data, confidence_bins = NULL) {
     response_data = response_data,
     n_guilty = n_guilty,
     n_innocent = n_innocent,
-    confidence_bins = confidence_bins
+    confidence_bins = confidence_bins,
+    lineup_size = lineup_size,
+    innocent_suspect_method = innocent_method
   )
 }
 
@@ -159,6 +171,8 @@ make_eig_data <- function(data, confidence_bins = NULL) {
 #'   target_present, identification, confidence
 #' @param prior_guilt Numeric. Prior probability that suspect is guilty (default = 0.5)
 #' @param confidence_bins Numeric vector of bin edges (only used if eig_data is a dataframe)
+#' @param lineup_size Nominal lineup size used when raw target-absent data have
+#'   no designated innocent suspect.
 #'
 #' @return A list of class "lineup_eig" containing:
 #'   \itemize{
@@ -189,10 +203,9 @@ make_eig_data <- function(data, confidence_bins = NULL) {
 #' EIG = 1 means perfect information (complete resolution of uncertainty).
 #'
 #' @references
-#' Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-#' conclusions via the data they should have produced: A priori comparison of
-#' eyewitness identification decision processes using quantitative predictions
-#' of the expected information gain. \emph{Psychological Review}.
+#' Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
+#' assessing the effectiveness of eyewitness identification procedures: Expected
+#' information gain. \emph{Psychological Review, 130}(3), 677--719.
 #'
 #' @examples
 #' # Compute EIG with binned confidence
@@ -203,11 +216,13 @@ make_eig_data <- function(data, confidence_bins = NULL) {
 #' print(eig_result)
 #'
 #' @export
-compute_eig <- function(eig_data, prior_guilt = 0.5, confidence_bins = NULL) {
+compute_eig <- function(eig_data, prior_guilt = 0.5, confidence_bins = NULL,
+                        lineup_size = 6) {
 
   # If eig_data is a raw dataframe, prepare it first
   if (is.data.frame(eig_data) && !("response_data" %in% names(eig_data))) {
-    eig_data <- make_eig_data(eig_data, confidence_bins = confidence_bins)
+    eig_data <- make_eig_data(eig_data, confidence_bins = confidence_bins,
+                              lineup_size = lineup_size)
   }
 
   # Validate prior
@@ -272,7 +287,9 @@ compute_eig <- function(eig_data, prior_guilt = 0.5, confidence_bins = NULL) {
     prior_entropy = prior_entropy,
     n_guilty = n_guilty,
     n_innocent = n_innocent,
-    confidence_bins = eig_data$confidence_bins
+    confidence_bins = eig_data$confidence_bins,
+    lineup_size = eig_data$lineup_size,
+    innocent_suspect_method = eig_data$innocent_suspect_method
   )
 
   class(result) <- c("lineup_eig", "list")
@@ -533,6 +550,8 @@ plot_eig_posteriors <- function(eig_obj, max_responses = 15, show_prior = TRUE) 
 #' @param data A dataframe with columns: target_present, identification, confidence
 #' @param prior_guilt Numeric. Prior probability that suspect is guilty (default = 0.5)
 #' @param confidence_bins Numeric vector of bin edges (optional)
+#' @param lineup_size Nominal lineup size used when no designated innocent
+#'   suspect is present.
 #' @param show_plot Logical. Whether to create plots (default = TRUE)
 #' @param plot_type Character. Which plot to create: "ig" (information gain),
 #'   "posteriors" (posterior probabilities), or "both" (default)
@@ -557,11 +576,12 @@ plot_eig_posteriors <- function(eig_obj, max_responses = 15, show_prior = TRUE) 
 #'
 #' @export
 make_eig <- function(data, prior_guilt = 0.5, confidence_bins = NULL,
-                     show_plot = TRUE, plot_type = "both") {
+                     show_plot = TRUE, plot_type = "both", lineup_size = 6) {
 
   # Compute EIG
   eig_obj <- compute_eig(data, prior_guilt = prior_guilt,
-                         confidence_bins = confidence_bins)
+                         confidence_bins = confidence_bins,
+                         lineup_size = lineup_size)
 
   # Create plots if requested
   plot_ig <- NULL

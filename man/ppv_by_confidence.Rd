@@ -59,6 +59,15 @@ Different correction methods estimate innocent_suspect_IDs differently:
   \item "effective": uses effective size to account for bias (error_rate / effective_size)
   \item "none": assumes all errors are innocent-suspect IDs (error_rate)
 }
+
+\strong{Note on the implicit base rate:} PPV is computed from raw
+target-present and target-absent counts, so the prior probability of guilt
+is implicitly the experiment's TP:TA ratio (e.g., 0.5 for the usual balanced
+design). PPV is \emph{not} base-rate-free: at different real-world base
+rates the PPV of the same procedure will differ. When target-absent lineups
+have no designated innocent suspect, the correction also relies on the
+pseudo-distribution assumption of spreading filler choices over lineup
+members, which is a modeling approximation.
 }
 \examples{
 data(lineup_example)

@@ -31,6 +31,21 @@ A list with gamma and dprime.
 Estimate decision criterion (gamma) and discriminability (d') from
 rejection rates in culprit-absent and culprit-present lineups.
 }
+\details{
+This is a \strong{method-of-moments estimator} that is exactly identified
+from the two rejection rates alone: Pr(REJ|I) fixes gamma, and the gap
+between culprit-absent and culprit-present rejection rates fixes d'. It is
+\strong{information-lossy}: it ignores the composition of choices
+(suspect-ID vs filler-ID) and the spread of filler choices, which are the
+most diagnostic outcomes. If you have the full response breakdown
+(suspect/filler/reject counts for both lineup types), prefer the
+minimum-Pearson fitter \code{\link{fit_max_sdt}} or the 2-HT model
+(\code{\link{fit_winter_2ht}}), which use all outcome counts.
+}
 \examples{
 estimate_msdt_params(pr_rej_I = 0.25, pr_rej_G = 0.15, lineup_size = 6)
+}
+\seealso{
+\code{\link{fit_max_sdt}} for a full-outcome, minimum-Pearson fit;
+  \code{\link{fit_winter_2ht}} for the 2-HT MPT model.
 }

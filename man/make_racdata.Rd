@@ -39,9 +39,9 @@ response time and accuracy for suspect identifications.
 RAC analysis computes, for each response time bin:
 \deqn{Accuracy = \frac{Correct Suspect IDs}{Correct Suspect IDs + Incorrect Suspect IDs}}
 
-Only suspect IDs are included (filler IDs and rejections are ignored).
-For target-absent lineups with no designated innocent suspect, filler IDs
-are divided by lineup size to estimate incorrect suspect IDs.
+Explicit target-absent suspect IDs are used when present. Otherwise,
+target-absent filler IDs are divided by lineup size to estimate incorrect
+suspect IDs. The two estimators are never added together.
 
 RAC analysis is useful for examining the speed-accuracy tradeoff in
 eyewitness identifications. Faster responses typically indicate stronger

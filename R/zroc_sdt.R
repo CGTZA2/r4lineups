@@ -43,7 +43,7 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' Under equal-variance SDT:
 #' - z-ROC should be linear with slope = 1
 #' - d' = z(HR) - z(FAR) for any criterion
-#' - Intercept = d' / sqrt(2)
+#' - Intercept = d' in the line z(HR) = z(FAR) + d'
 #'
 #' Under unequal-variance SDT:
 #' - Slope = SD_lure / SD_target
@@ -75,7 +75,7 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' )
 #'
 #' # Fit equal-variance SDT model
-#' sdt_fit <- fit_sdt_roc(sim_data, lineup_size = 6)
+#' sdt_fit <- fit_sdt_roc(sim_data, lineup_size = 6, bootstrap = FALSE)
 #' print(sdt_fit)
 #' plot(sdt_fit)
 #'
@@ -83,8 +83,17 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' sdt_fit$dprime
 #'
 #' # Fit unequal-variance model
-#' sdt_uv <- fit_sdt_roc(sim_data, lineup_size = 6, model = "unequal_variance")
+#' sdt_uv <- fit_sdt_roc(
+#'   sim_data, lineup_size = 6, model = "unequal_variance", bootstrap = FALSE
+#' )
 #' sdt_uv$variance_ratio
+#'
+#' \donttest{
+#' # Use more replicates for publication analyses.
+#' sdt_boot <- fit_sdt_roc(
+#'   sim_data, lineup_size = 6, n_bootstrap = 200, seed = 123
+#' )
+#' }
 #'
 #' @importFrom stats coef fitted lm residuals
 #' @export
@@ -110,6 +119,7 @@ fit_sdt_roc <- function(data,
     }
     roc_obj <- make_rocdata(data, lineup_size = lineup_size)
   }
+  raw_data <- roc_obj$raw_data
 
   # Extract the actual dataframe and metadata
   roc_data <- roc_obj$roc_data
@@ -125,9 +135,17 @@ fit_sdt_roc <- function(data,
 
   # Bootstrap confidence intervals
   if (bootstrap) {
-    if (!is.null(seed)) set.seed(seed)
-    boot_results <- .bootstrap_sdt_fit(roc_data, n_tp, n_ta, model, n_bootstrap, conf_level)
-    params$bootstrap_ci <- boot_results
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
+    if (is.null(raw_data)) {
+      warning("Valid bootstrap intervals require raw trial-level data; bootstrap was disabled for this legacy ROC object.",
+              call. = FALSE)
+      bootstrap <- FALSE
+    } else {
+      params$bootstrap_ci <- .bootstrap_sdt_fit(
+        raw_data, roc_obj$lineup_size, model, n_bootstrap, conf_level
+      )
+    }
   }
 
   # Package results
@@ -163,6 +181,14 @@ fit_sdt_roc <- function(data,
     if (rate == 0) return(0.5 / n)
     if (rate == 1) return((n - 0.5) / n)
     return(rate)
+  }
+
+  # Exclude the artificial reject-all origin before fitting the z-ROC line.
+  if (all(c("n_correct_ids", "n_false_ids") %in% names(roc_data))) {
+    roc_data <- roc_data[!(roc_data$n_correct_ids == 0 & roc_data$n_false_ids == 0), ]
+  }
+  if (nrow(roc_data) < 2L) {
+    stop("At least two non-origin ROC points are required for z-ROC fitting.", call. = FALSE)
   }
 
   # Apply corrections
@@ -213,7 +239,7 @@ fit_sdt_roc <- function(data,
   # Compute R-squared
   ss_res <- sum(result$residuals^2, na.rm = TRUE)
   ss_tot <- sum((zroc_data$z_hr - mean(zroc_data$z_hr, na.rm = TRUE))^2, na.rm = TRUE)
-  result$r_squared <- 1 - (ss_res / ss_tot)
+  result$r_squared <- if (ss_tot > 0) 1 - (ss_res / ss_tot) else NA_real_
 
   return(result)
 }
@@ -230,10 +256,10 @@ fit_sdt_roc <- function(data,
     variance_ratio <- 1.0
 
   } else {
-    # Unequal variance: d' = intercept * sqrt(1 + slope^2) / slope
+    # Unequal variance: report d_a, the symmetric standardized separation.
     slope <- fit_results$slope
     intercept <- fit_results$intercept
-    dprime <- intercept * sqrt(1 + slope^2) / slope
+    dprime <- sqrt(2) * intercept / sqrt(1 + slope^2)
     variance_ratio <- slope
   }
 
@@ -254,21 +280,22 @@ fit_sdt_roc <- function(data,
 
 #' Bootstrap SDT Parameter Estimates
 #' @keywords internal
-.bootstrap_sdt_fit <- function(roc_data, n_tp, n_ta, model, n_bootstrap, conf_level) {
-  # Resample and refit to get confidence intervals
+.bootstrap_sdt_fit <- function(raw_data, lineup_size, model, n_bootstrap, conf_level) {
+  # Stratified trial-level resampling and complete ROC reconstruction.
 
   boot_dprime <- numeric(n_bootstrap)
   boot_variance_ratio <- numeric(n_bootstrap)
 
   for (i in 1:n_bootstrap) {
-    # This is a simplified bootstrap - in practice would need to resample
-    # raw data and recompute ROC, but here we'll resample ROC points
-    n_points <- nrow(roc_data)
-    boot_indices <- sample(1:n_points, n_points, replace = TRUE)
-    boot_roc <- roc_data[boot_indices, ]
-
     tryCatch({
-      zroc_boot <- .compute_zroc(boot_roc, n_tp, n_ta)
+      tp <- which(raw_data$target_present)
+      ta <- which(!raw_data$target_present)
+      boot_data <- raw_data[c(sample(tp, length(tp), replace = TRUE),
+                              sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
+      boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size)
+      zroc_boot <- .compute_zroc(
+        boot_obj$roc_data, boot_obj$n_target_present, boot_obj$n_target_absent
+      )
       fit_boot <- .fit_zroc_line(zroc_boot, model)
       params_boot <- .extract_sdt_parameters(fit_boot, zroc_boot, model)
 
@@ -296,6 +323,7 @@ fit_sdt_roc <- function(data,
     variance_ratio_ci = variance_ci,
     variance_ratio_se = sd(boot_variance_ratio, na.rm = TRUE),
     n_successful = length(boot_dprime),
+    n_bootstrap = n_bootstrap,
     conf_level = conf_level
   ))
 }
@@ -426,7 +454,7 @@ summary.sdt_roc_fit <- function(object, ...) {
     cat("  95% CI: [", round(object$bootstrap_ci$dprime_ci[1], 4), ",",
         round(object$bootstrap_ci$dprime_ci[2], 4), "]\n")
     cat("  Bootstrap samples:", object$bootstrap_ci$n_successful, "/",
-        length(object$bootstrap_ci$dprime_se) * 1000, "\n")
+        object$bootstrap_ci$n_bootstrap, "\n")
   }
 
   if (object$model_type == "unequal_variance") {

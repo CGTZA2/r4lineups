@@ -8,7 +8,8 @@ make_bayes_curves(
   data,
   response_categories = c("simple", "confidence"),
   confidence_bins = NULL,
-  prior_grid = seq(0.01, 0.99, 0.01)
+  prior_grid = seq(0.01, 0.99, 0.01),
+  lineup_size = 6
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ Options:
 
 \item{prior_grid}{Numeric vector of prior probabilities to evaluate
 (default: seq(0.01, 0.99, 0.01))}
+
+\item{lineup_size}{Nominal lineup size, used when target-absent data have no
+designated innocent suspect.}
 }
 \value{
 A list containing:

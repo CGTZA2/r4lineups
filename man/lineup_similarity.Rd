@@ -34,7 +34,7 @@ A tibble with columns:
   \item foil_name - Name/label for the foil
   \item foil_path - Path to foil image
   \item distance - Distance from target (lower = more similar)
-  \item similarity - Similarity score [0,1] for cosine metric
+  \item similarity - Cosine similarity score [-1,1] for cosine metric
   \item verified - Would be identified as same person
   \item rank - Rank by similarity (1 = most similar to target)
 }

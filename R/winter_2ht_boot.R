@@ -62,7 +62,8 @@ boot_winter_2ht <- function(x,
 
   # Set seed if provided
   if (!is.null(seed)) {
-    set.seed(seed)
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
   }
 
   # Get original fit if x is a winter_2ht object

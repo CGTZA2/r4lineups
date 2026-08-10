@@ -7,24 +7,25 @@
 esize_T_boot(lineup_table, d)
 }
 \arguments{
-\item{lineup_table}{A table of lineup choices}
+\item{lineup_table}{A vector of individual lineup choices. The historical
+argument name is retained for compatibility.}
 
 \item{d}{Indices for bootstrap resampling}
 }
 \description{
-Base function for generating boostrapped Effective Size (Tredoux, 1998)
+Base function for generating bootstrapped Effective Size (Tredoux, 1998)
 }
 \details{
 This is the statistic function passed to \code{boot::boot()} for
-  bootstrapping Tredoux's E'. The data argument should be a table of
-  lineup counts; \code{d} is the index vector supplied by \code{boot::boot}.
+  bootstrapping Tredoux's E'. The data argument must contain individual
+  lineup choices; \code{d} resamples mock witnesses rather than count-table cells.
   For a higher-level interface that accepts raw lineup vectors, see
   \code{\link{esize_boot_dist}}.
 }
 \examples{
-# Table of lineup choices from 50 mock witnesses to a 6-member lineup
+# Choices from 50 mock witnesses to a 6-member lineup
 set.seed(1)
-lineup_table <- table(sample(1:6, 50, replace = TRUE))
+lineup_table <- sample(1:6, 50, replace = TRUE)
 # E' for the observed data
 esize_T_boot(lineup_table, seq_along(lineup_table))
 }

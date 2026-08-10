@@ -4,7 +4,7 @@
 \alias{.apply_decision_rule}
 \title{Apply Decision Rule to Lineup Strengths}
 \usage{
-.apply_decision_rule(strengths, rule, lineup_size, d_prime)
+.apply_decision_rule(strengths, rule, lineup_size, d_prime = NULL)
 }
 \arguments{
 \item{strengths}{Numeric vector of memory strengths for all lineup members}

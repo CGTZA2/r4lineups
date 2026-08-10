@@ -9,7 +9,8 @@ make_eig(
   prior_guilt = 0.5,
   confidence_bins = NULL,
   show_plot = TRUE,
-  plot_type = "both"
+  plot_type = "both",
+  lineup_size = 6
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ make_eig(
 
 \item{plot_type}{Character. Which plot to create: "ig" (information gain),
 "posteriors" (posterior probabilities), or "both" (default)}
+
+\item{lineup_size}{Nominal lineup size used when no designated innocent
+suspect is present.}
 }
 \value{
 A list of class "lineup_eig" containing:

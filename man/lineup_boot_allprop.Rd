@@ -4,7 +4,7 @@
 \alias{lineup_boot_allprop}
 \title{Confidence intervals for lineup proportion}
 \usage{
-lineup_boot_allprop(lineup_vec, k, conf = 0.95)
+lineup_boot_allprop(lineup_vec, k, conf = 0.95, R = 1000)
 }
 \arguments{
 \item{lineup_vec}{A numeric vector of lineup choices}
@@ -12,6 +12,8 @@ lineup_boot_allprop(lineup_vec, k, conf = 0.95)
 \item{k}{Number of targets in lineup. Must be specified by user (scalar).}
 
 \item{conf}{Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).}
+
+\item{R}{Number of bootstrap replications. Defaults to 1000.}
 }
 \value{
 Returns a vector of bias corrected confidence intervals for

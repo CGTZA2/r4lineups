@@ -4,7 +4,7 @@
 \alias{eff_size_per_foils}
 \title{Effective Size per Foils}
 \usage{
-eff_size_per_foils(lineup_vec, target_pos, k, conf = 0.95)
+eff_size_per_foils(lineup_vec, target_pos, k, conf = 0.95, R = 1000)
 }
 \arguments{
 \item{lineup_vec}{A numeric vector of lineup choices}
@@ -14,6 +14,8 @@ eff_size_per_foils(lineup_vec, target_pos, k, conf = 0.95)
 \item{k}{Number of members in lineup. Must be specified by user (scalar).}
 
 \item{conf}{Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).}
+
+\item{R}{Number of bootstrap replications. Defaults to 1000.}
 }
 \description{
 Function for computing effective size (Malpass, 1981) counting foils who fall

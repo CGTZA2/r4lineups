@@ -68,6 +68,16 @@ then cumulative hit and false alarm rates are computed to form the full ROC curv
 The full ROC provides a threshold-free measure of investigator discriminability—
 the ability to distinguish guilty from innocent suspects using ALL available
 eyewitness evidence.
+
+\strong{Note on ordering and bias:} ordering cells by the \emph{sample}
+diagnosticity ratio (\code{order = "diagnosticity"}) bows the curve upward
+from noise alone, so the resulting AUC is optimistically biased — identical
+target-present and target-absent response distributions yield AUC slightly
+above 0.5, with the bias growing with the number of decision-by-confidence
+cells and shrinking with sample size. For inference or comparisons across
+conditions, prefer \code{order = "apriori"} (the theoretically fixed
+ordering suggested by Smith & Yang, 2020) or compare against a permutation
+baseline.
 }
 \examples{
 data(lineup_example)

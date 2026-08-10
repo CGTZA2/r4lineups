@@ -44,5 +44,5 @@
 
 compare_eff_sizes.boot <- function(linedf, d){
   temp_df <- linedf[d,]
-  diff <- (esize_T(table(temp_df[1])) - esize_T(table(temp_df[2])))
+  esize_T(table(temp_df[[1]])) - esize_T(table(temp_df[[2]]))
 }

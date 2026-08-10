@@ -278,19 +278,20 @@ Key differences:
 | Responses | Suspect IDs only | ALL responses |
 | Range | Limited (often 0-0.30) | Full (0-1.0) |
 | Measure | pAUC | AUC |
-| Bias | Favors conservative procedures | Unbiased |
+| Bias | Favors conservative procedures | Ordering-dependent; sample-DR ordering is an upper bound |
 | Evidence | Inculpatory only | Inculpatory + exculpatory |
 
 ## Practical Recommendations
 
-1. **Use full ROC for new analyses**
-   - Provides unbiased discriminability measure
+1. **Use full ROC when the inferential target is total evidentiary value**
+   - Uses inculpatory and exculpatory responses
    - Uses all available evidence
    - Aligns with real investigator decisions
 
-2. **Use diagnosticity ordering** (default)
-   - Data-driven approach
-   - Optimal ordering of evidence
+2. **Pre-specify ordering for confirmatory comparisons**
+   - `order = "apriori"` avoids choosing the order from the same sample
+   - Diagnosticity ordering is useful as an exploratory upper-bound estimate,
+     but its AUC is optimistically biased and can be unstable across samples
 
 3. **Bin confidence if needed**
    - Creates cleaner ROC curves

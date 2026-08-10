@@ -31,9 +31,9 @@ utils::globalVariables("time_numeric")
 #' RAC analysis computes, for each response time bin:
 #' \deqn{Accuracy = \frac{Correct Suspect IDs}{Correct Suspect IDs + Incorrect Suspect IDs}}
 #'
-#' Only suspect IDs are included (filler IDs and rejections are ignored).
-#' For target-absent lineups with no designated innocent suspect, filler IDs
-#' are divided by lineup size to estimate incorrect suspect IDs.
+#' Explicit target-absent suspect IDs are used when present. Otherwise,
+#' target-absent filler IDs are divided by lineup size to estimate incorrect
+#' suspect IDs. The two estimators are never added together.
 #'
 #' RAC analysis is useful for examining the speed-accuracy tradeoff in
 #' eyewitness identifications. Faster responses typically indicate stronger
@@ -59,6 +59,8 @@ utils::globalVariables("time_numeric")
 #' @export
 #' @import tibble
 make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
+  .validate_lineup_analysis(data, require_confidence = FALSE,
+                            require_response_time = TRUE)
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "response_time")
@@ -98,6 +100,7 @@ make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
   }
 
   # Initialize results
+  innocent_method <- .innocent_suspect_method(ta_data)
   rac_results <- tibble::tibble(
     response_time = character(),
     mean_time = numeric(),
@@ -136,9 +139,11 @@ make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
                                 ta_data$response_time == time_level, na.rm = TRUE)
     }
 
-    # Estimate incorrect suspect IDs from fillers
-    n_estimated_incorrect <- n_incorrect_fillers / lineup_size
-    n_incorrect_total <- n_incorrect_suspects + n_estimated_incorrect
+    n_incorrect_total <- if (innocent_method == "designated") {
+      n_incorrect_suspects
+    } else {
+      n_incorrect_fillers / lineup_size
+    }
 
     # Calculate accuracy
     n_total <- n_correct + n_incorrect_total
@@ -166,14 +171,19 @@ make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
   total_correct <- sum(tp_data$identification == "suspect")
   total_incorrect_suspects <- sum(ta_data$identification == "suspect")
   total_incorrect_fillers <- sum(ta_data$identification == "filler")
-  total_incorrect <- total_incorrect_suspects + (total_incorrect_fillers / lineup_size)
+  total_incorrect <- if (innocent_method == "designated") {
+    total_incorrect_suspects
+  } else {
+    total_incorrect_fillers / lineup_size
+  }
   overall_accuracy <- total_correct / (total_correct + total_incorrect)
 
   list(
     rac_data = rac_results,
     overall_accuracy = overall_accuracy,
     n_total_suspect_ids = total_correct + total_incorrect,
-    lineup_size = lineup_size
+    lineup_size = lineup_size,
+    innocent_suspect_method = innocent_method
   )
 }
 
@@ -293,7 +303,8 @@ make_rac <- function(data, lineup_size = 6, time_bins = NULL,
     rac_data = rac_obj$rac_data,
     overall_accuracy = rac_obj$overall_accuracy,
     n_total_suspect_ids = rac_obj$n_total_suspect_ids,
-    lineup_size = rac_obj$lineup_size
+    lineup_size = rac_obj$lineup_size,
+    innocent_suspect_method = rac_obj$innocent_suspect_method
   )
 
   class(result) <- c("lineup_rac", "list")

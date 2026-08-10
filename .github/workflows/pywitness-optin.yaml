@@ -1,0 +1,46 @@
+name: pyWitness opt-in parity
+
+on:
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  smoke-test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      MPLCONFIGDIR: ${{ runner.temp }}/matplotlib
+      XDG_CACHE_HOME: ${{ runner.temp }}/cache
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::testthat, any::pkgload, any::reticulate
+
+      - name: Install pinned pyWitness
+        shell: Rscript {0}
+        run: |
+          pkgload::load_all(".")
+          install_pywitness(
+            envname = "r4lineups-pywitness",
+            python = Sys.which("python")
+          )
+
+      - name: Run opt-in bridge smoke test
+        shell: Rscript {0}
+        env:
+          R4LINEUPS_RUN_PYWITNESS: "true"
+          R4LINEUPS_PYWITNESS_ENV: "r4lineups-pywitness"
+        run: |
+          pkgload::load_all(".")
+          testthat::test_file("tests/testthat/test-pywitness-optin.R")

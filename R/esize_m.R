@@ -26,7 +26,8 @@
 #'            Wells, G. L.,Leippe, M. R., & Ostrom, T. M. (1979). Guidelines for
 #'            empirically assessing the fairness of a lineup. \emph{Law and Human Behavior,
 #'            3}(4), 285-293.
-#'@return Malpass's original & adjusted estimates of effective size
+#'@return The Tredoux-adjusted Malpass effective-size estimate. With
+#'  \code{both = TRUE}, the original and adjusted estimates are also printed.
 #'@examples
 #'#Data:
 #'lineup_vec <- round(runif(100, 1, 6))
@@ -38,25 +39,33 @@
 #'@export
 
 esize_m <- function (lineup_table, k, both =FALSE){
-  #Revised formulation (Tredoux, 1998)
-  ea <- sum(lineup_table)/k
-  x <- sum(abs(lineup_table-ea)/(2*ea))
-  esize_ma = k-x
-
-
-  #Original formulation (Malpass, 1981)
-  if (0 %in% names(lineup_table)== TRUE ){
-    ka <- k-1
-    lineup_table_a <- lineup_table[-1]
+  if (inherits(lineup_table, "table")) {
+    datacheck3(lineup_table, k)
+    counts <- numeric(k)
+    if (is.null(names(lineup_table))) {
+      counts[] <- as.numeric(lineup_table)
+    } else {
+      counts[as.integer(names(lineup_table))] <- as.numeric(lineup_table)
+    }
+  } else {
+    lineup_vec <- typecheck(lineup_table)
+    datacheck1(lineup_vec, k)
+    counts <- tabulate(as.integer(lineup_vec), nbins = k)
   }
-  else{
-    ka <- k
-    lineup_table_a <- lineup_table
+  if (sum(counts) == 0) {
+    stop("At least one lineup choice is required.", call. = FALSE)
   }
 
-  ea <- (sum(lineup_table))/ka
-  xa <- sum(abs(lineup_table_a-ea)/(2*ea))
-  esize_ma_a = ka-xa
+  # Revised formulation using the declared nominal size (Tredoux, 1998).
+  expected_adjusted <- sum(counts) / k
+  esize_ma <- k - sum(abs(counts - expected_adjusted) / (2 * expected_adjusted))
+
+  # Original formulation uses only lineup members receiving at least one choice.
+  selected_counts <- counts[counts > 0]
+  ka <- length(selected_counts)
+  expected_original <- sum(selected_counts) / ka
+  esize_ma_a <- ka - sum(abs(selected_counts - expected_original) /
+                           (2 * expected_original))
 
   #Output
   if (both) {
@@ -64,5 +73,5 @@ esize_m <- function (lineup_table, k, both =FALSE){
     cat("Effective size (Malpass, 1981,","\n",
         "            adj Tredoux, 1998) = ", esize_ma, "\n")
   }
-  esize_ma
+  unname(esize_ma)
 }

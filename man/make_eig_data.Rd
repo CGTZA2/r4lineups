@@ -4,7 +4,7 @@
 \alias{make_eig_data}
 \title{Prepare EIG Data from Lineup Identification}
 \usage{
-make_eig_data(data, confidence_bins = NULL)
+make_eig_data(data, confidence_bins = NULL, lineup_size = 6)
 }
 \arguments{
 \item{data}{A dataframe with the following columns:
@@ -17,6 +17,9 @@ make_eig_data(data, confidence_bins = NULL)
 \item{confidence_bins}{Numeric vector of bin edges for grouping confidence
 (e.g., c(0, 60, 80, 100) creates bins 0-60, 61-80, 81-100).
 If NULL, uses individual confidence levels.}
+
+\item{lineup_size}{Nominal lineup size. Used to split target-absent filler
+identifications when no designated innocent suspect is present.}
 }
 \value{
 A list containing:
@@ -45,8 +48,7 @@ eig_data$response_data
 
 }
 \references{
-Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-conclusions via the data they should have produced: A priori comparison of
-eyewitness identification decision processes using quantitative predictions
-of the expected information gain. \emph{Psychological Review}.
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
+assessing the effectiveness of eyewitness identification procedures: Expected
+information gain. \emph{Psychological Review, 130}(3), 677--719.
 }

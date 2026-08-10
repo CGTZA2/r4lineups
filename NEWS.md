@@ -1,8 +1,98 @@
-# r4lineups 2.0.0 (2026-07-06)
+# r4lineups 2.1.0 (2026-08-10)
+
+* Added an explicit authorship and acknowledgements statement recognizing
+  Colin Tredoux and Tamsyn Naylor as authors of the original package; the use
+  of Codex and Claude for code-review, drafting, and debugging support in the
+  latest development cycle; and the published work on which the package's
+  computational methods rely. Suspected implementation errors should be
+  reported through the GitHub issue tracker.
+* Relicensed the package under the permissive MIT license and added canonical
+  citation metadata for the CRAN and JOSS release.
+
+## Wixted lineup-memory model interface
+
+* Added `install_pywitness()` and `check_pywitness_deps()` for an explicit,
+  isolated `r4lineups-pywitness` virtual environment. Installation uses the
+  immutable archive for audited pyWitness revision
+  `e726dcfc09423d0e0ff7f46c8e3a711040293eba`; package loading and ordinary CRAN
+  checks never install or initialize it.
+* Added `fit_lineup_models()` for fair simultaneous lineups, with Independent
+  Observations, Ensemble, Integration, and optional BEST-Rest fits; equal- and
+  unequal-variance paths; zero or estimated shared variance where identified;
+  starting values; optimizer controls; and explicit convergence diagnostics.
+* Results are durable R-native `lineup_model_comparison` objects with extracted
+  parameters, observed and expected response cells, Pearson statistics,
+  degrees of freedom, p-values, confidence binning, engine metadata, and
+  comparison/fit/ROC plots. No live Python object is retained.
+* The audited engine minimizes Pearson chi-squared. The reported multinomial
+  log likelihood is evaluated at that estimate rather than maximized, so AIC
+  and BIC are deliberately `NA` rather than invalidly treating it as an MLE.
+* BEST-Rest and Ensemble are reported as scale-equivalent parameterizations and
+  are never counted as independent model-selection evidence. Integration is a
+  historical comparator rather than a recommended default.
+* Added opt-in, three-platform Python tests for wrapper/direct-engine parity,
+  parameter and generating-model recovery, probability partitions,
+  BEST-Rest/Ensemble rescaling, equal/unequal variance, zero/estimated shared
+  variance, sparse confidence cells, and optimizer failure.
+
+# r4lineups 2.0.0 (2026-08-08)
 
 Major release: a substantial expansion of the package from the 0.1.x
 fairness-measure toolkit into a full analysis suite for eyewitness
 identification research, plus a package-wide statistical audit.
+
+## CRAN-readiness and statistical corrections
+
+* Corrected the legacy fairness estimators and bootstrap helpers: unchosen
+  lineup positions are retained, named count tables are matched by member
+  label, Malpass and Tredoux effective sizes use the documented definitions,
+  Tredoux bootstrap resampling occurs at the witness level, and bootstrap
+  standard errors are the standard deviation of the replicate statistics.
+* Corrected diagnosticity pairing, log-ratio variance, inverse-variance
+  weighting, homogeneity degrees of freedom, and independent TP/TA resampling.
+  `pos_list` now denotes the actual suspect position for each TP/TA pair (or a
+  two-element TP/TA position pair). Homogeneity inference requires positive
+  suspect-ID cells, as in Tredoux's uncorrected log-risk procedure.
+* Confidence-based methods now distinguish observed designated innocent-suspect
+  IDs from estimates based on target-absent filler IDs. ROC/CAC/RAC,
+  calibration, PPV, utility, full ROC, EIG, and Bayesian curves no longer add
+  both quantities. With no designated suspect, full ROC/EIG/Bayesian response
+  probabilities split target-absent filler choices into `1 / lineup_size`
+  suspect and `(lineup_size - 1) / lineup_size` filler components.
+* Full-ROC documentation now identifies empirical diagnosticity ordering as an
+  optimistic, sample-dependent ordering. PPV/effective-size, utility
+  false-alarm, fractional calibration/ANRI, saturated single-condition 2-HT,
+  and method-of-moments mSDT assumptions are stated explicitly.
+* Corrected pAUC sorting/interpolation and stratified its bootstrap; corrected
+  unequal-variance z-ROC discriminability and raw-data resampling; fixed binary
+  SDT-GLM validation and the covariance term in summary-level log-beta
+  comparisons.
+* Seed-taking simulation and bootstrap functions now restore the caller's RNG
+  state. Bootstrap count and confidence arguments are validated and honored,
+  optimizer/bootstrap failures are checked, and numerical/vector edge cases
+  receive explicit errors.
+* Optional Python dependency checks no longer initialize or download a managed
+  Python installation. Face-embedding distances reject missing, non-finite,
+  unequal-length, or zero-norm vectors as appropriate.
+* Added package-wide export-contract and hand-calculation regression tests.
+  All 156 exported functions are referenced by the test suite; functions that
+  require Python, Shiny, `lme4`, images, or other optional environments have
+  explicit dependency/error-path coverage and opt-in smoke-test exemptions.
+* Reduced evaluated vignette bootstrap/simulation sizes while retaining
+  publication-grade settings in unevaluated examples. Source builds no longer
+  include the audit article PDFs.
+* Corrected the EIG reference to Starns, Cohen, and Rotello (2023).
+* Corrected the lineup-memory simulator: the supplied lowest criterion now
+  controls identification versus rejection, subsequent ordered criteria
+  control confidence, and explicit criteria are preserved. The simulator now
+  implements Independent Observations/MAX, Ensemble, and Integration exactly
+  under its documented independent equal-variance assumptions. `"best_rest"`
+  remains accepted for compatibility but is identified as a scale-equivalent
+  parameterization of Ensemble.
+* Reframed `fit_max_sdt()` as a restricted, aggregate, single-criterion,
+  equal-variance Independent-Observations fit estimated by minimum Pearson
+  chi-squared. It is not a maximum-likelihood fit and is not the complete
+  confidence-based Wixted et al. (2018) model.
 
 ## Major New Features (pyWitness-inspired)
 
@@ -17,7 +107,8 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
 * S3 methods: `print()`, `summary()`, `plot()` for model comparison objects
 * `format_comparison_table()`: Publication-ready comparison tables
 * Automatic handling of different data requirements across models
-* Model selection recommendations based on AIC/BIC
+* Side-by-side reporting of non-comparable estimands; AIC/BIC are reported only
+  for the 2-HT likelihood fit and are not used to rank EIG or full-ROC AUC
 * Side-by-side visualizations of model results
 
 ### pAUC Statistical Comparison
@@ -33,11 +124,13 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
 ### Data Simulation and Power Analysis
 
 * `simulate_lineup_data()`: Generate lineup identification data
-  * Signal Detection Theory (SDT) model with multiple decision rules:
+  * Signal Detection Theory (SDT) model with three distinct decision families:
     * **MAX** (Independent Observations Model) - Default
-    * **BEST-REST** - Compare best match vs average of rest
-    * **Ensemble** - Average memory strength across lineup members
+    * **Ensemble** - Best match relative to the lineup mean
     * **Integration** - Sum memory strengths across all members
+  * **BEST-REST** remains a compatibility parameterization. Its decision
+    variable is `k / (k - 1)` times Ensemble, so the two fit identically when
+    criteria are rescaled and must not be treated as independent model evidence
   * Based on Wixted et al. (2018) and pyWitness implementations
   * Flexible parameters: d', criterion, lineup size, confidence levels
   * Optional response time simulation
@@ -132,8 +225,9 @@ This release implements high-priority features from pyWitness (Mickes et al., 20
 * Multi-item signal detection (mSDT) core functions: `pmax_filler()`,
   `dmax_filler()`, `qmax_filler()`, `rmax_filler()`, `max_filler_moments()`,
   `estimate_msdt_params()` (method-of-moments from rejection rates)
-* `fit_max_sdt()` / `compare_max_sdt()`: full-information maximum-likelihood
-  fitting of the compound MAX decision rule, with bootstrap CIs
+* `fit_max_sdt()` / `compare_max_sdt()`: restricted aggregate
+  Independent-Observations/MAX fitting by minimum Pearson chi-squared, with
+  bootstrap CIs and nested-constraint comparisons
 
 ### SDT Summary-Level Comparisons and GLM Estimation
 
@@ -249,7 +343,7 @@ New features based on:
 
 * Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental validation of a multinomial processing tree model for analyzing eyewitness identification decisions. *Scientific Reports, 12*, 15571.
 
-* Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical conclusions via the data they should have produced. *Psychological Review*.
+* Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for assessing the effectiveness of eyewitness identification procedures: Expected information gain. *Psychological Review, 130*(3), 677–719.
 
 * Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability. *Perspectives on Psychological Science, 15*(3), 589-607.
 

@@ -29,7 +29,10 @@ This vignette demonstrates how to use r4lineups' data simulation and power analy
 - **Explore scenarios**: Compare different experimental designs
 - **Teach concepts**: Demonstrate signal detection theory principles
 
-The simulation framework implements a Signal Detection Theory (SDT) model with the MAX decision rule, following the methodology used in eyewitness identification research (Wixted et al., 2018).
+The simulation framework implements equal-variance, independent-signal versions
+of the Independent Observations/MAX, Ensemble, and Integration decision rules
+discussed by Wixted et al. (2018). The accepted `"best_rest"` option is a
+scale-equivalent parameterization of Ensemble, not a fourth competing family.
 
 ## Signal Detection Model
 
@@ -48,6 +51,12 @@ The simulation generates data using the following SDT framework:
 - `c_criterion`: Decision criterion (higher = more conservative)
 - `lineup_size`: Number of lineup members
 - `conf_levels`: Number of confidence scale points
+
+The lowest supplied `c_criterion` is always the identification-versus-rejection
+threshold. Additional strictly increasing criteria define confidence. A scalar
+criterion retains that value as the lowest threshold and generates the
+remaining confidence thresholds over the documented two-unit range; for full
+control, supply one ordered criterion per confidence level.
 
 ## Basic Data Simulation
 
@@ -123,7 +132,7 @@ As expected, higher discriminability leads to:
 
 Use `simulate_power_analysis()` to determine the sample size needed to detect an effect:
 
-```{r power_analysis_basic}
+```{r power_analysis_basic, eval=FALSE}
 # Power analysis for detecting d' = 1.5 with ROC pAUC
 power_result <- simulate_power_analysis(
   sample_sizes = c(50, 100, 150, 200, 300),
@@ -145,7 +154,7 @@ The power analysis shows how power increases with sample size. For 80% power to 
 
 Power analysis for different discriminability levels:
 
-```{r power_comparison}
+```{r power_comparison, eval=FALSE}
 # Power to detect d' = 2.0
 power_high <- simulate_power_analysis(
   sample_sizes = c(100, 150, 200, 250, 300),
@@ -342,7 +351,7 @@ cat("7-point scale: unique values =", length(unique(conf_7$confidence)), "\n")
 
 Research question: How many participants do we need to detect discriminability at d' = 1.5?
 
-```{r planning_example}
+```{r planning_example, eval=FALSE}
 # Power analysis for d' = 1.5
 lineup_power <- simulate_power_analysis(
   sample_sizes = seq(50, 300, by = 25),

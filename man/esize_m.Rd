@@ -16,7 +16,8 @@ size estimate only. If TRUE, both Malpass's (1981) original formulation and
 Malpass's adjusted version (Tredoux, 1998) are printed to the console.}
 }
 \value{
-Malpass's original & adjusted estimates of effective size
+The Tredoux-adjusted Malpass effective-size estimate. With
+ \code{both = TRUE}, the original and adjusted estimates are also printed.
 }
 \description{
 Function for computing Effective Size

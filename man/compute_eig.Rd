@@ -4,7 +4,12 @@
 \alias{compute_eig}
 \title{Compute Expected Information Gain (EIG)}
 \usage{
-compute_eig(eig_data, prior_guilt = 0.5, confidence_bins = NULL)
+compute_eig(
+  eig_data,
+  prior_guilt = 0.5,
+  confidence_bins = NULL,
+  lineup_size = 6
+)
 }
 \arguments{
 \item{eig_data}{List output from make_eig_data(), or a dataframe with columns:
@@ -13,6 +18,9 @@ target_present, identification, confidence}
 \item{prior_guilt}{Numeric. Prior probability that suspect is guilty (default = 0.5)}
 
 \item{confidence_bins}{Numeric vector of bin edges (only used if eig_data is a dataframe)}
+
+\item{lineup_size}{Nominal lineup size used when raw target-absent data have
+no designated innocent suspect.}
 }
 \value{
 A list of class "lineup_eig" containing:
@@ -58,8 +66,7 @@ print(eig_result)
 
 }
 \references{
-Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-conclusions via the data they should have produced: A priori comparison of
-eyewitness identification decision processes using quantitative predictions
-of the expected information gain. \emph{Psychological Review}.
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
+assessing the effectiveness of eyewitness identification procedures: Expected
+information gain. \emph{Psychological Review, 130}(3), 677--719.
 }

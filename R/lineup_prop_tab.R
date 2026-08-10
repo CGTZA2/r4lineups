@@ -20,7 +20,25 @@
 #'@export
 
 lineup_prop_tab <- function(lineup_table, target_pos){
-    lineup_table[target_pos]/sum(lineup_table)
-}
+  counts <- as.numeric(lineup_table)
+  if (length(target_pos) != 1L || is.na(target_pos)) {
+    stop("target_pos must identify exactly one lineup member.", call. = FALSE)
+  }
+  total <- sum(counts)
+  if (!is.finite(total) || total <= 0 || any(!is.finite(counts)) || any(counts < 0)) {
+    stop("lineup_table must contain finite non-negative counts with a positive total.", call. = FALSE)
+  }
 
+  if (!is.null(names(lineup_table))) {
+    idx <- match(as.character(target_pos), names(lineup_table))
+    count <- if (is.na(idx)) 0 else counts[idx]
+  } else {
+    if (!is.numeric(target_pos) || target_pos != as.integer(target_pos) ||
+        target_pos < 1 || target_pos > length(counts)) {
+      stop("target_pos is outside the unnamed lineup table.", call. = FALSE)
+    }
+    count <- counts[target_pos]
+  }
+  unname(count / total)
+}
 

@@ -84,3 +84,17 @@ test_that("make_fullroc_data errors without both lineup types", {
   expect_error(make_fullroc_data(data[data$target_present, ]),
                "target-present and target-absent")
 })
+
+test_that("full ROC splits TA filler IDs when no innocent suspect is designated", {
+  dat <- data.frame(
+    target_present = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE),
+    identification = c("suspect", "filler", "reject", "filler", "filler", "reject"),
+    confidence = rep(80, 6)
+  )
+  result <- make_fullroc_data(dat, lineup_size = 4, order = "apriori")
+  tab <- result$diagnosticity_table
+  expect_equal(tab$n_false_alarms[tab$decision == "suspect"], 0.5)
+  expect_equal(tab$n_false_alarms[tab$decision == "filler"], 1.5)
+  expect_equal(sum(tab$false_alarm_rate), 1)
+  expect_equal(result$innocent_suspect_method, "estimated_from_fillers")
+})

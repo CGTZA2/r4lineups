@@ -4,8 +4,7 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #' Compare Multiple Models for Lineup Identification Data
 #'
 #' Fits and compares multiple models (2-HT, EIG, Full ROC) to the same lineup
-#' identification dataset, providing a comprehensive comparison table and
-#' model selection recommendations.
+#' identification dataset, providing a side-by-side descriptive table.
 #'
 #' @param data A dataframe with columns: target_present, identification, confidence
 #' @param models Character vector of models to fit. Options:
@@ -26,7 +25,8 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #'   \itemize{
 #'     \item comparison_table: Dataframe comparing model fits
 #'     \item fitted_models: List of fitted model objects
-#'     \item best_model: Name of best model by AIC (if applicable)
+#'     \item best_model: Always NULL. The included methods estimate different
+#'       quantities and cannot be ranked by a common information criterion.
 #'     \item data: The input data
 #'     \item models_fit: Character vector of models successfully fit
 #'   }
@@ -40,16 +40,19 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #' \itemize{
 #'   \item **2-HT (Winter et al., 2022)**: Multinomial processing tree model
 #'     with parameters for detection (dP, dA), bias (b), and guessing (g).
-#'     Provides AIC/BIC for model comparison.
+#'     Provides AIC/BIC for comparison only with other likelihood models fit
+#'     to the same observations and outcome representation.
 #'   \item **EIG (Starns et al., 2023)**: Information-theoretic measure of
 #'     evidentiary value. Higher values indicate more diagnostic procedures.
 #'   \item **Full ROC (Smith & Yang, 2020)**: Uses ALL responses to compute
-#'     investigator discriminability. AUC ranges from 0.5 (chance) to 1.0 (perfect).
+#'     investigator discriminability. AUC ranges from 0 to 1; 0.5 represents
+#'     chance under a fixed ordering.
 #' }
 #'
-#' **Model Selection:**
+#' **Interpretation:**
 #' \itemize{
-#'   \item Use AIC/BIC for 2-HT model (lower is better)
+#'   \item AIC/BIC describe the 2-HT likelihood fit but cannot be compared with
+#'     EIG or full-ROC AUC
 #'   \item Use EIG for comparing procedure diagnosticity (higher is better)
 #'   \item Use Full ROC AUC for investigator discriminability (higher is better)
 #' }
@@ -73,8 +76,9 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #' of a multinomial processing tree model for analyzing eyewitness identification
 #' decisions. \emph{Scientific Reports, 12}, 15571.
 #'
-#' Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical conclusions
-#' via the data they should have produced. \emph{Psychological Review}.
+#' Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
+#' assessing the effectiveness of eyewitness identification procedures: Expected
+#' information gain. \emph{Psychological Review, 130}(3), 677--719.
 #'
 #' Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator
 #' discriminability and eyewitness discriminability. \emph{Perspectives on
@@ -180,11 +184,13 @@ compare_models <- function(data,
     fitted_eig <- tryCatch({
       if (show_warnings) {
         compute_eig(data, prior_guilt = prior_guilt,
-                   confidence_bins = confidence_bins)
+                   confidence_bins = confidence_bins,
+                   lineup_size = lineup_size)
       } else {
         suppressWarnings(
           compute_eig(data, prior_guilt = prior_guilt,
-                     confidence_bins = confidence_bins)
+                     confidence_bins = confidence_bins,
+                     lineup_size = lineup_size)
         )
       }
     }, error = function(e) {
@@ -250,7 +256,7 @@ compare_models <- function(data,
         Model = "Full ROC (Smith & Yang, 2020)",
         Measure = "Full AUC",
         Value = round(fitted_fullroc$auc, 4),
-        Interpretation = "Higher is better (0.5-1.0)",
+        Interpretation = "Higher is better (0-1)",
         stringsAsFactors = FALSE
       ))
       comparison_table <- rbind(comparison_table, data.frame(
@@ -270,11 +276,8 @@ compare_models <- function(data,
     }
   }
 
-  # Determine best model by AIC (if 2-HT was fit)
+  # These methods have different likelihoods/estimands; no common best model.
   best_model <- NULL
-  if ("2ht" %in% models_fit) {
-    best_model <- "2ht"  # Only parametric model with AIC
-  }
 
   # Create result object
   result <- list(
@@ -309,9 +312,7 @@ print.model_comparison <- function(x, ...) {
   cat("Comparison Table:\n")
   print(x$comparison_table, row.names = FALSE)
 
-  if (!is.null(x$best_model)) {
-    cat("\n\nBest parametric model (by AIC):", x$best_model, "\n")
-  }
+  cat("\nMetrics describe different estimands and are not a single model-selection scale.\n")
 
   cat("\nAccess fitted models via: $fitted_models$<model_name>\n")
   cat("Available models:", paste(names(x$fitted_models), collapse = ", "), "\n")
@@ -373,8 +374,8 @@ summary.model_comparison <- function(object, ...) {
   }
 
   cat("---\n")
-  cat("Model Selection Guidance:\n")
-  cat("  - 2-HT: Use AIC/BIC for parametric model comparison\n")
+  cat("Interpretation Guidance:\n")
+  cat("  - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes\n")
   cat("  - EIG: Higher values = more informative procedure\n")
   cat("  - Full ROC: Higher AUC = better investigator discriminability\n")
   cat("\nEach model provides different insights -- consider using multiple models.\n")

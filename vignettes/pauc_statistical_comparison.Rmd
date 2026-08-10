@@ -98,7 +98,7 @@ comparison <- compare_pauc(
   lineup_size = 6,
   label1 = "Strong discriminability (d'=2.0)",
   label2 = "Moderate discriminability (d'=1.5)",
-  n_bootstrap = 1000,  # Use 2000+ for publications
+  n_bootstrap = 100,  # Use 2000+ for publications
   seed = 123
 )
 
@@ -151,7 +151,7 @@ comparison_20 <- compare_pauc(
   max_false_id_rate = 0.20,  # 20% cutoff
   label1 = "Strong",
   label2 = "Moderate",
-  n_bootstrap = 1000,
+  n_bootstrap = 100,
   seed = 456
 )
 
@@ -172,11 +172,11 @@ Common policy-relevant cutoffs:
 quick_comparison <- compare_pauc(
   condition1,
   condition2,
-  n_bootstrap = 500,  # Faster
+  n_bootstrap = 100,  # Fast vignette setting
   seed = 789
 )
 
-cat("Quick comparison (500 bootstrap samples):\n")
+cat("Quick comparison (100 bootstrap samples):\n")
 cat("  p-value:", format.pval(quick_comparison$p_value), "\n")
 
 # Vs. publication-quality (more samples)
@@ -197,7 +197,7 @@ Recommendations:
 
 ### Example 1: Simultaneous vs. Sequential Lineups
 
-```{r example_simultaneous_sequential}
+```{r example_simultaneous_sequential, eval=FALSE}
 # Simulate simultaneous lineup (potentially better)
 simultaneous <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
@@ -230,7 +230,7 @@ plot(lineup_comparison)
 
 ### Example 2: Lineup Size Comparison
 
-```{r example_lineup_size}
+```{r example_lineup_size, eval=FALSE}
 # 6-person lineup
 lineup_6 <- simulate_lineup_data(
   n_tp = 150, n_ta = 150,
@@ -263,7 +263,7 @@ summary(size_comparison)
 
 ### Example 3: Retention Interval
 
-```{r example_retention}
+```{r example_retention, eval=FALSE}
 # Immediate test (better memory)
 immediate <- simulate_lineup_data(
   n_tp = 180, n_ta = 180,
@@ -299,7 +299,7 @@ print(retention_comparison)
 
 When comparing multiple conditions, adjust for multiple testing:
 
-```{r multiple_comparisons}
+```{r multiple_comparisons, eval=FALSE}
 # Three conditions
 high_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 2.0, lineup_size = 6, conf_levels = 5)
 med_d <- simulate_lineup_data(n_tp = 120, n_ta = 120, d_prime = 1.5, lineup_size = 6, conf_levels = 5)
@@ -391,7 +391,7 @@ comparison_99 <- compare_pauc(
   condition1,
   condition2,
   conf_level = 0.99,  # 99% CI
-  n_bootstrap = 1000,
+  n_bootstrap = 100,
   seed = 555
 )
 
@@ -406,7 +406,7 @@ cat("\nNote: 99% CI is wider (more conservative)\n")
 
 Determine required sample size for detecting pAUC differences:
 
-```{r power_analysis}
+```{r power_analysis, eval=FALSE}
 # Simulate various sample sizes
 sample_sizes <- c(50, 100, 150, 200, 300)
 power_results <- data.frame(
@@ -532,7 +532,7 @@ cat("  • Bootstrap distribution (supplementary)\n")
 
 ### 1. Insufficient Bootstrap Samples
 
-```{r pitfall_bootstrap}
+```{r pitfall_bootstrap, eval=FALSE}
 cat("Too few bootstrap samples lead to unstable SE estimates:\n\n")
 
 # Compare with different bootstrap samples

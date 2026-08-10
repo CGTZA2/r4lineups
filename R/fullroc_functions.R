@@ -82,6 +82,7 @@ make_fullroc_data <- function(data,
                                order = c("diagnosticity", "apriori"),
                                lineup_size = 6,
                                epsilon = 0.001) {
+  .validate_lineup_analysis(data)
 
   order <- match.arg(order)
 
@@ -110,6 +111,11 @@ make_fullroc_data <- function(data,
 
   n_tp <- nrow(tp_data)
   n_ta <- nrow(ta_data)
+  innocent_method <- .innocent_suspect_method(ta_data)
+  if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
+      !is.finite(lineup_size) || lineup_size < 2) {
+    stop("lineup_size must be a finite number of at least 2.", call. = FALSE)
+  }
 
   if (n_tp == 0 | n_ta == 0) {
     stop("Data must include both target-present and target-absent lineups")
@@ -139,8 +145,18 @@ make_fullroc_data <- function(data,
     n_hits <- sum(tp_data$identification == dec & tp_data$conf_bin == conf)
     hit_rate <- n_hits / n_tp
 
-    # Count false alarms (target-absent)
-    n_fa <- sum(ta_data$identification == dec & ta_data$conf_bin == conf)
+    # Count target-absent outcomes. In a lineup without a designated innocent
+    # suspect, split filler IDs into their expected suspect (1/m) and remaining
+    # filler ((m-1)/m) components, as required by full-ROC rate adjustment.
+    if (innocent_method == "estimated_from_fillers" && dec == "suspect") {
+      n_fa <- sum(ta_data$identification == "filler" & ta_data$conf_bin == conf) /
+        lineup_size
+    } else if (innocent_method == "estimated_from_fillers" && dec == "filler") {
+      n_fa <- sum(ta_data$identification == "filler" & ta_data$conf_bin == conf) *
+        (lineup_size - 1) / lineup_size
+    } else {
+      n_fa <- sum(ta_data$identification == dec & ta_data$conf_bin == conf)
+    }
     false_alarm_rate <- n_fa / n_ta
 
     diagnosticity_table$hit_rate[i] <- hit_rate
@@ -236,7 +252,8 @@ make_fullroc_data <- function(data,
     diagnosticity_table = diagnosticity_table,
     n_target_present = n_tp,
     n_target_absent = n_ta,
-    lineup_size = lineup_size
+    lineup_size = lineup_size,
+    innocent_suspect_method = innocent_method
   )
 }
 
@@ -389,7 +406,7 @@ plot_fullroc <- function(fullroc_obj,
 
   # Add shaded area under curve
   p <- p + geom_ribbon(
-    aes(ymin = cumulative_false_alarm_rate, ymax = cumulative_hit_rate),
+    aes(ymin = 0, ymax = cumulative_hit_rate),
     alpha = 0.2,
     fill = "steelblue"
   )

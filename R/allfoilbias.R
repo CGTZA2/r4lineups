@@ -16,17 +16,12 @@
 #'@export
 
 allfoilbias <- function (lineup_table, target_pos, k){
-    datacheck3(lineup_table, k)
-    # Make df for testing
-    linedf <- as.data.frame(matrix(ncol = length(lineup_table),
-                                   nrow = length(lineup_table)))
-    linebias <- NULL
-    for (i in seq_along(lineup_table)){
-        linebias[i] = lineup_prop_tab(lineup_table,target_pos)
-        linedf[,i] = rot_vector(lineup_table)
-        linetab = linedf[,i]
-    }
-    # linebias[length(linetab)] = lineup_prop_pos(linetab,1)
-    linebias
+  datacheck3(lineup_table, k)
+  if (!is.numeric(target_pos) || length(target_pos) != 1L || is.na(target_pos) ||
+      target_pos < 1 || target_pos > k || target_pos != as.integer(target_pos)) {
+    stop("target_pos must be one integer member position between 1 and k.", call. = FALSE)
+  }
+  out <- vapply(seq_len(k), function(pos) lineup_prop_tab(lineup_table, pos), numeric(1))
+  names(out) <- paste0("member_", seq_len(k))
+  out
 }
-

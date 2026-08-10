@@ -4,6 +4,7 @@
 #'@param lineup_vec A numeric vector of lineup choices
 #'@param k Number of targets in lineup. Must be specified by user (scalar).
 #'@param conf Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).
+#'@param R Number of bootstrap replications. Defaults to 1000.
 #'@return Returns a vector of bias corrected confidence intervals for
 #'        lineup proportion for each member in a lineup
 #'@seealso \code{\link[boot:boot]{boot}}: https://cran.r-project.org/web/packages/boot/boot.pdf
@@ -29,24 +30,31 @@
 #'@importFrom purrr map map_df
 #'@importFrom dplyr slice
 
-lineup_boot_allprop <- function(lineup_vec, k, conf = 0.95){
+lineup_boot_allprop <- function(lineup_vec, k, conf = 0.95, R = 1000){
   lineup_vec <- typecheck(lineup_vec)
   datacheck1(lineup_vec, k)
-  target_pos <- c(1:k)
-  z <- map(target_pos,~boot(lineup_vec, lineup_prop_boot, target_pos = .x, R = 1000) %>%
-             boot.ci(conf = 0.95, type = "bca")) %>%
-    map(magrittr::extract, "bca") %>%
-    map_df(magrittr::extract,"bca")
+  if (!is.numeric(conf) || length(conf) != 1L || conf <= 0 || conf >= 1) {
+    stop("conf must be between 0 and 1.", call. = FALSE)
+  }
+  if (!is.numeric(R) || length(R) != 1L || R < 1 || R != as.integer(R)) {
+    stop("R must be a positive integer.", call. = FALSE)
+  }
 
-  z2 <-  matrix(ncol = length(target_pos),nrow = 5, z$bca) %>%
-    data.frame() %>%
-    slice(4:5)
-  ci <- as.data.frame(t(z2))
-
-  member <- seq(from = 1, to = length(target_pos), by = 1)
-  rownames(ci) <- member
-  colnames(ci) <- c("ci_low", "ci_high")
-  ci <- round(ci, 3)
-
-  return(ci)
+  target_pos <- seq_len(k)
+  ci_values <- lapply(target_pos, function(pos) {
+    boot_obj <- boot(lineup_vec, lineup_prop_boot, target_pos = pos, R = R)
+    ci_obj <- suppressWarnings(tryCatch(
+      boot.ci(boot_obj, conf = conf, type = "bca", target_pos = pos),
+      error = function(e) NULL
+    ))
+    if (!is.null(ci_obj) && !is.null(ci_obj$bca) && all(is.finite(ci_obj$bca[4:5]))) {
+      return(ci_obj$bca[4:5])
+    }
+    alpha <- (1 - conf) / 2
+    as.numeric(stats::quantile(boot_obj$t, c(alpha, 1 - alpha), na.rm = TRUE))
+  })
+  ci <- as.data.frame(do.call(rbind, ci_values))
+  names(ci) <- c("ci_low", "ci_high")
+  rownames(ci) <- target_pos
+  ci
 }
