@@ -4,7 +4,7 @@
 \alias{func_size_report}
 \title{Functional Size with Bootstrapped Confidence Intervals}
 \usage{
-func_size_report(lineup_vec, target_pos, k, R)
+func_size_report(lineup_vec, target_pos, k, R = 1000)
 }
 \arguments{
 \item{lineup_vec}{A numeric vector of lineup choices}
@@ -14,6 +14,10 @@ func_size_report(lineup_vec, target_pos, k, R)
 \item{k}{Number of members in lineup. Must be specified by user (scalar).}
 
 \item{R}{Number of bootstrap samples. Defaults to 1000}
+}
+\value{
+Invisibly returns the functional-size estimate, normal, percentile,
+ and BCa intervals, the number of replications, and the bootstrap object.
 }
 \description{
 This function is a master function, calling other functions it needs,

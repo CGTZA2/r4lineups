@@ -10,7 +10,13 @@
 #'
 #' @return List with decision_value and chosen_position
 #' @keywords internal
-.apply_decision_rule <- function(strengths, rule, lineup_size, d_prime) {
+.apply_decision_rule <- function(strengths, rule, lineup_size, d_prime = NULL) {
+
+  if (!is.numeric(strengths) || length(strengths) != lineup_size ||
+      anyNA(strengths) || any(!is.finite(strengths))) {
+    stop("strengths must contain one finite numeric value per lineup member.",
+         call. = FALSE)
+  }
 
   if (rule == "max") {
     # Independent Observations Model - MAX rule
@@ -32,21 +38,18 @@
     rest_mean <- mean(rest_strengths)
 
     # Decision variable: best - average(rest)
-    # Adjusted by lineup size as per pyWitness formula
     decision_value <- best_strength - rest_mean
     chosen_position <- max_idx
 
   } else if (rule == "ensemble") {
-    # Ensemble Model
-    # Average memory strength across all lineup members
-    # Based on Wixted et al. (2018) ensemble coding
+    # Ensemble Model: the MAX strength minus the lineup mean.
 
     # Find best match first
     max_idx <- which.max(strengths)
     best_strength <- strengths[max_idx]
 
-    # Compute ensemble average excluding the chosen member
-    # Formula from pyWitness: (w*(n-1) - sum(others))/n
+    # This equals (n - 1) / n times BEST-Rest. The two rules therefore
+    # represent the same model under a corresponding rescaling of criteria.
     other_strengths <- strengths[-max_idx]
     ensemble_avg <- (best_strength * (lineup_size - 1) - sum(other_strengths)) / lineup_size
 
@@ -70,10 +73,61 @@
     stop("Unknown decision rule: ", rule)
   }
 
-  return(list(
+  list(
     decision_value = decision_value,
     chosen_position = chosen_position
-  ))
+  )
+}
+
+.simulation_criteria <- function(c_criterion, conf_levels) {
+  if (!is.numeric(c_criterion) || length(c_criterion) < 1L ||
+      anyNA(c_criterion) || any(!is.finite(c_criterion))) {
+    stop("c_criterion must contain finite numeric decision criteria.",
+         call. = FALSE)
+  }
+
+  if (is.null(conf_levels)) {
+    if (length(c_criterion) != 1L) {
+      stop("c_criterion must be a scalar when conf_levels is NULL.",
+           call. = FALSE)
+    }
+    return(as.numeric(c_criterion))
+  }
+
+  if (!is.numeric(conf_levels) || length(conf_levels) != 1L ||
+      is.na(conf_levels) || !is.finite(conf_levels) ||
+      conf_levels < 2L || conf_levels != as.integer(conf_levels)) {
+    stop("conf_levels must be at least 2 and integer-valued, or NULL.",
+         call. = FALSE)
+  }
+  conf_levels <- as.integer(conf_levels)
+
+  if (length(c_criterion) == 1L) {
+    # A scalar is the actual ID/rejection threshold. Additional confidence
+    # thresholds are placed over a documented two-unit range above it.
+    criteria <- c_criterion + seq(0, 2, length.out = conf_levels)
+  } else if (length(c_criterion) == conf_levels) {
+    criteria <- as.numeric(c_criterion)
+  } else {
+    stop("c_criterion must be a scalar or have one value per confidence level.",
+         call. = FALSE)
+  }
+
+  if (is.unsorted(criteria, strictly = TRUE)) {
+    stop("Confidence criteria must be strictly increasing.", call. = FALSE)
+  }
+  criteria
+}
+
+.simulation_response <- function(decision_value, criteria, conf_levels) {
+  makes_id <- decision_value > criteria[1L]
+  if (is.null(conf_levels)) {
+    confidence <- NA_integer_
+  } else {
+    confidence <- sum(decision_value > criteria)
+    confidence <- max(1L, min(as.integer(conf_levels), confidence))
+  }
+  list(makes_id = makes_id, confidence = confidence)
 }
 
 
@@ -87,17 +141,20 @@
 #' @param d_prime Numeric. Discriminability (d') between target and lure
 #'   distributions. Higher values = better memory. Typical range: 0.5 to 3.0
 #'   (default = 1.5)
-#' @param c_criterion Numeric or vector. Decision criterion/criteria for making
-#'   identifications. Lower values = more liberal (more IDs). Can be a single
-#'   value or vector for multiple confidence bins (default = 0)
+#' @param c_criterion Numeric scalar or vector of ordered decision criteria.
+#'   The first value is always the identification/rejection threshold. With
+#'   confidence ratings, a scalar generates \code{conf_levels} thresholds from
+#'   \code{c_criterion} through \code{c_criterion + 2}; alternatively, supply
+#'   exactly one strictly increasing threshold per confidence level. Lower
+#'   values are more liberal (default = 0).
 #' @param lineup_size Integer. Number of lineup members (default = 6)
 #' @param conf_levels Integer. Number of confidence levels to simulate. If NULL,
 #'   returns binary decision only (default = 5)
 #' @param decision_rule Character. Decision strategy for lineup choices:
 #'   \itemize{
 #'     \item "max" - Independent observations, choose highest strength (default)
-#'     \item "best_rest" - Compare best match vs average of remaining members
-#'     \item "ensemble" - Average memory strength across all lineup members
+#'     \item "best_rest" - Best strength minus the mean of the other members
+#'     \item "ensemble" - Best strength minus the mean of all lineup members
 #'     \item "integration" - Sum memory strengths across all members
 #'   }
 #' @param include_response_time Logical. Whether to simulate response times
@@ -121,17 +178,25 @@
 #'   \item Decision: Depends on decision_rule parameter
 #' }
 #'
-#' **Decision Rules:**
+#' \strong{Decision Rules:}
 #' \itemize{
-#'   \item **MAX** (default): Independent observations model. Choose lineup member
+#'   \item \strong{MAX} (default): Independent observations model. Choose lineup member
 #'     with highest memory strength (Clark, 2003).
-#'   \item **BEST-REST**: Compare best match against average of remaining members.
-#'     Decision variable = best - mean(others) (Wixted et al., 2018).
-#'   \item **Ensemble**: Average memory strength across lineup members using
-#'     ensemble coding principles. More holistic evaluation (Wixted et al., 2018).
-#'   \item **Integration**: Sum memory strengths across all lineup members.
+#'   \item \strong{BEST-REST}: Best strength minus the average of the remaining
+#'     members (Clark, 2003).
+#'   \item \strong{Ensemble}: Best strength minus the average of all lineup members
+#'     (Wixted et al., 2018). For lineup size \eqn{k}, this is
+#'     \eqn{(k - 1) / k} times BEST-REST, so the two are equivalent model
+#'     parameterizations when their criteria are rescaled by the same factor.
+#'   \item \strong{Integration}: Sum memory strengths across all lineup members.
 #'     Represents complete integration of evidence (Wixted et al., 2018).
 #' }
+#'
+#' All rules use independent signals with target distribution
+#' \eqn{N(d', 1)} and filler distribution \eqn{N(0, 1)}. Thus, this simulator
+#' represents the equal-variance, zero-correlation special case of the lineup
+#' models. It does not implement the shared-variance or unequal-variance
+#' likelihood models fitted by Wixted et al. (2018).
 #'
 #' The simulation assumes:
 #' \itemize{
@@ -140,16 +205,17 @@
 #'   \item Normal distributions for memory strength
 #' }
 #'
-#' Response times (if simulated):
+#' Response times (if simulated) are a heuristic convenience, not a fitted
+#' reaction-time or drift-diffusion model:
 #' \itemize{
-#'   \item Based on drift-diffusion model logic
 #'   \item Faster for stronger memory signals
-#'   \item RT ~ InverseGaussian(strength-dependent)
+#'   \item A bounded noisy function of decision strength
 #' }
 #'
 #' @references
 #' Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
-#' lineup memory. \emph{Cognitive Psychology, 105}, 8-114.
+#' lineup memory. \emph{Cognitive Psychology, 105}, 81--114.
+#' \doi{10.1016/j.cogpsych.2018.06.001}
 #'
 #' Mickes, L., et al. (2024). pyWitness 1.0: A python eyewitness
 #' identification analysis toolkit. \emph{Behavior Research Methods, 56},
@@ -173,13 +239,12 @@
 #'   seed = 42
 #' )
 #'
-#' # Integration model with response times
+#' # Integration decision rule
 #' integration_data <- simulate_lineup_data(
 #'   n_tp = 200, n_ta = 200,
 #'   d_prime = 1.5,
 #'   decision_rule = "integration",
 #'   conf_levels = 5,
-#'   include_response_time = TRUE,
 #'   seed = 42
 #' )
 #'
@@ -209,25 +274,38 @@ simulate_lineup_data <- function(n_tp = 100,
                                   seed = NULL) {
 
   if (!is.null(seed)) {
-    set.seed(seed)
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
   }
 
   # Match decision_rule argument
   decision_rule <- match.arg(decision_rule)
 
   # Validate inputs
-  if (n_tp < 1 || n_ta < 1) {
-    stop("n_tp and n_ta must be positive")
+  if (!is.numeric(n_tp) || length(n_tp) != 1L || is.na(n_tp) ||
+      !is.finite(n_tp) || n_tp < 1L || n_tp != as.integer(n_tp) ||
+      !is.numeric(n_ta) || length(n_ta) != 1L || is.na(n_ta) ||
+      !is.finite(n_ta) || n_ta < 1L || n_ta != as.integer(n_ta)) {
+    stop("n_tp and n_ta must be positive integers.", call. = FALSE)
   }
-  if (d_prime < 0) {
-    stop("d_prime must be non-negative")
+  n_tp <- as.integer(n_tp)
+  n_ta <- as.integer(n_ta)
+  if (!is.numeric(d_prime) || length(d_prime) != 1L || is.na(d_prime) ||
+      !is.finite(d_prime) || d_prime < 0) {
+    stop("d_prime must be a finite non-negative scalar.", call. = FALSE)
   }
-  if (lineup_size < 2) {
-    stop("lineup_size must be at least 2")
+  if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
+      is.na(lineup_size) || !is.finite(lineup_size) || lineup_size < 2L ||
+      lineup_size != as.integer(lineup_size)) {
+    stop("lineup_size must be at least 2 and integer-valued.", call. = FALSE)
   }
-  if (!is.null(conf_levels) && conf_levels < 2) {
-    stop("conf_levels must be at least 2")
+  lineup_size <- as.integer(lineup_size)
+  if (!is.logical(include_response_time) ||
+      length(include_response_time) != 1L || is.na(include_response_time)) {
+    stop("include_response_time must be TRUE or FALSE.", call. = FALSE)
   }
+  criteria <- .simulation_criteria(c_criterion, conf_levels)
+  if (!is.null(conf_levels)) conf_levels <- as.integer(conf_levels)
 
   # Initialize results
   all_data <- list()
@@ -248,24 +326,12 @@ simulate_lineup_data <- function(n_tp = 100,
       d_prime
     )
 
-    max_strength <- decision_result$decision_value
+    decision_value <- decision_result$decision_value
     max_position <- decision_result$chosen_position
 
-    # Decision: ID if max exceeds criterion, otherwise reject
-    if (!is.null(conf_levels)) {
-      # Multiple criteria for confidence levels
-      criteria <- seq(min(c_criterion) - 1,
-                      max(c_criterion) + 2,
-                      length.out = conf_levels + 1)
-      conf <- findInterval(max_strength, criteria, rightmost.closed = TRUE)
-      conf <- pmax(1, pmin(conf_levels, conf))  # Bound to valid range
-
-      # Identify if exceeds lowest criterion
-      makes_id <- max_strength > criteria[1]
-    } else {
-      makes_id <- max_strength > c_criterion
-      conf <- NA
-    }
+    response <- .simulation_response(decision_value, criteria, conf_levels)
+    makes_id <- response$makes_id
+    conf <- response$confidence
 
     # Determine identification
     if (makes_id) {
@@ -282,7 +348,7 @@ simulate_lineup_data <- function(n_tp = 100,
     if (include_response_time) {
       # RT based on memory strength (stronger = faster)
       # Base RT + inverse of strength + noise
-      rt <- 5000 + (3000 / (1 + max_strength^2)) + rnorm(1, 0, 1000)
+      rt <- 5000 + (3000 / (1 + decision_value^2)) + rnorm(1, 0, 1000)
       rt <- max(rt, 500)  # Minimum 500ms
     } else {
       rt <- NA
@@ -311,22 +377,12 @@ simulate_lineup_data <- function(n_tp = 100,
       d_prime
     )
 
-    max_strength <- decision_result$decision_value
+    decision_value <- decision_result$decision_value
     max_position <- decision_result$chosen_position
 
-    # Decision: ID if max exceeds criterion, otherwise reject
-    if (!is.null(conf_levels)) {
-      criteria <- seq(min(c_criterion) - 1,
-                      max(c_criterion) + 2,
-                      length.out = conf_levels + 1)
-      conf <- findInterval(max_strength, criteria, rightmost.closed = TRUE)
-      conf <- pmax(1, pmin(conf_levels, conf))
-
-      makes_id <- max_strength > criteria[1]
-    } else {
-      makes_id <- max_strength > c_criterion
-      conf <- NA
-    }
+    response <- .simulation_response(decision_value, criteria, conf_levels)
+    makes_id <- response$makes_id
+    conf <- response$confidence
 
     # Determine identification
     # In target-absent, position 1 is designated "innocent suspect"
@@ -342,7 +398,7 @@ simulate_lineup_data <- function(n_tp = 100,
 
     # Simulate response time
     if (include_response_time) {
-      rt <- 5000 + (3000 / (1 + max_strength^2)) + rnorm(1, 0, 1000)
+      rt <- 5000 + (3000 / (1 + decision_value^2)) + rnorm(1, 0, 1000)
       rt <- max(rt, 500)
     } else {
       rt <- NA
@@ -379,6 +435,7 @@ simulate_lineup_data <- function(n_tp = 100,
     n_ta = n_ta,
     d_prime = d_prime,
     c_criterion = c_criterion,
+    criteria = criteria,
     lineup_size = lineup_size,
     conf_levels = conf_levels,
     decision_rule = decision_rule,
@@ -386,7 +443,7 @@ simulate_lineup_data <- function(n_tp = 100,
   )
 
   class(result) <- c("simulated_lineup_data", "data.frame")
-  return(result)
+  result
 }
 
 
@@ -402,7 +459,7 @@ print.simulated_lineup_data <- function(x, ...) {
   cat("  Target-present lineups:", params$n_tp, "\n")
   cat("  Target-absent lineups:", params$n_ta, "\n")
   cat("  d':", params$d_prime, "\n")
-  cat("  Criterion:", params$c_criterion, "\n")
+  cat("  Criteria:", paste(params$criteria, collapse = ", "), "\n")
   cat("  Lineup size:", params$lineup_size, "\n")
   if (!is.null(params$decision_rule)) {
     cat("  Decision rule:", params$decision_rule, "\n")

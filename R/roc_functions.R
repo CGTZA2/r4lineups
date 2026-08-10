@@ -28,8 +28,9 @@
 #'   \item False ID rate = proportion of target-absent lineups where suspect identified
 #' }
 #'
-#' When no innocent suspect is designated in target-absent lineups, filler IDs
-#' are divided by lineup size to estimate the false ID rate.
+#' If target-absent data contain explicit \code{"suspect"} responses, those
+#' designated innocent-suspect IDs are used directly. Otherwise, filler IDs
+#' are divided by lineup size. The two estimators are never added together.
 #'
 #' @references
 #' Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should
@@ -54,6 +55,7 @@
 #' @export
 #' @import tibble
 make_rocdata <- function(data, lineup_size = 6) {
+  .validate_lineup_analysis(data)
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "confidence")
@@ -91,33 +93,29 @@ make_rocdata <- function(data, lineup_size = 6) {
     n_correct <- sum(tp_data$identification == "suspect" & tp_data$confidence >= conf)
     correct_id_rate <- n_correct / n_tp
 
-    # Target-absent: count suspect IDs at or above this confidence
-    n_false_suspects <- sum(ta_data$identification == "suspect" & ta_data$confidence >= conf)
-
-    # Also count filler IDs and divide by lineup size to estimate false suspect IDs
-    n_false_fillers <- sum(ta_data$identification == "filler" & ta_data$confidence >= conf)
-    n_estimated_false_suspects <- n_false_fillers / lineup_size
-
-    # Total false ID rate (actual suspect IDs + estimated from fillers)
-    false_id_rate <- (n_false_suspects + n_estimated_false_suspects) / n_ta
+    method <- .innocent_suspect_method(ta_data)
+    n_false <- .innocent_suspect_count(
+      ta_data, ta_data$confidence >= conf, lineup_size, method
+    )
+    false_id_rate <- n_false / n_ta
 
     roc_results <- rbind(roc_results, tibble::tibble(
       confidence = conf,
       correct_id_rate = correct_id_rate,
       false_id_rate = false_id_rate,
       n_correct_ids = n_correct,
-      n_false_ids = n_false_suspects + n_estimated_false_suspects
+      n_false_ids = n_false
     ))
   }
 
   # Add point at (0, 0) for reject all
-  roc_results <- rbind(roc_results, tibble::tibble(
+  roc_results <- rbind(tibble::tibble(
     confidence = min(conf_levels) - 1,
     correct_id_rate = 0,
     false_id_rate = 0,
     n_correct_ids = 0,
     n_false_ids = 0
-  ))
+  ), roc_results)
 
   # Calculate partial AUC (using trapezoidal rule)
   # Sort by false_id_rate for integration
@@ -135,7 +133,9 @@ make_rocdata <- function(data, lineup_size = 6) {
     pauc = pauc,
     n_target_present = n_tp,
     n_target_absent = n_ta,
-    lineup_size = lineup_size
+    lineup_size = lineup_size,
+    innocent_suspect_method = method,
+    raw_data = data
   )
 }
 
@@ -189,7 +189,7 @@ make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE) {
 
   # Add shaded area under curve
   p <- p + geom_ribbon(
-    aes(ymin = false_id_rate, ymax = correct_id_rate),
+    aes(ymin = 0, ymax = correct_id_rate),
     alpha = 0.2,
     fill = "steelblue"
   )

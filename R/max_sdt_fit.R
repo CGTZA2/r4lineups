@@ -1,9 +1,9 @@
-#' MAX SDT Compound-Decision Model for Eyewitness Lineups
+#' Restricted Independent-Observations/MAX Model for Lineup Counts
 #'
-#' Fits the MAX signal-detection (compound-decision) model to eyewitness lineup
-#' data using chi-squared goodness-of-fit minimization. Estimates d' (sensitivity)
-#' and lambda (criterion) simultaneously from hit rates, false-alarm rates, and
-#' rejection rates, supporting one or two conditions and optional model constraints.
+#' Fits the equal-variance, independent-signal, single-criterion MAX model to
+#' aggregate simultaneous-lineup counts using minimum-Pearson chi-squared
+#' estimation. Estimates d' (sensitivity) and lambda (criterion) simultaneously,
+#' supporting one or two conditions and optional cross-condition constraints.
 #'
 #' @param n_hit Number of correct suspect identifications in target-present (TP)
 #'   lineups (condition 1).
@@ -45,11 +45,11 @@
 #' }
 #'
 #' @details
-#' The MAX SDT compound-decision model (Smith, 2022; Gourevitch & Galanter, 1967)
-#' addresses the fundamental challenge of eyewitness lineup research: participants
-#' make only one identification response, so within-person ROC analysis is impossible.
-#' Group-level d' inference requires a model that jointly accounts for detection
-#' (is the target present?) and identification (which member is the target?).
+#' This is a restricted Independent Observations/MAX model for simultaneous,
+#' fair lineups. Fillers are IID \eqn{N(0, 1)}, the culprit signal is
+#' \eqn{N(d', 1)}, memory signals are independent, and a single criterion is
+#' applied to the largest signal. Target-absent \code{n_fa} therefore means a
+#' choice of any lineup member, not only a designated innocent suspect.
 #'
 #' For a lineup of \eqn{n} members with culprit signal strength \eqn{d'} and
 #' response criterion \eqn{\lambda}:
@@ -57,18 +57,32 @@
 #' \deqn{P(\text{choose anyone} \mid \text{TP}) = 1 - \Phi(\lambda - d')\Phi(\lambda)^{n-1}}
 #' \deqn{P(\text{choose anyone} \mid \text{TA}) = 1 - \Phi(\lambda)^n}
 #'
-#' Parameters are estimated by minimizing the chi-squared discrepancy between
-#' observed and predicted frequencies. Nested model comparisons (equal d' or equal
-#' lambda across conditions) are supported via \code{\link{compare_max_sdt}}.
+#' Parameters are estimated by minimizing the Pearson chi-squared discrepancy
+#' between the mutually exclusive response cells: target-present correct ID,
+#' filler ID and rejection; and target-absent choice and rejection. This is not
+#' maximum-likelihood estimation and is not the multi-criterion likelihood model
+#' of Wixted et al. (2018). Nested comparisons (equal d' or equal lambda across
+#' conditions) are supported via \code{\link{compare_max_sdt}}.
+#'
+#' Estimates are conditional on the model assumptions. Correlated signals,
+#' unequal variances, confidence criteria, sequential presentation, unfair
+#' lineups, and the Ensemble and Integration decision variables are outside the
+#' scope of this function.
 #'
 #' Parametric bootstrap CIs are obtained by simulating data from the fitted model
 #' and re-fitting.
 #'
 #' @references
-#' Gourevitch, V., & Galanter, E. (1967). A significance test for one-parameter
-#' isosensitivity functions. \emph{Psychometrika, 32}(1), 25-33.
+#' Duncan, M. (2006). \emph{A signal detection model of compound decision
+#' tasks}. DRDC Toronto TR 2006-256.
 #'
-#' Smith, A. M. (2022). Culprit and victim lineups. Unpublished analysis scripts.
+#' Kaesler, M., Dunn, J. C., Ransom, K., & Semmler, C. (2020). Do sequential
+#' lineups impair underlying discriminability? \emph{Cognitive Research:
+#' Principles and Implications, 5}, 35. \doi{10.1186/s41235-020-00234-5}
+#'
+#' Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup
+#' memory. \emph{Cognitive Psychology, 105}, 81--114.
+#' \doi{10.1016/j.cogpsych.2018.06.001}
 #'
 #' @seealso \code{\link{compare_max_sdt}}, \code{\link{estimate_msdt_params}},
 #'   \code{\link{sdt_compare}}
@@ -85,16 +99,16 @@
 #' fit_free <- fit_max_sdt(
 #'   n_hit = 69, n_tp_choose = 82, n_fa = 64,
 #'   N_tp = 96, N_ta = 106,
-#'   n_hit_2 = 67, n_tp_choose_2 = 78, n_fa_2 = 42,
-#'   N_tp_2 = 90, N_ta_2 = 96, n = 6
+#'   n_hit_2 = 68, n_tp_choose_2 = 78, n_fa_2 = 42,
+#'   N_tp_2 = 96, N_ta_2 = 96, n = 6
 #' )
 #'
 #' # Two conditions, equal d' (constrained)
 #' fit_eqd <- fit_max_sdt(
 #'   n_hit = 69, n_tp_choose = 82, n_fa = 64,
 #'   N_tp = 96, N_ta = 106,
-#'   n_hit_2 = 67, n_tp_choose_2 = 78, n_fa_2 = 42,
-#'   N_tp_2 = 90, N_ta_2 = 96, n = 6,
+#'   n_hit_2 = 68, n_tp_choose_2 = 78, n_fa_2 = 42,
+#'   N_tp_2 = 96, N_ta_2 = 96, n = 6,
 #'   constrain_d = TRUE
 #' )
 #'
@@ -366,7 +380,8 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
 
   # --- bootstrap ---
   if (nboot > 0) {
-    if (!is.null(seed)) set.seed(seed)
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
     boot_mat <- matrix(NA_real_, nrow = nboot, ncol = np,
                        dimnames = list(NULL, names(phat)))
     sim_counts <- function(d, lam, N_tp_i, N_ta_i) {
@@ -470,7 +485,7 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
 #' @export
 print.max_sdt_fit <- function(x, digits = 3, ...) {
   nc <- x$n_conditions
-  cat("MAX SDT Compound-Decision Model\n")
+  cat("Restricted Independent-Observations/MAX SDT Model\n")
   cat(sprintf("  Lineup size: %d | Conditions: %d | Free parameters: %d\n",
               x$n, nc, x$n_params))
   cat(sprintf("  Convergence: %s\n",
@@ -514,7 +529,7 @@ plot.max_sdt_fit <- function(x, ...) {
     ggplot2::scale_fill_manual(values = c(Observed = "#72b7b2",
                                           Predicted = "#e15759")) +
     ggplot2::labs(x = "Cell", y = "Count", fill = NULL,
-                  title = "MAX SDT: Observed vs Predicted frequencies") +
+                  title = "Restricted MAX SDT: Observed vs Predicted frequencies") +
     ggplot2::theme_minimal(base_size = 12) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 35, hjust = 1))
 }
@@ -536,16 +551,19 @@ plot.max_sdt_fit <- function(x, ...) {
 #' \deqn{\Delta\chi^2 = \chi^2_{\text{constrained}} - \chi^2_{\text{free}}}
 #' with degrees of freedom equal to the difference in the number of free parameters.
 #' A significant result indicates that the constraint worsens fit.
+#' The fits must use identical counts and lineup sizes, must have converged, and
+#' the constrained model must impose every constraint in the free model plus at
+#' least one additional constraint.
 #'
 #' @seealso \code{\link{fit_max_sdt}}
 #' @examples
 #' fit_free <- fit_max_sdt(
 #'   n_hit=69, n_tp_choose=82, n_fa=64, N_tp=96, N_ta=106,
-#'   n_hit_2=67, n_tp_choose_2=78, n_fa_2=42, N_tp_2=90, N_ta_2=96
+#'   n_hit_2=68, n_tp_choose_2=78, n_fa_2=42, N_tp_2=96, N_ta_2=96
 #' )
 #' fit_eqd <- fit_max_sdt(
 #'   n_hit=69, n_tp_choose=82, n_fa=64, N_tp=96, N_ta=106,
-#'   n_hit_2=67, n_tp_choose_2=78, n_fa_2=42, N_tp_2=90, N_ta_2=96,
+#'   n_hit_2=68, n_tp_choose_2=78, n_fa_2=42, N_tp_2=96, N_ta_2=96,
 #'   constrain_d = TRUE
 #' )
 #' compare_max_sdt(fit_free, fit_eqd)
@@ -553,13 +571,34 @@ plot.max_sdt_fit <- function(x, ...) {
 compare_max_sdt <- function(free, constrained) {
   if (!inherits(free, "max_sdt_fit") || !inherits(constrained, "max_sdt_fit"))
     stop("Both arguments must be 'max_sdt_fit' objects.", call. = FALSE)
+  if (!identical(free$n, constrained$n) ||
+      !identical(free$n_conditions, constrained$n_conditions) ||
+      !isTRUE(all.equal(free$observed, constrained$observed,
+                        check.attributes = TRUE))) {
+    stop("Models must be fitted to identical counts and lineup sizes.",
+         call. = FALSE)
+  }
+  if (free$convergence != 0L || constrained$convergence != 0L) {
+    stop("Both models must have converged before they can be compared.",
+         call. = FALSE)
+  }
   if (free$n_params <= constrained$n_params)
     stop("'free' must have more free parameters than 'constrained'.", call. = FALSE)
+  constraints_free <- c(d = isTRUE(free$constrain_d),
+                        c = isTRUE(free$constrain_c))
+  constraints_constrained <- c(d = isTRUE(constrained$constrain_d),
+                               c = isTRUE(constrained$constrain_c))
+  if (any(constraints_free & !constraints_constrained)) {
+    stop("'constrained' is not nested within 'free'.", call. = FALSE)
+  }
 
   delta_chisq <- constrained$chisq - free$chisq
-  delta_df    <- constrained$n_params - free$n_params  # negative = more constrained
-  # flip: df of test = |delta in free params|
   test_df     <- abs(free$n_params - constrained$n_params)
+  if (delta_chisq < -1e-5) {
+    stop("The constrained fit has a materially smaller chi-squared value; ",
+         "check optimizer convergence.", call. = FALSE)
+  }
+  delta_chisq <- max(delta_chisq, 0)
   p_val       <- pchisq(delta_chisq, df = test_df, lower.tail = FALSE)
 
   structure(

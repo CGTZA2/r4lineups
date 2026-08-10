@@ -58,6 +58,13 @@
 #'   \item P(reject) = dA + (1-dA) * (1-b) * (1-g)
 #' }
 #'
+#' With one aggregate 2 by 3 outcome table, the four free parameters fit the
+#' four independent cell proportions, so the model is saturated and has no
+#' residual goodness-of-fit degrees of freedom. Inference about model fit or
+#' restrictions requires additional conditions, parameter constraints, or
+#' participant/item-level replication; the reported AIC/BIC describe this
+#' likelihood fit but do not by themselves validate the process interpretation.
+#'
 #' @references
 #' Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental validation
 #' of a multinomial processing tree model for analyzing eyewitness identification

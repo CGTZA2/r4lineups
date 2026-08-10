@@ -98,11 +98,6 @@ install_r4lineups_python <- function(method = "auto",
 #'
 #' @export
 check_python_deps <- function(verbose = TRUE) {
-
-  if (!reticulate::py_available(initialize = TRUE)) {
-    stop("Python is not available. Please install Python first.", call. = FALSE)
-  }
-
   packages <- c(
     "deepface",
     "cv2",
@@ -128,6 +123,19 @@ check_python_deps <- function(verbose = TRUE) {
     version = character(length(packages)),
     required = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
   )
+
+  # Do not initialize Python merely to inspect availability. With recent
+  # reticulate versions initialization may offer/download a managed Python,
+  # which is inappropriate during R CMD check and surprising for a check-only
+  # helper.
+  if (!reticulate::py_available(initialize = FALSE)) {
+    results$version[] <- NA_character_
+    if (verbose) {
+      cat("Python is not configured. Run install_r4lineups_python() explicitly ",
+          "if you want to use face-analysis features.\n", sep = "")
+    }
+    return(invisible(results))
+  }
 
   for (i in seq_along(packages)) {
     pkg <- packages[i]

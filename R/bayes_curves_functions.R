@@ -24,6 +24,8 @@
 #'   (e.g., c(0, 60, 80, 100)). Ignored if response_categories = "simple".
 #' @param prior_grid Numeric vector of prior probabilities to evaluate
 #'   (default: seq(0.01, 0.99, 0.01))
+#' @param lineup_size Nominal lineup size, used when target-absent data have no
+#'   designated innocent suspect.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -69,7 +71,8 @@
 make_bayes_curves <- function(data,
                                response_categories = c("simple", "confidence"),
                                confidence_bins = NULL,
-                               prior_grid = seq(0.01, 0.99, 0.01)) {
+                               prior_grid = seq(0.01, 0.99, 0.01),
+                               lineup_size = 6) {
 
   # Validate required columns
   required_cols <- c("target_present", "identification")
@@ -79,6 +82,12 @@ make_bayes_curves <- function(data,
   }
 
   response_categories <- match.arg(response_categories)
+  .validate_lineup_analysis(data,
+    require_confidence = identical(response_categories, "confidence"))
+  if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
+      !is.finite(lineup_size) || lineup_size < 2) {
+    stop("lineup_size must be a finite number of at least 2.", call. = FALSE)
+  }
 
   # Create response categories
   if (response_categories == "simple") {
@@ -109,8 +118,12 @@ make_bayes_curves <- function(data,
     stop("Data must include both target-present and target-absent lineups")
   }
 
-  # Get unique response categories
-  response_types <- unique(data$response_cat)
+  guilty_counts <- table(guilty_data$response_cat)
+  innocent_method <- .innocent_suspect_method(innocent_data)
+  innocent_counts <- .adjust_innocent_response_counts(
+    table(innocent_data$response_cat), lineup_size, innocent_method
+  )
+  response_types <- union(names(guilty_counts), names(innocent_counts))
 
   # Compute likelihoods for each response type
   likelihood_results <- tibble::tibble(
@@ -122,8 +135,10 @@ make_bayes_curves <- function(data,
   )
 
   for (resp in response_types) {
-    n_resp_guilty <- sum(guilty_data$response_cat == resp, na.rm = TRUE)
-    n_resp_innocent <- sum(innocent_data$response_cat == resp, na.rm = TRUE)
+    n_resp_guilty <- unname(guilty_counts[resp])
+    n_resp_innocent <- unname(innocent_counts[resp])
+    if (is.na(n_resp_guilty)) n_resp_guilty <- 0
+    if (is.na(n_resp_innocent)) n_resp_innocent <- 0
 
     p_x_g <- n_resp_guilty / n_guilty
     p_x_i <- n_resp_innocent / n_innocent
@@ -176,11 +191,8 @@ make_bayes_curves <- function(data,
     }
   }
 
-  # Compute response counts
-  response_counts <- data %>%
-    dplyr::group_by(response_cat, target_present) %>%
-    dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
-    dplyr::rename(response = response_cat)
+  # Store the same (possibly filler-adjusted) counts used for likelihoods.
+  response_counts <- likelihood_results[, c("response", "n_guilty", "n_innocent")]
 
   list(
     curves = curve_results,
@@ -188,7 +200,9 @@ make_bayes_curves <- function(data,
     response_counts = response_counts,
     n_guilty = n_guilty,
     n_innocent = n_innocent,
-    response_categories = response_categories
+    response_categories = response_categories,
+    lineup_size = lineup_size,
+    innocent_suspect_method = innocent_method
   )
 }
 
@@ -209,6 +223,8 @@ make_bayes_curves <- function(data,
 #'   specify both identification and bin (e.g., "suspect_(80,100]")
 #' @param prior_grid Numeric vector of prior probabilities for procedure A
 #'   (default: seq(0.01, 0.99, 0.01))
+#' @param lineup_size Nominal lineup size for procedures without a designated
+#'   innocent suspect.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -252,7 +268,8 @@ make_bree_curve <- function(data_proc_a,
                              data_proc_b,
                              reference_response = "suspect",
                              confidence_bins = NULL,
-                             prior_grid = seq(0.01, 0.99, 0.01)) {
+                             prior_grid = seq(0.01, 0.99, 0.01),
+                             lineup_size = 6) {
 
   # Determine response category type
   if (is.null(confidence_bins)) {
@@ -265,12 +282,14 @@ make_bree_curve <- function(data_proc_a,
   curves_a <- make_bayes_curves(data_proc_a,
                                 response_categories = response_type,
                                 confidence_bins = confidence_bins,
-                                prior_grid = prior_grid)
+                                prior_grid = prior_grid,
+                                lineup_size = lineup_size)
 
   curves_b <- make_bayes_curves(data_proc_b,
                                 response_categories = response_type,
                                 confidence_bins = confidence_bins,
-                                prior_grid = prior_grid)
+                                prior_grid = prior_grid,
+                                lineup_size = lineup_size)
 
   # Check if reference response exists in both procedures
   if (!reference_response %in% curves_a$likelihoods$response) {

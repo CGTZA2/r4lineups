@@ -179,6 +179,7 @@ ppv_by_confidence <- function(data,
                                 confidence_bins = NULL,
                                 correction = c("nominal", "effective", "none"),
                                 effective_size_data = NULL) {
+  .validate_lineup_analysis(data)
 
   # Validate inputs
   correction <- match.arg(correction)
@@ -202,6 +203,7 @@ ppv_by_confidence <- function(data,
   # Separate target-present and target-absent
   tp_data <- data[data$target_present == TRUE, ]
   ta_data <- data[data$target_present == FALSE, ]
+  innocent_method <- .innocent_suspect_method(ta_data)
 
   # Get unique confidence levels
   conf_levels <- levels(data$conf_level)
@@ -237,8 +239,12 @@ ppv_by_confidence <- function(data,
     # Overall error rate in this confidence bin
     error_rate <- (n_ta_suspect + n_ta_filler) / n_ta_total
 
-    # Estimate innocent-suspect IDs based on correction method
-    if (correction == "nominal") {
+    # A designated innocent suspect provides the observed error count directly;
+    # size corrections are approximations for lineups without one.
+    if (innocent_method == "designated") {
+      innocent_rate <- n_ta_suspect / n_ta_total
+      eff_size <- NA_real_
+    } else if (correction == "nominal") {
       innocent_rate <- innocent_id_rate_nominal(error_rate, lineup_size)
       eff_size <- lineup_size
 
@@ -326,6 +332,7 @@ ppv_by_confidence <- function(data,
     ppv_data = ppv_results,
     overall_ppv = overall_ppv,
     correction_method = correction,
+    innocent_suspect_method = innocent_method,
     lineup_size = lineup_size,
     n_target_present = nrow(tp_data),
     n_target_absent = nrow(ta_data)

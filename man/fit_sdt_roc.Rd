@@ -58,7 +58,7 @@ z-transformed false alarm rates for each confidence level.
 Under equal-variance SDT:
 - z-ROC should be linear with slope = 1
 - d' = z(HR) - z(FAR) for any criterion
-- Intercept = d' / sqrt(2)
+- Intercept = d' in the line z(HR) = z(FAR) + d'
 
 Under unequal-variance SDT:
 - Slope = SD_lure / SD_target
@@ -83,7 +83,7 @@ sim_data <- simulate_lineup_data(
 )
 
 # Fit equal-variance SDT model
-sdt_fit <- fit_sdt_roc(sim_data, lineup_size = 6)
+sdt_fit <- fit_sdt_roc(sim_data, lineup_size = 6, bootstrap = FALSE)
 print(sdt_fit)
 plot(sdt_fit)
 
@@ -91,8 +91,17 @@ plot(sdt_fit)
 sdt_fit$dprime
 
 # Fit unequal-variance model
-sdt_uv <- fit_sdt_roc(sim_data, lineup_size = 6, model = "unequal_variance")
+sdt_uv <- fit_sdt_roc(
+  sim_data, lineup_size = 6, model = "unequal_variance", bootstrap = FALSE
+)
 sdt_uv$variance_ratio
+
+\donttest{
+# Use more replicates for publication analyses.
+sdt_boot <- fit_sdt_roc(
+  sim_data, lineup_size = 6, n_bootstrap = 200, seed = 123
+)
+}
 
 }
 \references{

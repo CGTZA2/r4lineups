@@ -14,7 +14,7 @@
 #' @return A list containing:
 #' \itemize{
 #'   \item distance - The computed distance (lower = more similar)
-#'   \item similarity - Similarity score in [0,1] for cosine metric
+#'   \item similarity - Similarity score in [-1,1] for cosine metric
 #'   \item verified - Logical, TRUE if distance is below the model's threshold
 #'   \item threshold - The verification threshold for this model/metric
 #'   \item model - Model used
@@ -123,7 +123,7 @@ face_similarity <- function(img1_path,
 #'   \item foil_name - Name/label for the foil
 #'   \item foil_path - Path to foil image
 #'   \item distance - Distance from target (lower = more similar)
-#'   \item similarity - Similarity score [0,1] for cosine metric
+#'   \item similarity - Cosine similarity score [-1,1] for cosine metric
 #'   \item verified - Would be identified as same person
 #'   \item rank - Rank by similarity (1 = most similar to target)
 #' }
@@ -371,6 +371,13 @@ lineup_pairwise_matrix <- function(target_path,
   
   all_paths <- c(target_path, foil_paths)
   n <- length(all_paths)
+  if (length(foil_paths) < 1L) {
+    stop("foil_paths must contain at least one foil image.", call. = FALSE)
+  }
+  missing <- all_paths[!file.exists(all_paths)]
+  if (length(missing) > 0L) {
+    stop("Image file(s) not found: ", paste(missing, collapse = ", "), call. = FALSE)
+  }
   
   # Get names
   names <- c("Target", paste0("Foil_", seq_along(foil_paths)))
@@ -383,8 +390,8 @@ lineup_pairwise_matrix <- function(target_path,
   mat <- matrix(0, nrow = n, ncol = n, dimnames = list(names, names))
   
   message("Computing pairwise distances...")
-  for (i in 1:(n-1)) {
-    for (j in (i+1):n) {
+  for (i in seq_len(n - 1L)) {
+    for (j in seq.int(i + 1L, n)) {
       if (!is.null(embs$embedding[[i]]) && !is.null(embs$embedding[[j]])) {
         d <- embedding_distance(embs$embedding[[i]], embs$embedding[[j]], metric = metric)
         mat[i, j] <- d

@@ -42,7 +42,11 @@
 #'@export
 
 esize_T <- function(lineup_table){
-  i <- 1-(1/(sum(lineup_table)^2))*sum(lineup_table^2)
-  i <- 1/(1-i)
-  return(i)
+  counts <- as.numeric(lineup_table)
+  if (length(counts) == 0L || anyNA(counts) || any(!is.finite(counts)) ||
+      any(counts < 0) || sum(counts) <= 0) {
+    stop("lineup_table must contain finite non-negative counts with a positive total.",
+         call. = FALSE)
+  }
+  sum(counts)^2 / sum(counts^2)
 }

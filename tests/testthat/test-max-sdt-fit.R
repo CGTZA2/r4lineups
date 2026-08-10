@@ -209,6 +209,33 @@ test_that("compare_max_sdt errors if free has fewer params than constrained", {
   expect_error(compare_max_sdt(fit1, fit2))
 })
 
+test_that("compare_max_sdt rejects fits to different data", {
+  free_fit <- fit_max_sdt(
+    n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
+    n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100
+  )
+  constrained <- fit_max_sdt(
+    n_hit=54, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
+    n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100,
+    constrain_d = TRUE
+  )
+  expect_error(compare_max_sdt(free_fit, constrained), "identical counts")
+})
+
+test_that("compare_max_sdt rejects non-nested constraint swaps", {
+  constrain_d_fit <- fit_max_sdt(
+    n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
+    n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100,
+    constrain_d = TRUE
+  )
+  constrain_c_fit <- fit_max_sdt(
+    n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
+    n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100,
+    constrain_c = TRUE
+  )
+  expect_error(compare_max_sdt(constrain_d_fit, constrain_c_fit))
+})
+
 # --- S3 methods ---
 
 test_that("print runs without error", {

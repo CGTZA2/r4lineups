@@ -214,7 +214,10 @@ print(head(model_fullroc$diagnosticity_table[, c("evidence_label",
 - Values closer to 1.0 indicate better discriminability
 - All witness responses contribute to overall discriminability
 
-## Model Selection Guidance
+## Method-Choice Guidance
+
+These methods estimate different quantities; their displayed numbers are not a
+common model-selection scale and the wrapper does not declare a “best model.”
 
 ### When to Use Each Model
 
@@ -238,14 +241,17 @@ print(head(model_fullroc$diagnosticity_table[, c("evidence_label",
 
 ### Comparing Model Fits
 
-For parametric models (2-HT), use AIC/BIC:
+The 2-HT fit reports AIC/BIC, but these values are comparative rather than
+absolute. They can only be compared with alternative likelihood models fitted
+to the same observations and outcome representation; they cannot be compared
+with EIG or AUC. A single-condition 2-HT fit is saturated.
 
 ```{r model_selection}
 if ("2ht" %in% comparison$models_fit) {
   cat("2-HT Model Fit:\n")
   cat("  AIC:", round(comparison$fitted_models$`2ht`$aic, 2), "\n")
   cat("  BIC:", round(comparison$fitted_models$`2ht`$bic, 2), "\n")
-  cat("\nLower values indicate better fit\n")
+  cat("\nUse only for comparisons with compatible likelihood models\n")
 }
 ```
 
@@ -575,7 +581,7 @@ if ("2ht" %in% comparison$models_fit) {
 
 Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental validation of a multinomial processing tree model for analyzing eyewitness identification decisions. *Scientific Reports, 12*, 15571.
 
-Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical conclusions via the data they should have produced: A priori comparison of eyewitness identification decision processes using quantitative predictions of the expected information gain. *Psychological Review*.
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for assessing the effectiveness of eyewitness identification procedures: Expected information gain. *Psychological Review, 130*(3), 677–719. https://doi.org/10.1037/rev0000332
 
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability: A method for creating full receiver operating characteristic curves of lineup identification performance. *Perspectives on Psychological Science, 15*(3), 589-607.
 

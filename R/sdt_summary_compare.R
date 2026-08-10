@@ -21,6 +21,7 @@ sdt_summary_from_counts <- function(hits,
                                     cr,
                                     correction = c("loglinear", "half", "none")) {
   correction <- match.arg(correction)
+  .validate_sdt_counts(hits, fas, misses, cr)
   ns <- hits + misses
   nn <- fas + cr
   if (ns <= 0 || nn <= 0) {
@@ -99,9 +100,8 @@ sdt_summary_variance <- function(hits,
     var_zH <- sdt_var_z_from_binom(ns, pH, correction)
     var_zF <- sdt_var_z_from_binom(nn, pF, correction)
   } else {
-    if (!is.null(seed)) {
-      set.seed(seed)
-    }
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
     boot_stats <- replicate(
       nboot,
       {
@@ -123,14 +123,22 @@ sdt_summary_variance <- function(hits,
   }
   if (method == "bootstrap") {
     var_c <- stats::var(boot_stats["c", ])
+    cov_dc <- stats::cov(boot_stats["dprime", ], boot_stats["c", ])
+    var_ln_beta <- stats::var(boot_stats["dprime", ] * boot_stats["c", ])
   } else {
     var_c <- 0.25 * (var_zH + var_zF)
+    cov_dc <- 0.5 * (var_zF - var_zH)
+    var_ln_beta <- (summ$c^2) * var_dprime +
+      (summ$dprime^2) * var_c +
+      2 * summ$dprime * summ$c * cov_dc
   }
   list(
     var_zH = var_zH,
     var_zF = var_zF,
     var_dprime = var_dprime,
     var_c = var_c,
+    cov_dprime_c = cov_dc,
+    var_ln_beta = var_ln_beta,
     nboot = nboot,
     method = method,
     correction = correction
@@ -243,10 +251,17 @@ sdt_var_z_from_binom <- function(n, p, correction) {
 }
 
 sdt_var_ln_beta <- function(summary_obj, var_obj) {
-  dprime <- summary_obj$dprime
-  cval <- summary_obj$c
-  var_d <- var_obj$var_dprime
-  var_c <- var_obj$var_c
-  # Approximate via delta method, ignoring covariance between d' and c.
-  (cval^2) * var_d + (dprime^2) * var_c
+  var_obj$var_ln_beta
+}
+
+.validate_sdt_counts <- function(...) {
+  counts <- list(...)
+  valid <- vapply(counts, function(x) {
+    is.numeric(x) && length(x) == 1L && !is.na(x) && is.finite(x) &&
+      x >= 0 && x == as.integer(x)
+  }, logical(1))
+  if (!all(valid)) {
+    stop("SDT counts must be non-negative integer scalars.", call. = FALSE)
+  }
+  invisible(TRUE)
 }

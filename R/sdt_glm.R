@@ -44,13 +44,12 @@ fit_sdt_glm <- function(data,
     stop("covariates must be NULL or a character vector.", call. = FALSE)
   }
 
+  if (!all(c(is_old, said_old, covariates) %in% names(data))) {
+    stop("All response and covariate column names must exist in data.", call. = FALSE)
+  }
   df <- data
-  if (!is.numeric(df[[is_old]])) {
-    df[[is_old]] <- as.numeric(df[[is_old]])
-  }
-  if (!is.numeric(df[[said_old]])) {
-    df[[said_old]] <- as.numeric(df[[said_old]])
-  }
+  df[[is_old]] <- .as_binary_sdt(df[[is_old]], is_old)
+  df[[said_old]] <- .as_binary_sdt(df[[said_old]], said_old)
 
   df$.is_old_c <- if (center_isold) df[[is_old]] - 0.5 else df[[is_old]]
   df$.said_old <- df[[said_old]]
@@ -141,13 +140,14 @@ fit_sdt_glmm <- function(data,
     stop("covariates must be NULL or a character vector.", call. = FALSE)
   }
 
+  required_names <- c(is_old, said_old, subject_id, item_id, covariates)
+  if (!all(required_names %in% names(data))) {
+    stop("All response, grouping, item, and covariate column names must exist in data.",
+         call. = FALSE)
+  }
   df <- data
-  if (!is.numeric(df[[is_old]])) {
-    df[[is_old]] <- as.numeric(df[[is_old]])
-  }
-  if (!is.numeric(df[[said_old]])) {
-    df[[said_old]] <- as.numeric(df[[said_old]])
-  }
+  df[[is_old]] <- .as_binary_sdt(df[[is_old]], is_old)
+  df[[said_old]] <- .as_binary_sdt(df[[said_old]], said_old)
 
   df$.is_old_c <- if (center_isold) df[[is_old]] - 0.5 else df[[is_old]]
   df$.said_old <- df[[said_old]]
@@ -185,6 +185,14 @@ fit_sdt_glmm <- function(data,
   attr(fit, "sdt_is_old_col") <- is_old
   attr(fit, "sdt_said_old_col") <- said_old
   fit
+}
+
+.as_binary_sdt <- function(x, name) {
+  if (is.logical(x)) return(as.integer(x))
+  if (!is.numeric(x) || anyNA(x) || !all(x %in% c(0, 1))) {
+    stop(name, " must contain only logical or numeric 0/1 values.", call. = FALSE)
+  }
+  as.numeric(x)
 }
 
 #' Extract SDT Metrics from a GLM/GLMM

@@ -42,6 +42,11 @@
 #'@export
 
 esize_T_ci_n <- function(lineup_table, alpha){
+    datacheck3(lineup_table, length(lineup_table))
+    if (!is.numeric(alpha) || length(alpha) != 1L || !is.finite(alpha) ||
+        alpha <= 0 || alpha >= 1) {
+      stop("alpha must be a confidence level strictly between 0 and 1.", call. = FALSE)
+    }
     N = sum(lineup_table)
     a <- 4/N
     b <- sum((lineup_table/N)^3)

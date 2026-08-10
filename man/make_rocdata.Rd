@@ -38,8 +38,9 @@ Mickes (2015). For each confidence level:
   \item False ID rate = proportion of target-absent lineups where suspect identified
 }
 
-When no innocent suspect is designated in target-absent lineups, filler IDs
-are divided by lineup size to estimate the false ID rate.
+If target-absent data contain explicit \code{"suspect"} responses, those
+designated innocent-suspect IDs are used directly. Otherwise, filler IDs
+are divided by lineup size. The two estimators are never added together.
 }
 \examples{
 data(lineup_example)

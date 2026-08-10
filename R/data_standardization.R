@@ -178,8 +178,8 @@ validate_lineup_data <- function(data,
       if (strict) stop(msg)
     } else {
       # Only check further if confidence is numeric
-      if (any(is.na(data$confidence))) {
-        msg <- "confidence contains missing values"
+      if (any(!is.finite(data$confidence))) {
+        msg <- "confidence contains missing or non-finite values"
         messages <- c(messages, msg)
         valid <- FALSE
         if (strict) stop(msg)
@@ -211,7 +211,14 @@ validate_lineup_data <- function(data,
       if (strict) stop(msg)
     }
 
-    if (any(data$response_time <= 0, na.rm = TRUE)) {
+    if (is.numeric(data$response_time) && any(!is.finite(data$response_time))) {
+      msg <- "response_time contains missing or non-finite values"
+      messages <- c(messages, msg)
+      valid <- FALSE
+      if (strict) stop(msg)
+    }
+
+    if (is.numeric(data$response_time) && any(data$response_time <= 0, na.rm = TRUE)) {
       msg <- "response_time contains non-positive values"
       messages <- c(messages, msg)
       valid <- FALSE
@@ -522,9 +529,8 @@ create_example_lineup_data <- function(n_trials = 100,
                                         include_response_time = FALSE,
                                         seed = NULL) {
 
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  restore_rng <- .local_seed(seed)
+  on.exit(restore_rng(), add = TRUE)
 
   # Generate target presence
   target_present <- sample(

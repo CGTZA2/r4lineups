@@ -52,6 +52,10 @@
 #'
 #' ANRI provides a less biased estimate of the population resolution, making it
 #' more appropriate for hypothesis testing and group comparisons.
+#' When target-absent suspect identifications are estimated from filler choices,
+#' \code{N} and the bin counts are effective (possibly fractional) counts from
+#' \code{make_calibration_data()}, so the correction is an approximation. See
+#' \code{\link{make_calibration_data}} for the designated-suspect distinction.
 #'
 #' @references
 #' Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of discrimination
@@ -188,9 +192,8 @@ bootstrap_anri <- function(data,
   confidence_scale <- match.arg(confidence_scale)
 
   # Set seed for reproducibility if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  restore_rng <- .local_seed(seed)
+  on.exit(restore_rng(), add = TRUE)
 
   # Compute point estimate
   anri_point <- compute_anri(data, confidence_bins, choosers_only, lineup_size,
@@ -328,9 +331,8 @@ compare_anri <- function(data,
   }
 
   # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  restore_rng <- .local_seed(seed)
+  on.exit(restore_rng(), add = TRUE)
 
   # Split data by group
   data_group1 <- data[data[[group_var]] == groups[1], ]

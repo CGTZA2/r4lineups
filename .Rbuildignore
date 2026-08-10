@@ -20,11 +20,13 @@
 ^examples$
 ^test_.*\.R$
 ^test_.*\.png$
-^Rplots\.pdf$
+^(.*/)?Rplots\.pdf$
 ^notes$
+^pdfs$
 ^doc$
 ^Meta$
 ^AUDIT_FINDINGS\.md$
+^CRAN_AUDIT_REPORT\.md$
 ^cran-comments\.md$
 ^CONTRIBUTING\.md$
 ^agents\.md$
@@ -32,3 +34,10 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^\.DS_Store$
+^LICENSE\.md$
+^CITATION\.cff$
+^r4lineups_joss$
+^paper$
+^gem_report\.md$
+^RELEASE_CHECKLIST\.md$

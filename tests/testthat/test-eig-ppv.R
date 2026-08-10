@@ -35,6 +35,9 @@ test_that("EIG is bounded by prior entropy and non-negative", {
 
 test_that("ppv corrections are ordered: none <= effective <= nominal for fair lineups", {
   data(lineup_example)
+  lineup_example$identification[
+    !lineup_example$target_present & lineup_example$identification == "suspect"
+  ] <- "filler"
   bins <- c(0, 60, 80, 100)
   ppv_none <- ppv_by_confidence(lineup_example, correction = "none",
                                 confidence_bins = bins)
@@ -54,12 +57,52 @@ test_that("effective correction computes a plausible effective size (regression)
   # Regression for the bug where the fallback tabulated the values of the
   # per-position count vector, collapsing E' to ~1.38 regardless of data.
   data(lineup_example)
+  lineup_example$identification[
+    !lineup_example$target_present & lineup_example$identification == "suspect"
+  ] <- "filler"
   ppv_eff <- ppv_by_confidence(lineup_example, correction = "effective",
                                confidence_bins = c(0, 60, 80, 100))
   esizes <- ppv_eff$ppv_data$effective_size
   esizes <- esizes[!is.na(esizes)]
   expect_true(all(esizes > 2))
   expect_true(all(esizes <= 6 + 1e-10))
+})
+
+test_that("designated innocent-suspect IDs supersede size approximations", {
+  data(lineup_example)
+  bins <- c(0, 60, 80, 100)
+  nominal <- ppv_by_confidence(lineup_example, correction = "nominal",
+                               confidence_bins = bins)
+  effective <- ppv_by_confidence(lineup_example, correction = "effective",
+                                 confidence_bins = bins)
+  uncorrected <- ppv_by_confidence(lineup_example, correction = "none",
+                                   confidence_bins = bins)
+  expect_equal(nominal$overall_ppv, effective$overall_ppv)
+  expect_equal(effective$overall_ppv, uncorrected$overall_ppv)
+  expect_equal(nominal$innocent_suspect_method, "designated")
+})
+
+test_that("EIG splits filler outcomes when no innocent suspect is designated", {
+  dat <- data.frame(
+    target_present = c(TRUE, TRUE, FALSE, FALSE),
+    identification = c("suspect", "reject", "filler", "reject"),
+    confidence = rep(80, 4)
+  )
+  prepared <- make_eig_data(dat, lineup_size = 4)
+  suspect <- prepared$response_data[
+    prepared$response_data$identification == "suspect", ]
+  filler <- prepared$response_data[
+    prepared$response_data$identification == "filler", ]
+  expect_equal(suspect$n_innocent, 0.25)
+  expect_equal(filler$n_innocent, 0.75)
+  expect_equal(sum(prepared$response_data$p_x_given_innocent), 1)
+  expect_equal(prepared$innocent_suspect_method, "estimated_from_fillers")
+
+  bayes <- make_bayes_curves(dat, lineup_size = 4, prior_grid = 0.5)
+  suspect_lik <- bayes$likelihoods[
+    bayes$likelihoods$response == "suspect", ]
+  expect_equal(suspect_lik$n_innocent, 0.25)
+  expect_equal(sum(bayes$likelihoods$p_x_given_innocent), 1)
 })
 
 test_that("innocent_id_rate helpers compute the documented formulas", {

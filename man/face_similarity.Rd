@@ -31,7 +31,7 @@ face_similarity(
 A list containing:
 \itemize{
   \item distance - The computed distance (lower = more similar)
-  \item similarity - Similarity score in [0,1] for cosine metric
+  \item similarity - Similarity score in [-1,1] for cosine metric
   \item verified - Logical, TRUE if distance is below the model's threshold
   \item threshold - The verification threshold for this model/metric
   \item model - Model used

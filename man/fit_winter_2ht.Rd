@@ -80,6 +80,13 @@ Model equations for culprit-absent lineups:
   \item P(filler ID) = (1-dA) * (1-b) * g * ((L-1)/L)
   \item P(reject) = dA + (1-dA) * (1-b) * (1-g)
 }
+
+With one aggregate 2 by 3 outcome table, the four free parameters fit the
+four independent cell proportions, so the model is saturated and has no
+residual goodness-of-fit degrees of freedom. Inference about model fit or
+restrictions requires additional conditions, parameter constraints, or
+participant/item-level replication; the reported AIC/BIC describe this
+likelihood fit but do not by themselves validate the process interpretation.
 }
 \examples{
 # Example 1: Using count data directly

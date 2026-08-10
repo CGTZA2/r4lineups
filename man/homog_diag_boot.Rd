@@ -4,7 +4,14 @@
 \alias{homog_diag_boot}
 \title{Homogeneity of diagnosticity ratio with bootstrapped CIs}
 \usage{
-homog_diag_boot(lineup_pres_list, lineup_abs_list, k, R = 100)
+homog_diag_boot(
+  lineup_pres_list,
+  lineup_abs_list,
+  k,
+  R = 100,
+  pos_list = NULL,
+  seed = NULL
+)
 }
 \arguments{
 \item{lineup_pres_list}{A list containing k vectors of lineup choices for k lineups, in which the
@@ -16,6 +23,16 @@ target was absent}
 \item{k}{Number of members in lineup. Must be specified by user (scalar).}
 
 \item{R}{Number of bootstrap replications. Defaults to R = 100.}
+
+\item{pos_list}{Suspect positions for each lineup pair, in the same format as
+\code{diag_param()}. This is required; earlier releases attempted to infer
+suspect positions from observed choices, which cannot be done validly.}
+
+\item{seed}{Optional integer seed for reproducible resampling.}
+}
+\value{
+Invisibly returns a list containing the observed mean diagnosticity,
+ chi-square statistic, percentile intervals, bootstrap draws, and \code{R}.
 }
 \description{
 Function for computing bootstrapped estimates of homogeneity of diagnosticity ratio
@@ -26,18 +43,23 @@ Computes bootstrapped diagnosticity ratio with chi-squared estimate,
 }
 \examples{
 #Target present data:
-A <-  round(runif(100,1,6))
-B <-  round(runif(70,1,5))
-C <-  round(runif(20,1,4))
+A <- rep(1:6, length.out = 100)
+B <- rep(1:5, length.out = 70)
+C <- rep(1:4, length.out = 20)
 lineup_pres_list <- list(A, B, C)
 rm(A, B, C)
 
 #Target absent data:
-A <-  round(runif(100,1,6))
-B <-  round(runif(70,1,5))
-C <-  round(runif(20,1,4))
+A <- rep(6:1, length.out = 100)
+B <- rep(5:1, length.out = 70)
+C <- rep(4:1, length.out = 20)
 lineup_abs_list <- list(A, B, C)
 rm(A, B, C)
+
+pos_list <- c(3, 2, 1)
+k <- c(6, 5, 4)
+homog_diag_boot(lineup_pres_list, lineup_abs_list, k, R = 20,
+               pos_list = pos_list, seed = 1)
 
 }
 \references{

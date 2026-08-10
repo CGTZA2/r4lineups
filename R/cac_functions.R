@@ -26,9 +26,9 @@
 #' CAC analysis computes, for each confidence level:
 #' \deqn{Accuracy = \frac{Correct Suspect IDs}{Correct Suspect IDs + Incorrect Suspect IDs}}
 #'
-#' Only suspect IDs are included (filler IDs are ignored). For target-absent
-#' lineups with no designated innocent suspect, filler IDs are divided by
-#' lineup size to estimate incorrect suspect IDs.
+#' Explicit target-absent suspect IDs are used when present. Otherwise,
+#' target-absent filler IDs are divided by lineup size to estimate incorrect
+#' suspect IDs. The two estimators are never added together.
 #'
 #' According to Mickes (2015), CAC analysis is most relevant for triers of fact
 #' (judges/jurors) evaluating estimator variables (e.g., exposure duration,
@@ -54,6 +54,7 @@
 #' @export
 #' @import tibble
 make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
+  .validate_lineup_analysis(data)
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "confidence")
@@ -93,6 +94,7 @@ make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
   }
 
   # Initialize results
+  innocent_method <- .innocent_suspect_method(ta_data)
   cac_results <- tibble::tibble(
     confidence = character(),
     n_correct = numeric(),
@@ -125,9 +127,11 @@ make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
                                 ta_data$confidence == conf, na.rm = TRUE)
     }
 
-    # Estimate incorrect suspect IDs from fillers
-    n_estimated_incorrect <- n_incorrect_fillers / lineup_size
-    n_incorrect_total <- n_incorrect_suspects + n_estimated_incorrect
+    n_incorrect_total <- if (innocent_method == "designated") {
+      n_incorrect_suspects
+    } else {
+      n_incorrect_fillers / lineup_size
+    }
 
     # Calculate accuracy
     n_total <- n_correct + n_incorrect_total
@@ -154,14 +158,19 @@ make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
   total_correct <- sum(tp_data$identification == "suspect")
   total_incorrect_suspects <- sum(ta_data$identification == "suspect")
   total_incorrect_fillers <- sum(ta_data$identification == "filler")
-  total_incorrect <- total_incorrect_suspects + (total_incorrect_fillers / lineup_size)
+  total_incorrect <- if (innocent_method == "designated") {
+    total_incorrect_suspects
+  } else {
+    total_incorrect_fillers / lineup_size
+  }
   overall_accuracy <- total_correct / (total_correct + total_incorrect)
 
   list(
     cac_data = cac_results,
     overall_accuracy = overall_accuracy,
     n_total_suspect_ids = total_correct + total_incorrect,
-    lineup_size = lineup_size
+    lineup_size = lineup_size,
+    innocent_suspect_method = innocent_method
   )
 }
 
@@ -270,7 +279,8 @@ make_cac <- function(data, lineup_size = 6, confidence_bins = NULL,
     cac_data = cac_obj$cac_data,
     overall_accuracy = cac_obj$overall_accuracy,
     n_total_suspect_ids = cac_obj$n_total_suspect_ids,
-    lineup_size = cac_obj$lineup_size
+    lineup_size = cac_obj$lineup_size,
+    innocent_suspect_method = cac_obj$innocent_suspect_method
   )
 
   class(result) <- c("lineup_cac", "list")

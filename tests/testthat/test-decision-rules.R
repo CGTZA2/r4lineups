@@ -178,13 +178,88 @@ test_that(".apply_decision_rule helper function works", {
 
   # Ensemble rule
   result_ens <- r4lineups:::.apply_decision_rule(strengths, "ensemble", lineup_size, d_prime)
-  expect_true(is.numeric(result_ens$decision_value))
+  expect_equal(result_ens$decision_value,
+               max(strengths) - mean(strengths))
   expect_equal(result_ens$chosen_position, 1)
 
   # Integration rule
   result_int <- r4lineups:::.apply_decision_rule(strengths, "integration", lineup_size, d_prime)
   expect_equal(result_int$decision_value, sum(strengths))
   expect_equal(result_int$chosen_position, 1)
+})
+
+test_that("BEST-Rest and Ensemble have the documented scaling identity", {
+  strengths <- c(2.0, 0.5, -0.3, 1.2, 0.8, -0.5)
+  k <- length(strengths)
+  best_rest <- r4lineups:::.apply_decision_rule(
+    strengths, "best_rest", k
+  )$decision_value
+  ensemble <- r4lineups:::.apply_decision_rule(
+    strengths, "ensemble", k
+  )$decision_value
+
+  expect_equal(ensemble, (k - 1) / k * best_rest, tolerance = 1e-14)
+})
+
+test_that("BEST-Rest and Ensemble simulations agree under rescaled criteria", {
+  k <- 6L
+  best_rest <- simulate_lineup_data(
+    n_tp = 200, n_ta = 200, d_prime = 1.5,
+    c_criterion = c(0.2, 0.7, 1.2), conf_levels = 3,
+    lineup_size = k, decision_rule = "best_rest", seed = 912
+  )
+  ensemble <- simulate_lineup_data(
+    n_tp = 200, n_ta = 200, d_prime = 1.5,
+    c_criterion = (k - 1) / k * c(0.2, 0.7, 1.2), conf_levels = 3,
+    lineup_size = k, decision_rule = "ensemble", seed = 912
+  )
+
+  expect_equal(best_rest$target_present, ensemble$target_present)
+  expect_equal(best_rest$identification, ensemble$identification)
+  expect_equal(best_rest$confidence, ensemble$confidence)
+})
+
+test_that("the supplied lowest criterion controls identification", {
+  liberal <- simulate_lineup_data(
+    n_tp = 100, n_ta = 100, d_prime = 1,
+    c_criterion = -100, conf_levels = 5, seed = 16
+  )
+  conservative <- simulate_lineup_data(
+    n_tp = 100, n_ta = 100, d_prime = 1,
+    c_criterion = 100, conf_levels = 5, seed = 16
+  )
+
+  expect_false(any(liberal$identification == "reject"))
+  expect_true(all(conservative$identification == "reject"))
+  expect_equal(attr(liberal, "simulation_params")$criteria,
+               seq(-100, -98, length.out = 5))
+})
+
+test_that("explicit confidence criteria are preserved", {
+  criteria <- c(-0.25, 0.1, 0.8, 1.4)
+  data <- simulate_lineup_data(
+    n_tp = 25, n_ta = 25, c_criterion = criteria,
+    conf_levels = length(criteria), seed = 17
+  )
+  expect_equal(attr(data, "simulation_params")$criteria, criteria)
+})
+
+test_that("simulation criteria receive strict validation", {
+  expect_error(
+    simulate_lineup_data(n_tp = 10, n_ta = 10,
+                         c_criterion = c(0, 1), conf_levels = 3),
+    "one value per confidence level"
+  )
+  expect_error(
+    simulate_lineup_data(n_tp = 10, n_ta = 10,
+                         c_criterion = c(0, 0, 1), conf_levels = 3),
+    "strictly increasing"
+  )
+  expect_error(
+    simulate_lineup_data(n_tp = 10, n_ta = 10,
+                         c_criterion = c(0, 1), conf_levels = NULL),
+    "scalar"
+  )
 })
 
 

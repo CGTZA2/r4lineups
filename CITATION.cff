@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use r4lineups, please cite the software using this metadata."
+title: "r4lineups: Statistical Inference on Lineup Fairness"
+type: software
+authors:
+  - family-names: Tredoux
+    given-names: Colin G.
+    email: colin.tredoux@uct.ac.za
+    affiliation: University of Cape Town
+  - family-names: Naylor
+    given-names: Tamsyn M.
+    email: tmnaylor@outlook.com
+    affiliation: University of Cape Town
+version: 2.1.0
+date-released: 2026-08-10
+license: MIT
+repository-code: "https://github.com/CGTZA2/r4lineups"
+url: "https://cgtza2.github.io/r4lineups/"
+# Add the tagged-release archive DOI after successful JOSS review.
+keywords:
+  - eyewitness identification
+  - lineup fairness
+  - forensic psychology
+  - signal detection theory
+  - confidence-accuracy analysis

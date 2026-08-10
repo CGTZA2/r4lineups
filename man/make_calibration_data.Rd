@@ -70,6 +70,14 @@ correct from incorrect responses:
 When \code{choosers_only = TRUE}, only suspect identifications are included (standard
 for eyewitness calibration analysis). When \code{choosers_only = FALSE}, all responses
 are included with fillers and rejections counted as incorrect.
+
+If target-absent data contain designated innocent-suspect identifications,
+those observations are used directly. Otherwise, each target-absent filler
+identification contributes weight \code{1 / lineup_size} as an estimate of
+innocent-suspect identifications. In that latter case the per-bin counts and
+effective total used by C, O/U, NRI, and downstream ANRI can be fractional;
+the results are lineup-size approximations rather than statistics from an
+observed designated-suspect outcome.
 }
 \examples{
 set.seed(123)

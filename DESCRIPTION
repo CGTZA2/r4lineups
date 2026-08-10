@@ -1,12 +1,21 @@
 Package: r4lineups
 Title: Statistical Inference on Lineup Fairness
-Version: 2.0.0
+Version: 2.1.0
 URL: https://github.com/CGTZA2/r4lineups, https://cgtza2.github.io/r4lineups/
 BugReports: https://github.com/CGTZA2/r4lineups/issues
 Authors@R: c(
-    person("Colin", "Tredoux", email = "colin.tredoux@uct.ac.za", role = c("aut", "cre")),
-    person("Tamsyn", "Naylor", email = "tmnaylor@outlook.com", role = "aut"))
-Description: Computes various properties of laboratory or police lineups for researchers in forensic psychology. The package includes functions for calculating lineup bias, functional size, effective size, diagnosticity ratio, homogeneity of the diagnosticity ratio, and ROC curves for confidence-accuracy data. Face similarity is computed using state-of-the-art deep learning embeddings (ArcFace, FaceNet, etc.) via Python's deepface library.
+    person("Colin", "Tredoux", email = "colin.tredoux@uct.ac.za",
+           role = c("aut", "cre"),
+           comment = "Co-author of the original package"),
+    person("Tamsyn", "Naylor", email = "tmnaylor@outlook.com",
+           role = "aut",
+           comment = "Co-author of the original package"))
+Description: Computes statistical measures for laboratory and police lineups in
+    forensic psychology, including lineup bias, functional and effective size,
+    diagnosticity, confidence-accuracy curves, signal detection models, and
+    simulation tools. Optional face-similarity functions use embeddings supplied
+    by Python's 'deepface' library; optional lineup-memory model fitting uses a
+    separately installed, pinned 'pyWitness' engine.
 Depends: R (>= 4.1.0)
 Imports:
     boot,
@@ -35,8 +44,9 @@ Suggests:
     shinyWidgets,
     testthat (>= 3.0.0),
     umap
-License: CC0
+License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 VignetteBuilder: knitr
 Maintainer: Colin Tredoux <colin.tredoux@uct.ac.za>

@@ -25,9 +25,12 @@ simulate_lineup_data(
 distributions. Higher values = better memory. Typical range: 0.5 to 3.0
 (default = 1.5)}
 
-\item{c_criterion}{Numeric or vector. Decision criterion/criteria for making
-identifications. Lower values = more liberal (more IDs). Can be a single
-value or vector for multiple confidence bins (default = 0)}
+\item{c_criterion}{Numeric scalar or vector of ordered decision criteria.
+The first value is always the identification/rejection threshold. With
+confidence ratings, a scalar generates \code{conf_levels} thresholds from
+\code{c_criterion} through \code{c_criterion + 2}; alternatively, supply
+exactly one strictly increasing threshold per confidence level. Lower
+values are more liberal (default = 0).}
 
 \item{lineup_size}{Integer. Number of lineup members (default = 6)}
 
@@ -37,8 +40,8 @@ returns binary decision only (default = 5)}
 \item{decision_rule}{Character. Decision strategy for lineup choices:
 \itemize{
   \item "max" - Independent observations, choose highest strength (default)
-  \item "best_rest" - Compare best match vs average of remaining members
-  \item "ensemble" - Average memory strength across all lineup members
+  \item "best_rest" - Best strength minus the mean of the other members
+  \item "ensemble" - Best strength minus the mean of all lineup members
   \item "integration" - Sum memory strengths across all members
 }}
 
@@ -69,17 +72,25 @@ This function implements signal detection models with multiple decision rules:
   \item Decision: Depends on decision_rule parameter
 }
 
-**Decision Rules:**
+\strong{Decision Rules:}
 \itemize{
-  \item **MAX** (default): Independent observations model. Choose lineup member
+  \item \strong{MAX} (default): Independent observations model. Choose lineup member
     with highest memory strength (Clark, 2003).
-  \item **BEST-REST**: Compare best match against average of remaining members.
-    Decision variable = best - mean(others) (Wixted et al., 2018).
-  \item **Ensemble**: Average memory strength across lineup members using
-    ensemble coding principles. More holistic evaluation (Wixted et al., 2018).
-  \item **Integration**: Sum memory strengths across all lineup members.
+  \item \strong{BEST-REST}: Best strength minus the average of the remaining
+    members (Clark, 2003).
+  \item \strong{Ensemble}: Best strength minus the average of all lineup members
+    (Wixted et al., 2018). For lineup size \eqn{k}, this is
+    \eqn{(k - 1) / k} times BEST-REST, so the two are equivalent model
+    parameterizations when their criteria are rescaled by the same factor.
+  \item \strong{Integration}: Sum memory strengths across all lineup members.
     Represents complete integration of evidence (Wixted et al., 2018).
 }
+
+All rules use independent signals with target distribution
+\eqn{N(d', 1)} and filler distribution \eqn{N(0, 1)}. Thus, this simulator
+represents the equal-variance, zero-correlation special case of the lineup
+models. It does not implement the shared-variance or unequal-variance
+likelihood models fitted by Wixted et al. (2018).
 
 The simulation assumes:
 \itemize{
@@ -88,11 +99,11 @@ The simulation assumes:
   \item Normal distributions for memory strength
 }
 
-Response times (if simulated):
+Response times (if simulated) are a heuristic convenience, not a fitted
+reaction-time or drift-diffusion model:
 \itemize{
-  \item Based on drift-diffusion model logic
   \item Faster for stronger memory signals
-  \item RT ~ InverseGaussian(strength-dependent)
+  \item A bounded noisy function of decision strength
 }
 }
 \examples{
@@ -113,13 +124,12 @@ ensemble_data <- simulate_lineup_data(
   seed = 42
 )
 
-# Integration model with response times
+# Integration decision rule
 integration_data <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 1.5,
   decision_rule = "integration",
   conf_levels = 5,
-  include_response_time = TRUE,
   seed = 42
 )
 
@@ -139,7 +149,8 @@ power_results <- simulate_power_analysis(
 }
 \references{
 Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
-lineup memory. \emph{Cognitive Psychology, 105}, 8-114.
+lineup memory. \emph{Cognitive Psychology, 105}, 81--114.
+\doi{10.1016/j.cogpsych.2018.06.001}
 
 Mickes, L., et al. (2024). pyWitness 1.0: A python eyewitness
 identification analysis toolkit. \emph{Behavior Research Methods, 56},

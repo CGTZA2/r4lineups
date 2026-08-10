@@ -84,7 +84,7 @@ test_that("homog_diag runs without error and produces sensible output", {
     sample(1:6, 100, replace = TRUE),
     sample(1:6,  80, replace = TRUE)
   )
-  pos <- list(c(1,2,3,4,5,6), c(1,2,3,4,5,6))
+  pos <- c(1, 1)
   k   <- c(6, 6)
   # Should complete without error
   expect_output(homog_diag(pres, abs_, pos, k), "Mean diagnosticity ratio")

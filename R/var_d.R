@@ -44,6 +44,13 @@ var_diag_ratio <- function(lineup_pres, lineup_abs, pos_pres, pos_abs, k1, k2){
     lineup_pres <- typecheck(lineup_pres)
     lineup_abs <- typecheck(lineup_abs)
     datacheck2(lineup_pres, lineup_abs, k1, k2)
+    if (length(pos_pres) != 1L || length(pos_abs) != 1L ||
+        pos_pres < 1 || pos_pres > k1 || pos_abs < 1 || pos_abs > k2) {
+      stop("Suspect positions must each be a single position within its lineup.", call. = FALSE)
+    }
+    if (!any(lineup_pres == pos_pres) || !any(lineup_abs == pos_abs)) {
+      return(Inf)
+    }
 
     a <- sum(lineup_pres  != pos_pres)
     b <- sum(lineup_pres == pos_pres)*(length(lineup_pres))

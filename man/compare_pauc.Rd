@@ -73,6 +73,9 @@ retention intervals, etc.).
   \item Calculates p-value from standard normal distribution
 }
 
+The two datasets are treated as independent conditions. This function does
+not implement a paired or clustered bootstrap.
+
 **Interpretation:**
 \itemize{
   \item Positive pAUC difference: Condition 1 has better discriminability

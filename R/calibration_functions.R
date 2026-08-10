@@ -52,6 +52,14 @@
 #' for eyewitness calibration analysis). When \code{choosers_only = FALSE}, all responses
 #' are included with fillers and rejections counted as incorrect.
 #'
+#' If target-absent data contain designated innocent-suspect identifications,
+#' those observations are used directly. Otherwise, each target-absent filler
+#' identification contributes weight \code{1 / lineup_size} as an estimate of
+#' innocent-suspect identifications. In that latter case the per-bin counts and
+#' effective total used by C, O/U, NRI, and downstream ANRI can be fractional;
+#' the results are lineup-size approximations rather than statistics from an
+#' observed designated-suspect outcome.
+#'
 #' @references
 #' Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity
 #' of confidence in eyewitness identification: Comments on what can be inferred
@@ -81,6 +89,7 @@
 make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = TRUE,
                                    lineup_size = 6,
                                    confidence_scale = c("auto", "0-1", "0-100")) {
+  .validate_lineup_analysis(data)
 
   confidence_scale <- match.arg(confidence_scale)
 
@@ -93,12 +102,24 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 
   # Filter to choosers only if requested
   if (choosers_only) {
-    data_filtered <- data[data$identification == "suspect", ]
+    ta_data <- data[data$target_present == FALSE, , drop = FALSE]
+    innocent_method <- .innocent_suspect_method(ta_data)
+    if (innocent_method == "designated") {
+      data_filtered <- data[data$identification == "suspect", , drop = FALSE]
+      data_filtered$.weight <- 1
+    } else {
+      keep <- (data$target_present == TRUE & data$identification == "suspect") |
+        (data$target_present == FALSE & data$identification == "filler")
+      data_filtered <- data[keep, , drop = FALSE]
+      data_filtered$.weight <- ifelse(data_filtered$target_present, 1, 1 / lineup_size)
+    }
     if (nrow(data_filtered) == 0) {
       stop("No suspect identifications found in data")
     }
   } else {
     data_filtered <- data
+    data_filtered$.weight <- 1
+    innocent_method <- "all_responses"
   }
 
   # Add correctness indicator
@@ -142,9 +163,9 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 
     if (nrow(bin_data) == 0) next
 
-    n_bin <- nrow(bin_data)
-    mean_conf <- mean(bin_data$confidence, na.rm = TRUE)
-    n_correct <- sum(bin_data$correct, na.rm = TRUE)
+    n_bin <- sum(bin_data$.weight)
+    mean_conf <- stats::weighted.mean(bin_data$confidence, bin_data$.weight, na.rm = TRUE)
+    n_correct <- sum(bin_data$.weight * bin_data$correct, na.rm = TRUE)
     n_incorrect <- n_bin - n_correct
     accuracy <- n_correct / n_bin
 
@@ -190,9 +211,13 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
   data_filtered$confidence_prop <- data_filtered$confidence / conf_scale
 
   # Compute overall statistics
-  N <- nrow(data_filtered)
-  overall_accuracy <- mean(data_filtered$correct, na.rm = TRUE)
-  overall_confidence <- mean(data_filtered$confidence_prop, na.rm = TRUE)
+  N <- sum(data_filtered$.weight)
+  overall_accuracy <- stats::weighted.mean(
+    data_filtered$correct, data_filtered$.weight, na.rm = TRUE
+  )
+  overall_confidence <- stats::weighted.mean(
+    data_filtered$confidence_prop, data_filtered$.weight, na.rm = TRUE
+  )
 
   # Calibration statistic (C) - weighted mean squared deviation
   C <- sum((calibration_results$n / N) *
@@ -219,7 +244,8 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     overall_confidence = overall_confidence,
     n_total = N,
     choosers_only = choosers_only,
-    confidence_scale = conf_scale
+    confidence_scale = conf_scale,
+    innocent_suspect_method = innocent_method
   )
 }
 
@@ -404,7 +430,7 @@ make_calibration_gg <- function(cal_obj, show_stats = TRUE, show_n = TRUE,
   # Add perfect calibration diagonal
   if (show_diagonal) {
     p <- p + geom_abline(slope = 1, intercept = 0, linetype = "dashed",
-                         color = "gray50", size = 0.8)
+                         color = "gray50", linewidth = 0.8)
   }
 
   # Add sample size labels
@@ -593,7 +619,9 @@ make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
     overall_accuracy = cal_obj$overall_accuracy,
     overall_confidence = cal_obj$overall_confidence,
     n_total = cal_obj$n_total,
-    choosers_only = cal_obj$choosers_only
+    choosers_only = cal_obj$choosers_only,
+    confidence_scale = cal_obj$confidence_scale,
+    innocent_suspect_method = cal_obj$innocent_suspect_method
   )
 
   class(result) <- c("lineup_calibration", "list")

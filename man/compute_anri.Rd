@@ -71,6 +71,10 @@ Where:
 
 ANRI provides a less biased estimate of the population resolution, making it
 more appropriate for hypothesis testing and group comparisons.
+When target-absent suspect identifications are estimated from filler choices,
+\code{N} and the bin counts are effective (possibly fractional) counts from
+\code{make_calibration_data()}, so the correction is an approximation. See
+\code{\link{make_calibration_data}} for the designated-suspect distinction.
 }
 \examples{
 set.seed(123)

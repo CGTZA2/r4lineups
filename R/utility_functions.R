@@ -66,12 +66,9 @@
 #' can be misleading. Utility analysis incorporates base rates and the relative
 #' costs of errors, providing a more complete evaluation.
 #'
-#' \strong{Note on the false-alarm estimate:} the innocent-suspect ID rate is
-#' estimated as direct innocent-suspect picks \emph{plus} filler picks divided
-#' by lineup size. This hybrid is strictly appropriate for designs with no
-#' designated innocent suspect; when target-absent lineups \emph{do} contain a
-#' designated innocent suspect, it double counts (direct picks plus a
-#' filler-derived estimate) and slightly overstates the false-alarm rate.
+#' \strong{Note on the false-alarm estimate:} explicit target-absent suspect
+#' IDs are used when present. Otherwise, filler IDs are divided by lineup size.
+#' Direct and filler-derived estimates are never added together.
 #'
 #' @references
 #' Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
@@ -91,6 +88,7 @@ make_utility_curves <- function(data,
                                 utility_matrix = c(tp = 1, fn = -0.5, fp = -2, tn = 0.5),
                                 lineup_size = 6,
                                 criteria = c("confidence", "all")) {
+  .validate_lineup_analysis(data)
 
   # Validate inputs
   required_cols <- c("target_present", "identification", "confidence")
@@ -124,6 +122,7 @@ make_utility_curves <- function(data,
 
   # Get confidence levels (sorted from high to low for cumulative criteria)
   conf_levels <- sort(unique(data$confidence), decreasing = TRUE)
+  innocent_method <- .innocent_suspect_method(ta_data)
 
   # Initialize results
   utility_results <- tibble::tibble(
@@ -142,11 +141,9 @@ make_utility_curves <- function(data,
     hit_rate <- n_hits / n_tp
 
     # False alarm rate: proportion of TA trials with suspect ID at or above this confidence
-    n_false_suspects <- sum(ta_data$identification == "suspect" & ta_data$confidence >= conf)
-    # Estimate from fillers
-    n_false_fillers <- sum(ta_data$identification == "filler" & ta_data$confidence >= conf)
-    n_estimated_false <- n_false_fillers / lineup_size
-    n_total_false <- n_false_suspects + n_estimated_false
+    n_total_false <- .innocent_suspect_count(
+      ta_data, ta_data$confidence >= conf, lineup_size, innocent_method
+    )
     fa_rate <- n_total_false / n_ta
 
     # Compute expected utility
@@ -191,8 +188,21 @@ make_utility_curves <- function(data,
   # Compute average utility across criteria (excluding reject-all)
   avg_utility <- mean(utility_results$expected_utility[utility_results$criterion != min(conf_levels) - 1])
 
-  # Utility if all IDs accepted (lowest threshold)
-  utility_all_ids <- utility_results$expected_utility[1]
+  # Utility if all IDs are accepted uses the lowest confidence threshold.
+  confidence_rows <- seq_along(conf_levels)
+  utility_all_ids <- utility_results$expected_utility[utils::tail(confidence_rows, 1)]
+
+  if (criteria == "all") {
+    utility_results <- utility_results[c(utils::tail(confidence_rows, 1), nrow(utility_results)), ]
+    max_idx <- which.max(utility_results$expected_utility)
+    max_utility <- list(
+      expected_utility = utility_results$expected_utility[max_idx],
+      criterion = utility_results$criterion[max_idx],
+      hit_rate = utility_results$hit_rate[max_idx],
+      false_alarm_rate = utility_results$false_alarm_rate[max_idx]
+    )
+    avg_utility <- utility_all_ids
+  }
 
   list(
     utility_data = utility_results,
@@ -202,7 +212,9 @@ make_utility_curves <- function(data,
     base_rate = base_rate,
     utility_matrix = utility_matrix,
     n_target_present = n_tp,
-    n_target_absent = n_ta
+    n_target_absent = n_ta,
+    innocent_suspect_method = innocent_method,
+    criteria = criteria
   )
 }
 

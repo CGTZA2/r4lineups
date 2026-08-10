@@ -84,6 +84,10 @@ The utility matrix should reflect the relative value/cost of outcomes. For examp
 Lampinen et al. (2019) show that comparing procedures by ROC curves alone
 can be misleading. Utility analysis incorporates base rates and the relative
 costs of errors, providing a more complete evaluation.
+
+\strong{Note on the false-alarm estimate:} explicit target-absent suspect
+IDs are used when present. Otherwise, filler IDs are divided by lineup size.
+Direct and filler-derived estimates are never added together.
 }
 \examples{
 data(lineup_example)

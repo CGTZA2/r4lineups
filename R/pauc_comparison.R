@@ -46,6 +46,9 @@
 #'   \item Calculates p-value from standard normal distribution
 #' }
 #'
+#' The two datasets are treated as independent conditions. This function does
+#' not implement a paired or clustered bootstrap.
+#'
 #' **Interpretation:**
 #' \itemize{
 #'   \item Positive pAUC difference: Condition 1 has better discriminability
@@ -91,11 +94,16 @@ compare_pauc <- function(data1,
                          seed = NULL,
                          label1 = "Condition 1",
                          label2 = "Condition 2") {
-
-  # Set seed if provided
-  if (!is.null(seed)) {
-    set.seed(seed)
+  if (!is.numeric(n_bootstrap) || length(n_bootstrap) != 1L ||
+      n_bootstrap < 2 || n_bootstrap != as.integer(n_bootstrap)) {
+    stop("n_bootstrap must be an integer of at least 2.", call. = FALSE)
   }
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      !is.finite(conf_level) || conf_level <= 0 || conf_level >= 1) {
+    stop("conf_level must be strictly between 0 and 1.", call. = FALSE)
+  }
+  restore_rng <- .local_seed(seed)
+  on.exit(restore_rng(), add = TRUE)
 
   # Compute ROC for both conditions
   roc1 <- make_rocdata(data1, lineup_size = lineup_size)
@@ -129,8 +137,15 @@ compare_pauc <- function(data1,
 
   # Z-test for difference
   pauc_diff <- pauc1 - pauc2
-  z_score <- pauc_diff / se_diff
-  p_value <- 2 * (1 - stats::pnorm(abs(z_score)))  # Two-tailed
+  if (!is.finite(se_diff) || se_diff < 0) {
+    stop("Bootstrap standard error could not be estimated.", call. = FALSE)
+  }
+  z_score <- if (se_diff == 0) {
+    if (pauc_diff == 0) 0 else sign(pauc_diff) * Inf
+  } else {
+    pauc_diff / se_diff
+  }
+  p_value <- if (z_score == 0) 1 else 2 * stats::pnorm(-abs(z_score))
 
   # Confidence interval for difference
   z_crit <- stats::qnorm(1 - (1 - conf_level) / 2)
@@ -172,6 +187,12 @@ compare_pauc <- function(data1,
 #' @return Numeric pAUC value
 #' @keywords internal
 .compute_pauc_with_cutoff <- function(roc_data, max_false_id_rate) {
+  if (!is.numeric(max_false_id_rate) || length(max_false_id_rate) != 1L ||
+      is.na(max_false_id_rate) || max_false_id_rate < 0) {
+    stop("max_false_id_rate must be a non-negative numeric scalar.", call. = FALSE)
+  }
+  roc_data <- roc_data[order(roc_data$false_id_rate, roc_data$correct_id_rate), ]
+  roc_data <- roc_data[!duplicated(roc_data$false_id_rate, fromLast = TRUE), ]
 
   # Filter to points at or below cutoff
   roc_filtered <- roc_data[roc_data$false_id_rate <= max_false_id_rate, ]
@@ -184,8 +205,8 @@ compare_pauc <- function(data1,
 
     if (length(below_idx) > 0 && length(above_idx) > 0) {
       # Get nearest points
-      below_pt <- roc_data[max(below_idx), ]
-      above_pt <- roc_data[min(above_idx), ]
+      below_pt <- roc_data[below_idx[which.max(roc_data$false_id_rate[below_idx])], ]
+      above_pt <- roc_data[above_idx[which.min(roc_data$false_id_rate[above_idx])], ]
 
       # Linear interpolation
       slope <- (above_pt$correct_id_rate - below_pt$correct_id_rate) /
@@ -238,20 +259,20 @@ compare_pauc <- function(data1,
 .bootstrap_pauc_comparison <- function(data1, data2, lineup_size,
                                        max_false_id_rate, n_bootstrap) {
 
-  n1 <- nrow(data1)
-  n2 <- nrow(data2)
-
   pauc1_boot <- numeric(n_bootstrap)
   pauc2_boot <- numeric(n_bootstrap)
   diff_boot <- numeric(n_bootstrap)
 
   for (b in 1:n_bootstrap) {
-    # Resample with replacement
-    boot_idx1 <- sample(1:n1, n1, replace = TRUE)
-    boot_idx2 <- sample(1:n2, n2, replace = TRUE)
-
-    boot_data1 <- data1[boot_idx1, ]
-    boot_data2 <- data2[boot_idx2, ]
+    # Stratify by target presence so every resample preserves both trial types.
+    resample_condition <- function(dat) {
+      tp <- which(dat$target_present)
+      ta <- which(!dat$target_present)
+      dat[c(sample(tp, length(tp), replace = TRUE),
+            sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
+    }
+    boot_data1 <- resample_condition(data1)
+    boot_data2 <- resample_condition(data2)
 
     # Compute ROC and pAUC for bootstrap samples
     tryCatch({
@@ -446,7 +467,7 @@ plot.pauc_comparison <- function(x, show_cutoff = TRUE, show_test_results = TRUE
   if (nrow(roc1_filtered) > 1) {
     p <- p + geom_ribbon(
       data = roc1_filtered,
-      aes(ymin = false_id_rate, ymax = correct_id_rate),
+      aes(ymin = 0, ymax = correct_id_rate),
       alpha = 0.2,
       color = NA
     )
@@ -455,7 +476,7 @@ plot.pauc_comparison <- function(x, show_cutoff = TRUE, show_test_results = TRUE
   if (nrow(roc2_filtered) > 1) {
     p <- p + geom_ribbon(
       data = roc2_filtered,
-      aes(ymin = false_id_rate, ymax = correct_id_rate),
+      aes(ymin = 0, ymax = correct_id_rate),
       alpha = 0.2,
       color = NA
     )
@@ -467,7 +488,7 @@ plot.pauc_comparison <- function(x, show_cutoff = TRUE, show_test_results = TRUE
       xintercept = x$max_false_id_rate,
       linetype = "dotted",
       color = "gray30",
-      size = 1
+      linewidth = 1
     ) +
     annotate(
       "text",

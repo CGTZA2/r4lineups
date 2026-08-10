@@ -10,6 +10,8 @@ inst/doc
 *.Rcheck/
 *.tar.gz
 notes/
+pdfs/
+.DS_Store
 vignettes/*.html
 vignettes/*.R
 vignettes/test.Rmd
@@ -17,3 +19,6 @@ vignettes/test.Rmd
 /Meta/
 docs/
 Rplots.pdf
+r4lineups_joss/
+paper/*.pdf
+gem_report.md

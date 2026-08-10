@@ -37,9 +37,9 @@ and accuracy for suspect identifications.
 CAC analysis computes, for each confidence level:
 \deqn{Accuracy = \frac{Correct Suspect IDs}{Correct Suspect IDs + Incorrect Suspect IDs}}
 
-Only suspect IDs are included (filler IDs are ignored). For target-absent
-lineups with no designated innocent suspect, filler IDs are divided by
-lineup size to estimate incorrect suspect IDs.
+Explicit target-absent suspect IDs are used when present. Otherwise,
+target-absent filler IDs are divided by lineup size to estimate incorrect
+suspect IDs. The two estimators are never added together.
 
 According to Mickes (2015), CAC analysis is most relevant for triers of fact
 (judges/jurors) evaluating estimator variables (e.g., exposure duration,
