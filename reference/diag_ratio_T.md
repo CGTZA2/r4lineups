@@ -80,7 +80,7 @@ pos_abs <- 5
 
 #Call:
 diag_ratio_T(lineup_pres, lineup_abs, pos_pres, pos_abs, 6, 5)
-#> [1] 1.374925
+#> [1] 1.273079
 diag_ratio_T(lineup_pres, lineup_abs, 3, 5, 6, 5)
-#> [1] 1.374925
+#> [1] 1.273079
 ```

@@ -25,8 +25,7 @@ esize_m_boot(lineup_vec, d, k)
 
 ## Value
 
-If printarg=FALSE, provides only Malpass's priginal calculation of
-effective size
+The Tredoux-adjusted Malpass effective-size estimate for the resample.
 
 ## Details
 
@@ -86,7 +85,7 @@ bootobject
 #> t1*     5.46 -0.21534   0.2121728
 
 #To get confidence intervals:
-cis <- boot::boot.ci(bootobject, conf = 0.95, type = "all")
+cis <- boot::boot.ci(bootobject, conf = 0.95, type = "all", k = 6)
 #> Warning: bootstrap variances needed for studentized intervals
 #> Warning: extreme order statistics used as endpoints
 ```

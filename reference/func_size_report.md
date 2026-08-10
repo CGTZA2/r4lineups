@@ -6,7 +6,7 @@ and reporting results in some detail
 ## Usage
 
 ``` r
-func_size_report(lineup_vec, target_pos, k, R)
+func_size_report(lineup_vec, target_pos, k, R = 1000)
 ```
 
 ## Arguments
@@ -27,6 +27,11 @@ func_size_report(lineup_vec, target_pos, k, R)
 - R:
 
   Number of bootstrap samples. Defaults to 1000
+
+## Value
+
+Invisibly returns the functional-size estimate, normal, percentile, and
+BCa intervals, the number of replications, and the bootstrap object.
 
 ## Details
 
@@ -62,15 +67,15 @@ target_pos <- 3
 
 #Call:
 x <- func_size_report(lineup_vec, target_pos, 6)
-#> Functional size of lineup is  5.556
+#> Functional size of lineup is 5.556
 #> Confidence intervals [95%]
-#> Normal Theory 2.573 8.041
-#> Bootstrap: percentile (R = 1000) 3.846 9.091
-#> Bootstrap: bias-corrected (R = 1000) 3.704 8.333
+#> Normal Theory 2.573 8.041 
+#> Bootstrap: percentile (R = 1000) 3.846 9.091 
+#> Bootstrap: bias-corrected (R = 1000) 3.704 8.333 
 x <- func_size_report(lineup_vec, 3, 6)
-#> Functional size of lineup is  5.556
+#> Functional size of lineup is 5.556
 #> Confidence intervals [95%]
-#> Normal Theory 2.498 8.031
-#> Bootstrap: percentile (R = 1000) 3.846 9.091
-#> Bootstrap: bias-corrected (R = 1000) 3.571 8.333
+#> Normal Theory 2.498 8.031 
+#> Bootstrap: percentile (R = 1000) 3.846 9.091 
+#> Bootstrap: bias-corrected (R = 1000) 3.571 8.333 
 ```

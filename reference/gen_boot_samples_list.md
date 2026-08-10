@@ -22,7 +22,7 @@ gen_boot_samples_list(lineup_list, bootno)
 
 ## Value
 
-A list of bootstrapped lineup data Length of list = no. of boostrap
+A list of bootstrapped lineup data Length of list = number of bootstrap
 sample draws
 
 ## Examples
@@ -39,15 +39,4 @@ bootno <- 1000
 
 #Call:
 bootdata <- gen_boot_samples_list(linelist, bootno)
-#> Warning: `rerun()` was deprecated in purrr 1.0.0.
-#> ℹ Please use `map()` instead.
-#>   # Previously
-#>   rerun(1000, sample(lineup_list[[i]], length(lineup_list[[i]]), replace =
-#>   TRUE))
-#> 
-#>   # Now
-#>   map(1:1000, ~ sample(lineup_list[[i]], length(lineup_list[[i]]), replace =
-#>   TRUE))
-#> ℹ The deprecated feature was likely used in the r4lineups package.
-#>   Please report the issue at <https://github.com/CGTZA2/r4lineups/issues>.
 ```

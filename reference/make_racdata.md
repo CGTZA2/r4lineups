@@ -51,9 +51,9 @@ RAC analysis computes, for each response time bin: \$\$Accuracy =
 \frac{Correct Suspect IDs}{Correct Suspect IDs + Incorrect Suspect
 IDs}\$\$
 
-Only suspect IDs are included (filler IDs and rejections are ignored).
-For target-absent lineups with no designated innocent suspect, filler
-IDs are divided by lineup size to estimate incorrect suspect IDs.
+Explicit target-absent suspect IDs are used when present. Otherwise,
+target-absent filler IDs are divided by lineup size to estimate
+incorrect suspect IDs. The two estimators are never added together.
 
 RAC analysis is useful for examining the speed-accuracy tradeoff in
 eyewitness identifications. Faster responses typically indicate stronger
@@ -81,9 +81,9 @@ rac <- make_racdata(data, time_bins = c(0, 4000, 8000, 12000, 20000))
 rac$rac_data
 #> # A tibble: 4 × 7
 #>   response_time   mean_time n_correct n_incorrect n_total accuracy      se
-#>   <chr>               <dbl>     <int>       <dbl>   <dbl>    <dbl>   <dbl>
-#> 1 [0,4e+03]           2671.        24        5.5    29.5     0.814  0.0717
-#> 2 (4e+03,8e+03]       5924.        35        9.67   44.7     0.784  0.0616
-#> 3 (8e+03,1.2e+04]     8758.         3        2.83    5.83    0.514  0.207 
-#> 4 (1.2e+04,2e+04]      NaN          0        0       0      NA     NA     
+#>   <chr>               <dbl>     <int>       <int>   <int>    <dbl>   <dbl>
+#> 1 [0,4e+03]           2671.        24           4      28    0.857  0.0661
+#> 2 (4e+03,8e+03]       5924.        35           7      42    0.833  0.0575
+#> 3 (8e+03,1.2e+04]     8758.         3           1       4    0.75   0.217 
+#> 4 (1.2e+04,2e+04]      NaN          0           0       0   NA     NA     
 ```

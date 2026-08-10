@@ -96,6 +96,13 @@ Where:
 
 ANRI provides a less biased estimate of the population resolution,
 making it more appropriate for hypothesis testing and group comparisons.
+When target-absent suspect identifications are estimated from filler
+choices, `N` and the bin counts are effective (possibly fractional)
+counts from
+[`make_calibration_data()`](https://cgtza2.github.io/r4lineups/reference/make_calibration_data.md),
+so the correction is an approximation. See
+[`make_calibration_data`](https://cgtza2.github.io/r4lineups/reference/make_calibration_data.md)
+for the designated-suspect distinction.
 
 ## References
 

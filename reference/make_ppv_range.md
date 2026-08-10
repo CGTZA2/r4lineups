@@ -62,5 +62,9 @@ result <- make_ppv_range(lineup_example, confidence_bins = c(0, 60, 80, 100))
 result$plot_ppv_range
 
 result$plot_effective_size
+#> Warning: Removed 2 rows containing missing values or values outside the scale range
+#> (`geom_line()`).
+#> Warning: Removed 2 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
 
 ```

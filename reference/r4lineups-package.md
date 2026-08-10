@@ -1,12 +1,38 @@
 # r4lineups: Statistical Inference on Lineup Fairness
 
-Computes various properties of laboratory or police lineups for
-researchers in forensic psychology. The package includes functions for
-calculating lineup bias, functional size, effective size, diagnosticity
-ratio, homogeneity of the diagnosticity ratio, and ROC curves for
-confidence-accuracy data. Face similarity is computed using
-state-of-the-art deep learning embeddings (ArcFace, FaceNet, etc.) via
-Python's deepface library.
+Computes statistical measures for laboratory and police lineups in
+forensic psychology, including lineup bias, functional and effective
+size, diagnosticity, confidence-accuracy curves, signal detection
+models, and simulation tools. Optional face-similarity functions use
+embeddings supplied by Python's 'deepface' library; optional
+lineup-memory model fitting uses a separately installed, pinned
+'pyWitness' engine.
+
+## Authorship and acknowledgements
+
+Colin Tredoux and Tamsyn Naylor are the key authors of \`r4lineups\` and
+were jointly responsible for the original package's design and
+development.
+
+Development used multiple dynamically updated frontier models: Anthropic
+Claude Sonnet 4 and 5 and Claude Opus 4.6 and 4.8, and OpenAI Codex with
+GPT-5-family models including GPT-5.5 and GPT-5.6 Sol. Additional Claude
+and Codex sessions were used, but exact session-level model identifiers
+were not consistently recorded. These tools assisted with code review
+and drafting, debugging, test scaffolding, documentation, package-check
+remediation, and manuscript editing. Colin Tredoux and Tamsyn Naylor
+reviewed, modified, and validated the AI-assisted outputs, made the
+statistical and software-design decisions, and retain full
+responsibility for accuracy, originality, licensing, and scholarly
+claims.
+
+The package implements computational approaches developed by many
+researchers. Their publications are cited in the documentation for the
+relevant functions and vignettes, and the package authors gratefully
+acknowledge this foundational work. Any error in translating a published
+method into code is an error in this package, not in the cited work.
+Please report suspected errors through the [GitHub issue
+tracker](https://github.com/CGTZA2/r4lineups/issues).
 
 ## See also
 
@@ -14,14 +40,19 @@ Useful links:
 
 - <https://github.com/CGTZA2/r4lineups>
 
+- <https://cgtza2.github.io/r4lineups/>
+
 - Report bugs at <https://github.com/CGTZA2/r4lineups/issues>
 
 ## Author
 
-**Maintainer**: Colin Tredoux <colin.tredoux@uct.ac.za>
+**Maintainer**: Colin Tredoux <colin.tredoux@uct.ac.za> (Co-author of
+the original package)
 
 Authors:
 
-- Colin Tredoux <colin.tredoux@uct.ac.za>
+- Colin Tredoux <colin.tredoux@uct.ac.za> (Co-author of the original
+  package)
 
-- Tamsyn Naylor <tmnaylor@outlook.com>
+- Tamsyn Naylor <tmnaylor@outlook.com> (Co-author of the original
+  package)

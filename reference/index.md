@@ -350,11 +350,25 @@ fitting.
   [`msdt_dprime_from_rej()`](https://cgtza2.github.io/r4lineups/reference/estimate_msdt_params.md)
   : mSDT Parameter Estimation from Rejection Rates
 - [`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
-  : MAX SDT Compound-Decision Model for Eyewitness Lineups
+  : Restricted Independent-Observations/MAX Model for Lineup Counts
 - [`max_filler_moments()`](https://cgtza2.github.io/r4lineups/reference/max_filler_moments.md)
   : Max Filler Distribution Moments
 - [`plot_msdt_joint()`](https://cgtza2.github.io/r4lineups/reference/plot_msdt_joint.md)
   : Plot mSDT Joint Distributions
+
+## Wixted lineup-memory models (optional pyWitness engine)
+
+Fit and compare Independent Observations, Ensemble, and Integration
+models for fair simultaneous lineups.
+
+- [`check_pywitness_deps()`](https://cgtza2.github.io/r4lineups/reference/check_pywitness_deps.md)
+  : Check Availability of the pyWitness Engine
+- [`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
+  : Fit Competing Wixted Lineup-Memory Models
+- [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md)
+  : Install the Audited pyWitness Engine
+- [`plot(`*`<lineup_model_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.lineup_model_comparison.md)
+  : Plot a Wixted Lineup-Memory Model Comparison
 
 ## SDT estimation and comparison
 
@@ -465,7 +479,7 @@ Additional helper functions.
 - [`gen_esize_m()`](https://cgtza2.github.io/r4lineups/reference/gen_esize_m.md)
   : Effective Size (across a dataframe)
 - [`gen_esize_m_ci()`](https://cgtza2.github.io/r4lineups/reference/gen_esize_m_ci.md)
-  : Bootstrapped Confidence Intervals for Effective Size
+  : Bootstrap Quantile for Effective Size
 - [`gen_lineup_prop()`](https://cgtza2.github.io/r4lineups/reference/gen_lineup_prop.md)
   : Lineup proportion over dataframe
 - [`gen_linevec()`](https://cgtza2.github.io/r4lineups/reference/gen_linevec.md)

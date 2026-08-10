@@ -12,7 +12,8 @@ make_bree_curve(
   data_proc_b,
   reference_response = "suspect",
   confidence_bins = NULL,
-  prior_grid = seq(0.01, 0.99, 0.01)
+  prior_grid = seq(0.01, 0.99, 0.01),
+  lineup_size = 6
 )
 ```
 
@@ -43,6 +44,11 @@ make_bree_curve(
 
   Numeric vector of prior probabilities for procedure A (default:
   seq(0.01, 0.99, 0.01))
+
+- lineup_size:
+
+  Nominal lineup size for procedures without a designated innocent
+  suspect.
 
 ## Value
 

@@ -75,12 +75,14 @@ rejection rates: the culprit-absent rejection rate fixes $`\gamma`$, and
 the culprit-absent vs culprit-present rejection gap fixes $`d'`$. It is
 information-lossy — it ignores the composition of choices (suspect-ID vs
 filler-ID) and the spread of filler choices, which are the most
-diagnostic outcomes. If you have the full response breakdown
-(suspect/filler/reject counts for both lineup types), prefer the
-likelihood-based fitter
-[`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md),
-which uses all outcome counts, or the 2-HT model
-([`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)).
+diagnostic outcomes. If you have the aggregate response breakdown,
+[`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
+uses all suspect/filler/reject counts in a restricted single-criterion,
+equal-variance Independent-Observations/MAX fit. It minimizes Pearson
+chi-squared rather than likelihood and is not the complete
+confidence-based Wixted et al. (2018) model. The 2-HT model
+([`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md))
+provides a different process account.
 
 ## Joint distribution plots
 

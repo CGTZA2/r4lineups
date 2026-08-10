@@ -1,5 +1,5 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   bayesian_inference: bayesian_inference.html
@@ -7,6 +7,7 @@ articles:
   face_similarity: face_similarity.html
   fullroc_analysis: fullroc_analysis.html
   information_error_rate_analysis: information_error_rate_analysis.html
+  lineup_memory_models: lineup_memory_models.html
   model_comparison: model_comparison.html
   msdt_model: msdt_model.html
   pauc_statistical_comparison: pauc_statistical_comparison.html
@@ -16,7 +17,7 @@ articles:
   simulation_power_analysis: simulation_power_analysis.html
   Vignette: Vignette.html
   winter_2ht_model: winter_2ht_model.html
-last_built: 2026-07-06T13:51Z
+last_built: 2026-08-10T16:16Z
 urls:
   reference: https://cgtza2.github.io/r4lineups/reference
   article: https://cgtza2.github.io/r4lineups/articles

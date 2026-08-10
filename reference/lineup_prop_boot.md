@@ -49,6 +49,6 @@ https://cran.r-project.org/web/packages/boot/boot.pdf
 lineup_vec <- round(runif(100, 1, 6))
 
 bootobject <- boot::boot(lineup_vec, lineup_prop_boot, target_pos = 3, R = 1000)
-cis <- boot::boot.ci(bootobject, conf = 0.95, type = "all")
+cis <- boot::boot.ci(bootobject, conf = 0.95, type = "all", target_pos = 3)
 #> Warning: bootstrap variances needed for studentized intervals
 ```

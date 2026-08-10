@@ -3,6 +3,32 @@
 Statistical tools for assessing lineup fairness, confidence‑accuracy
 analyses, and face similarity in eyewitness identification research.
 
+## Authorship and acknowledgements
+
+Colin Tredoux and Tamsyn Naylor are the key authors of `r4lineups` and
+were jointly responsible for the original package’s design and
+development.
+
+Development used multiple dynamically updated frontier models: Anthropic
+Claude Sonnet 4 and 5 and Claude Opus 4.6 and 4.8, and OpenAI Codex with
+GPT-5-family models including GPT-5.5 and GPT-5.6 Sol. Additional Claude
+and Codex sessions were used, but exact session-level model identifiers
+were not consistently recorded. These tools assisted with code review
+and drafting, debugging, test scaffolding, documentation, package-check
+remediation, and manuscript editing. Colin Tredoux and Tamsyn Naylor
+reviewed, modified, and validated the AI-assisted outputs, made the
+statistical and software-design decisions, and retain full
+responsibility for accuracy, originality, licensing, and scholarly
+claims.
+
+This package implements computational approaches developed by many
+researchers. We gratefully acknowledge their foundational work and cite
+their publications in the documentation for the relevant functions and
+vignettes. Any error in translating a published method into code is an
+error in this package, not in the cited work. Please report suspected
+errors through the [GitHub issue
+tracker](https://github.com/CGTZA2/r4lineups/issues).
+
 ## What this package includes
 
 - **Lineup bias & proportions**: target‑position proportions, all‑member
@@ -15,6 +41,8 @@ analyses, and face similarity in eyewitness identification research.
   (Miller/Gourevitch/bootstrap), z‑tests
 - **mSDT (multi‑item SDT)**: max filler distribution, parameter
   estimation from rejection rates, joint plots
+- **Wixted lineup-memory models**: optional pyWitness-backed Independent
+  Observations, Ensemble, and Integration fitting
 - **Full ROC (Smith & Yang)**: full ROC data and plots
 - **EIG & PPV range**: information‑gain and PPV‑range analyses
 - **Calibration & ANRI**: calibration metrics, ANRI and bootstrap
@@ -33,7 +61,7 @@ This repository is an R package. From R:
 ``` r
 
 # from GitHub
-remotes::install_github("ctredoux/r4lineups")
+remotes::install_github("CGTZA2/r4lineups")
 
 # from local source
 devtools::install()
@@ -43,6 +71,18 @@ If you prefer base R:
 
 ``` r
 R CMD INSTALL .
+```
+
+### Optional Wixted model engine
+
+The lineup-memory fitting interface uses a separately installed, pinned
+pyWitness engine. Installation is explicit and isolated; it is never
+triggered when r4lineups loads or during ordinary package checks.
+
+``` r
+
+install_pywitness()
+check_pywitness_deps(initialize = TRUE)
 ```
 
 ## Core data format (confidence‑based analyses)
@@ -99,6 +139,29 @@ fullroc <- make_fullroc(lineup_example, conf_bins = c(0, 60, 80, 100), lineup_si
 plot_fullroc(fullroc)
 ```
 
+### Competing lineup-memory models
+
+Fit one fair simultaneous-lineup procedure or condition at a time. The
+result contains R-native parameter, cell, fit, and engine tables and can
+be saved without a live Python session.
+
+``` r
+
+fits <- fit_lineup_models(
+  lineup_example,
+  models = c("independent", "ensemble", "integration"),
+  lineup_size = 6,
+  confidence_bins = c(0, 60, 80, 100)
+)
+print(fits)
+plot(fits, type = "fit")
+```
+
+pyWitness minimizes Pearson chi-squared. `loglik_at_estimate` is
+diagnostic, not maximized; AIC and BIC are therefore not reported.
+BEST-Rest and Ensemble are equivalent after criterion rescaling and must
+not be ranked as independent models.
+
 ### Face similarity
 
 ``` r
@@ -114,7 +177,8 @@ The app bundles key analyses (bias, effective size, Bayesian inference,
 ROC/CAC, EIG/PPV, face similarity). It is an interactive companion to
 the package, not a complete replacement for the R API.
 
-A hosted instance is available at <https://r4lineups.cogbook.org/>.
+Package documentation is available at
+<https://cgtza2.github.io/r4lineups/>.
 
 ``` r
 
@@ -146,13 +210,19 @@ For deployment, the app lives at `inst/shiny/r4lineups_app`.
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from
   counts
 - `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions
+- `lineup_memory_models.Rmd` — optional Wixted/pyWitness model-fitting
+  workflow
 
 ## Notes
 
 - `notes/` contains working papers and test scripts and is **not** part
   of the package build.
+- `pdfs/` contains local audit sources and is ignored by Git and package
+  builds.
 - For face similarity, Python dependencies are managed via
   [`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md).
+- For Wixted model fitting, pyWitness is managed separately via
+  [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md).
 - Tests can be run with `testthat::test_dir("tests/testthat")`; package
   checks use standard `R CMD build` and `R CMD check` workflows.
 
@@ -508,11 +578,25 @@ fitting.
   [`msdt_dprime_from_rej()`](https://cgtza2.github.io/r4lineups/reference/estimate_msdt_params.md)
   : mSDT Parameter Estimation from Rejection Rates
 - [`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
-  : MAX SDT Compound-Decision Model for Eyewitness Lineups
+  : Restricted Independent-Observations/MAX Model for Lineup Counts
 - [`max_filler_moments()`](https://cgtza2.github.io/r4lineups/reference/max_filler_moments.md)
   : Max Filler Distribution Moments
 - [`plot_msdt_joint()`](https://cgtza2.github.io/r4lineups/reference/plot_msdt_joint.md)
   : Plot mSDT Joint Distributions
+
+## Wixted lineup-memory models (optional pyWitness engine)
+
+Fit and compare Independent Observations, Ensemble, and Integration
+models for fair simultaneous lineups.
+
+- [`check_pywitness_deps()`](https://cgtza2.github.io/r4lineups/reference/check_pywitness_deps.md)
+  : Check Availability of the pyWitness Engine
+- [`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
+  : Fit Competing Wixted Lineup-Memory Models
+- [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md)
+  : Install the Audited pyWitness Engine
+- [`plot(`*`<lineup_model_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.lineup_model_comparison.md)
+  : Plot a Wixted Lineup-Memory Model Comparison
 
 ## SDT estimation and comparison
 
@@ -623,7 +707,7 @@ Additional helper functions.
 - [`gen_esize_m()`](https://cgtza2.github.io/r4lineups/reference/gen_esize_m.md)
   : Effective Size (across a dataframe)
 - [`gen_esize_m_ci()`](https://cgtza2.github.io/r4lineups/reference/gen_esize_m_ci.md)
-  : Bootstrapped Confidence Intervals for Effective Size
+  : Bootstrap Quantile for Effective Size
 - [`gen_lineup_prop()`](https://cgtza2.github.io/r4lineups/reference/gen_lineup_prop.md)
   : Lineup proportion over dataframe
 - [`gen_linevec()`](https://cgtza2.github.io/r4lineups/reference/gen_linevec.md)
@@ -665,6 +749,8 @@ Additional helper functions.
   Lineups](https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.md):
 - [Information and Error-Rate
   Metrics](https://cgtza2.github.io/r4lineups/articles/information_error_rate_analysis.md):
+- [Fitting Wixted Lineup-Memory
+  Models](https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.md):
 - [Comparing Models for Eyewitness Identification
   Data](https://cgtza2.github.io/r4lineups/articles/model_comparison.md):
 - [mSDT: Multi-Item Signal Detection

@@ -89,7 +89,7 @@ comparison <- compare_pauc(
   lineup_size = 6,
   label1 = "Strong discriminability (d'=2.0)",
   label2 = "Moderate discriminability (d'=1.5)",
-  n_bootstrap = 1000,  # Use 2000+ for publications
+  n_bootstrap = 100,  # Use 2000+ for publications
   seed = 123
 )
 
@@ -99,20 +99,20 @@ print(comparison)
 #> === pAUC Comparison Analysis ===
 #> 
 #> Conditions:
-#>   Strong discriminability (d'=2.0): pAUC = 0.1647 (SE = 0.0178)
-#>   Moderate discriminability (d'=1.5): pAUC = 0.1655 (SE = 0.0144)
+#>   Strong discriminability (d'=2.0): pAUC = 0.0832 (SE = 0.0202)
+#>   Moderate discriminability (d'=1.5): pAUC = 0.1202 (SE = 0.0123)
 #> 
-#> Difference: -8e-04
-#>   95% CI: [-0.0459, 0.0443]
+#> Difference: -0.037
+#>   95% CI: [-0.0843, 0.0104]
 #> 
 #> Statistical Test:
-#>   Z = -0.035
-#>   p-value = 0.9722
+#>   Z = -1.531
+#>   p-value = 0.1258
 #> 
 #> Interpretation: Moderate discriminability (d'=1.5) has higher discriminability than Strong discriminability (d'=2.0) (ns)
 #> 
-#> Max false ID rate cutoff: 0.3722
-#> Bootstrap samples: 1000
+#> Max false ID rate cutoff: 0.2467
+#> Bootstrap samples: 100
 #> 
 #> Note: *** p<0.001, ** p<0.01, * p<0.05, ns = not significant
 ```
@@ -124,14 +124,14 @@ print(comparison)
 cat("Statistical Test Results:\n\n")
 #> Statistical Test Results:
 cat("pAUC Difference:", round(comparison$pauc_diff, 4), "\n")
-#> pAUC Difference: -8e-04
+#> pAUC Difference: -0.037
 cat("Z-score:", round(comparison$z_score, 3), "\n")
-#> Z-score: -0.035
+#> Z-score: -1.531
 cat("P-value:", format.pval(comparison$p_value, digits = 4), "\n")
-#> P-value: 0.9722
+#> P-value: 0.1258
 cat("95% CI: [", round(comparison$ci_diff["lower"], 4), ", ",
     round(comparison$ci_diff["upper"], 4), "]\n\n", sep = "")
-#> 95% CI: [-0.0459, 0.0443]
+#> 95% CI: [-0.0843, 0.0104]
 
 if (comparison$p_value < 0.05) {
   cat("Conclusion: Significant difference between conditions (p < 0.05)\n")
@@ -154,30 +154,30 @@ summary(comparison)
 #>   Sample size: 300 
 #>   Target-present: 150 
 #>   Target-absent: 150 
-#>   pAUC: 0.1647 
-#>   SE(pAUC): 0.0178 
-#>   95% CI: [0.1299, 0.1996]
+#>   pAUC: 0.0832 
+#>   SE(pAUC): 0.0202 
+#>   95% CI: [0.0436, 0.1229]
 #> 
 #> Condition 2: Moderate discriminability (d'=1.5) 
 #>   Sample size: 300 
 #>   Target-present: 150 
 #>   Target-absent: 150 
-#>   pAUC: 0.1655 
-#>   SE(pAUC): 0.0144 
-#>   95% CI: [0.1374, 0.1937]
+#>   pAUC: 0.1202 
+#>   SE(pAUC): 0.0123 
+#>   95% CI: [0.0961, 0.1443]
 #> 
 #> Difference (Strong discriminability (d'=2.0) - Moderate discriminability (d'=1.5)):
-#>   Estimate: -8e-04 
-#>   SE(diff): 0.023 
-#>   95% CI: [-0.0459, 0.0443]
-#>   Z-score: -0.035 
-#>   p-value: 0.9722 
+#>   Estimate: -0.037 
+#>   SE(diff): 0.0241 
+#>   95% CI: [-0.0843, 0.0104]
+#>   Z-score: -1.531 
+#>   p-value: 0.1258 
 #> 
-#> Effect size (d): -0.05 
+#> Effect size (d): -2.208 
 #> 
 #> Analysis Details:
-#>   Max false ID rate cutoff: 0.3722 
-#>   Bootstrap samples: 1000 
+#>   Max false ID rate cutoff: 0.2467 
+#>   Bootstrap samples: 100 
 #>   Confidence level:95%
 ```
 
@@ -206,7 +206,7 @@ comparison_20 <- compare_pauc(
   max_false_id_rate = 0.20,  # 20% cutoff
   label1 = "Strong",
   label2 = "Moderate",
-  n_bootstrap = 1000,
+  n_bootstrap = 100,
   seed = 456
 )
 
@@ -217,20 +217,20 @@ print(comparison_20)
 #> === pAUC Comparison Analysis ===
 #> 
 #> Conditions:
-#>   Strong: pAUC = 0.0958 (SE = 0.0095)
-#>   Moderate: pAUC = 0.0593 (SE = 0.0073)
+#>   Strong: pAUC = 0.0832 (SE = 0.0169)
+#>   Moderate: pAUC = 0.0908 (SE = 0.0091)
 #> 
-#> Difference: 0.0365
-#>   95% CI: [0.013, 0.06]
+#> Difference: -0.0076
+#>   95% CI: [-0.0483, 0.0332]
 #> 
 #> Statistical Test:
-#>   Z = 3.046
-#>   p-value = 0.002319
+#>   Z = -0.364
+#>   p-value = 0.7156
 #> 
-#> Interpretation: Strong has higher discriminability than Moderate (**)
+#> Interpretation: Moderate has higher discriminability than Strong (ns)
 #> 
 #> Max false ID rate cutoff: 0.2
-#> Bootstrap samples: 1000
+#> Bootstrap samples: 100
 #> 
 #> Note: *** p<0.001, ** p<0.01, * p<0.05, ns = not significant
 ```
@@ -247,14 +247,14 @@ Common policy-relevant cutoffs: - **5% (0.05)**: Very conservative -
 quick_comparison <- compare_pauc(
   condition1,
   condition2,
-  n_bootstrap = 500,  # Faster
+  n_bootstrap = 100,  # Fast vignette setting
   seed = 789
 )
 
-cat("Quick comparison (500 bootstrap samples):\n")
-#> Quick comparison (500 bootstrap samples):
+cat("Quick comparison (100 bootstrap samples):\n")
+#> Quick comparison (100 bootstrap samples):
 cat("  p-value:", format.pval(quick_comparison$p_value), "\n")
-#>   p-value: 0.97267
+#>   p-value: 0.13338
 
 # Vs. publication-quality (more samples)
 # publication_comparison <- compare_pauc(
@@ -301,30 +301,8 @@ lineup_comparison <- compare_pauc(
 )
 
 print(lineup_comparison)
-#> 
-#> === pAUC Comparison Analysis ===
-#> 
-#> Conditions:
-#>   Simultaneous: pAUC = 0.2025 (SE = 0.0133)
-#>   Sequential: pAUC = 0.1305 (SE = 0.013)
-#> 
-#> Difference: 0.072
-#>   95% CI: [0.0341, 0.1099]
-#> 
-#> Statistical Test:
-#>   Z = 3.728
-#>   p-value = 0.0001931
-#> 
-#> Interpretation: Simultaneous has higher discriminability than Sequential (***)
-#> 
-#> Max false ID rate cutoff: 0.3542
-#> Bootstrap samples: 1000
-#> 
-#> Note: *** p<0.001, ** p<0.01, * p<0.05, ns = not significant
 plot(lineup_comparison)
 ```
-
-![](pauc_statistical_comparison_files/figure-html/example_simultaneous_sequential-1.png)
 
 ### Example 2: Lineup Size Comparison
 
@@ -358,38 +336,6 @@ size_comparison <- compare_pauc(
 )
 
 summary(size_comparison)
-#> 
-#> === pAUC Comparison Summary ===
-#> 
-#> Condition 1: 6-person lineup 
-#>   Sample size: 300 
-#>   Target-present: 150 
-#>   Target-absent: 150 
-#>   pAUC: 0.0462 
-#>   SE(pAUC): 0.0056 
-#>   95% CI: [0.0352, 0.0573]
-#> 
-#> Condition 2: 8-person lineup 
-#>   Sample size: 300 
-#>   Target-present: 150 
-#>   Target-absent: 150 
-#>   pAUC: 0.0405 
-#>   SE(pAUC): 0.0056 
-#>   95% CI: [0.0296, 0.0515]
-#> 
-#> Difference (6-person lineup - 8-person lineup):
-#>   Estimate: 0.0057 
-#>   SE(diff): 0.0079 
-#>   95% CI: [-0.0097, 0.0212]
-#>   Z-score: 0.726 
-#>   p-value: 0.4676 
-#> 
-#> Effect size (d): 1.019 
-#> 
-#> Analysis Details:
-#>   Max false ID rate cutoff: 0.15 
-#>   Bootstrap samples: 1000 
-#>   Confidence level:95%
 ```
 
 ### Example 3: Retention Interval
@@ -423,26 +369,6 @@ retention_comparison <- compare_pauc(
 )
 
 print(retention_comparison)
-#> 
-#> === pAUC Comparison Analysis ===
-#> 
-#> Conditions:
-#>   Immediate test: pAUC = 0.1986 (SE = 0.0131)
-#>   1-week delay: pAUC = 0.099 (SE = 0.012)
-#> 
-#> Difference: 0.0996
-#>   95% CI: [0.0655, 0.1337]
-#> 
-#> Statistical Test:
-#>   Z = 5.727
-#>   p-value = 1.023e-08
-#> 
-#> Interpretation: Immediate test has higher discriminability than 1-week delay (***)
-#> 
-#> Max false ID rate cutoff: 0.3333
-#> Bootstrap samples: 1000
-#> 
-#> Note: *** p<0.001, ** p<0.01, * p<0.05, ns = not significant
 ```
 
 ## Multiple Comparisons
@@ -480,20 +406,11 @@ comparison_table$p_adjusted <- p.adjust(comparison_table$p_value, method = "bonf
 
 # Display results
 cat("Multiple Comparison Results:\n")
-#> Multiple Comparison Results:
 print(comparison_table, row.names = FALSE)
-#>      Comparison  pAUC_diff         Z    p_value p_adjusted
-#>  High vs Medium 0.01426505 0.6902745 0.49002156 1.00000000
-#>     High vs Low 0.04288773 2.1650596 0.03038312 0.09114937
-#>   Medium vs Low 0.02862269 1.4639521 0.14320704 0.42962111
 
 cat("\nInterpretation:\n")
-#> 
-#> Interpretation:
 cat("  Use p_adjusted for significance testing\n")
-#>   Use p_adjusted for significance testing
 cat("  Bonferroni correction: α = 0.05 / 3 comparisons = 0.0167\n")
-#>   Bonferroni correction: α = 0.05 / 3 comparisons = 0.0167
 ```
 
 ## Advanced Topics
@@ -511,23 +428,23 @@ cat("Bootstrap Distribution Summary:\n\n")
 cat("Condition 1 pAUC:\n")
 #> Condition 1 pAUC:
 cat("  Mean:", round(mean(boot_dist$pauc1_boot), 4), "\n")
-#>   Mean: 0.1646
+#>   Mean: 0.0808
 cat("  SD:", round(sd(boot_dist$pauc1_boot), 4), "\n\n")
-#>   SD: 0.0178
+#>   SD: 0.0202
 
 cat("Condition 2 pAUC:\n")
 #> Condition 2 pAUC:
 cat("  Mean:", round(mean(boot_dist$pauc2_boot), 4), "\n")
-#>   Mean: 0.1576
+#>   Mean: 0.1107
 cat("  SD:", round(sd(boot_dist$pauc2_boot), 4), "\n\n")
-#>   SD: 0.0144
+#>   SD: 0.0123
 
 cat("Difference:\n")
 #> Difference:
 cat("  Mean:", round(mean(boot_dist$diff_boot), 4), "\n")
-#>   Mean: 0.007
+#>   Mean: -0.0299
 cat("  SD:", round(sd(boot_dist$diff_boot), 4), "\n")
-#>   SD: 0.023
+#>   SD: 0.0241
 ```
 
 ### Visualizing Bootstrap Distributions
@@ -568,16 +485,16 @@ comparison_99 <- compare_pauc(
   condition1,
   condition2,
   conf_level = 0.99,  # 99% CI
-  n_bootstrap = 1000,
+  n_bootstrap = 100,
   seed = 555
 )
 
 cat("95% CI:", round(comparison$ci_diff["lower"], 4), "to",
     round(comparison$ci_diff["upper"], 4), "\n")
-#> 95% CI: -0.0459 to 0.0443
+#> 95% CI: -0.0843 to 0.0104
 cat("99% CI:", round(comparison_99$ci_diff["lower"], 4), "to",
     round(comparison_99$ci_diff["upper"], 4), "\n")
-#> 99% CI: -0.0594 to 0.0578
+#> 99% CI: -0.0916 to 0.0177
 cat("\nNote: 99% CI is wider (more conservative)\n")
 #> 
 #> Note: 99% CI is wider (more conservative)
@@ -620,18 +537,9 @@ for (i in seq_along(sample_sizes)) {
 
 # Display results
 cat("Power Analysis Results:\n")
-#> Power Analysis Results:
 print(power_results)
-#>     n power
-#> 1  50  0.16
-#> 2 100  0.26
-#> 3 150  0.26
-#> 4 200  0.40
-#> 5 300  0.50
 
 cat("\nFor 80% power, recommend n ≥", min(power_results$n[power_results$power >= 0.8]), "\n")
-#> 
-#> For 80% power, recommend n ≥ Inf
 ```
 
 ## Interpretation Guidelines
@@ -767,19 +675,14 @@ cat("  • Bootstrap distribution (supplementary)\n")
 ``` r
 
 cat("Too few bootstrap samples lead to unstable SE estimates:\n\n")
-#> Too few bootstrap samples lead to unstable SE estimates:
 
 # Compare with different bootstrap samples
 comp_100 <- compare_pauc(condition1, condition2, n_bootstrap = 100, seed = 666)
 comp_1000 <- compare_pauc(condition1, condition2, n_bootstrap = 1000, seed = 666)
 
 cat("100 samples:  SE =", round(comp_100$se_diff, 5), "\n")
-#> 100 samples:  SE = 0.02415
 cat("1000 samples: SE =", round(comp_1000$se_diff, 5), "\n")
-#> 1000 samples: SE = 0.02404
 cat("\nUse ≥ 1000 samples for stable estimates\n")
-#> 
-#> Use ≥ 1000 samples for stable estimates
 ```
 
 ### 2. Ignoring Multiple Testing

@@ -1,6 +1,6 @@
 # Bootstrapped Effective Size (Tredoux, 1998)
 
-Base function for generating boostrapped Effective Size (Tredoux, 1998)
+Base function for generating bootstrapped Effective Size (Tredoux, 1998)
 
 ## Usage
 
@@ -12,7 +12,8 @@ esize_T_boot(lineup_table, d)
 
 - lineup_table:
 
-  A table of lineup choices
+  A vector of individual lineup choices. The historical argument name is
+  retained for compatibility.
 
 - d:
 
@@ -22,10 +23,9 @@ esize_T_boot(lineup_table, d)
 
 This is the statistic function passed to
 [`boot::boot()`](https://rdrr.io/pkg/boot/man/boot.html) for
-bootstrapping Tredoux's E'. The data argument should be a table of
-lineup counts; `d` is the index vector supplied by
-[`boot::boot`](https://rdrr.io/pkg/boot/man/boot.html). For a
-higher-level interface that accepts raw lineup vectors, see
+bootstrapping Tredoux's E'. The data argument must contain individual
+lineup choices; `d` resamples mock witnesses rather than count-table
+cells. For a higher-level interface that accepts raw lineup vectors, see
 [`esize_boot_dist`](https://cgtza2.github.io/r4lineups/reference/esize_boot_dist.md).
 
 ## References
@@ -60,9 +60,9 @@ https://cran.r-project.org/web/packages/boot/boot.pdf
 ## Examples
 
 ``` r
-# Table of lineup choices from 50 mock witnesses to a 6-member lineup
+# Choices from 50 mock witnesses to a 6-member lineup
 set.seed(1)
-lineup_table <- table(sample(1:6, 50, replace = TRUE))
+lineup_table <- sample(1:6, 50, replace = TRUE)
 # E' for the observed data
 esize_T_boot(lineup_table, seq_along(lineup_table))
 #> [1] 5.681818

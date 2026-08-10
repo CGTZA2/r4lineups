@@ -99,6 +99,15 @@ When `choosers_only = TRUE`, only suspect identifications are included
 `choosers_only = FALSE`, all responses are included with fillers and
 rejections counted as incorrect.
 
+If target-absent data contain designated innocent-suspect
+identifications, those observations are used directly. Otherwise, each
+target-absent filler identification contributes weight `1 / lineup_size`
+as an estimate of innocent-suspect identifications. In that latter case
+the per-bin counts and effective total used by C, O/U, NRI, and
+downstream ANRI can be fractional; the results are lineup-size
+approximations rather than statistics from an observed
+designated-suspect outcome.
+
 ## References
 
 Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and
@@ -129,7 +138,7 @@ cal$C
 cal$calibration_data
 #> # A tibble: 3 × 7
 #>   bin          n mean_confidence accuracy n_correct n_incorrect
-#>   <chr>    <int>           <dbl>    <dbl>     <dbl>       <dbl>
+#>   <chr>    <dbl>           <dbl>    <dbl>     <dbl>       <dbl>
 #> 1 [0,60]      61            28.2    0.475        29          32
 #> 2 (60,80]     22            72.0    0.591        13           9
 #> 3 (80,100]    20            92.0    0.55         11           9

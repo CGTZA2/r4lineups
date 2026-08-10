@@ -48,9 +48,9 @@ CAC analysis computes, for each confidence level: \$\$Accuracy =
 \frac{Correct Suspect IDs}{Correct Suspect IDs + Incorrect Suspect
 IDs}\$\$
 
-Only suspect IDs are included (filler IDs are ignored). For
-target-absent lineups with no designated innocent suspect, filler IDs
-are divided by lineup size to estimate incorrect suspect IDs.
+Explicit target-absent suspect IDs are used when present. Otherwise,
+target-absent filler IDs are divided by lineup size to estimate
+incorrect suspect IDs. The two estimators are never added together.
 
 According to Mickes (2015), CAC analysis is most relevant for triers of
 fact (judges/jurors) evaluating estimator variables (e.g., exposure
@@ -78,8 +78,8 @@ cac <- make_cacdata(lineup_example, confidence_bins = c(0, 60, 80, 100))
 cac$cac_data
 #> # A tibble: 3 × 6
 #>   confidence n_correct n_incorrect n_total accuracy     se
-#>   <chr>          <int>       <dbl>   <dbl>    <dbl>  <dbl>
-#> 1 [0,60]             5        7.83    12.8    0.390 0.136 
-#> 2 (60,80]           17       11.2     28.2    0.604 0.0922
-#> 3 (80,100]          38        0       38      1     0     
+#>   <chr>          <int>       <int>   <int>    <dbl>  <dbl>
+#> 1 [0,60]             5           5      10    0.5   0.158 
+#> 2 (60,80]           17          10      27    0.630 0.0929
+#> 3 (80,100]          38           0      38    1     0     
 ```

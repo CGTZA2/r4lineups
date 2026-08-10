@@ -152,9 +152,9 @@ print(result)
 #> ------------------------------------------------
 #>   k (positions): 6    N (choices): 40    S (draws): 10000
 #>   Prior: Dirichlet(alpha = 0.50)
-#>   Posterior mean:   3.758
-#>   Posterior median: 3.753
-#>   95% credible interval: [2.613, 4.954]
+#>   Posterior mean:   3.760
+#>   Posterior median: 3.747
+#>   95% credible interval: [2.645, 4.932]
 
 # With a fairness threshold
 result2 <- esize_T_bayes(lineup_table, threshold = 4)
@@ -163,11 +163,11 @@ print(result2)
 #> ------------------------------------------------
 #>   k (positions): 6    N (choices): 40    S (draws): 10000
 #>   Prior: Dirichlet(alpha = 0.50)
-#>   Posterior mean:   3.747
-#>   Posterior median: 3.734
-#>   95% credible interval: [2.621, 4.924]
-#>   P(E' < 4.00 | data): 0.660
-#>   P(E' > 4.00 | data): 0.340
+#>   Posterior mean:   3.767
+#>   Posterior median: 3.757
+#>   95% credible interval: [2.648, 4.930]
+#>   P(E' < 4.00 | data): 0.648
+#>   P(E' > 4.00 | data): 0.352
 
 # Plot the posterior
 plot(result)

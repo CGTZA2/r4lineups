@@ -83,20 +83,20 @@ print(ppv_range)
 #> Lineup size: 6 
 #> 
 #> Overall PPV by correction method:
-#>   Nominal (best-case): 0.772 
-#>   Effective (realistic): 0.683 
-#>   None (worst-case): 0.361 
+#>   Nominal (best-case): 0.595 
+#>   Effective (realistic): 0.595 
+#>   None (worst-case): 0.595 
 #> 
 #> PPV range by confidence level:
 #>  confidence ppv_nominal ppv_effective ppv_none effective_size error_rate
-#>      [0,60]       0.577         0.571    0.185           5.85      0.265
-#>     (60,80]       0.857         0.725    0.500           2.63      1.000
+#>      [0,60]       0.500         0.500    0.500             NA      0.265
+#>     (60,80]       0.630         0.630    0.630             NA      1.000
 
 # Access individual corrections
 ppv_range$ppv_nominal$overall_ppv
-#> [1] 0.7719298
+#> [1] 0.5945946
 ppv_range$ppv_effective$overall_ppv
-#> [1] 0.6827536
+#> [1] 0.5945946
 ppv_range$ppv_none$overall_ppv
-#> [1] 0.3606557
+#> [1] 0.5945946
 ```

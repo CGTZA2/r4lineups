@@ -93,7 +93,7 @@ head(lineup_data)
 #>   Target-present lineups: 200 
 #>   Target-absent lineups: 200 
 #>   d': 1.5 
-#>   Criterion: 0 
+#>   Criteria: 0, 0.5, 1, 1.5, 2 
 #>   Lineup size: 6 
 #>   Decision rule: max 
 #>   Confidence levels: 5 
@@ -113,25 +113,26 @@ head(lineup_data)
 #> 
 #> First 10 rows:
 #>   participant_id target_present identification confidence
-#> 1            212          FALSE         filler          4
-#> 2            173           TRUE        suspect          5
-#> 3            388          FALSE         filler          3
-#> 4            280          FALSE         filler          4
-#> 5            277          FALSE         filler          3
-#> 6            350          FALSE         filler          5
+#> 1            212          FALSE         filler          2
+#> 2            173           TRUE        suspect          4
+#> 3            388          FALSE         filler          2
+#> 4            280          FALSE         filler          3
+#> 5            277          FALSE         filler          2
+#> 6            350          FALSE         filler          3
 str(lineup_data)
 #> Classes 'simulated_lineup_data' and 'data.frame':    400 obs. of  4 variables:
-#>  $ participant_id: num  212 173 388 280 277 350 60 12 81 331 ...
+#>  $ participant_id: int  212 173 388 280 277 350 60 12 81 331 ...
 #>  $ target_present: logi  FALSE TRUE FALSE FALSE FALSE FALSE ...
 #>  $ identification: chr  "filler" "suspect" "filler" "filler" ...
-#>  $ confidence    : num  4 5 3 4 3 5 4 4 5 4 ...
-#>  - attr(*, "simulation_params")=List of 8
-#>   ..$ n_tp         : num 200
-#>   ..$ n_ta         : num 200
+#>  $ confidence    : int  2 4 2 3 2 3 3 3 4 3 ...
+#>  - attr(*, "simulation_params")=List of 9
+#>   ..$ n_tp         : int 200
+#>   ..$ n_ta         : int 200
 #>   ..$ d_prime      : num 1.5
 #>   ..$ c_criterion  : num 0
-#>   ..$ lineup_size  : num 6
-#>   ..$ conf_levels  : num 5
+#>   ..$ criteria     : num [1:5] 0 0.5 1 1.5 2
+#>   ..$ lineup_size  : int 6
+#>   ..$ conf_levels  : int 5
 #>   ..$ decision_rule: chr "max"
 #>   ..$ seed         : NULL
 ```
@@ -159,19 +160,21 @@ print(comparison)
 #> 
 #> Comparison Table:
 #>                          Model                   Measure   Value
-#>      EIG (Starns et al., 2023) Expected Information Gain  0.2041
-#>      EIG (Starns et al., 2023)    Information Efficiency 20.4000
+#>      EIG (Starns et al., 2023) Expected Information Gain  0.2116
+#>      EIG (Starns et al., 2023)    Information Efficiency 21.2000
 #>      EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7634
-#>  Full ROC (Smith & Yang, 2020)          Operating Points  7.0000
+#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7706
+#>  Full ROC (Smith & Yang, 2020)          Operating Points 11.0000
 #>  Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
 #>               Interpretation
 #>      Higher is better (bits)
 #>          Percentage (0-100%)
 #>          Maximum possible IG
-#>   Higher is better (0.5-1.0)
+#>       Higher is better (0-1)
 #>  Number of decision criteria
 #>             Cumulative (0-1)
+#> 
+#> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
 #> Available models: eig, fullroc
@@ -196,18 +199,18 @@ summary(comparison)
 #>    eig, fullroc 
 #> 
 #> --- EIG Summary ---
-#>   EIG: 0.2041 bits
-#>   Information efficiency: 20.4 %
-#>   Number of response categories: 7 
+#>   EIG: 0.2116 bits
+#>   Information efficiency: 21.2 %
+#>   Number of response categories: 11 
 #> 
 #> --- Full ROC Summary ---
-#>   Full AUC: 0.7634 
-#>   Operating points: 7 
+#>   Full AUC: 0.7706 
+#>   Operating points: 11 
 #>   Ordering method: diagnosticity 
 #> 
 #> ---
-#> Model Selection Guidance:
-#>   - 2-HT: Use AIC/BIC for parametric model comparison
+#> Interpretation Guidance:
+#>   - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes
 #>   - EIG: Higher values = more informative procedure
 #>   - Full ROC: Higher AUC = better investigator discriminability
 #> 
@@ -269,10 +272,10 @@ model_eig <- comparison$fitted_models$eig
 
 # View EIG value
 cat("Expected Information Gain:", round(model_eig$eig, 4), "bits\n")
-#> Expected Information Gain: 0.2041 bits
+#> Expected Information Gain: 0.2116 bits
 cat("Information Efficiency:",
     round(model_eig$eig / model_eig$prior_entropy * 100, 1), "%\n")
-#> Information Efficiency: 20.4 %
+#> Information Efficiency: 21.2 %
 
 # Most informative responses
 cat("\nTop 5 most informative response categories:\n")
@@ -283,17 +286,17 @@ print(head(model_eig$response_data[, c("response", "information_gain",
 #> # A tibble: 5 × 3
 #>   response  information_gain posterior_guilty
 #>   <chr>                <dbl>            <dbl>
-#> 1 filler_2             1                0    
-#> 2 suspect_5            0.466            0.879
-#> 3 suspect_3            0.189            0.25 
-#> 4 filler_3             0.141            0.283
-#> 5 filler_4             0.121            0.298
+#> 1 reject_1             1                0    
+#> 2 suspect_1            1                0    
+#> 3 suspect_4            0.670            0.939
+#> 4 suspect_5            0.441            0.870
+#> 5 filler_1             0.350            0.167
 ```
 
 **Interpreting EIG:**
 
-- Total information provided: 0.204 bits
-- Efficiency: 20.4% of maximum possible
+- Total information provided: 0.212 bits
+- Efficiency: 21.2% of maximum possible
 - Most informative responses push posterior beliefs strongly toward
   guilt or innocence
 
@@ -306,9 +309,9 @@ model_fullroc <- comparison$fitted_models$fullroc
 
 # View AUC
 cat("Full ROC AUC:", round(model_fullroc$auc, 4), "\n")
-#> Full ROC AUC: 0.7634
+#> Full ROC AUC: 0.7706
 cat("Operating Points:", model_fullroc$summary$n_operating_points, "\n")
-#> Operating Points: 7
+#> Operating Points: 11
 
 # View diagnosticity table (top 10 points)
 cat("\nTop 10 most diagnostic evidence categories:\n")
@@ -317,22 +320,29 @@ cat("\nTop 10 most diagnostic evidence categories:\n")
 print(head(model_fullroc$diagnosticity_table[, c("evidence_label",
                                                   "diagnosticity_ratio")], 10))
 #>    evidence_label diagnosticity_ratio
-#> 10      suspect_5           7.2307692
-#> 7       suspect_4           2.3333333
-#> 11       filler_5           0.6086957
-#> 8        filler_4           0.4242424
-#> 5        filler_3           0.3939394
-#> 4       suspect_3           0.3333333
-#> 2        filler_2           0.0000000
+#> 10      suspect_4          15.5000000
+#> 13      suspect_5           6.6666667
+#> 7       suspect_3           2.3750000
+#> 4       suspect_2           1.0000000
+#> 14       filler_5           0.6363636
+#> 11       filler_4           0.5675676
+#> 8        filler_3           0.5384615
+#> 5        filler_2           0.3673469
+#> 2        filler_1           0.2000000
+#> 1       suspect_1           0.0000000
 ```
 
 **Interpreting Full ROC:**
 
-- AUC = 0.763: Investigator’s ability to discriminate
+- AUC = 0.771: Investigator’s ability to discriminate
 - Values closer to 1.0 indicate better discriminability
 - All witness responses contribute to overall discriminability
 
-## Model Selection Guidance
+## Method-Choice Guidance
+
+These methods estimate different quantities; their displayed numbers are
+not a common model-selection scale and the wrapper does not declare a
+“best model.”
 
 ### When to Use Each Model
 
@@ -351,7 +361,11 @@ Policy/practical decision-making focus
 
 ### Comparing Model Fits
 
-For parametric models (2-HT), use AIC/BIC:
+The 2-HT fit reports AIC/BIC, but these values are comparative rather
+than absolute. They can only be compared with alternative likelihood
+models fitted to the same observations and outcome representation; they
+cannot be compared with EIG or AUC. A single-condition 2-HT fit is
+saturated.
 
 ``` r
 
@@ -359,7 +373,7 @@ if ("2ht" %in% comparison$models_fit) {
   cat("2-HT Model Fit:\n")
   cat("  AIC:", round(comparison$fitted_models$`2ht`$aic, 2), "\n")
   cat("  BIC:", round(comparison$fitted_models$`2ht`$bic, 2), "\n")
-  cat("\nLower values indicate better fit\n")
+  cat("\nUse only for comparisons with compatible likelihood models\n")
 }
 ```
 
@@ -387,13 +401,15 @@ print(comparison_subset)
 #> 
 #> Comparison Table:
 #>                      Model                   Measure   Value
-#>  EIG (Starns et al., 2023) Expected Information Gain  0.2041
-#>  EIG (Starns et al., 2023)    Information Efficiency 20.4000
+#>  EIG (Starns et al., 2023) Expected Information Gain  0.2116
+#>  EIG (Starns et al., 2023)    Information Efficiency 21.2000
 #>  EIG (Starns et al., 2023)             Prior Entropy  1.0000
 #>           Interpretation
 #>  Higher is better (bits)
 #>      Percentage (0-100%)
 #>      Maximum possible IG
+#> 
+#> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
 #> Available models: eig
@@ -423,19 +439,21 @@ print(comparison_binned)
 #> 
 #> Comparison Table:
 #>                          Model                   Measure   Value
-#>      EIG (Starns et al., 2023) Expected Information Gain  0.1631
-#>      EIG (Starns et al., 2023)    Information Efficiency 16.3000
+#>      EIG (Starns et al., 2023) Expected Information Gain  0.1659
+#>      EIG (Starns et al., 2023)    Information Efficiency 16.6000
 #>      EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7225
-#>  Full ROC (Smith & Yang, 2020)          Operating Points  2.0000
+#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7246
+#>  Full ROC (Smith & Yang, 2020)          Operating Points  3.0000
 #>  Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
 #>               Interpretation
 #>      Higher is better (bits)
 #>          Percentage (0-100%)
 #>          Maximum possible IG
-#>   Higher is better (0.5-1.0)
+#>       Higher is better (0-1)
 #>  Number of decision criteria
 #>             Cumulative (0-1)
+#> 
+#> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
 #> Available models: eig, fullroc
@@ -455,7 +473,7 @@ comparison_prior <- compare_models(
 cat("EIG with prior = 0.3:\n")
 #> EIG with prior = 0.3:
 print(comparison_prior$fitted_models$eig$eig)
-#> [1] 0.1822699
+#> [1] 0.1904357
 ```
 
 ## Simulated Data Example
@@ -491,19 +509,21 @@ print(sim_comparison)
 #> 
 #> Comparison Table:
 #>                          Model                   Measure   Value
-#>      EIG (Starns et al., 2023) Expected Information Gain  0.2121
-#>      EIG (Starns et al., 2023)    Information Efficiency 21.2000
+#>      EIG (Starns et al., 2023) Expected Information Gain  0.2393
+#>      EIG (Starns et al., 2023)    Information Efficiency 23.9000
 #>      EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7862
-#>  Full ROC (Smith & Yang, 2020)          Operating Points  8.0000
+#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.8038
+#>  Full ROC (Smith & Yang, 2020)          Operating Points 11.0000
 #>  Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
 #>               Interpretation
 #>      Higher is better (bits)
 #>          Percentage (0-100%)
 #>          Maximum possible IG
-#>   Higher is better (0.5-1.0)
+#>       Higher is better (0-1)
 #>  Number of decision criteria
 #>             Cumulative (0-1)
+#> 
+#> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
 #> Available models: eig, fullroc
@@ -553,15 +573,15 @@ if ("eig" %in% procedure_eval$models_fit) {
               procedure_eval$fitted_models$eig$prior_entropy * 100, 0),
       "% of maximum information\n\n")
 }
-#> EIG = 0.204 bits
-#>   → Provides 20 % of maximum information
+#> EIG = 0.212 bits
+#>   → Provides 21 % of maximum information
 
 if ("fullroc" %in% procedure_eval$models_fit) {
   cat("Full ROC AUC =", round(procedure_eval$fitted_models$fullroc$auc, 3), "\n")
   cat("  → Discriminability is",
       ifelse(procedure_eval$fitted_models$fullroc$auc > 0.75, "good", "moderate"), "\n")
 }
-#> Full ROC AUC = 0.763 
+#> Full ROC AUC = 0.771 
 #>   → Discriminability is good
 ```
 
@@ -617,17 +637,17 @@ if ("2ht" %in% comparison$models_fit) {
 table_console <- format_comparison_table(comparison, format = "console")
 print(table_console)
 #>                           Model                   Measure   Value
-#> 1     EIG (Starns et al., 2023) Expected Information Gain  0.2041
-#> 2     EIG (Starns et al., 2023)    Information Efficiency 20.4000
+#> 1     EIG (Starns et al., 2023) Expected Information Gain  0.2116
+#> 2     EIG (Starns et al., 2023)    Information Efficiency 21.2000
 #> 3     EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#> 4 Full ROC (Smith & Yang, 2020)                  Full AUC  0.7634
-#> 5 Full ROC (Smith & Yang, 2020)          Operating Points  7.0000
+#> 4 Full ROC (Smith & Yang, 2020)                  Full AUC  0.7706
+#> 5 Full ROC (Smith & Yang, 2020)          Operating Points 11.0000
 #> 6 Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
 #>                Interpretation
 #> 1     Higher is better (bits)
 #> 2         Percentage (0-100%)
 #> 3         Maximum possible IG
-#> 4  Higher is better (0.5-1.0)
+#> 4      Higher is better (0-1)
 #> 5 Number of decision criteria
 #> 6            Cumulative (0-1)
 ```
@@ -645,14 +665,14 @@ if (requireNamespace("knitr", quietly = TRUE)) {
 
 \|Model \|Measure \| Value\|Interpretation \|
 \|:—————————–\|:————————-\|——-:\|:—————————\| \|EIG (Starns et al.,
-2023) \|Expected Information Gain \| 0.2041\|Higher is better (bits) \|
+2023) \|Expected Information Gain \| 0.2116\|Higher is better (bits) \|
 \|EIG (Starns et al., 2023) \|Information Efficiency \|
-20.4000\|Percentage (0-100%) \| \|EIG (Starns et al., 2023) \|Prior
+21.2000\|Percentage (0-100%) \| \|EIG (Starns et al., 2023) \|Prior
 Entropy \| 1.0000\|Maximum possible IG \| \|Full ROC (Smith & Yang,
-2020) \|Full AUC \| 0.7634\|Higher is better (0.5-1.0) \| \|Full ROC
-(Smith & Yang, 2020) \|Operating Points \| 7.0000\|Number of decision
-criteria \| \|Full ROC (Smith & Yang, 2020) \|Max Hit Rate \|
-1.0000\|Cumulative (0-1) \|
+2020) \|Full AUC \| 0.7706\|Higher is better (0-1) \| \|Full ROC (Smith
+& Yang, 2020) \|Operating Points \| 11.0000\|Number of decision criteria
+\| \|Full ROC (Smith & Yang, 2020) \|Max Hit Rate \| 1.0000\|Cumulative
+(0-1) \|
 
 ## Interpretation Guidelines
 
@@ -818,10 +838,10 @@ Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental
 validation of a multinomial processing tree model for analyzing
 eyewitness identification decisions. *Scientific Reports, 12*, 15571.
 
-Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-conclusions via the data they should have produced: A priori comparison
-of eyewitness identification decision processes using quantitative
-predictions of the expected information gain. *Psychological Review*.
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
+for assessing the effectiveness of eyewitness identification procedures:
+Expected information gain. *Psychological Review, 130*(3), 677–719.
+<https://doi.org/10.1037/rev0000332>
 
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between
 investigator discriminability and eyewitness discriminability: A method

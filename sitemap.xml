@@ -2,8 +2,12 @@
 <url><loc>https://cgtza2.github.io/r4lineups/404.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/AUDIT_FINDINGS.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/CONTRIBUTING.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/CRAN_AUDIT_REPORT.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/FULLROC_QUICK_REFERENCE.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/FULLROC_README.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/LICENSE-text.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/LICENSE.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/RELEASE_CHECKLIST.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/ROC_COMPARISON_GUIDE.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/agents.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/Vignette.html</loc></url>
@@ -13,6 +17,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/index.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/information_error_rate_analysis.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/model_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/msdt_model.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/pauc_statistical_comparison.html</loc></url>
@@ -34,6 +39,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/bootstrap_anri.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/calibration_bayes.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/check_python_deps.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/check_pywitness_deps.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/chi_diag.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_anri.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_dpp.html</loc></url>
@@ -87,6 +93,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/estimate_msdt_params.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/extract_sdt_metrics.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/face_similarity.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/fit_sdt_glm.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/fit_sdt_glmm.html</loc></url>
@@ -121,6 +128,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/innocent_id_rate_effective.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/innocent_id_rate_nominal.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/innocent_id_rate_uncorrected.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/install_pywitness.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/line73.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/lineup_bias_boot_dist.html</loc></url>
@@ -163,6 +171,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/nortje2012.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.esize_T_bayes.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.esize_T_bayes_compare.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/plot.lineup_model_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.model_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.pauc_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.power_analysis.html</loc></url>

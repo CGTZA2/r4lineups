@@ -117,11 +117,11 @@ print(result)
 #> -----------------------------------------------------------
 #>   Lineup A: k = 6, N = 45   |   Lineup B: k = 6, N = 50
 #>   S (draws): 10000    Prior: Dirichlet(alpha = 0.50)
-#>   E'_A posterior median: 3.885
-#>   E'_B posterior median: 5.515
-#>   Delta (E'_A - E'_B) posterior mean:   -1.578
-#>   Delta posterior median:               -1.592
-#>   95% credible interval for Delta: [-2.848, -0.240]
+#>   E'_A posterior median: 3.899
+#>   E'_B posterior median: 5.521
+#>   Delta (E'_A - E'_B) posterior mean:   -1.570
+#>   Delta posterior median:               -1.580
+#>   95% credible interval for Delta: [-2.855, -0.243]
 #>   P(E'_A > E'_B | data): 0.010
 #>   P(E'_B > E'_A | data): 0.990
 plot(result)

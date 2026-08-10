@@ -11,7 +11,8 @@ make_bayes_curves(
   data,
   response_categories = c("simple", "confidence"),
   confidence_bins = NULL,
-  prior_grid = seq(0.01, 0.99, 0.01)
+  prior_grid = seq(0.01, 0.99, 0.01),
+  lineup_size = 6
 )
 ```
 
@@ -45,6 +46,11 @@ make_bayes_curves(
 
   Numeric vector of prior probabilities to evaluate (default: seq(0.01,
   0.99, 0.01))
+
+- lineup_size:
+
+  Nominal lineup size, used when target-absent data have no designated
+  innocent suspect.
 
 ## Value
 
@@ -98,8 +104,8 @@ bayes <- make_bayes_curves(lineup_example)
 bayes$likelihoods
 #> # A tibble: 3 × 5
 #>   response p_x_given_guilty p_x_given_innocent n_guilty n_innocent
-#>   <chr>               <dbl>              <dbl>    <int>      <int>
-#> 1 suspect              0.6                0.15       60         15
+#>   <chr>               <dbl>              <dbl>    <int>      <dbl>
+#> 1 filler               0.18               0.24       18         24
 #> 2 reject               0.22               0.61       22         61
-#> 3 filler               0.18               0.24       18         24
+#> 3 suspect              0.6                0.15       60         15
 ```

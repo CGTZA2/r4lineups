@@ -43,5 +43,5 @@ lineup_vec <- round(runif(100, 1, 6))
 
 #Call:
 lineup_prop_vec(lineup_vec, 3, 6)
-#> [1] 0.2
+#> [1] 0.3
 ```

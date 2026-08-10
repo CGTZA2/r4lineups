@@ -113,6 +113,10 @@ Lampinen et al. (2019) show that comparing procedures by ROC curves
 alone can be misleading. Utility analysis incorporates base rates and
 the relative costs of errors, providing a more complete evaluation.
 
+**Note on the false-alarm estimate:** explicit target-absent suspect IDs
+are used when present. Otherwise, filler IDs are divided by lineup size.
+Direct and filler-derived estimates are never added together.
+
 ## References
 
 Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
@@ -127,16 +131,16 @@ data(lineup_example)
 util <- make_utility_curves(lineup_example)
 util$max_utility
 #> $expected_utility
-#>    tp 
-#> 0.285 
+#>     tp 
+#> 0.3125 
 #> 
 #> $criterion
-#> [1] 90
+#> [1] 60
 #> 
 #> $hit_rate
-#> [1] 0.38
+#> [1] 0.6
 #> 
 #> $false_alarm_rate
-#> [1] 0
+#> [1] 0.11
 #> 
 ```

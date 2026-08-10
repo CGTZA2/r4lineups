@@ -7,8 +7,12 @@ published methods are welcome.
 
 ## Reporting Issues
 
-Please use the project issue tracker to report bugs, unclear
-documentation, reproducibility problems, or feature requests. Include:
+Please use the [project issue
+tracker](https://github.com/CGTZA2/r4lineups/issues) to report bugs,
+suspected errors in the implementation of a published method, unclear
+documentation, reproducibility problems, or feature requests. An
+implementation error belongs to `r4lineups` and should not be attributed
+to the authors of the underlying publication. Include:
 
 - the version of `r4lineups` you are using;
 - a small reproducible example, if possible;

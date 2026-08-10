@@ -75,5 +75,5 @@ variables and estimator variables that affect eyewitness memory.
 data(lineup_example)
 roc_result <- make_roc(lineup_example)
 print(roc_result$pauc)
-#> [1] 0.08746667
+#> [1] 0.07615
 ```

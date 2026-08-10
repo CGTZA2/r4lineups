@@ -6,7 +6,7 @@ fall within the CI for chance guessing
 ## Usage
 
 ``` r
-eff_size_per_foils(lineup_vec, target_pos, k, conf = 0.95)
+eff_size_per_foils(lineup_vec, target_pos, k, conf = 0.95, R = 1000)
 ```
 
 ## Arguments
@@ -28,6 +28,10 @@ eff_size_per_foils(lineup_vec, target_pos, k, conf = 0.95)
   Desired level of alpha. Defaults to 0.95. May be specified by user
   (scalar).
 
+- R:
+
+  Number of bootstrap replications. Defaults to 1000.
+
 ## References
 
 Malpass, R S. (1981). Effective size and defendant bias in eyewitness
@@ -45,7 +49,7 @@ target_pos <- c(1, 2, 3, 4, 5, 6)
 
 #Call:
 eff_size_per_foils(lineup_vec, target_pos, 6)
-#> [1] 1
+#> [1] 5
 eff_size_per_foils(lineup_vec, target_pos, conf = 0.95, 6)
-#> [1] 1
+#> [1] 5
 ```

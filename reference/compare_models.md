@@ -1,8 +1,8 @@
 # Compare Multiple Models for Lineup Identification Data
 
 Fits and compares multiple models (2-HT, EIG, Full ROC) to the same
-lineup identification dataset, providing a comprehensive comparison
-table and model selection recommendations.
+lineup identification dataset, providing a side-by-side descriptive
+table.
 
 ## Usage
 
@@ -65,7 +65,8 @@ An object of class "model_comparison" containing:
 
 - fitted_models: List of fitted model objects
 
-- best_model: Name of best model by AIC (if applicable)
+- best_model: Always NULL. The included methods estimate different
+  quantities and cannot be ranked by a common information criterion.
 
 - data: The input data
 
@@ -81,18 +82,20 @@ different data requirements and output formats across models.
 
 - \*\*2-HT (Winter et al., 2022)\*\*: Multinomial processing tree model
   with parameters for detection (dP, dA), bias (b), and guessing (g).
-  Provides AIC/BIC for model comparison.
+  Provides AIC/BIC for comparison only with other likelihood models fit
+  to the same observations and outcome representation.
 
 - \*\*EIG (Starns et al., 2023)\*\*: Information-theoretic measure of
   evidentiary value. Higher values indicate more diagnostic procedures.
 
 - \*\*Full ROC (Smith & Yang, 2020)\*\*: Uses ALL responses to compute
-  investigator discriminability. AUC ranges from 0.5 (chance) to 1.0
-  (perfect).
+  investigator discriminability. AUC ranges from 0 to 1; 0.5 represents
+  chance under a fixed ordering.
 
-\*\*Model Selection:\*\*
+\*\*Interpretation:\*\*
 
-- Use AIC/BIC for 2-HT model (lower is better)
+- AIC/BIC describe the 2-HT likelihood fit but cannot be compared with
+  EIG or full-ROC AUC
 
 - Use EIG for comparing procedure diagnosticity (higher is better)
 
@@ -104,9 +107,9 @@ Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental
 validation of a multinomial processing tree model for analyzing
 eyewitness identification decisions. *Scientific Reports, 12*, 15571.
 
-Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-conclusions via the data they should have produced. *Psychological
-Review*.
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
+for assessing the effectiveness of eyewitness identification procedures:
+Expected information gain. *Psychological Review, 130*(3), 677–719.
 
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between
 investigator discriminability and eyewitness discriminability.
@@ -153,12 +156,11 @@ print(comparison)
 #>      Higher is better (bits)
 #>          Percentage (0-100%)
 #>          Maximum possible IG
-#>   Higher is better (0.5-1.0)
+#>       Higher is better (0-1)
 #>  Number of decision criteria
 #>             Cumulative (0-1)
 #> 
-#> 
-#> Best parametric model (by AIC): 2ht 
+#> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
 #> Available models: 2ht, eig, fullroc 
@@ -191,8 +193,8 @@ summary(comparison)
 #>   Ordering method: diagnosticity 
 #> 
 #> ---
-#> Model Selection Guidance:
-#>   - 2-HT: Use AIC/BIC for parametric model comparison
+#> Interpretation Guidance:
+#>   - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes
 #>   - EIG: Higher values = more informative procedure
 #>   - Full ROC: Higher AUC = better investigator discriminability
 #> 

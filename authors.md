@@ -2,23 +2,27 @@
 
 ## Authors
 
-- **Colin Tredoux**. Author, maintainer.
+- **Colin Tredoux**. Author, maintainer.  
+  Co-author of the original package
 
-- **Tamsyn Naylor**. Author.
+- **Tamsyn Naylor**. Author.  
+  Co-author of the original package
 
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/CGTZA2/r4lineups/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/CGTZA2/r4lineups/blob/main/inst/CITATION)
 
 Tredoux C, Naylor T (2026). *r4lineups: Statistical Inference on Lineup
-Fairness*. R package version 2.0.0,
-<https://github.com/CGTZA2/r4lineups>.
+Fairness*.
+[doi:10.32614/CRAN.package.r4lineups](https://doi.org/10.32614/CRAN.package.r4lineups).
+R package version 2.1.0, <https://CRAN.R-project.org/package=r4lineups>.
 
     @Manual{,
       title = {r4lineups: Statistical Inference on Lineup Fairness},
-      author = {Colin Tredoux and Tamsyn Naylor},
+      author = {Colin G. Tredoux and Tamsyn M. Naylor},
       year = {2026},
-      note = {R package version 2.0.0},
-      url = {https://github.com/CGTZA2/r4lineups},
+      note = {R package version 2.1.0},
+      doi = {10.32614/CRAN.package.r4lineups},
+      url = {https://CRAN.R-project.org/package=r4lineups},
     }

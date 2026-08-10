@@ -23,8 +23,8 @@ homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
 
 - pos_list:
 
-  A numeric vector indexing lineup member positions for the target
-  present & absent conditions.
+  Suspect positions for each lineup pair. See
+  [`diag_param()`](https://cgtza2.github.io/r4lineups/reference/diag_param.md).
 
 - k:
 
@@ -67,32 +67,28 @@ empirically assessing the fairness of a lineup. *Law and Human Behavior,
 
 ``` r
 #Target present data:
-A <-  round(runif(100,1,6))
-B <-  round(runif(70,1,5))
-C <-  round(runif(20,1,4))
+A <- rep(1:6, length.out = 100)
+B <- rep(1:5, length.out = 70)
+C <- rep(1:4, length.out = 20)
 lineup_pres_list <- list(A, B, C)
 rm(A, B, C)
 
 #Target absent data:
-A <-  round(runif(100,1,6))
-B <-  round(runif(70,1,5))
-C <-  round(runif(20,1,4))
+A <- rep(6:1, length.out = 100)
+B <- rep(5:1, length.out = 70)
+C <- rep(4:1, length.out = 20)
 lineup_abs_list <- list(A, B, C)
 rm(A, B, C)
 
-#Pos list
-lineup1_pos <- c(1, 2, 3, 4, 5, 6)
-lineup2_pos <- c(1, 2, 3, 4, 5)
-lineup3_pos <- c(1, 2, 3, 4)
-pos_list <- list(lineup1_pos, lineup2_pos, lineup3_pos)
-rm(lineup1_pos, lineup2_pos, lineup3_pos)
+# Suspect position for each TP/TA pair
+pos_list <- c(3, 2, 1)
 
 #Nominal size:
 k <- c(6, 5, 4)
 
 #Call:
 homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
-#> Mean diagnosticity ratio: 0.9176438
-#> Chi-square estimate (q): 0.5509454
-#> Sig: 0.9075646
+#> Mean diagnosticity ratio: 1
+#> Chi-square estimate (q): 0
+#> Sig: 1
 ```

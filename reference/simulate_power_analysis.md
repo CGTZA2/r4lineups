@@ -74,8 +74,8 @@ power_res <- simulate_power_analysis(
 #> Simulating sample size: 50 
 #> Simulating sample size: 100 
 print(power_res)
-#>       sample_size mean_stat sd_stat  ci_lower  ci_upper power
-#> 2.5%           50 0.1346333       0 0.1346333 0.1346333     1
-#> 2.5%1         100 0.1302333       0 0.1302333 0.1302333     1
+#>       sample_size mean_stat sd_stat ci_lower ci_upper power
+#> 2.5%           50   0.08340       0  0.08340  0.08340     1
+#> 2.5%1         100   0.08035       0  0.08035  0.08035     1
 # }
 ```

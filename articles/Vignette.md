@@ -179,7 +179,7 @@ lineup, and is 0.14% of the witnesses.
   that are often not observed by computed confidence intervals. We
   therefore recommend computing bootstrapped estimates of all lineup
   measures, and especially the sampling variability around estimates. To
-  calculate a boostrapped lineup proportion for a single lineup member,
+  calculate a bootstrapped lineup proportion for a single lineup member,
   we pass the
   [`lineup_prop_boot()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_boot.md)
   function as an argument to the `boot()` function supplied by the
@@ -189,37 +189,40 @@ lineup, and is 0.14% of the witnesses.
   resamples we desire (R).
 
   ``` r
-  bootobject <- boot::boot(lineup_vec, lineup_prop_boot, target_pos = 3, R = 1000)
+  bootobject <- boot::boot(lineup_vec, lineup_prop_boot, target_pos = 3, R = 100)
   bootobject
 
   ORDINARY NONPARAMETRIC BOOTSTRAP
 
 
   Call:
-  boot::boot(data = lineup_vec, statistic = lineup_prop_boot, R = 1000, 
+  boot::boot(data = lineup_vec, statistic = lineup_prop_boot, R = 100, 
       target_pos = 3)
 
 
   Bootstrap Statistics :
-       original        bias    std. error
-  t1* 0.1428571 -0.0007142857  0.03065291
+       original      bias    std. error
+  t1* 0.1428571 0.003533835  0.02736007
   ```
 
   - *We then compute confidence intervals:*
 
   ``` r
-  cis <- boot::boot.ci(bootobject, conf = 0.95, type = "bca")
+  cis <- boot::boot.ci(bootobject, conf = 0.95, type = "bca", target_pos = 3)
   cis
   BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
-  Based on 1000 bootstrap replicates
+  Based on 100 bootstrap replicates
 
   CALL : 
-  boot::boot.ci(boot.out = bootobject, conf = 0.95, type = "bca")
+  boot::boot.ci(boot.out = bootobject, conf = 0.95, type = "bca", 
+      target_pos = 3)
 
   Intervals : 
   Level       BCa          
-  95%   ( 0.0827,  0.2030 )  
+  95%   ( 0.0752,  0.1880 )  
   Calculations and Intervals on Original Scale
+  Warning : BCa Intervals used Extreme Quantiles
+  Some BCa intervals may be unstable
   ```
 
 If you are not familiar with how the boot or the boot.ci functions work,
@@ -243,15 +246,15 @@ generated from the argument ‘k’, within the function itself.
 
 ``` r
 allprop(lineup_vec, k = 8)
-   prop
-1 0.143
-2 0.135
-3 0.143
-4 0.045
-5 0.286
-6 0.045
-7 0.173
-8 0.030
+        prop
+1 0.14285714
+2 0.13533835
+3 0.14285714
+4 0.04511278
+5 0.28571429
+6 0.04511278
+7 0.17293233
+8 0.03007519
 ```
 
 The function then returns proportion of mock witnesses selecting each
@@ -263,21 +266,21 @@ lineup member.
   too, with
   [`lineup_boot_allprop()`](https://cgtza2.github.io/r4lineups/reference/lineup_boot_allprop.md).
 
-  This function takes a vector of lineup data, a vector indexing target
-  positions, and nominal size.
+  This function takes a vector of lineup data and the nominal lineup
+  size.
 
   ``` r
-  lineuprops.ci <- lineup_boot_allprop(lineup_vec, target_pos, k = 8)
+  lineuprops.ci <- lineup_boot_allprop(lineup_vec, k = 8, R = 100)
   lineuprops.ci
-     ci_low ci_high
-  1   0.950   0.950
-  2  22.770  21.280
-  3  22.320  19.040
-  4 973.570 972.120
-  5 970.370   0.083
-  6   0.203   0.015
-  7   0.195   0.203
-  8   0.241   0.060
+         ci_low    ci_high
+  1 0.075187970 0.21052632
+  2 0.082706767 0.19273026
+  3 0.081329716 0.21596589
+  4 0.015844571 0.09022556
+  5 0.162925698 0.36781632
+  6 0.015037594 0.08270677
+  7 0.081673031 0.22556391
+  8 0.007518797 0.06766917
   ```
 
   The object `lineuprops.ci` is a dataframe of 2 columns and k rows, in
@@ -313,12 +316,12 @@ which provides more detail, including bootstrapped confidence intervals.
   target position, and another indicating nominal size:
 
   ``` r
-  func_size_report(lineup_vec, target_pos = 3, k = 8)
-  Functional size of lineup is  7
+  func_size_report(lineup_vec, target_pos = 3, k = 8, R = 100)
+  Functional size of lineup is 7
   Confidence intervals [95%]
-  Normal Theory 3.263 10.067
-  Bootstrap: percentile (R = 1000) 4.75 12.065
-  Bootstrap: bias-corrected (R = 1000) 4.586 10.231
+  Normal Theory 2.885 10.312 
+  Bootstrap: percentile (R = 100) 4.85 12.091 
+  Bootstrap: bias-corrected (R = 100) 4.586 10.231 
   ```
 
 ------------------------------------------------------------------------
@@ -359,14 +362,11 @@ ways.
 
     Malpass’ Effective size B = $`k-\sum_{i=1}^{k}\frac{|o_{i}-e|}{2e}`$
 
-    Both Malpass’ measures of effective size can be computed by calling
-    the
+    Both Malpass measures can be displayed by calling
     [`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md)
-    function and passing a table of lineup data. If ‘both = FALSE’ is
-    passed as an argument, only Malpass’s adjusted formula for effective
-    size is used. If both = TRUE, both Malpass’s original and adjusted
-    calculations of effective size are returned. You must also specify
-    nominal size.
+    and passing lineup choices (or a table) plus nominal size. The
+    function always returns the Tredoux-adjusted estimate; `both = TRUE`
+    additionally prints the original Malpass estimate for comparison.
 
 ``` r
 esize_m(table(lineup_vec), k = 8, both = TRUE)
@@ -379,10 +379,10 @@ Effective size (Malpass, 1981,
 - *Compute bootstrapped estimates (Malpass’s adjusted):*
 
   Tredoux (1998) argued that it is better to use the alternate measure
-  of E’, but this was in a time when bootrapping methods for statistical
-  inference were not widely known, and we therefore include a function
-  that allows you to compute bootstrap estimates of the measures, with
-  confidence intervals.
+  of E’, but this was in a time when bootstrapping methods for
+  statistical inference were not widely known, and we therefore include
+  a function that allows you to compute bootstrap estimates of the
+  measures, with confidence intervals.
 
   To do this, one must first generate a bootstrap sample using the
   [`gen_boot_samples()`](https://cgtza2.github.io/r4lineups/reference/gen_boot_samples.md)
@@ -393,29 +393,17 @@ Effective size (Malpass, 1981,
   ``` r
   #Create a dataframe of bootstrapped lineup data
   bootdata <- gen_boot_samples(lineup_vec, 1000)
-  Warning:  [1m [22m`rerun()` was deprecated in purrr 1.0.0.
-   [36mℹ [39m Please use `map()` instead.
-    # Previously
-    rerun(1000, sample(lineup_vec, length(lineup_vec), replace = TRUE))
-
-    # Now
-    map(1:1000, ~ sample(lineup_vec, length(lineup_vec), replace = TRUE))
-   [36mℹ [39m The deprecated feature was likely used in the  [34mr4lineups [39m package.
-    Please report the issue at  [3m [34m<https://github.com/CGTZA2/r4lineups/issues> [39m [23m.
-   [90mThis warning is displayed once per session. [39m
-   [90mCall `lifecycle::last_lifecycle_warnings()` to see where this warning was [39m
-   [90mgenerated. [39m
 
   #Calculate effective size for each lineup in bootdata
   #Pass bootstrap df to function
   #Nominal size is again declared by user
   lineupsizes <- gen_esize_m(bootdata, k = 8)
 
-  #Pass vector of boostrapped effective sizes to gen_esize_m_ci
+  #Pass vector of bootstrapped effective sizes to gen_esize_m_ci
   #to calculate lower and upper CIs with desired level of alpha
   gen_esize_m_ci(lineupsizes, perc = .025)
       2.5% 
-  5.345865 
+  5.323308 
   gen_esize_m_ci(lineupsizes, perc = .975)
      97.5% 
   6.285714 
@@ -425,18 +413,18 @@ Effective size (Malpass, 1981,
   effective size):*
 
   This function allows you to calculate descriptive statistics for a
-  boostrapped vector/df of effective sizes (see object `lineupsizes`,
+  bootstrapped vector/df of effective sizes (see object `lineupsizes`,
   above). We pass this to
   [`gen_boot_propmean_se()`](https://cgtza2.github.io/r4lineups/reference/gen_boot_propmean_se.md).
   Descriptive statistics are reported in some detail.
 
   ``` r
   gen_boot_propmean_se(lineupsizes)
-  Boot prop. (mean)   =  5.829 
-  Boot prop. (median) =  5.827 
-  SD of boot prop     =  0.238 
-  SE of boot prop     =  0.007526221 
-  2.5% boot CI lvl    =  5.345865 
+  Boot prop. (mean)   =  5.813556 
+  Boot prop. (median) =  5.804511 
+  SD of boot prop     =  0.2431211 
+  SE of boot prop     =  0.243 
+  2.5% boot CI lvl    =  5.323308 
   97.5% boot CI lvl   =  6.285714 
   ```
 
@@ -463,7 +451,7 @@ esize_T(lineup_table)
 [1] 5.693273
 
 #Compute bootstrapped effective size
-esize_boot <- boot::boot(lineup_table, esize_T_boot, R = 1000)
+esize_boot <- boot::boot(lineup_vec, esize_T_boot, R = 100)
 
 #View boot object
 esize_boot
@@ -472,31 +460,35 @@ ORDINARY NONPARAMETRIC BOOTSTRAP
 
 
 Call:
-boot::boot(data = lineup_table, statistic = esize_T_boot, R = 1000)
+boot::boot(data = lineup_vec, statistic = esize_T_boot, R = 100)
 
 
 Bootstrap Statistics :
-    original    bias    std. error
-t1* 5.693273 0.2033467   0.7236207
+    original     bias    std. error
+t1* 5.693273 -0.1922552   0.4433237
 
 #Get confidence intervals
 esize_boot.ci <- boot::boot.ci(esize_boot)
 Warning in boot::boot.ci(esize_boot): bootstrap variances needed for
 studentized intervals
+Warning in norm.inter(t, adj.alpha): extreme order statistics used as endpoints
 esize_boot.ci
 BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
-Based on 1000 bootstrap replicates
+Based on 100 bootstrap replicates
 
 CALL : 
 boot::boot.ci(boot.out = esize_boot)
 
 Intervals : 
 Level      Normal              Basic         
-95%   ( 4.072,  6.908 )   ( 4.060,  6.937 )  
+95%   ( 5.017,  6.754 )   ( 5.020,  6.826 )  
 
 Level     Percentile            BCa          
-95%   ( 4.450,  7.327 )   ( 3.976,  6.914 )  
+95%   ( 4.560,  6.367 )   ( 4.999,  6.578 )  
 Calculations and Intervals on Original Scale
+Some basic intervals may be unstable
+Some percentile intervals may be unstable
+Warning : BCa Intervals used Extreme Quantiles
 Some BCa intervals may be unstable
 ```
 
@@ -516,8 +508,9 @@ Some BCa intervals may be unstable
     0.05, but this can be adjusted as desired.
 
 ``` r
-eff_size_per_foils(lineup_vec, target_pos, k = 8, conf = 0.95)
-[1] 0
+eff_size_per_foils(lineup_vec, target_pos = seq_len(8), k = 8,
+                   conf = 0.95, R = 100)
+[1] 4
 ```
 
 Applying this function to our data, we see that effective size for this
@@ -544,9 +537,9 @@ effsize_compare(linedf)
 The two Effective sizes are  5.693273   4.967425
 If the interval includes 0, ns at p = .05
 Confidence intervals of difference [95%]
-Normal Theory -0.209 1.803
-Bootstrap: percentile (R = 1000) -0.384 1.66
-Bootstrap: bias-corrected (R = 1000) -0.231 1.755
+Normal Theory -0.201 1.742
+Bootstrap: percentile (R = 1000) -0.299 1.66
+Bootstrap: bias-corrected (R = 1000) -0.237 1.708
 ```
 
 The effective size for lineup_1 is therefore not significantly different
@@ -644,31 +637,28 @@ we follow the following steps:
 ``` r
 
 #Target present data:
-TP_lineup1 <-       round(runif(100,1,6))
-TP_lineup2 <-       round(runif(70,1,5))
-TP_lineup3 <-       round(runif(20,1,4))
+TP_lineup1 <-       rep(1:6, length.out = 100)
+TP_lineup2 <-       rep(1:5, length.out = 70)
+TP_lineup3 <-       rep(1:4, length.out = 20)
 lineup_pres_list <- list(TP_lineup1, TP_lineup2, TP_lineup3)
 
 #Target absent data:
-TA_lineup1 <-       round(runif(100,1,6))
-TA_lineup2 <-       round(runif(70,1,5))
-TA_lineup3 <-       round(runif(20,1,4))
+TA_lineup1 <-       rep(6:1, length.out = 100)
+TA_lineup2 <-       rep(5:1, length.out = 70)
+TA_lineup3 <-       rep(4:1, length.out = 20)
 lineup_abs_list <-  list(TA_lineup1, TA_lineup2, TA_lineup3)
 ```
 
-2.  Next, the function requires a list of target positions for each
-    lineup pair. For each set of TP/TA data in the TP/TA lists, there
-    should be a corresponding target position list.
+2.  Next, the function requires the suspect position for each lineup
+    pair. If the TP and TA suspect positions differ, supply a
+    two-element vector in TP, TA order for that pair.
 
-    - Each target position indexes the position of each member in the
-      lineup. Therefore, its length should = k for that lineup pair.
+    - A single position can be supplied for each pair when it is shared
+      by the TP and TA lineups.
 
 ``` r
 
-lineup1_pos <- c(1, 2, 3, 4, 5, 6)
-lineup2_pos <- c(1, 2, 3, 4, 5)
-lineup3_pos <- c(1, 2, 3, 4)
-pos_list    <- list(lineup1_pos, lineup2_pos, lineup3_pos)
+pos_list <- c(3, 2, 1)
 ```
 
 3.  To ensure the data have been coded accurately, we then specify
@@ -686,9 +676,9 @@ pos_list    <- list(lineup1_pos, lineup2_pos, lineup3_pos)
 
 ``` r
 homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
-Mean diagnosticity ratio: 1.067796
-Chi-square estimate (q): 0.1144233
-Sig: 0.9900521
+Mean diagnosticity ratio: 1
+Chi-square estimate (q): 0
+Sig: 1
 ```
 
 #### Calculate homogeneity for *k* independent diagnosticity ratios, with bootstrapped confidence intervals
@@ -698,8 +688,8 @@ diagnosticity ratios, and therefore takes the same arguments as
 [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md)
 (which provides normal theory estimates).
 
-This function does not require you to specify a list of target positions
-(this is generated from the data).
+This function also requires suspect positions: they cannot be inferred
+from the observed choices. Pass them with `pos_list` as above.
 
 Thus, we follow steps 1 and 3, outlined above, before calling
 [`homog_diag_boot()`](https://cgtza2.github.io/r4lineups/reference/homog_diag_boot.md):
@@ -740,7 +730,7 @@ make_roc(lineup_example)
 
 === Lineup ROC Analysis ===
 
-Partial AUC: 0.087 
+Partial AUC: 0.076 
 Target-present lineups: 100 
 Target-absent lineups: 100 
 Lineup size: 6 
@@ -750,16 +740,16 @@ ROC Data:
  [38;5;246m# A tibble: 10 × 5 [39m
    confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
          [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m        100            0.17         0                17         0  
- [38;5;250m 2 [39m         90            0.38         0                38         0  
- [38;5;250m 3 [39m         80            0.48         0.06             48         6  
- [38;5;250m 4 [39m         70            0.55         0.112            55        11.2
- [38;5;250m 5 [39m         60            0.6          0.133            60        13.3
- [38;5;250m 6 [39m         50            0.6          0.18             60        18  
- [38;5;250m 7 [39m         40            0.6          0.19             60        19  
- [38;5;250m 8 [39m         30            0.6          0.19             60        19  
- [38;5;250m 9 [39m         20            0.6          0.19             60        19  
- [38;5;250m10 [39m         19            0            0                 0         0  
+ [38;5;250m 1 [39m         19            0             0                0           0
+ [38;5;250m 2 [39m        100            0.17          0               17           0
+ [38;5;250m 3 [39m         90            0.38          0               38           0
+ [38;5;250m 4 [39m         80            0.48          0.06            48           6
+ [38;5;250m 5 [39m         70            0.55          0.1             55          10
+ [38;5;250m 6 [39m         60            0.6           0.11            60          11
+ [38;5;250m 7 [39m         50            0.6           0.15            60          15
+ [38;5;250m 8 [39m         40            0.6           0.15            60          15
+ [38;5;250m 9 [39m         30            0.6           0.15            60          15
+ [38;5;250m10 [39m         20            0.6           0.15            60          15
 
 Plot available in $plot
 ```

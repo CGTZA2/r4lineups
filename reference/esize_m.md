@@ -28,7 +28,8 @@ esize_m(lineup_table, k, both = FALSE)
 
 ## Value
 
-Malpass's original & adjusted estimates of effective size
+The Tredoux-adjusted Malpass effective-size estimate. With
+`both = TRUE`, the original and adjusted estimates are also printed.
 
 ## Details
 
@@ -66,10 +67,10 @@ lineup_vec <- round(runif(100, 1, 6))
 
 #Call:
 esize_m(lineup_vec, 6, both = TRUE)
-#> Effective size (Malpass, 1981) =  -41 
+#> Effective size (Malpass, 1981) =  4.96 
 #> Effective size (Malpass, 1981, 
-#>              adj Tredoux, 1998) =  -41 
-#> [1] -41
+#>              adj Tredoux, 1998) =  4.96 
+#> [1] 4.96
 esize_m(lineup_vec, 6)
-#> [1] -41
+#> [1] 4.96
 ```

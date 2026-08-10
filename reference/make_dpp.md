@@ -102,5 +102,5 @@ ROC does not. *Journal of Applied Research in Memory and Cognition*.
 data(lineup_example)
 dpp <- make_dpp(lineup_example)
 dpp$dpp
-#> [1] 0.5396491
+#> [1] 0.4923333
 ```

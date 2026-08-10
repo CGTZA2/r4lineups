@@ -77,6 +77,16 @@ Different correction methods estimate innocent_suspect_IDs differently:
 
 - "none": assumes all errors are innocent-suspect IDs (error_rate)
 
+**Note on the implicit base rate:** PPV is computed from raw
+target-present and target-absent counts, so the prior probability of
+guilt is implicitly the experiment's TP:TA ratio (e.g., 0.5 for the
+usual balanced design). PPV is *not* base-rate-free: at different
+real-world base rates the PPV of the same procedure will differ. When
+target-absent lineups have no designated innocent suspect, the
+correction also relies on the pseudo-distribution assumption of
+spreading filler choices over lineup members, which is a modeling
+approximation.
+
 ## References
 
 Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of

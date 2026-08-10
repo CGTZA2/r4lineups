@@ -7,7 +7,7 @@ from identification decisions and confidence levels.
 ## Usage
 
 ``` r
-make_eig_data(data, confidence_bins = NULL)
+make_eig_data(data, confidence_bins = NULL, lineup_size = 6)
 ```
 
 ## Arguments
@@ -27,6 +27,11 @@ make_eig_data(data, confidence_bins = NULL)
   Numeric vector of bin edges for grouping confidence (e.g., c(0, 60,
   80, 100) creates bins 0-60, 61-80, 81-100). If NULL, uses individual
   confidence levels.
+
+- lineup_size:
+
+  Nominal lineup size. Used to split target-absent filler
+  identifications when no designated innocent suspect is present.
 
 ## Value
 
@@ -49,10 +54,9 @@ target-present (guilty) and target-absent (innocent) lineups.
 
 ## References
 
-Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-conclusions via the data they should have produced: A priori comparison
-of eyewitness identification decision processes using quantitative
-predictions of the expected information gain. *Psychological Review*.
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
+for assessing the effectiveness of eyewitness identification procedures:
+Expected information gain. *Psychological Review, 130*(3), 677–719.
 
 ## Examples
 

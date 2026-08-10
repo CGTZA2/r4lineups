@@ -60,21 +60,21 @@ set.seed(1)
 lineup_vec <- sample(1:6, 50, replace = TRUE)
 # Functional size for the observed data
 func_size.boot(lineup_vec, seq_along(lineup_vec), target_pos = 3)
-#> [1] Inf
+#> [1] 10
 # Bootstrap functional size
 boot_fs <- boot::boot(lineup_vec, func_size.boot, R = 100, target_pos = 3)
+#> Warning: No mock witnesses chose the target position; functional size is infinite.
+#> Warning: No mock witnesses chose the target position; functional size is infinite.
 boot::boot.ci(boot_fs, type = "perc")
-#> Warning: extreme order statistics used as endpoints
 #> BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
-#> Based on 11 bootstrap replicates
+#> Based on 98 bootstrap replicates
 #> 
 #> CALL : 
 #> boot::boot.ci(boot.out = boot_fs, type = "perc")
 #> 
 #> Intervals : 
 #> Level     Percentile     
-#> 95%   ( 1,  1 )  
+#> 95%   ( 5.287, 37.065 )  
 #> Calculations and Intervals on Original Scale
-#> Warning : Percentile Intervals used Extreme Quantiles
 #> Some percentile intervals may be unstable
 ```

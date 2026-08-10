@@ -58,5 +58,5 @@ data(lineup_example)
 odd <- seq(1, nrow(lineup_example), by = 2)
 cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
 cmp$dpp_difference
-#> [1] 0.03461538
+#> [1] -0.006
 ```

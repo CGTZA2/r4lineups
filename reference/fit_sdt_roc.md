@@ -80,7 +80,8 @@ The z-ROC is created by plotting z-transformed hit rates against
 z-transformed false alarm rates for each confidence level.
 
 Under equal-variance SDT: - z-ROC should be linear with slope = 1 - d' =
-z(HR) - z(FAR) for any criterion - Intercept = d' / sqrt(2)
+z(HR) - z(FAR) for any criterion - Intercept = d' in the line z(HR) =
+z(FAR) + d'
 
 Under unequal-variance SDT: - Slope = SD_lure / SD_target - Slope \> 1
 indicates greater variability in lure distribution
@@ -116,7 +117,7 @@ sim_data <- simulate_lineup_data(
 )
 
 # Fit equal-variance SDT model
-sdt_fit <- fit_sdt_roc(sim_data, lineup_size = 6)
+sdt_fit <- fit_sdt_roc(sim_data, lineup_size = 6, bootstrap = FALSE)
 print(sdt_fit)
 #> 
 #> === SDT Model Fit to ROC Data ===
@@ -124,36 +125,43 @@ print(sdt_fit)
 #> Model: Equal Variance 
 #> 
 #> Parameters:
-#>   d' (discriminability): 0.774 
-#>     95% CI: [ 0.375 , 1.065 ]
-#>     SE: 0.181 
+#>   d' (discriminability): 1.518 
 #> 
 #> z-ROC Line:
 #>   Slope: 1 
-#>   Intercept: 0.774 
-#>   R-squared: 0.885 
+#>   Intercept: 1.518 
+#>   R-squared: 0.835 
 #> 
 #> Decision Criteria (c):
 #>  Criterion Value
-#>         c1 0.677
-#>         c2 0.285
-#>         c3 0.172
-#>         c4 0.166
-#>         c5 2.807
+#>         c1 1.462
+#>         c2 0.951
+#>         c3 0.601
+#>         c4 0.461
+#>         c5 0.425
 #> 
 #> Interpretation:
-#>   - Weak discriminability (0.5 <= d' < 1.0)
+#>   - Moderate discriminability (1.0 <= d' < 2.0)
 #>   - Conservative bias (mean c > 0)
 plot(sdt_fit)
 
 
 # Get d' estimate
 sdt_fit$dprime
-#> [1] 0.7736453
+#> [1] 1.518421
 
 # Fit unequal-variance model
-sdt_uv <- fit_sdt_roc(sim_data, lineup_size = 6, model = "unequal_variance")
+sdt_uv <- fit_sdt_roc(
+  sim_data, lineup_size = 6, model = "unequal_variance", bootstrap = FALSE
+)
 sdt_uv$variance_ratio
 #>    z_far 
-#> 1.404541 
+#> 0.713702 
+
+# \donttest{
+# Use more replicates for publication analyses.
+sdt_boot <- fit_sdt_roc(
+  sim_data, lineup_size = 6, n_bootstrap = 200, seed = 123
+)
+# }
 ```

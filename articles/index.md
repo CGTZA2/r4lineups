@@ -12,6 +12,8 @@
   Lineups](https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.md):
 - [Information and Error-Rate
   Metrics](https://cgtza2.github.io/r4lineups/articles/information_error_rate_analysis.md):
+- [Fitting Wixted Lineup-Memory
+  Models](https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.md):
 - [Comparing Models for Eyewitness Identification
   Data](https://cgtza2.github.io/r4lineups/articles/model_comparison.md):
 - [mSDT: Multi-Item Signal Detection

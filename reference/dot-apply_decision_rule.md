@@ -6,7 +6,7 @@ different decision strategies.
 ## Usage
 
 ``` r
-.apply_decision_rule(strengths, rule, lineup_size, d_prime)
+.apply_decision_rule(strengths, rule, lineup_size, d_prime = NULL)
 ```
 
 ## Arguments

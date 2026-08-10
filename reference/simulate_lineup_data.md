@@ -38,9 +38,12 @@ simulate_lineup_data(
 
 - c_criterion:
 
-  Numeric or vector. Decision criterion/criteria for making
-  identifications. Lower values = more liberal (more IDs). Can be a
-  single value or vector for multiple confidence bins (default = 0)
+  Numeric scalar or vector of ordered decision criteria. The first value
+  is always the identification/rejection threshold. With confidence
+  ratings, a scalar generates `conf_levels` thresholds from
+  `c_criterion` through `c_criterion + 2`; alternatively, supply exactly
+  one strictly increasing threshold per confidence level. Lower values
+  are more liberal (default = 0).
 
 - lineup_size:
 
@@ -57,9 +60,9 @@ simulate_lineup_data(
 
   - "max" - Independent observations, choose highest strength (default)
 
-  - "best_rest" - Compare best match vs average of remaining members
+  - "best_rest" - Best strength minus the mean of the other members
 
-  - "ensemble" - Average memory strength across all lineup members
+  - "ensemble" - Best strength minus the mean of all lineup members
 
   - "integration" - Sum memory strengths across all members
 
@@ -97,21 +100,27 @@ rules:
 
 - Decision: Depends on decision_rule parameter
 
-\*\*Decision Rules:\*\*
+**Decision Rules:**
 
-- \*\*MAX\*\* (default): Independent observations model. Choose lineup
+- **MAX** (default): Independent observations model. Choose lineup
   member with highest memory strength (Clark, 2003).
 
-- \*\*BEST-REST\*\*: Compare best match against average of remaining
-  members. Decision variable = best - mean(others) (Wixted et al.,
-  2018).
+- **BEST-REST**: Best strength minus the average of the remaining
+  members (Clark, 2003).
 
-- \*\*Ensemble\*\*: Average memory strength across lineup members using
-  ensemble coding principles. More holistic evaluation (Wixted et al.,
-  2018).
+- **Ensemble**: Best strength minus the average of all lineup members
+  (Wixted et al., 2018). For lineup size \\k\\, this is \\(k - 1) / k\\
+  times BEST-REST, so the two are equivalent model parameterizations
+  when their criteria are rescaled by the same factor.
 
-- \*\*Integration\*\*: Sum memory strengths across all lineup members.
+- **Integration**: Sum memory strengths across all lineup members.
   Represents complete integration of evidence (Wixted et al., 2018).
+
+All rules use independent signals with target distribution \\N(d', 1)\\
+and filler distribution \\N(0, 1)\\. Thus, this simulator represents the
+equal-variance, zero-correlation special case of the lineup models. It
+does not implement the shared-variance or unequal-variance likelihood
+models fitted by Wixted et al. (2018).
 
 The simulation assumes:
 
@@ -121,18 +130,18 @@ The simulation assumes:
 
 - Normal distributions for memory strength
 
-Response times (if simulated):
-
-- Based on drift-diffusion model logic
+Response times (if simulated) are a heuristic convenience, not a fitted
+reaction-time or drift-diffusion model:
 
 - Faster for stronger memory signals
 
-- RT ~ InverseGaussian(strength-dependent)
+- A bounded noisy function of decision strength
 
 ## References
 
 Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
-lineup memory. *Cognitive Psychology, 105*, 8-114.
+lineup memory. *Cognitive Psychology, 105*, 81–114.
+[doi:10.1016/j.cogpsych.2018.06.001](https://doi.org/10.1016/j.cogpsych.2018.06.001)
 
 Mickes, L., et al. (2024). pyWitness 1.0: A python eyewitness
 identification analysis toolkit. *Behavior Research Methods, 56*,
@@ -158,13 +167,12 @@ ensemble_data <- simulate_lineup_data(
   seed = 42
 )
 
-# Integration model with response times
+# Integration decision rule
 integration_data <- simulate_lineup_data(
   n_tp = 200, n_ta = 200,
   d_prime = 1.5,
   decision_rule = "integration",
   conf_levels = 5,
-  include_response_time = TRUE,
   seed = 42
 )
 

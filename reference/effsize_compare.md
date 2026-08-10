@@ -6,7 +6,7 @@ Function for comparing effective size of two independent lineups
 ## Usage
 
 ``` r
-effsize_compare(linedf)
+effsize_compare(linedf, R = 1000)
 ```
 
 ## Arguments
@@ -15,6 +15,10 @@ effsize_compare(linedf)
 
   A dataframe of lineup data. Contains 2 columns, each of which hold
   data for 2 independent lineups
+
+- R:
+
+  Number of bootstrap replications.
 
 ## Value
 
@@ -66,12 +70,12 @@ lineup_vec2 <- round(runif(100, 1, 6))
 linedf <- as.data.frame(cbind(lineup_vec1, lineup_vec2))
 
 #Call:
-x <- effsize_compare(linedf)
+x <- effsize_compare(linedf, R = 100)
 #> 
 #> The two Effective sizes are  5.847953   5.411255
 #> If the interval includes 0, ns at p = .05
 #> Confidence intervals of difference [95%]
-#> Normal Theory -0.243 1.186
-#> Bootstrap: percentile (R = 1000) -0.368 1.094
-#> Bootstrap: bias-corrected (R = 1000) -0.313 1.139
+#> Normal Theory -0.425 1.242
+#> Bootstrap: percentile (R = 100) -0.386 1.281
+#> Bootstrap: bias-corrected (R = 100) -0.395 1.279
 ```

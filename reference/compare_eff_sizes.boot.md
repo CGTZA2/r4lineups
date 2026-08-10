@@ -62,6 +62,7 @@ linedf <- data.frame(lineup1 = sample(1:6, 50, replace = TRUE),
                      lineup2 = sample(1:6, 50, replace = TRUE))
 # Difference in effective size for the observed data
 compare_eff_sizes.boot(linedf, seq_len(nrow(linedf)))
+#> [1] -0.07855048
 # Bootstrap the difference
 boot_diff <- boot::boot(linedf, compare_eff_sizes.boot, R = 100)
 boot::boot.ci(boot_diff, type = "perc")

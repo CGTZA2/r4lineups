@@ -125,19 +125,19 @@ print(rac_result)
 #> 
 #> === Lineup RAC Analysis ===
 #> 
-#> Overall Accuracy: 0.75 
-#> Total Suspect IDs: 267 
+#> Overall Accuracy: 0.8 
+#> Total Suspect IDs: 250 
 #> Lineup size: 6 
 #> 
 #> RAC Data:
 #> # A tibble: 5 × 7
 #>   response_time   mean_time n_correct n_incorrect n_total accuracy      se
-#>   <chr>               <dbl>     <int>       <dbl>   <dbl>    <dbl>   <dbl>
-#> 1 [0,5e+03]           3786.        39        3.17    42.2   0.925   0.0406
-#> 2 (5e+03,1e+04]       7206.       140       21      161     0.870   0.0265
-#> 3 (1e+04,1.5e+04]    11202.        20       29.8     49.8   0.401   0.0694
-#> 4 (1.5e+04,2e+04]    15103.         1       12.7     13.7   0.0732  0.0704
-#> 5 (2e+04,1e+05]        NaN          0        0        0    NA      NA
+#>   <chr>               <dbl>     <int>       <int>   <int>    <dbl>   <dbl>
+#> 1 [0,5e+03]           3786.        39           2      41   0.951   0.0336
+#> 2 (5e+03,1e+04]       7206.       140          14     154   0.909   0.0232
+#> 3 (1e+04,1.5e+04]    11202.        20          22      42   0.476   0.0771
+#> 4 (1.5e+04,2e+04]    15103.         1          12      13   0.0769  0.0739
+#> 5 (2e+04,1e+05]        NaN          0           0       0  NA      NA
 ```
 
 ### Interpret the Results
@@ -145,8 +145,8 @@ print(rac_result)
 The RAC data shows:
 
 - **Accuracy** decreases as response time increases
-- **Fastest responses** (0-5s): ~0.92 accuracy
-- **Slowest responses** (15-20s): ~0.07 accuracy
+- **Fastest responses** (0-5s): ~0.95 accuracy
+- **Slowest responses** (15-20s): ~0.08 accuracy
 
 This pattern is consistent with the “strong memory = fast and accurate”
 principle.
@@ -236,17 +236,17 @@ rac_fine <- make_rac(
 print(rac_fine$rac_data[, c("response_time", "n_total", "accuracy")])
 #> # A tibble: 10 × 3
 #>    response_time      n_total accuracy
-#>    <chr>                <dbl>    <dbl>
-#>  1 [0,2.5e+03]           3.17   0.947 
-#>  2 (2.5e+03,5e+03]      39      0.923 
-#>  3 (5e+03,7.5e+03]      88.3    0.928 
-#>  4 (7.5e+03,1e+04]      72.7    0.798 
-#>  5 (1e+04,1.25e+04]     37.8    0.529 
-#>  6 (1.25e+04,1.5e+04]   12      0     
-#>  7 (1.5e+04,1.75e+04]   10.5    0.0952
-#>  8 (1.75e+04,2e+04]      3.17   0     
-#>  9 (2e+04,2.25e+04]      0     NA     
-#> 10 (2.25e+04,2.5e+04]    0     NA
+#>    <chr>                <int>    <dbl>
+#>  1 [0,2.5e+03]              3    1    
+#>  2 (2.5e+03,5e+03]         38    0.947
+#>  3 (5e+03,7.5e+03]         86    0.953
+#>  4 (7.5e+03,1e+04]         68    0.853
+#>  5 (1e+04,1.25e+04]        32    0.625
+#>  6 (1.25e+04,1.5e+04]      10    0    
+#>  7 (1.5e+04,1.75e+04]      10    0.1  
+#>  8 (1.75e+04,2e+04]         3    0    
+#>  9 (2e+04,2.25e+04]         0   NA    
+#> 10 (2.25e+04,2.5e+04]       0   NA
 ```
 
 **Warning**: Finer bins provide more detail but reduce sample sizes per
@@ -266,10 +266,10 @@ high_accuracy_bins <- rac_result$rac_data[rac_result$rac_data$accuracy > 0.80, ]
 print(high_accuracy_bins[, c("response_time", "mean_time", "accuracy", "n_total")])
 #> # A tibble: 3 × 4
 #>   response_time mean_time accuracy n_total
-#>   <chr>             <dbl>    <dbl>   <dbl>
-#> 1 [0,5e+03]         3786.    0.925    42.2
-#> 2 (5e+03,1e+04]     7206.    0.870   161  
-#> 3 NA                  NA    NA        NA
+#>   <chr>             <dbl>    <dbl>   <int>
+#> 1 [0,5e+03]         3786.    0.951      41
+#> 2 (5e+03,1e+04]     7206.    0.909     154
+#> 3 NA                  NA    NA          NA
 ```
 
 ### 2. Comparing Conditions
@@ -487,4 +487,4 @@ relevant** - Applicable to video lineups
 
 ------------------------------------------------------------------------
 
-*This vignette was created for r4lineups version 2.0.0*
+*This vignette was created for r4lineups version 2.1.0*

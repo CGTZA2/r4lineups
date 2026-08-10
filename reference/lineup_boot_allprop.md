@@ -5,7 +5,7 @@ Computes bootstrapped confidence intervals for lineup proportion
 ## Usage
 
 ``` r
-lineup_boot_allprop(lineup_vec, k, conf = 0.95)
+lineup_boot_allprop(lineup_vec, k, conf = 0.95, R = 1000)
 ```
 
 ## Arguments
@@ -22,6 +22,10 @@ lineup_boot_allprop(lineup_vec, k, conf = 0.95)
 
   Desired level of alpha. Defaults to 0.95. May be specified by user
   (scalar).
+
+- R:
+
+  Number of bootstrap replications. Defaults to 1000.
 
 ## Value
 

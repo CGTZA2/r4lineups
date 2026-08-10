@@ -53,8 +53,9 @@ Mickes (2015). For each confidence level:
 - False ID rate = proportion of target-absent lineups where suspect
   identified
 
-When no innocent suspect is designated in target-absent lineups, filler
-IDs are divided by lineup size to estimate the false ID rate.
+If target-absent data contain explicit `"suspect"` responses, those
+designated innocent-suspect IDs are used directly. Otherwise, filler IDs
+are divided by lineup size. The two estimators are never added together.
 
 ## References
 
@@ -82,16 +83,16 @@ roc$roc_data
 #> # A tibble: 10 × 5
 #>    confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
 #>         <dbl>           <dbl>         <dbl>         <dbl>       <dbl>
-#>  1        100            0.17         0                17         0  
-#>  2         90            0.38         0                38         0  
-#>  3         80            0.48         0.06             48         6  
-#>  4         70            0.55         0.112            55        11.2
-#>  5         60            0.6          0.133            60        13.3
-#>  6         50            0.6          0.18             60        18  
-#>  7         40            0.6          0.19             60        19  
-#>  8         30            0.6          0.19             60        19  
-#>  9         20            0.6          0.19             60        19  
-#> 10         19            0            0                 0         0  
+#>  1         19            0             0                0           0
+#>  2        100            0.17          0               17           0
+#>  3         90            0.38          0               38           0
+#>  4         80            0.48          0.06            48           6
+#>  5         70            0.55          0.1             55          10
+#>  6         60            0.6           0.11            60          11
+#>  7         50            0.6           0.15            60          15
+#>  8         40            0.6           0.15            60          15
+#>  9         30            0.6           0.15            60          15
+#> 10         20            0.6           0.15            60          15
 roc$pauc
-#> [1] 0.08746667
+#> [1] 0.07615
 ```

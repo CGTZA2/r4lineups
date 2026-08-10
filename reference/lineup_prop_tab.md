@@ -40,9 +40,7 @@ lineup_table <- table(lineup_vec)
 
 #Call:
 lineup_prop_tab(lineup_table, 3)
-#> <NA> 
-#>   NA 
+#> [1] 0
 lineup_prop_tab(table(lineup_vec), 2)
-#> <NA> 
-#>   NA 
+#> [1] 0
 ```

@@ -39,15 +39,6 @@ k <- 6
 
 #Bootstrap data:
 lineup_boot_df <- gen_boot_samples(lineup_vec, 1000)
-#> Warning: `rerun()` was deprecated in purrr 1.0.0.
-#> ℹ Please use `map()` instead.
-#>   # Previously
-#>   rerun(1000, sample(lineup_vec, length(lineup_vec), replace = TRUE))
-#> 
-#>   # Now
-#>   map(1:1000, ~ sample(lineup_vec, length(lineup_vec), replace = TRUE))
-#> ℹ The deprecated feature was likely used in the r4lineups package.
-#>   Please report the issue at <https://github.com/CGTZA2/r4lineups/issues>.
 
 #Compute proportion for bootstrap samples:
 lineuprops <- gen_lineup_prop(lineup_boot_df, target_pos, 6)

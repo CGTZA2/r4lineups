@@ -5,7 +5,7 @@ Computes ln of diagnosticity ratio: ln(d)
 ## Usage
 
 ``` r
-ln_diag_ratio(linedf)
+ln_diag_ratio(linedf, correction = TRUE)
 ```
 
 ## Arguments
@@ -14,10 +14,16 @@ ln_diag_ratio(linedf)
 
   A dataframe of parameters for computing diagnosticity ratio
 
+- correction:
+
+  Logical. Apply Tredoux's small-cell correction (default `TRUE`). Set
+  to `FALSE` for the uncorrected log relative risk used by the
+  homogeneity procedure, which requires positive suspect-ID counts.
+
 ## Details
 
-The Haldane (1940) continuity correction adds 0.5 to each cell count and
-to each marginal total before computing the ratio: \$\$d =
+The correction adds 0.5 to each suspect-identification count and to its
+corresponding sample total before computing the ratio: \$\$d =
 \frac{(n\_{11}+0.5)/(n\_{11}+n\_{21}+0.5)}{(n\_{12}+0.5)/(n\_{12}+n\_{22}+0.5)}\$\$
 \\\ln(d)\\ is then returned. The correction avoids undefined log ratios
 when a cell count is zero and stabilises variance estimates in small
@@ -65,36 +71,28 @@ empirically assessing the fairness of a lineup. *Law and Human Behavior,
 
 ``` r
 #Target present data:
-A <-  round(runif(100,1,6))
-B <-  round(runif(70,1,5))
-C <-  round(runif(20,1,4))
+A <- rep(1:6, length.out = 100)
+B <- rep(1:5, length.out = 70)
+C <- rep(1:4, length.out = 20)
 lineup_pres_list <- list(A, B, C)
 rm(A, B, C)
 
 
 #Target absent data:
-A <-  round(runif(100,1,6))
-B <-  round(runif(70,1,5))
-C <-  round(runif(20,1,4))
+A <- rep(6:1, length.out = 100)
+B <- rep(5:1, length.out = 70)
+C <- rep(4:1, length.out = 20)
 lineup_abs_list <- list(A, B, C)
 rm(A, B, C)
 
-#Pos list
-lineup1_pos <- c(1, 2, 3, 4, 5, 6)
-lineup2_pos <- c(1, 2, 3, 4, 5)
-lineup3_pos <- c(1, 2, 3, 4)
-pos_list <- list(lineup1_pos, lineup2_pos, lineup3_pos)
-rm(lineup1_pos, lineup2_pos, lineup3_pos)
+# Suspect position for each TP/TA pair
+pos_list <- c(3, 2, 1)
 
 #Nominal size:
 k <- c(6, 5, 4)
 
 #Use diag param helper function to get data (n11, n21, n12, n22):
 linedf <- diag_param(lineup_pres_list, lineup_abs_list, pos_list, k)
-#> Warning: longer object length is not a multiple of shorter object length
-#> Warning: longer object length is not a multiple of shorter object length
-#> Warning: longer object length is not a multiple of shorter object length
-#> Warning: longer object length is not a multiple of shorter object length
 
 #Call:
 lnd <- ln_diag_ratio(linedf)

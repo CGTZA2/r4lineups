@@ -97,11 +97,11 @@ ppv_range <- make_ppv_range(
 
 # Overall PPV under each correction
 ppv_range$ppv_nominal$overall_ppv
-#> [1] 0.7719298
+#> [1] 0.5945946
 ppv_range$ppv_effective$overall_ppv
-#> [1] 0.6233097
+#> [1] 0.5945946
 ppv_range$ppv_none$overall_ppv
-#> [1] 0.3606557
+#> [1] 0.5945946
 ```
 
 ### Plots

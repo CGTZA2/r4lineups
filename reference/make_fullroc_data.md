@@ -94,6 +94,16 @@ The full ROC provides a threshold-free measure of investigator
 discriminability— the ability to distinguish guilty from innocent
 suspects using ALL available eyewitness evidence.
 
+**Note on ordering and bias:** ordering cells by the *sample*
+diagnosticity ratio (`order = "diagnosticity"`) bows the curve upward
+from noise alone, so the resulting AUC is optimistically biased —
+identical target-present and target-absent response distributions yield
+AUC slightly above 0.5, with the bias growing with the number of
+decision-by-confidence cells and shrinking with sample size. For
+inference or comparisons across conditions, prefer `order = "apriori"`
+(the theoretically fixed ordering suggested by Smith & Yang, 2020) or
+compare against a permutation baseline.
+
 ## References
 
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between

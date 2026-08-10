@@ -1,6 +1,6 @@
 # Convert Cosine Distance to Similarity Score
 
-Converts cosine distance to a similarity score in \[0, 1\] range.
+Converts cosine distance to cosine similarity in \[-1, 1\].
 
 ## Usage
 
@@ -16,8 +16,8 @@ cosine_to_similarity(distance)
 
 ## Value
 
-Numeric similarity score(s) where 1 = identical, 0 = maximally
-different.
+Numeric cosine similarity score(s), where 1 means the same direction, 0
+means orthogonal, and -1 means opposite directions.
 
 ## Examples
 

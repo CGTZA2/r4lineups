@@ -109,6 +109,9 @@ lineups, different retention intervals, etc.).
 
 4.  Calculates p-value from standard normal distribution
 
+The two datasets are treated as independent conditions. This function
+does not implement a paired or clustered bootstrap.
+
 \*\*Interpretation:\*\*
 
 - Positive pAUC difference: Condition 1 has better discriminability
@@ -151,19 +154,19 @@ print(comparison)
 #> === pAUC Comparison Analysis ===
 #> 
 #> Conditions:
-#>   Procedure A: pAUC = 0.0562 (SE = 0.018)
-#>   Procedure B: pAUC = 0.1167 (SE = 0.0213)
+#>   Procedure A: pAUC = 0.0508 (SE = 0.0235)
+#>   Procedure B: pAUC = 0.1 (SE = 0.0192)
 #> 
-#> Difference: -0.0605
-#>   95% CI: [-0.1155, -0.0055]
+#> Difference: -0.0492
+#>   95% CI: [-0.1064, 0.008]
 #> 
 #> Statistical Test:
-#>   Z = -2.157
-#>   p-value = 0.031
+#>   Z = -1.685
+#>   p-value = 0.09192
 #> 
-#> Interpretation: Procedure B has higher discriminability than Procedure A (*)
+#> Interpretation: Procedure B has higher discriminability than Procedure A (ns)
 #> 
-#> Max false ID rate cutoff: 0.25
+#> Max false ID rate cutoff: 0.2
 #> Bootstrap samples: 200
 #> 
 #> Note: *** p<0.001, ** p<0.01, * p<0.05, ns = not significant

@@ -1,10 +1,10 @@
-# MAX SDT Compound-Decision Model for Eyewitness Lineups
+# Restricted Independent-Observations/MAX Model for Lineup Counts
 
-Fits the MAX signal-detection (compound-decision) model to eyewitness
-lineup data using chi-squared goodness-of-fit minimization. Estimates d'
-(sensitivity) and lambda (criterion) simultaneously from hit rates,
-false-alarm rates, and rejection rates, supporting one or two conditions
-and optional model constraints.
+Fits the equal-variance, independent-signal, single-criterion MAX model
+to aggregate simultaneous-lineup counts using minimum-Pearson
+chi-squared estimation. Estimates d' (sensitivity) and lambda
+(criterion) simultaneously, supporting one or two conditions and
+optional cross-condition constraints.
 
 ## Usage
 
@@ -145,12 +145,12 @@ An object of class `"max_sdt_fit"` containing:
 
 ## Details
 
-The MAX SDT compound-decision model (Smith, 2022; Gourevitch & Galanter,
-1967) addresses the fundamental challenge of eyewitness lineup research:
-participants make only one identification response, so within-person ROC
-analysis is impossible. Group-level d' inference requires a model that
-jointly accounts for detection (is the target present?) and
-identification (which member is the target?).
+This is a restricted Independent Observations/MAX model for
+simultaneous, fair lineups. Fillers are IID \\N(0, 1)\\, the culprit
+signal is \\N(d', 1)\\, memory signals are independent, and a single
+criterion is applied to the largest signal. Target-absent `n_fa`
+therefore means a choice of any lineup member, not only a designated
+innocent suspect.
 
 For a lineup of \\n\\ members with culprit signal strength \\d'\\ and
 response criterion \\\lambda\\: \$\$P(\text{correct ID}) =
@@ -159,21 +159,36 @@ response criterion \\\lambda\\: \$\$P(\text{correct ID}) =
 d')\Phi(\lambda)^{n-1}\$\$ \$\$P(\text{choose anyone} \mid \text{TA}) =
 1 - \Phi(\lambda)^n\$\$
 
-Parameters are estimated by minimizing the chi-squared discrepancy
-between observed and predicted frequencies. Nested model comparisons
-(equal d' or equal lambda across conditions) are supported via
+Parameters are estimated by minimizing the Pearson chi-squared
+discrepancy between the mutually exclusive response cells:
+target-present correct ID, filler ID and rejection; and target-absent
+choice and rejection. This is not maximum-likelihood estimation and is
+not the multi-criterion likelihood model of Wixted et al. (2018). Nested
+comparisons (equal d' or equal lambda across conditions) are supported
+via
 [`compare_max_sdt`](https://cgtza2.github.io/r4lineups/reference/compare_max_sdt.md).
+
+Estimates are conditional on the model assumptions. Correlated signals,
+unequal variances, confidence criteria, sequential presentation, unfair
+lineups, and the Ensemble and Integration decision variables are outside
+the scope of this function.
 
 Parametric bootstrap CIs are obtained by simulating data from the fitted
 model and re-fitting.
 
 ## References
 
-Gourevitch, V., & Galanter, E. (1967). A significance test for
-one-parameter isosensitivity functions. *Psychometrika, 32*(1), 25-33.
+Duncan, M. (2006). *A signal detection model of compound decision
+tasks*. DRDC Toronto TR 2006-256.
 
-Smith, A. M. (2022). Culprit and victim lineups. Unpublished analysis
-scripts.
+Kaesler, M., Dunn, J. C., Ransom, K., & Semmler, C. (2020). Do
+sequential lineups impair underlying discriminability? *Cognitive
+Research: Principles and Implications, 5*, 35.
+[doi:10.1186/s41235-020-00234-5](https://doi.org/10.1186/s41235-020-00234-5)
+
+Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
+lineup memory. *Cognitive Psychology, 105*, 81–114.
+[doi:10.1016/j.cogpsych.2018.06.001](https://doi.org/10.1016/j.cogpsych.2018.06.001)
 
 ## See also
 
@@ -190,7 +205,7 @@ fit1 <- fit_max_sdt(
   N_tp = 96, N_ta = 106, n = 6
 )
 print(fit1)
-#> MAX SDT Compound-Decision Model
+#> Restricted Independent-Observations/MAX SDT Model
 #>   Lineup size: 6 | Conditions: 1 | Free parameters: 2
 #>   Convergence: OK
 #> 
@@ -208,16 +223,16 @@ print(fit1)
 fit_free <- fit_max_sdt(
   n_hit = 69, n_tp_choose = 82, n_fa = 64,
   N_tp = 96, N_ta = 106,
-  n_hit_2 = 67, n_tp_choose_2 = 78, n_fa_2 = 42,
-  N_tp_2 = 90, N_ta_2 = 96, n = 6
+  n_hit_2 = 68, n_tp_choose_2 = 78, n_fa_2 = 42,
+  N_tp_2 = 96, N_ta_2 = 96, n = 6
 )
 
 # Two conditions, equal d' (constrained)
 fit_eqd <- fit_max_sdt(
   n_hit = 69, n_tp_choose = 82, n_fa = 64,
   N_tp = 96, N_ta = 106,
-  n_hit_2 = 67, n_tp_choose_2 = 78, n_fa_2 = 42,
-  N_tp_2 = 90, N_ta_2 = 96, n = 6,
+  n_hit_2 = 68, n_tp_choose_2 = 78, n_fa_2 = 42,
+  N_tp_2 = 96, N_ta_2 = 96, n = 6,
   constrain_d = TRUE
 )
 
@@ -225,9 +240,9 @@ fit_eqd <- fit_max_sdt(
 cmp <- compare_max_sdt(fit_free, fit_eqd)
 print(cmp)
 #> MAX SDT Model Comparison (chi-squared difference test)
-#>   Free model:       chi-sq = 4.659 (4 free params)
-#>   Constrained model: chi-sq = 6.081 (3 free params)
+#>   Free model:       chi-sq = 6.619 (4 free params)
+#>   Constrained model: chi-sq = 7.039 (3 free params)
 #>   Constraint: d' equal
-#>   Delta chi-sq(1) = 1.422, p = 0.2331
+#>   Delta chi-sq(1) = 0.420, p = 0.5170
 #>   Interpretation: constraint does not significantly worsen fit.
 ```

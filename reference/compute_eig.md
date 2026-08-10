@@ -7,7 +7,12 @@ witness responses using information theory.
 ## Usage
 
 ``` r
-compute_eig(eig_data, prior_guilt = 0.5, confidence_bins = NULL)
+compute_eig(
+  eig_data,
+  prior_guilt = 0.5,
+  confidence_bins = NULL,
+  lineup_size = 6
+)
 ```
 
 ## Arguments
@@ -24,6 +29,11 @@ compute_eig(eig_data, prior_guilt = 0.5, confidence_bins = NULL)
 - confidence_bins:
 
   Numeric vector of bin edges (only used if eig_data is a dataframe)
+
+- lineup_size:
+
+  Nominal lineup size used when raw target-absent data have no
+  designated innocent suspect.
 
 ## Value
 
@@ -65,10 +75,9 @@ information gain (responses don't distinguish guilty from innocent). EIG
 
 ## References
 
-Starns, J. J., Chen, T., & Staub, A. (2023). Assessing theoretical
-conclusions via the data they should have produced: A priori comparison
-of eyewitness identification decision processes using quantitative
-predictions of the expected information gain. *Psychological Review*.
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
+for assessing the effectiveness of eyewitness identification procedures:
+Expected information gain. *Psychological Review, 130*(3), 677–719.
 
 ## Examples
 

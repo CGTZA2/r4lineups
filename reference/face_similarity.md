@@ -50,7 +50,7 @@ A list containing:
 
 - distance - The computed distance (lower = more similar)
 
-- similarity - Similarity score in \[0,1\] for cosine metric
+- similarity - Similarity score in \[-1,1\] for cosine metric
 
 - verified - Logical, TRUE if distance is below the model's threshold
 

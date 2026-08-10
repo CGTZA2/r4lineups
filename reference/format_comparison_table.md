@@ -69,7 +69,7 @@ format_comparison_table(comparison)
 #> 11     Higher is better (bits)
 #> 12         Percentage (0-100%)
 #> 13         Maximum possible IG
-#> 14  Higher is better (0.5-1.0)
+#> 14      Higher is better (0-1)
 #> 15 Number of decision criteria
 #> 16            Cumulative (0-1)
 ```

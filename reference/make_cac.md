@@ -44,17 +44,17 @@ print(cac_result)
 #> 
 #> === Lineup CAC Analysis ===
 #> 
-#> Overall Accuracy: 0.759 
-#> Total Suspect IDs: 79 
+#> Overall Accuracy: 0.8 
+#> Total Suspect IDs: 75 
 #> Lineup size: 6 
 #> 
 #> CAC Data:
 #> # A tibble: 3 × 6
 #>   confidence n_correct n_incorrect n_total accuracy     se
-#>   <chr>          <int>       <dbl>   <dbl>    <dbl>  <dbl>
-#> 1 [0,60]             5        7.83    12.8    0.390 0.136 
-#> 2 (60,80]           17       11.2     28.2    0.604 0.0922
-#> 3 (80,100]          38        0       38      1     0     
+#>   <chr>          <int>       <int>   <int>    <dbl>  <dbl>
+#> 1 [0,60]             5           5      10    0.5   0.158 
+#> 2 (60,80]           17          10      27    0.630 0.0929
+#> 3 (80,100]          38           0      38    1     0     
 #> 
 #> Plot available in $plot
 ```

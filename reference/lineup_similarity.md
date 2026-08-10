@@ -56,7 +56,7 @@ A tibble with columns:
 
 - distance - Distance from target (lower = more similar)
 
-- similarity - Similarity score \[0,1\] for cosine metric
+- similarity - Cosine similarity score \[-1,1\] for cosine metric
 
 - verified - Would be identified as same person
 

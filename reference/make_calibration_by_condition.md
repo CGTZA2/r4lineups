@@ -88,7 +88,7 @@ by_cond <- make_calibration_by_condition(data, condition_vars = "instruction",
 by_cond$condition_summary
 #> # A tibble: 2 × 7
 #>   condition     n      C      OU    NRI overall_accuracy overall_confidence
-#> * <chr>     <int>  <dbl>   <dbl>  <dbl>            <dbl>              <dbl>
+#> * <chr>     <dbl>  <dbl>   <dbl>  <dbl>            <dbl>              <dbl>
 #> 1 biased       79 0.0690  0.0495 0.0210            0.481              0.531
 #> 2 unbiased     76 0.120  -0.0270 0.0262            0.526              0.499
 ```

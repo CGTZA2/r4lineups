@@ -12,9 +12,11 @@ These tools help researchers:
 - **Explore scenarios**: Compare different experimental designs
 - **Teach concepts**: Demonstrate signal detection theory principles
 
-The simulation framework implements a Signal Detection Theory (SDT)
-model with the MAX decision rule, following the methodology used in
-eyewitness identification research (Wixted et al., 2018).
+The simulation framework implements equal-variance, independent-signal
+versions of the Independent Observations/MAX, Ensemble, and Integration
+decision rules discussed by Wixted et al. (2018). The accepted
+`"best_rest"` option is a scale-equivalent parameterization of Ensemble,
+not a fourth competing family.
 
 ## Signal Detection Model
 
@@ -31,6 +33,13 @@ the lineup is rejected
 (higher = better memory) - `c_criterion`: Decision criterion (higher =
 more conservative) - `lineup_size`: Number of lineup members -
 `conf_levels`: Number of confidence scale points
+
+The lowest supplied `c_criterion` is always the
+identification-versus-rejection threshold. Additional strictly
+increasing criteria define confidence. A scalar criterion retains that
+value as the lowest threshold and generates the remaining confidence
+thresholds over the documented two-unit range; for full control, supply
+one ordered criterion per confidence level.
 
 ## Basic Data Simulation
 
@@ -62,7 +71,7 @@ head(sim_data)
 #>   Target-present lineups: 200 
 #>   Target-absent lineups: 200 
 #>   d': 1.5 
-#>   Criterion: 0.5 
+#>   Criteria: 0.5, 1, 1.5, 2, 2.5 
 #>   Lineup size: 6 
 #>   Decision rule: max 
 #>   Confidence levels: 5 
@@ -75,26 +84,26 @@ head(sim_data)
 #>     Rejections: 0 
 #>   Target-absent:
 #>     Suspect IDs: 0 
-#>     Filler IDs: 4 
-#>     Rejections: 0 
+#>     Filler IDs: 3 
+#>     Rejections: 1 
 #> 
-#>   Suspect ID Accuracy: 0.6 
+#>   Suspect ID Accuracy: 0.667 
 #> 
 #> First 10 rows:
 #>   participant_id target_present identification confidence
-#> 1              4           TRUE         filler          4
-#> 2            220          FALSE         filler          2
-#> 3            285          FALSE         filler          5
-#> 4            362          FALSE         filler          3
-#> 5            298          FALSE         filler          4
-#> 6             44           TRUE        suspect          3
+#> 1              4           TRUE         filler          2
+#> 2            220          FALSE         reject          1
+#> 3            285          FALSE         filler          4
+#> 4            362          FALSE         filler          2
+#> 5            298          FALSE         filler          3
+#> 6             44           TRUE        suspect          2
 
 # Summary
 table(sim_data$target_present, sim_data$identification)
 #>        
-#>         filler suspect
-#>   FALSE    168      32
-#>   TRUE      82     118
+#>         filler reject suspect
+#>   FALSE    142     30      28
+#>   TRUE      75      7     118
 ```
 
 The simulated data has the standard format required by r4lineups
@@ -162,26 +171,13 @@ power_result <- simulate_power_analysis(
   n_simulations = 100,  # Use 500+ for real studies
   alpha = 0.05
 )
-#> Simulating sample size: 50 
-#> Simulating sample size: 100 
-#> Simulating sample size: 150 
-#> Simulating sample size: 200 
-#> Simulating sample size: 300
 
 # View results
 print(power_result)
-#>       sample_size mean_stat    sd_stat   ci_lower  ci_upper power
-#> 2.5%           50 0.1288457 0.02966739 0.08496667 0.1852083     1
-#> 2.5%1         100 0.1328031 0.01840048 0.09768938 0.1643758     1
-#> 2.5%2         150 0.1305349 0.01389554 0.10236481 0.1572742     1
-#> 2.5%3         200 0.1327607 0.01379545 0.10697328 0.1590655     1
-#> 2.5%4         300 0.1328042 0.01077195 0.11178160 0.1554874     1
 
 # Plot power curve
 plot(power_result)
 ```
-
-![](simulation_power_analysis_files/figure-html/power_analysis_basic-1.png)
 
 The power analysis shows how power increases with sample size. For 80%
 power to detect d’ = 1.5, we typically need 150-200 participants per
@@ -199,23 +195,10 @@ power_high <- simulate_power_analysis(
   d_prime = 2.0,
   n_simulations = 100
 )
-#> Simulating sample size: 100 
-#> Simulating sample size: 150 
-#> Simulating sample size: 200 
-#> Simulating sample size: 250 
-#> Simulating sample size: 300
 
 print(power_high)
-#>       sample_size mean_stat    sd_stat  ci_lower  ci_upper power
-#> 2.5%          100 0.1696722 0.02194507 0.1346002 0.2257902     1
-#> 2.5%1         150 0.1740220 0.01916954 0.1389896 0.2093194     1
-#> 2.5%2         200 0.1737213 0.01819713 0.1403551 0.2114540     1
-#> 2.5%3         250 0.1749547 0.01398806 0.1487243 0.2045563     1
-#> 2.5%4         300 0.1752754 0.01479037 0.1473659 0.1990578     1
 plot(power_high)
 ```
-
-![](simulation_power_analysis_files/figure-html/power_comparison-1.png)
 
 The plot shows that with higher discriminability (d’ = 2.0), smaller
 sample sizes are needed to achieve adequate power.
@@ -241,21 +224,22 @@ print(roc_result)
 #> 
 #> === Lineup ROC Analysis ===
 #> 
-#> Partial AUC: 0.164 
+#> Partial AUC: 0.082 
 #> Target-present lineups: 200 
 #> Target-absent lineups: 200 
 #> Lineup size: 6 
-#> Confidence levels: 4 
+#> Confidence levels: 5 
 #> 
 #> ROC Data:
-#> # A tibble: 5 × 5
+#> # A tibble: 6 × 5
 #>   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
 #>        <dbl>           <dbl>         <dbl>         <dbl>       <dbl>
-#> 1          5           0.615         0.112           123        22.3
-#> 2          4           0.705         0.254           141        50.8
-#> 3          3           0.735         0.299           147        59.8
-#> 4          2           0.74          0.304           148        60.8
-#> 5          1           0             0                 0         0  
+#> 1          0           0             0                 0           0
+#> 2          5           0.34          0.03             68           6
+#> 3          4           0.52          0.05            104          10
+#> 4          3           0.65          0.115           130          23
+#> 5          2           0.675         0.145           135          29
+#> 6          1           0.675         0.16            135          32
 #> 
 #> Plot available in $plot
 ```
@@ -270,18 +254,19 @@ print(cac_result)
 #> 
 #> === Lineup CAC Analysis ===
 #> 
-#> Overall Accuracy: 0.709 
-#> Total Suspect IDs: 209 
+#> Overall Accuracy: 0.808 
+#> Total Suspect IDs: 167 
 #> Lineup size: 6 
 #> 
 #> CAC Data:
-#> # A tibble: 4 × 6
+#> # A tibble: 5 × 6
 #>   confidence n_correct n_incorrect n_total accuracy     se
-#>   <chr>          <int>       <dbl>   <dbl>    <dbl>  <dbl>
-#> 1 2                  1         1       2      0.5   0.354 
-#> 2 3                  6         9      15      0.4   0.126 
-#> 3 4                 18        28.5    46.5    0.387 0.0714
-#> 4 5                123        22.3   145.     0.846 0.0299
+#>   <chr>          <int>       <int>   <int>    <dbl>  <dbl>
+#> 1 1                  0           3       3    0     0     
+#> 2 2                  5           6      11    0.455 0.150 
+#> 3 3                 26          13      39    0.667 0.0755
+#> 4 4                 36           4      40    0.9   0.0474
+#> 5 5                 68           6      74    0.919 0.0317
 #> 
 #> Plot available in $plot
 ```
@@ -306,18 +291,18 @@ print(rac_result)
 #> 
 #> === Lineup RAC Analysis ===
 #> 
-#> Overall Accuracy: 0.652 
-#> Total Suspect IDs: 192 
+#> Overall Accuracy: 0.785 
+#> Total Suspect IDs: 158 
 #> Lineup size: 6 
 #> 
 #> RAC Data:
 #> # A tibble: 4 × 7
 #>   response_time   mean_time n_correct n_incorrect n_total accuracy      se
-#>   <chr>               <dbl>     <int>       <dbl>   <dbl>    <dbl>   <dbl>
-#> 1 [0,5e+03]           4475.        39       9      48        0.812  0.0563
-#> 2 (5e+03,1e+04]       6158.        86      57.5   144.       0.599  0.0409
-#> 3 (1e+04,1.5e+04]      NaN          0       0.167   0.167    0      0     
-#> 4 (1.5e+04,2e+04]      NaN          0       0       0       NA     NA     
+#>   <chr>               <dbl>     <int>       <int>   <int>    <dbl>   <dbl>
+#> 1 [0,5e+03]           4388.        32           8      40    0.8    0.0632
+#> 2 (5e+03,1e+04]       6213.        92          26     118    0.780  0.0382
+#> 3 (1e+04,1.5e+04]      NaN          0           0       0   NA     NA     
+#> 4 (1.5e+04,2e+04]      NaN          0           0       0   NA     NA     
 #> 
 #> Plot available in $plot
 ```
@@ -332,36 +317,40 @@ print(fullroc_result)
 #> 
 #> === Full Lineup ROC Analysis (Smith & Yang, 2020) ===
 #> 
-#> Full AUC: 0.854 
+#> Full AUC: 0.844 
 #> Target-present lineups: 200 
 #> Target-absent lineups: 200 
 #> Lineup size: 6 
 #> Ordering method: diagnosticity 
-#> Operating points: 8 
+#> Operating points: 11 
 #> 
 #> ROC Data (first 10 points):
-#>   cumulative_hit_rate cumulative_false_alarm_rate evidence_label
-#> 1               0.000                       0.000         origin
-#> 2               0.615                       0.055      suspect_5
-#> 3               0.620                       0.055      suspect_2
-#> 4               0.650                       0.070      suspect_3
-#> 5               0.740                       0.165      suspect_4
-#> 6               0.915                       0.505       filler_5
-#> 7               0.990                       0.790       filler_4
-#> 8               1.000                       0.970       filler_3
-#> 9               1.000                       1.000       filler_2
+#>    cumulative_hit_rate cumulative_false_alarm_rate evidence_label
+#> 1                0.000                       0.000         origin
+#> 2                0.340                       0.030      suspect_5
+#> 3                0.520                       0.050      suspect_4
+#> 4                0.650                       0.115      suspect_3
+#> 5                0.755                       0.195       filler_5
+#> 6                0.780                       0.225      suspect_2
+#> 7                0.915                       0.550       filler_3
+#> 8                0.980                       0.735       filler_4
+#> 9                0.985                       0.785       filler_1
+#> 10               1.000                       0.980       filler_2
 #> 
 #> 
 #> Diagnosticity Table (ordered by evidence strength):
 #>  evidence_label hit_rate false_alarm_rate diagnosticity_ratio
-#>       suspect_5    0.615            0.055         11.18181818
-#>       suspect_2    0.005            0.000          5.00000000
-#>       suspect_3    0.030            0.015          2.00000000
-#>       suspect_4    0.090            0.095          0.94736842
-#>        filler_5    0.175            0.340          0.51470588
-#>        filler_4    0.075            0.285          0.26315789
-#>        filler_3    0.010            0.180          0.05555556
-#>        filler_2    0.000            0.030          0.00000000
+#>       suspect_5    0.340            0.030         11.33333333
+#>       suspect_4    0.180            0.020          9.00000000
+#>       suspect_3    0.130            0.065          2.00000000
+#>        filler_5    0.105            0.080          1.31250000
+#>       suspect_2    0.025            0.030          0.83333333
+#>        filler_3    0.135            0.325          0.41538462
+#>        filler_4    0.065            0.185          0.35135135
+#>        filler_1    0.005            0.050          0.10000000
+#>        filler_2    0.015            0.195          0.07692308
+#>       suspect_1    0.000            0.015          0.00000000
+#>        reject_1    0.000            0.005          0.00000000
 #> 
 #> Plot available in $plot
 ```
@@ -443,9 +432,9 @@ compare_lineups <- data.frame(
 
 print(compare_lineups)
 #>   Lineup_Size TP_Suspect_ID TA_Suspect_ID
-#> 1           4        0.3575        0.1175
-#> 2           6        0.3200        0.0625
-#> 3           8        0.2850        0.0875
+#> 1           4        0.3325        0.1075
+#> 2           6        0.3475        0.0725
+#> 3           8        0.2350        0.0525
 ```
 
 ## Advanced: Custom Simulation Parameters
@@ -477,7 +466,7 @@ cat("  Rejection rate:", mean(liberal_data$identification == "reject"), "\n\n")
 cat("Conservative criterion:\n")
 #> Conservative criterion:
 cat("  Rejection rate:", mean(conservative_data$identification == "reject"), "\n")
-#>   Rejection rate: 0.01
+#>   Rejection rate: 0.19
 ```
 
 ### Multiple Confidence Levels
@@ -499,7 +488,7 @@ conf_7 <- simulate_lineup_data(
 )
 
 cat("3-point scale: unique values =", length(unique(conf_3$confidence)), "\n")
-#> 3-point scale: unique values = 2
+#> 3-point scale: unique values = 3
 cat("7-point scale: unique values =", length(unique(conf_7$confidence)), "\n")
 #> 7-point scale: unique values = 7
 ```
@@ -520,25 +509,8 @@ lineup_power <- simulate_power_analysis(
   n_simulations = 200,
   alpha = 0.05
 )
-#> Simulating sample size: 50 
-#> Simulating sample size: 75 
-#> Simulating sample size: 100 
-#> Simulating sample size: 125 
-#> Simulating sample size: 150 
-#> Simulating sample size: 175 
-#> Simulating sample size: 200 
-#> Simulating sample size: 225 
-#> Simulating sample size: 250 
-#> Simulating sample size: 275 
-#> Simulating sample size: 300
 
 plot(lineup_power)
-```
-
-![](simulation_power_analysis_files/figure-html/planning_example-1.png)
-
-``` r
-
 
 # Result: We need approximately 150-200 participants per condition for 80% power
 ```
@@ -563,7 +535,7 @@ validation_data <- simulate_lineup_data(
 eig_result <- compute_eig(validation_data, prior_guilt = 0.5)
 
 cat("EIG (Expected Information Gain):", round(eig_result$eig, 4), "bits\n")
-#> EIG (Expected Information Gain): 0.3912 bits
+#> EIG (Expected Information Gain): 0.3988 bits
 cat("Interpretation: Higher d' should produce higher EIG\n")
 #> Interpretation: Higher d' should produce higher EIG
 ```
@@ -641,7 +613,7 @@ small_sample <- simulate_lineup_data(n_tp = 20, n_ta = 20, d_prime = 1.5)
 roc_small <- make_roc(small_sample, lineup_size = 6, show_plot = FALSE)
 cat("Small sample pAUC:", round(roc_small$pauc, 3),
     "(unreliable with n=40)\n")
-#> Small sample pAUC: 0.086 (unreliable with n=40)
+#> Small sample pAUC: 0.059 (unreliable with n=40)
 ```
 
 ### 2. Unrealistic Parameter Values

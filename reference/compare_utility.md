@@ -77,9 +77,9 @@ print(comparison)
 #> 
 #>   Base rate 0.1: +0.0060
 #>   Base rate 0.3: +0.0180
-#>   Base rate 0.5: +0.0592
-#>   Base rate 0.7: +0.0550
-#>   Base rate 0.9: +0.0183
+#>   Base rate 0.5: +0.0750
+#>   Base rate 0.7: +0.0450
+#>   Base rate 0.9: +0.0150
 #> 
 #> Plot available in $plot
 # }

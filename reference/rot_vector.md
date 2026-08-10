@@ -19,4 +19,5 @@ rot_vector(lineup_vec)
 ``` r
 # Rotate lineup positions by one place
 rot_vector(1:6)
+#> [1] 6 1 2 3 4 5
 ```
