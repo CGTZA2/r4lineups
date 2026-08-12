@@ -209,7 +209,7 @@ summary(fit)
 #> 
 #> Target-Present Lineups:
 #>            Observed Expected      Residual
-#> Suspect ID      147    147.0 -9.695088e-06
+#> Suspect ID      147    147.0 -9.695087e-06
 #> Filler ID        94     94.2 -1.619035e-01
 #> Reject          141    140.8  1.619132e-01
 #> 
