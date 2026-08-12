@@ -49,7 +49,7 @@ size are traditionally computed from mock-witness choices. Eyewitness
 experiments instead compare
 target-present and target-absent decisions, often with confidence and response
 time, although eyewitness data can also support estimates of lineup fairness
-(e.g., [@fitzgerald2023]). Analysts therefore need both lineup-construction
+[@fitzgerald2023]. Analysts therefore need both lineup-construction
 measures--including
 suspect-selection proportion, foil bias, functional size, Malpass effective
 size, and Tredoux effective size--and measures of identification performance
