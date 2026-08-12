@@ -151,4 +151,10 @@ Errors in translating that published work into package code remain the
 responsibility of the package authors and may be reported through the
 [GitHub issue tracker](https://github.com/CGTZA2/r4lineups/issues).
 
+This work was supported in part by incentive grants from the National Research
+Foundation of South Africa awarded to Colin G. Tredoux during 2016--2026
+(maximum value approximately US$2,000). The funder had no role in the
+software's design, development, validation, manuscript preparation, or the
+decision to submit. The authors declare no conflicts of interest.
+
 # References
