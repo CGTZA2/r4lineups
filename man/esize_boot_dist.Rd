@@ -24,7 +24,8 @@ esize_boot_dist(
 \item{R}{Number of bootstrap resamples.}
 }
 \value{
-A numeric vector of bootstrap estimates.
+A numeric vector of bootstrap estimates, carrying an \code{"n"}
+  attribute equal to the number of lineup choices resampled.
 }
 \description{
 Computes a bootstrap distribution for effective size using either

@@ -15,7 +15,8 @@
 #'
 #' @return A list containing:
 #'   \itemize{
-#'     \item plot: ggplot2 object (if show_plot = TRUE)
+#'     \item plot: ggplot2 object. Always returned, whatever show_plot is
+#'       set to; show_plot controls only whether it is displayed immediately
 #'     \item roc_data: Dataframe with ROC curve points
 #'     \item pauc: Partial area under the curve
 #'     \item summary: Summary statistics
@@ -48,14 +49,19 @@
 #' @export
 make_roc <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
 
-  # Compute ROC data
+  # Compute ROC data. make_rocdata() records a data-source label from its own
+  # call, which here would just be the formal name "data", so overwrite it with
+  # the expression this function was called with.
   roc_obj <- make_rocdata(data, lineup_size = lineup_size)
+  attr(roc_obj, "data_source") <- deparse(substitute(data))[1]
 
   # Create plot
+  # The plot is always built, so that it is available as $plot and to the
+  # plot() method. show_plot controls only whether it is displayed now:
+  # suppressing display should not destroy the object.
+  roc_plot <- make_roc_gg(roc_obj, ...)
   if (show_plot) {
-    roc_plot <- make_roc_gg(roc_obj, ...)
-  } else {
-    roc_plot <- NULL
+    print(roc_plot)
   }
 
   # Create summary
@@ -77,6 +83,7 @@ make_roc <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
   )
 
   class(result) <- c("lineup_roc", "list")
+  attr(result, "data_source") <- attr(roc_obj, "data_source")
   result
 }
 
@@ -88,8 +95,8 @@ make_roc <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
 print.lineup_roc <- function(x, ...) {
   cat("\n=== Lineup ROC Analysis ===\n\n")
   cat("Partial AUC:", round(x$pauc, 3), "\n")
-  cat("Target-present lineups:", x$summary$n_target_present, "\n")
-  cat("Target-absent lineups:", x$summary$n_target_absent, "\n")
+  cat("Target-present trials (N):", x$summary$n_target_present, "\n")
+  cat("Target-absent trials (N):", x$summary$n_target_absent, "\n")
   cat("Lineup size:", x$summary$lineup_size, "\n")
   cat("Confidence levels:", x$summary$n_confidence_levels, "\n\n")
 
@@ -97,7 +104,7 @@ print.lineup_roc <- function(x, ...) {
   print(x$roc_data, n = Inf)
 
   if (!is.null(x$plot)) {
-    cat("\nPlot available in $plot\n")
+    cat("\nPlot: use plot(x), or save the object and extract x$plot\n")
   }
 
   invisible(x)

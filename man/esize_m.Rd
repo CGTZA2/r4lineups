@@ -4,10 +4,10 @@
 \alias{esize_m}
 \title{Effective Size}
 \usage{
-esize_m(lineup_table, k, both = FALSE)
+esize_m(lineup_tab, k, both = FALSE)
 }
 \arguments{
-\item{lineup_table}{A table of lineup choices.}
+\item{lineup_tab}{A table of lineup choices.}
 
 \item{k}{Number of members in the lineup. Must be specified by the user (scalar).}
 
@@ -54,4 +54,9 @@ Malpass, R. S. (1981). Effective size and defendant bias in
            Wells, G. L.,Leippe, M. R., & Ostrom, T. M. (1979). Guidelines for
            empirically assessing the fairness of a lineup. \emph{Law and Human Behavior,
            3}(4), 285-293.
+}
+\seealso{
+\code{\link{esize_T}}, whose \dQuote{Small-sample bias} section
+  describes a downward bias affecting plug-in effective-size estimators at
+  small numbers of choices, and an optional correction.
 }

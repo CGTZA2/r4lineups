@@ -178,3 +178,24 @@ test_that("compare_models with custom prior", {
 
   expect_equal(comparison$fitted_models$eig$prior_guilt, 0.3)
 })
+
+test_that("markdown output is one line per row and carries no row names", {
+  # Regression test. format_comparison_table(format = "markdown") returns a
+  # knitr_kable object, which is a character vector with one element per line.
+  # The vignette printed it with cat(x) rather than cat(x, sep = "\n"), which
+  # joined every line with a space and collapsed the table into a single
+  # paragraph. kable was also called without row.names = FALSE, so the row
+  # names inherited from the named parameter vectors ("dP", "dA", ...) appeared
+  # as a spurious unlabelled first column.
+  test_data <- create_test_data()
+  comparison <- compare_models(test_data, models = "eig", show_warnings = FALSE)
+
+  md <- format_comparison_table(comparison, format = "markdown")
+
+  expect_gt(length(md), 2)                      # header, separator, >=1 row
+  expect_true(all(grepl("^\\|", md)))           # every element a table line
+  expect_match(md[2], "^\\|:?-")                # second line is the separator
+
+  # No leading empty header cell, which is how the row-name column showed up
+  expect_false(grepl("^\\|\\s+\\|", md[1]))
+})

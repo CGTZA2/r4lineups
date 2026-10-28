@@ -124,14 +124,28 @@ innocent_id_rate_uncorrected <- function(error_rate) {
 #' @param effective_size_data Optional dataframe with pre-computed effective sizes
 #'   per confidence bin (must have columns: conf_level, effective_size).
 #'   If NULL and correction="effective", computes from data.
+#' @param quiet Logical. Suppress the note issued when \code{correction} is not
+#'   applied because the data designate an innocent suspect. Default
+#'   \code{FALSE}.
 #'
 #' @return A list containing:
 #'   \itemize{
 #'     \item ppv_data: Dataframe with PPV by confidence level
 #'     \item overall_ppv: Overall PPV across all confidence levels
-#'     \item correction_method: The correction method used
+#'     \item correction_method: The correction method requested
+#'     \item innocent_suspect_method: "designated" when target-absent trials
+#'       identify an innocent suspect directly, otherwise the estimation route
 #'     \item lineup_size: Nominal lineup size
 #'   }
+#'
+#' @section When the correction is ignored:
+#' Lineup-size corrections exist to \emph{estimate} how many of the observed
+#' target-absent identifications fell on an innocent suspect, in data where no
+#' innocent suspect was designated. When the data do designate one, that count
+#' is observed rather than estimated, and \code{correction} has no work to do:
+#' all three methods return the same PPV. This is correct, not a fault, but it
+#' is easy to mistake for one, so a message is issued unless \code{quiet =
+#' TRUE}. \code{lineup_example} is data of this kind.
 #'
 #' @details
 #' PPV (Positive Predictive Value) is the probability that a suspect is guilty
@@ -178,7 +192,8 @@ ppv_by_confidence <- function(data,
                                 lineup_size = 6,
                                 confidence_bins = NULL,
                                 correction = c("nominal", "effective", "none"),
-                                effective_size_data = NULL) {
+                                effective_size_data = NULL,
+                                quiet = FALSE) {
   .validate_lineup_analysis(data)
 
   # Validate inputs
@@ -204,6 +219,17 @@ ppv_by_confidence <- function(data,
   tp_data <- data[data$target_present == TRUE, ]
   ta_data <- data[data$target_present == FALSE, ]
   innocent_method <- .innocent_suspect_method(ta_data)
+
+  # With a designated innocent suspect the error count is observed directly, so
+  # the branch below never consults `correction`. Say so: three "different"
+  # corrections returning one number otherwise reads as a bug.
+  if (innocent_method == "designated" && !isTRUE(quiet)) {
+    message("Target-absent lineups contain a designated innocent suspect, so ",
+            "innocent-suspect IDs are counted directly and the '", correction,
+            "' correction is not applied. All correction methods return the ",
+            "same PPV for these data. Lineup-size corrections apply only when ",
+            "no innocent suspect is designated.")
+  }
 
   # Get unique confidence levels
   conf_levels <- levels(data$conf_level)
@@ -259,15 +285,22 @@ ppv_by_confidence <- function(data,
           eff_size <- eff_size_row$effective_size[1]
         }
       } else {
-        # Compute from TA member choices
-        # Need to get individual lineup member choices
-        # For now, use a simple approximation based on suspect vs filler ratio
-        # This is a simplified version; proper implementation would need member-level data
-
-        # If we have member-level data, compute properly
+        # Compute from TA member choices. With member-level data this is the
+        # real thing; without it we fall back to an approximation built from
+        # the suspect/filler split.
         if ("lineup_member" %in% names(ta_conf)) {
-          ta_choices <- table(ta_conf$lineup_member)
-          eff_size <- esize_T(ta_choices)
+          # Rejections carry lineup_member == 0 and are not a lineup position,
+          # so they must not enter the tabulation. Tabulating over an explicit
+          # factor of all positions keeps unchosen members (null foils) in as
+          # zero counts, which is what makes them depress effective size.
+          chosen <- ta_conf$lineup_member
+          chosen <- chosen[!is.na(chosen) & chosen > 0]
+          if (length(chosen) > 0) {
+            ta_choices <- table(factor(chosen, levels = seq_len(lineup_size)))
+            eff_size <- esize_T(ta_choices)
+          } else {
+            eff_size <- lineup_size
+          }
         } else {
           # Fallback: estimate from suspect/filler distribution
           # Create pseudo-distribution
@@ -396,13 +429,25 @@ ppv_range_by_confidence <- function(data,
                                      confidence_bins = NULL,
                                      effective_size_data = NULL) {
 
-  # Compute PPV with each correction method
+  # Compute PPV with each correction method. The three calls are silenced and
+  # the designated-innocent-suspect note issued once below, rather than three
+  # times over.
   ppv_nominal <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                    "nominal", effective_size_data)
+                                    "nominal", effective_size_data, quiet = TRUE)
   ppv_effective <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                      "effective", effective_size_data)
+                                      "effective", effective_size_data, quiet = TRUE)
   ppv_none <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                 "none", effective_size_data)
+                                 "none", effective_size_data, quiet = TRUE)
+
+  if (identical(ppv_nominal$innocent_suspect_method, "designated")) {
+    message("Target-absent lineups contain a designated innocent suspect, so ",
+            "innocent-suspect IDs are counted directly and no lineup-size ",
+            "correction is applied. The nominal, effective and uncorrected ",
+            "estimates are therefore identical for these data. The three ",
+            "diverge only when no innocent suspect is designated and the ",
+            "number of innocent-suspect IDs has to be estimated from the ",
+            "filler IDs.")
+  }
 
   # Combine into a single dataframe for easy plotting
   ppv_range_data <- data.frame(

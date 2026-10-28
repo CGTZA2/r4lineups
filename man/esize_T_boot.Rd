@@ -4,10 +4,10 @@
 \alias{esize_T_boot}
 \title{Bootstrapped Effective Size (Tredoux, 1998)}
 \usage{
-esize_T_boot(lineup_table, d)
+esize_T_boot(lineup_tab, d)
 }
 \arguments{
-\item{lineup_table}{A vector of individual lineup choices. The historical
+\item{lineup_tab}{A vector of individual lineup choices. The historical
 argument name is retained for compatibility.}
 
 \item{d}{Indices for bootstrap resampling}
@@ -25,9 +25,9 @@ This is the statistic function passed to \code{boot::boot()} for
 \examples{
 # Choices from 50 mock witnesses to a 6-member lineup
 set.seed(1)
-lineup_table <- sample(1:6, 50, replace = TRUE)
+lineup_tab <- sample(1:6, 50, replace = TRUE)
 # E' for the observed data
-esize_T_boot(lineup_table, seq_along(lineup_table))
+esize_T_boot(lineup_tab, seq_along(lineup_tab))
 }
 \references{
 Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their

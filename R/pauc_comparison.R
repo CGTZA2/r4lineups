@@ -7,8 +7,12 @@
 #' @param data1 First dataset (dataframe with target_present, identification, confidence)
 #' @param data2 Second dataset (same format as data1)
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
-#' @param max_false_id_rate Numeric. Maximum false ID rate for pAUC calculation (default = NULL,
-#'   which uses the maximum observed false ID rate across both conditions)
+#' @param max_false_id_rate Numeric. Upper limit of the false-ID rate region over
+#'   which partial AUC is computed. Default \code{NULL} uses the largest region
+#'   \emph{both} conditions actually reach, i.e. the smaller of their two maximum
+#'   observed false-ID rates. Supplying a larger value means at least one
+#'   condition is integrated only as far as its own data extend, so the two areas
+#'   cover different intervals; a warning is issued in that case.
 #' @param n_bootstrap Integer. Number of bootstrap samples (default = 2000)
 #' @param conf_level Numeric. Confidence level for intervals (default = 0.95)
 #' @param seed Integer. Random seed for reproducibility (default = NULL)
@@ -109,12 +113,32 @@ compare_pauc <- function(data1,
   roc1 <- make_rocdata(data1, lineup_size = lineup_size)
   roc2 <- make_rocdata(data2, lineup_size = lineup_size)
 
-  # Determine max false ID rate cutoff
+  # Determine max false ID rate cutoff.
+  #
+  # This must be a region BOTH curves actually reach. Taking the larger of the
+  # two maxima integrates each curve only as far as its own data extend, so the
+  # two areas are computed over different intervals and are not comparable: the
+  # curve that stops earlier is charged for the region it never reached. The
+  # largest common region is the smaller of the two maxima.
+  reach1 <- max(roc1$roc_data$false_id_rate)
+  reach2 <- max(roc2$roc_data$false_id_rate)
   if (is.null(max_false_id_rate)) {
-    max_false_id_rate <- max(
-      max(roc1$roc_data$false_id_rate),
-      max(roc2$roc_data$false_id_rate)
-    )
+    max_false_id_rate <- min(reach1, reach2)
+    if (abs(reach1 - reach2) > .Machine$double.eps^0.5) {
+      message("The two conditions reach different maximum false-ID rates (",
+              round(reach1, 4), " and ", round(reach2, 4), "). Partial AUC is ",
+              "computed over the largest region both attain, up to ",
+              round(max_false_id_rate, 4),
+              ". Set max_false_id_rate explicitly to override.")
+    }
+  } else if (max_false_id_rate > min(reach1, reach2) +
+             .Machine$double.eps^0.5) {
+    warning("max_false_id_rate (", round(max_false_id_rate, 4), ") exceeds the ",
+            "false-ID rate reached by at least one condition (",
+            round(min(reach1, reach2), 4), "). That condition's partial AUC is ",
+            "integrated only as far as its data extend, so the two areas cover ",
+            "different intervals and are not directly comparable.",
+            call. = FALSE)
   }
 
   # Compute pAUC for both conditions (up to cutoff)

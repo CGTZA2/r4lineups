@@ -1,9 +1,13 @@
-#' Tredoux Effective Size (Tredoux, 1998)
+#' Effective Size (Tredoux, 1998)
 #'
 #' Function for generating Tredoux's transformed index-of-diversity
 #' effective size.
 #'
-#' @param lineup_table A table of lineup choices
+#' @param lineup_tab A table of lineup choices
+#' @param unbiased Logical. If \code{FALSE} (the default) the plug-in estimator
+#'   is returned, as in Tredoux (1998). If \code{TRUE}, the small-sample bias
+#'   correction described below is applied. The default is unchanged so that
+#'   existing analyses and published values are unaffected.
 #' @details Tredoux (1998) proposed using Agresti and Agresti's (1978)
 #'          index of diversity for lineup choices,
 #'          \deqn{I = 1 - \frac{\sum_i o_i^2}{N^2},}
@@ -14,6 +18,31 @@
 #'          = \frac{1}{\sum_i p_i^2}.}
 #'          This formula is algebraically equivalent to a reciprocal
 #'          concentration form.
+#'
+#' @section Small-sample bias:
+#' The expression above is a \emph{plug-in} estimator: sample proportions are
+#' substituted for the unknown \eqn{p_i}. Plug-in estimators of
+#' \eqn{\sum_i p_i^2} are biased upward, so \eqn{E'} is biased
+#' \strong{downward}. For \eqn{N} choices spread evenly over \eqn{k} members
+#' the bias is approximately
+#' \deqn{E[\hat{E}'] \approx \frac{Nk}{N + k - 1}, \qquad
+#'       \mathrm{bias} = -\frac{k(k-1)}{N + k - 1}.}
+#' A perfectly fair six-person lineup assessed with 50 choices therefore returns
+#' about 5.47 rather than 6, and with 20 choices about 4.87. The bias is
+#' negligible above a few hundred choices.
+#'
+#' With \code{unbiased = TRUE} the function substitutes the unbiased estimator
+#' of \eqn{\sum_i p_i^2}, giving
+#' \deqn{\hat{E}'_{\mathrm{corr}} = \frac{N(N-1)}{\sum_i o_i(o_i - 1)}.}
+#' In simulation this removes essentially all of the bias, at a modest increase
+#' in variance that disappears by \eqn{N \approx 100}.
+#'
+#' Which to use depends on what is being reported. For a description of the
+#' choice distribution actually observed, the plug-in value is the quantity of
+#' interest. For inference about the lineup that produced those choices — which
+#' is the framing of Tredoux (1998) — the corrected form is the better estimator.
+#' Note that the other functions in this family (\code{\link{esize_T_boot}},
+#' \code{\link{esize_T_ci_n}}, \code{\link{i_esize_T}}) use the plug-in form.
 #' @references Malpass, R. S. (1981). Effective size and defendant bias in eyewitness
 #'                  identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'
@@ -34,19 +63,44 @@
 #'@examples
 #'#Data:
 #'lineup_vec <- round(runif(100, 1, 6))
-#'lineup_table <- table(lineup_vec)
+#'lineup_tab <- table(lineup_vec)
 #'
 #'#Call:
-#'e <- esize_T(lineup_table)
+#'e <- esize_T(lineup_tab)
 #'
 #'@export
 
-esize_T <- function(lineup_table){
-  counts <- as.numeric(lineup_table)
+esize_T <- function(lineup_tab, unbiased = FALSE){
+  counts <- as.numeric(lineup_tab)
   if (length(counts) == 0L || anyNA(counts) || any(!is.finite(counts)) ||
       any(counts < 0) || sum(counts) <= 0) {
-    stop("lineup_table must contain finite non-negative counts with a positive total.",
+    stop("lineup_tab must contain finite non-negative counts with a positive total.",
          call. = FALSE)
   }
-  sum(counts)^2 / sum(counts^2)
+  if (!is.logical(unbiased) || length(unbiased) != 1L || is.na(unbiased)) {
+    stop("unbiased must be TRUE or FALSE.", call. = FALSE)
+  }
+
+  if (!unbiased) {
+    return(sum(counts)^2 / sum(counts^2))
+  }
+
+  # Unbiased estimator of sum(p^2): the probability that two draws without
+  # replacement fall on the same member. Undefined with fewer than two choices,
+  # and zero when every choice fell on a different member -- in which case the
+  # reciprocal is infinite and the plug-in value is the only usable answer.
+  n <- sum(counts)
+  if (n < 2) {
+    warning("Fewer than two choices; the bias correction is undefined. ",
+            "Returning the plug-in estimate.", call. = FALSE)
+    return(sum(counts)^2 / sum(counts^2))
+  }
+  concentration <- sum(counts * (counts - 1))
+  if (concentration <= 0) {
+    warning("Every choice fell on a different lineup member, so the corrected ",
+            "estimate is unbounded. Returning the plug-in estimate.",
+            call. = FALSE)
+    return(sum(counts)^2 / sum(counts^2))
+  }
+  n * (n - 1) / concentration
 }

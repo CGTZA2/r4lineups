@@ -128,7 +128,7 @@ make_rocdata <- function(data, lineup_size = 6) {
     pauc <- pauc + (width * height)
   }
 
-  list(
+  out <- list(
     roc_data = roc_results,
     pauc = pauc,
     n_target_present = n_tp,
@@ -137,6 +137,9 @@ make_rocdata <- function(data, lineup_size = 6) {
     innocent_suspect_method = method,
     raw_data = data
   )
+  class(out) <- c("lineup_roc_data", "list")
+  attr(out, "data_source") <- deparse(substitute(data))[1]
+  out
 }
 
 
@@ -144,11 +147,18 @@ make_rocdata <- function(data, lineup_size = 6) {
 #'
 #' Creates a ggplot2 visualization of ROC data from lineup identification experiments.
 #'
-#' @param rocobj_list List output from make_rocdata()
+#' @param rocobj_list List output from make_rocdata(), or the lineup_roc object
+#'   from make_roc()
 #' @param show_pauc Logical. Whether to display pAUC value on plot (default = TRUE)
 #' @param point_labels Logical. Whether to label points with confidence levels (default = TRUE)
+#' @param title Character. Plot title. The default names the ROC variant, so that
+#'   a partial ROC is not mistaken for a full ROC (see \code{\link{plot_fullroc}}).
+#' @param data_source Character. Name of the dataset the curve was computed from,
+#'   appended to the caption. Defaults to the \code{"data_source"} attribute
+#'   recorded by \code{\link{make_rocdata}}, and is omitted when unavailable.
 #'
-#' @return A ggplot2 object
+#' @return A ggplot2 object. Being an ordinary ggplot, it can be modified with
+#'   the usual \code{+} syntax, e.g. \code{p + ggplot2::theme_minimal()}.
 #'
 #' @examples
 #' data(lineup_example)
@@ -157,10 +167,20 @@ make_rocdata <- function(data, lineup_size = 6) {
 #'
 #' @export
 #' @import ggplot2 ggrepel
-make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE) {
+make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE,
+                        title = "Partial ROC Curve (suspect IDs only)",
+                        data_source = NULL) {
 
   roc_data <- rocobj_list$roc_data
   pauc <- rocobj_list$pauc
+
+  if (is.null(data_source)) {
+    data_source <- attr(rocobj_list, "data_source")
+  }
+  caption <- "Dashed line represents chance performance"
+  if (!is.null(data_source) && nzchar(data_source)) {
+    caption <- paste0(caption, "\nData: ", data_source)
+  }
 
   # Create base plot
   p <- ggplot(roc_data, aes(x = false_id_rate, y = correct_id_rate)) +
@@ -171,8 +191,8 @@ make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE) {
     labs(
       x = "False ID Rate (Innocent Suspect)",
       y = "Correct ID Rate (Guilty Suspect)",
-      title = "ROC Curve for Lineup Identification",
-      caption = "Dashed line represents chance performance"
+      title = title,
+      caption = caption
     ) +
     coord_cartesian(xlim = c(0, max(roc_data$false_id_rate) * 1.1),
                     ylim = c(0, 1))

@@ -1,9 +1,9 @@
-#' Bayesian Posterior Distribution of Tredoux Effective Size
+#' Bayesian Posterior Distribution of Effective Size (Tredoux, 1998)
 #'
 #' Fits a Dirichlet-Multinomial conjugate model to mock-witness choice counts
-#' and returns the posterior distribution of the Tredoux effective size E'.
+#' and returns the posterior distribution of effective size E' (Tredoux, 1998).
 #'
-#' @param lineup_table A table of lineup choice counts (one entry per position).
+#' @param lineup_tab A table of lineup choice counts (one entry per position).
 #' @param alpha Dirichlet concentration parameter(s). A scalar (applied to
 #'   all k positions) or a length-k numeric vector. Typical choices:
 #'   0.5 (Jeffreys prior, default), 1 (uniform over the simplex), 0.1
@@ -18,7 +18,7 @@
 #'   functioning below or above a fairness benchmark.
 #'
 #' @details
-#'   Tredoux's effective size E' = 1/sum(p_i^2) is mathematically identical
+#'   Effective size E' = 1/sum(p_i^2) (Tredoux, 1998) is mathematically identical
 #'   to the reciprocal of the Herfindahl-Hirschman concentration index
 #'   (Herfindahl, 1950; Hirschman, 1945) and to the reciprocal of
 #'   Simpson's (1949) concentration statistic lambda. The Bayesian approach
@@ -74,14 +74,14 @@
 #'
 #' @examples
 #' counts <- c(18, 7, 5, 4, 3, 3)
-#' lineup_table <- as.table(setNames(counts, 1:6))
+#' lineup_tab <- as.table(setNames(counts, 1:6))
 #'
 #' # Default Jeffreys prior
-#' result <- esize_T_bayes(lineup_table)
+#' result <- esize_T_bayes(lineup_tab)
 #' print(result)
 #'
 #' # With a fairness threshold
-#' result2 <- esize_T_bayes(lineup_table, threshold = 4)
+#' result2 <- esize_T_bayes(lineup_tab, threshold = 4)
 #' print(result2)
 #'
 #' # Plot the posterior
@@ -89,22 +89,22 @@
 #'
 #' @importFrom stats rgamma quantile median
 #' @export
-esize_T_bayes <- function(lineup_table,
+esize_T_bayes <- function(lineup_tab,
                           alpha        = 0.5,
                           S            = 10000,
                           credible_mass = 0.95,
                           threshold    = NULL) {
 
-  counts <- as.numeric(lineup_table)
+  counts <- as.numeric(lineup_tab)
   k <- length(counts)
   N <- sum(counts)
 
   if (k < 2)
-    stop("lineup_table must have at least 2 positions.", call. = FALSE)
+    stop("lineup_tab must have at least 2 positions.", call. = FALSE)
   if (N < 1)
-    stop("lineup_table must have at least one observation.", call. = FALSE)
+    stop("lineup_tab must have at least one observation.", call. = FALSE)
   if (any(counts < 0))
-    stop("lineup_table cannot contain negative counts.", call. = FALSE)
+    stop("lineup_tab cannot contain negative counts.", call. = FALSE)
   if (length(S) != 1 || !is.finite(S) || S < 1)
     stop("S must be a positive integer.", call. = FALSE)
   S <- as.integer(S)
@@ -173,7 +173,7 @@ print.esize_T_bayes <- function(x, ...) {
   } else {
     "heterogeneous (see $prior_alpha)"
   }
-  cat("Bayesian Posterior: Tredoux Effective Size (E')\n")
+  cat("Bayesian Posterior: Effective Size E' (Tredoux, 1998)\n")
   cat("------------------------------------------------\n")
   cat(sprintf("  k (positions): %d    N (choices): %d    S (draws): %d\n",
               x$k, x$n, x$S))
@@ -206,10 +206,12 @@ print.esize_T_bayes <- function(x, ...) {
 plot.esize_T_bayes <- function(x, ...) {
   df  <- data.frame(E_prime = x$E_draws)
   ci  <- x$credible_interval
-  ttl <- sprintf(
-    "Posterior distribution of E' (Tredoux)\n%.0f%% credible interval: [%.2f, %.2f]",
-    x$credible_mass * 100, ci["lower"], ci["upper"]
-  )
+  # Title and subtitle rather than one title with an embedded newline: a
+  # two-line title is laid out as a single text grob and is the usual cause of
+  # captions running off the top of a rendered figure.
+  ttl <- "Posterior distribution of E' (Tredoux, 1998)"
+  sub <- sprintf("%.0f%% credible interval: [%.2f, %.2f]",
+                 x$credible_mass * 100, ci["lower"], ci["upper"])
   ggplot2::ggplot(df, ggplot2::aes(x = E_prime)) +
     ggplot2::geom_histogram(
       ggplot2::aes(y = ggplot2::after_stat(density)),
@@ -226,9 +228,10 @@ plot.esize_T_bayes <- function(x, ...) {
       xintercept = x$posterior_median, linetype = "solid", color = "#2c3e50"
     ) +
     ggplot2::labs(
-      x     = "E' (Tredoux effective size)",
-      y     = "Density",
-      title = ttl
+      x        = "E' (Tredoux, 1998)",
+      y        = "Density",
+      title    = ttl,
+      subtitle = sub
     ) +
     ggplot2::theme_minimal(base_size = 12)
 }
@@ -238,7 +241,7 @@ utils::globalVariables(c("E_prime", "delta"))
 
 # ── Comparison function ───────────────────────────────────────────────────────
 
-#' Bayesian Comparison of Tredoux Effective Size Across Two Lineups
+#' Bayesian Comparison of Effective Size (Tredoux, 1998) Across Two Lineups
 #'
 #' Fits independent Dirichlet-Multinomial models to two lineup tables and
 #' returns the posterior distribution of the difference in Tredoux E'.
@@ -342,7 +345,7 @@ esize_T_bayes_compare <- function(table_a,
 #' @param ... Further arguments (unused).
 #' @export
 print.esize_T_bayes_compare <- function(x, ...) {
-  cat("Bayesian Comparison: Tredoux Effective Size (E'_A vs E'_B)\n")
+  cat("Bayesian Comparison: Effective Size E' (Tredoux, 1998), A vs B\n")
   cat("-----------------------------------------------------------\n")
   cat(sprintf("  Lineup A: k = %d, N = %d   |   Lineup B: k = %d, N = %d\n",
               x$result_a$k, x$result_a$n, x$result_b$k, x$result_b$n))

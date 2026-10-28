@@ -3,13 +3,26 @@
 #'Computes bootstrapped confidence intervals for lineup proportion
 #'@param lineup_vec A numeric vector of lineup choices
 #'@param k Number of targets in lineup. Must be specified by user (scalar).
-#'@param conf Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).
+#'@param conf Confidence level for the intervals, e.g. 0.95 for 95 percent
+#'            intervals. Defaults to 0.95. May be specified by user (scalar).
 #'@param R Number of bootstrap replications. Defaults to 1000.
-#'@return Returns a vector of bias corrected confidence intervals for
-#'        lineup proportion for each member in a lineup
+#'@return A dataframe of \code{k} rows and two columns, \code{ci_low} and
+#'        \code{ci_high}, holding the bias-corrected and accelerated (BCa)
+#'        confidence interval for the proportion choosing each lineup member.
+#'        Rows are named by lineup position.
 #'@seealso \code{\link[boot:boot]{boot}}: https://cran.r-project.org/web/packages/boot/boot.pdf
-#'@details Function that computes bootstrapped lineup proportion using 1000 bootstrap draws
-#'         Calls 'boot function in 'boot' package
+#'@details Computes a bootstrapped lineup proportion for each member in turn by
+#'         calling the \code{boot} function in the \code{boot} package. Where a
+#'         BCa interval cannot be computed, the percentile interval is used
+#'         instead.
+#'
+#'         Note that the \code{k} intervals are each computed at the nominal
+#'         \code{conf} level, with \strong{no} adjustment for the fact that
+#'         \code{k} of them are inspected together. Interpreting all of them at
+#'         once inflates the chance that at least one excludes the chance value
+#'         by more than the nominal amount. If a family-wise statement is wanted,
+#'         raise the level for each interval accordingly, e.g.
+#'         \code{conf = 1 - 0.05 / k} for a Bonferroni-style correction.
 #'@references Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their
 #'            application}. Cambridge University Press.
 #'

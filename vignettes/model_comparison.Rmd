@@ -1,6 +1,8 @@
 ---
 title: "Comparing Models for Eyewitness Identification Data"
-author: "r4lineups package"
+author:
+- "Colin G. Tredoux"
+- "Tamsyn M. Naylor"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -8,6 +10,11 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+> **Acknowledgement.** Large language models supplied by Anthropic and OpenAI
+> were used in preparing this vignette, to assist with checking code, testing
+> the veracity of the approaches described, and on occasion editing the text.
+> Responsibility for the content rests with the authors.
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -91,20 +98,56 @@ Full ROC uses ALL witness responses (suspect IDs, filler IDs, rejections) to com
 ```{r load_data}
 library(r4lineups)
 
-# Simulate example dataset with proper structure
-set.seed(2024)
-lineup_data <- simulate_lineup_data(
-  n_tp = 200,
-  n_ta = 200,
-  d_prime = 1.5,
+lineup_data <- as.data.frame(simulate_lineup_data(
+  n_tp        = 300,
+  n_ta        = 300,
+  d_prime     = 1.5,
+  c_criterion = 0.9,   # see the note below: 0 would be far too liberal
   lineup_size = 6,
-  conf_levels = 5
-)
+  conf_levels = 5,
+  foil_bias   = c(0.4, 0.2, 0.0, -0.4, -1.0),
+  seed        = 2024
+))
 
-# View structure
 head(lineup_data)
-str(lineup_data)
 ```
+
+The `c_criterion = 0.9` is not incidental, and it is worth explaining because
+getting it wrong makes one of the three models impossible to fit.
+
+`c_criterion` is a threshold on the **maximum** of the lineup members' memory
+strengths, not a textbook signal-detection criterion. The maximum of six draws
+from a standard normal averages about 1.27, so a criterion of 0 — the function
+default — is cleared by almost every lineup, and produces a rejection rate near
+zero:
+
+```{r criterion_warning}
+too_liberal <- as.data.frame(simulate_lineup_data(
+  n_tp = 300, n_ta = 300, d_prime = 1.5, c_criterion = 0,
+  lineup_size = 6, conf_levels = 5, seed = 2024
+))
+
+knitr::kable(
+  data.frame(
+    `c_criterion` = c(0, 0.9),
+    `Rejection rate (%)` = round(100 * c(
+      mean(too_liberal$identification == "reject"),
+      mean(lineup_data$identification == "reject")
+    ), 1),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "Rejection rate under two decision criteria, simulated data (300 target-present and 300 target-absent lineups)."
+)
+```
+
+The 2-HT model's detect-absence parameter `dA` is identified almost entirely by
+rejections — it is the probability of correctly concluding the culprit is
+absent. With half a percent of witnesses rejecting, the likelihood is nearly
+flat in `dA` and the fit fails. `fit_winter_2ht()` now detects this and says so;
+earlier versions failed with an opaque message about non-finite differences, and
+`compare_models()` simply omitted the model from its results, so every
+downstream section that referred to it silently produced nothing.
 
 ### Comparing All Models
 
@@ -120,6 +163,7 @@ comparison <- compare_models(
 # View comparison table
 print(comparison)
 ```
+
 
 ### Detailed Summary
 
@@ -143,23 +187,17 @@ plot(comparison, ncol = 2)
 # Access 2-HT model
 model_2ht <- comparison$fitted_models$`2ht`
 
-if (!is.null(model_2ht) && !is.null(model_2ht$parameters)) {
-  # View parameters
-  cat("2-HT Parameters:\n")
-  print(round(model_2ht$parameters, 3))
+knitr::kable(
+  data.frame(Parameter = names(model_2ht$parameters),
+             Estimate  = round(unname(model_2ht$parameters), 3),
+             SE        = round(unname(model_2ht$se), 3)),
+  row.names = FALSE,
+  caption = "2-HT parameter estimates with standard errors, simulated data."
+)
 
-  # Standard errors
-  cat("\nStandard Errors:\n")
-  print(round(model_2ht$se, 3))
-
-  # Model fit
-  cat("\nModel Fit:\n")
-  cat("  AIC:", round(model_2ht$aic, 2), "\n")
-  cat("  BIC:", round(model_2ht$bic, 2), "\n")
-  cat("  Log-likelihood:", round(model_2ht$loglik, 2), "\n")
-} else {
-  cat("2-HT model fitting did not converge with this dataset.\n")
-}
+cat("AIC:", round(model_2ht$aic, 2),
+    " BIC:", round(model_2ht$bic, 2),
+    " log-likelihood:", round(model_2ht$loglik, 2), "\n")
 ```
 
 **Interpreting 2-HT parameters (when available):**
@@ -247,12 +285,12 @@ to the same observations and outcome representation; they cannot be compared
 with EIG or AUC. A single-condition 2-HT fit is saturated.
 
 ```{r model_selection}
-if ("2ht" %in% comparison$models_fit) {
-  cat("2-HT Model Fit:\n")
-  cat("  AIC:", round(comparison$fitted_models$`2ht`$aic, 2), "\n")
-  cat("  BIC:", round(comparison$fitted_models$`2ht`$bic, 2), "\n")
-  cat("\nUse only for comparisons with compatible likelihood models\n")
-}
+cat("2-HT Model Fit:\n")
+cat("  AIC:", round(comparison$fitted_models$`2ht`$aic, 2), "\n")
+cat("  BIC:", round(comparison$fitted_models$`2ht`$bic, 2), "\n")
+cat("\nAIC and BIC compare likelihood-based models fitted to the same data.\n")
+cat("EIG and full-ROC AUC are not likelihoods, so they cannot be ranked\n")
+cat("against the 2-HT model by information criteria.\n")
 ```
 
 ## Advanced Usage
@@ -305,17 +343,12 @@ print(comparison_prior$fitted_models$eig$eig)
 ### Comparing Models with Known Parameters
 
 ```{r simulation_example}
-# Simulate data with known d' = 1.5
-set.seed(2026)
-sim_data <- simulate_lineup_data(
-  n_tp = 200,
-  n_ta = 200,
-  d_prime = 1.5,
-  lineup_size = 6,
-  conf_levels = 5
-)
+sim_data <- as.data.frame(simulate_lineup_data(
+  n_tp = 300, n_ta = 300, d_prime = 1.5, c_criterion = 0.9,
+  lineup_size = 6, conf_levels = 5,
+  foil_bias = c(0.4, 0.2, 0.0, -0.4, -1.0), seed = 2026
+))
 
-# Fit all models
 sim_comparison <- compare_models(
   sim_data,
   models = c("2ht", "eig", "fullroc"),
@@ -327,14 +360,35 @@ print(sim_comparison)
 
 ### Parameter Recovery Check
 
+A single fit tells you little. The useful check is whether the recovered
+parameters *move* as the generating parameter moves:
+
 ```{r parameter_recovery}
-# Check if 2-HT model recovers reasonable parameters
-if ("2ht" %in% sim_comparison$models_fit) {
-  cat("Known d' = 1.5 (moderate discriminability)\n")
-  cat("Recovered dP =", round(sim_comparison$fitted_models$`2ht`$parameters["dP"], 3), "\n")
-  cat("Expected: Moderate dP for moderate d'\n")
-}
+recovery <- do.call(rbind, lapply(c(0.5, 1.0, 1.5, 2.0, 2.5), function(dp) {
+  d <- as.data.frame(simulate_lineup_data(
+    n_tp = 400, n_ta = 400, d_prime = dp, c_criterion = 0.9,
+    lineup_size = 6, conf_levels = 5,
+    foil_bias = c(0.4, 0.2, 0.0, -0.4, -1.0), seed = 500 + round(10 * dp)
+  ))
+  fit <- fit_winter_2ht(d, lineup_size = 6,
+                        target_present = "target_present",
+                        identification = "identification")
+  data.frame(`True d'` = dp,
+             `Recovered dP` = round(fit$parameters[["dP"]], 3),
+             `Recovered dA` = round(fit$parameters[["dA"]], 3),
+             check.names = FALSE)
+}))
+
+knitr::kable(
+  recovery, row.names = FALSE,
+  caption = "2-HT detection parameters recovered from data simulated at known d', 400 lineups per arm."
+)
 ```
+
+`dP` increases monotonically with the generating d′, which is the result the
+check is looking for. It is not on the same scale as d′ and should not be
+expected to equal it: the two models parameterise memory differently, and what
+validates the analysis is that the ordering is recovered.
 
 ## Practical Examples
 
@@ -352,11 +406,10 @@ procedure_eval <- compare_models(
 # Interpretation
 cat("Procedure Evaluation:\n\n")
 
-if ("2ht" %in% procedure_eval$models_fit) {
-  cat("2-HT: dP =", round(procedure_eval$fitted_models$`2ht`$parameters["dP"], 2),
-      "\n  → Detection ability is",
-      ifelse(procedure_eval$fitted_models$`2ht`$parameters["dP"] > 0.5, "good", "moderate"), "\n\n")
-}
+cat("2-HT: dP =", round(procedure_eval$fitted_models$`2ht`$parameters[["dP"]], 2),
+    "\n  → Detection ability is",
+    ifelse(procedure_eval$fitted_models$`2ht`$parameters[["dP"]] > 0.5,
+           "good", "moderate"), "\n\n")
 
 if ("eig" %in% procedure_eval$models_fit) {
   cat("EIG =", round(procedure_eval$fitted_models$eig$eig, 3), "bits\n")
@@ -378,40 +431,49 @@ if ("fullroc" %in% procedure_eval$models_fit) {
 Use 2-HT model to check for bias:
 
 ```{r example_bias}
-if ("2ht" %in% comparison$models_fit) {
-  bias_param <- comparison$fitted_models$`2ht`$parameters["b"]
+params <- comparison$fitted_models$`2ht`$parameters
 
-  cat("Bias Parameter (b) =", round(bias_param, 3), "\n\n")
-
-  if (bias_param < 0.1) {
-    cat("Interpretation: Low bias - suspect does not stand out unfairly\n")
-  } else if (bias_param > 0.3) {
-    cat("Interpretation: High bias - suspect may stand out unfairly\n")
-    cat("Consider: Lineup construction, suspect appearance\n")
-  } else {
-    cat("Interpretation: Moderate bias level\n")
-  }
+bias_param <- params[["b"]]
+bias_reading <- if (bias_param < 0.1) {
+  "Low: the suspect does not appear to stand out unfairly"
+} else if (bias_param > 0.3) {
+  "High: the suspect may stand out. Check lineup construction"
+} else {
+  "Moderate"
 }
+
+knitr::kable(
+  data.frame(Parameter = "b (biased suspect selection)",
+             Estimate = round(bias_param, 3),
+             Reading = bias_reading),
+  row.names = FALSE,
+  caption = "2-HT bias parameter, simulated data (300 target-present and 300 target-absent lineups)."
+)
 ```
+
 
 ### Example 3: Comparing Detection vs. Guessing
 
 ```{r example_detection}
-if ("2ht" %in% comparison$models_fit) {
-  dP <- comparison$fitted_models$`2ht`$parameters["dP"]
-  g <- comparison$fitted_models$`2ht`$parameters["g"]
-
-  cat("Detection (dP) =", round(dP, 3), "\n")
-  cat("Guessing (g) =", round(g, 3), "\n\n")
-
-  cat("Interpretation:\n")
-  if (dP > g) {
-    cat("  Memory-based identification dominates\n")
-  } else {
-    cat("  Guessing plays a significant role\n")
-  }
-}
+knitr::kable(
+  data.frame(
+    Parameter = c("dP (detect culprit present)",
+                  "dA (detect culprit absent)",
+                  "g (guessing-based selection)"),
+    Estimate  = round(c(params[["dP"]], params[["dA"]], params[["g"]]), 3)
+  ),
+  row.names = FALSE,
+  caption = "2-HT detection and guessing parameters, simulated data."
+)
 ```
+
+Detection and guessing are separately identified here, which is the point of the
+model: an identification rate on its own cannot tell you whether witnesses
+recognised the culprit or simply picked someone plausible. Note that `dP` and
+`g` are probabilities of different events and are not in competition — a
+procedure can have both high detection and a high tendency to choose when
+detection fails.
+
 
 ## Formatted Comparison Tables
 
@@ -426,11 +488,11 @@ print(table_console)
 ### Markdown Format
 
 ```{r table_markdown, results='asis'}
-# Markdown format for reports
-if (requireNamespace("knitr", quietly = TRUE)) {
-  table_md <- format_comparison_table(comparison, format = "markdown")
-  cat(table_md)
-}
+table_md <- format_comparison_table(comparison, format = "markdown")
+
+# One element per line, so sep = "\n" is required. Plain cat(table_md) joins
+# the lines with spaces and the table collapses into a single paragraph.
+cat(table_md, sep = "\n")
 ```
 
 ## Interpretation Guidelines
@@ -516,7 +578,7 @@ cat("  → Each model provides unique insights\n")
 
 ### 1. Fit Multiple Models
 
-Don't rely on a single model—each provides unique insights:
+Don't rely on a single model, as each provides unique insights:
 
 ```{r best_practice_multiple}
 # Always fit at least 2-3 models
@@ -533,7 +595,7 @@ cat("  • Threshold-free performance (Full ROC)\n")
 
 ### 2. Report All Model Results
 
-When publishing, report results from all fitted models:
+When publishing, consider reporting results from all fitted models:
 
 ```{r best_practice_reporting}
 cat("In your paper, report:\n")
@@ -546,15 +608,68 @@ cat("  • Interpretation of each model's insights\n")
 ### 3. Check Model Assumptions
 
 ```{r best_practice_assumptions}
-if ("2ht" %in% comparison$models_fit) {
-  # Check goodness of fit
-  cat("2-HT Goodness of Fit:\n")
-  summary(comparison$fitted_models$`2ht`)
-
-  cat("\nIf χ² p-value < 0.05: Model may not fit well\n")
-  cat("Consider: Data quality, model assumptions\n")
-}
+summary(comparison$fitted_models$`2ht`)
 ```
+
+A chi-square p-value below 0.05 indicates that the model does not reproduce the
+observed response frequencies well. With large samples the test will detect
+small departures, so read it alongside the size of the discrepancies rather than
+as a pass/fail.
+
+
+## Technical Details
+
+### What each model estimates, and on what scale
+
+The three models are **not** three estimates of one quantity, and cannot be
+ranked against each other directly.
+
+| Model | Estimand | Scale | Inference available |
+|---|---|---|---|
+| 2-HT | Latent probabilities of detection, bias and guessing | Four probabilities in [0, 1] | Standard errors from the observed information matrix; goodness-of-fit chi-square |
+| EIG | Expected reduction in uncertainty about guilt | Bits, 0 to the prior entropy | None in this package |
+| Full ROC | Investigator discriminability | AUC in [0.5, 1] | None in this package; see the note on ordering bias below |
+
+### 2-HT estimation
+
+The model is a multinomial processing tree. Response probabilities are as given
+in the introduction, and the parameters are estimated by maximum likelihood over
+the six observed cell counts (three responses by two lineup types), so the model
+has four parameters for five free cells and one residual degree of freedom.
+Standard errors come from the numerically differentiated Hessian at the optimum,
+and the goodness-of-fit statistic is the usual multinomial chi-square.
+
+**Identifiability.** The detect-absence parameter `dA` is identified almost
+entirely by rejections. If very few witnesses reject, the likelihood is close to
+flat in `dA` and the optimiser fails. `fit_winter_2ht()` checks for this and
+reports it as such, rather than failing with a message about non-finite
+differences.
+
+### EIG
+
+Expected information gain is computed over the observed response categories with
+the prior supplied by `prior_guilt`. Because it is an expectation over a set of
+categories estimated from the data, it inherits the binning issue discussed in
+`vignette("calibration_decision_analysis")`, and it has no standard error here.
+
+### Full ROC
+
+Computed as described in `vignette("fullroc_analysis")`. The default ordering by
+sample diagnosticity ratio is **optimistically biased**, because the ordering is
+estimated from the same data used to compute the area; on data with no signal at
+all it returns AUC near 0.65 at 100 lineups per arm. `compare_models()` uses the
+default ordering, so treat the AUC it reports as an upper bound rather than an
+estimate, and refit with `order = "apriori"` for anything inferential.
+
+### Assumptions common to all three
+
+1. Each witness contributes one response, so the response categories partition
+   the sample.
+2. Target-present and target-absent lineups are independent samples.
+3. All lineup members other than the suspect are functioning foils. Where a
+   lineup contains members nobody ever chooses, the effective lineup size is
+   smaller than the nominal `lineup_size` passed here, and all three models will
+   be misspecified in the same direction.
 
 ## Summary
 
@@ -589,4 +704,4 @@ Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigat
 
 - See `?compare_models` for complete parameter documentation
 - See vignette("simulation_power_analysis") for data simulation
-- See vignette("pauc_comparison") for statistical comparison of conditions
+- See vignette("pauc_statistical_comparison") for statistical comparison of conditions

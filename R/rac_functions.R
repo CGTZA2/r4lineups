@@ -77,14 +77,17 @@ make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
   if (!is.null(time_bins)) {
     data$time_binned <- cut(data$response_time,
                             breaks = time_bins,
+                            dig.lab = 10,
                             include.lowest = TRUE,
                             right = TRUE)
     tp_data$time_binned <- cut(tp_data$response_time,
                                breaks = time_bins,
+                               dig.lab = 10,
                                include.lowest = TRUE,
                                right = TRUE)
     ta_data$time_binned <- cut(ta_data$response_time,
                                breaks = time_bins,
+                               dig.lab = 10,
                                include.lowest = TRUE,
                                right = TRUE)
     time_var <- "time_binned"
@@ -292,10 +295,12 @@ make_rac <- function(data, lineup_size = 6, time_bins = NULL,
                           time_bins = time_bins)
 
   # Create plot
+  # The plot is always built, so that it is available as $plot and to the
+  # plot() method. show_plot controls only whether it is displayed now:
+  # suppressing display should not destroy the object.
+  rac_plot <- make_rac_gg(rac_obj, ...)
   if (show_plot) {
-    rac_plot <- make_rac_gg(rac_obj, ...)
-  } else {
-    rac_plot <- NULL
+    print(rac_plot)
   }
 
   result <- list(
@@ -326,7 +331,7 @@ print.lineup_rac <- function(x, ...) {
   print(x$rac_data, n = Inf)
 
   if (!is.null(x$plot)) {
-    cat("\nPlot available in $plot\n")
+    cat("\nPlot: save this object first, then extract it with x$plot\n")
   }
 
   invisible(x)

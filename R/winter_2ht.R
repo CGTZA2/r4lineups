@@ -125,6 +125,24 @@ fit_winter_2ht <- function(data,
   N_ta <- sum(n_ta)
   N_total <- N_tp + N_ta
 
+  # The detect-absence parameter dA is identified almost entirely by rejections:
+  # it is the probability of correctly concluding the culprit is not present.
+  # With very few rejections the likelihood is close to flat in dA and the
+  # optimiser fails with an opaque message about non-finite differences. Say
+  # what is actually wrong instead.
+  n_reject <- counts[["n_tp_reject"]] + counts[["n_ta_reject"]]
+  reject_rate <- n_reject / N_total
+  if (reject_rate < 0.02) {
+    stop("Too few lineup rejections to fit the 2-HT model: ", n_reject,
+         " of ", N_total, " responses (", round(100 * reject_rate, 1), "%). ",
+         "The detect-absence parameter dA is identified by rejections, so the ",
+         "likelihood is nearly flat without them. If these are simulated data, ",
+         "the decision criterion is probably too liberal: c_criterion applies ",
+         "to the maximum of the lineup members' strengths, so 0 is not a ",
+         "neutral value and produces almost no rejections. See ",
+         "vignette(\"simulation_power_analysis\").", call. = FALSE)
+  }
+
   # Set starting parameters if not provided
   if (is.null(start_params)) {
     start_params <- c(

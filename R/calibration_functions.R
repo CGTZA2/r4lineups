@@ -604,10 +604,12 @@ make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
   )
 
   # Create plot
+  # The plot is always built, so that it is available as $plot and to the
+  # plot() method. show_plot controls only whether it is displayed now:
+  # suppressing display should not destroy the object.
+  cal_plot <- make_calibration_gg(cal_obj, ...)
   if (show_plot) {
-    cal_plot <- make_calibration_gg(cal_obj, ...)
-  } else {
-    cal_plot <- NULL
+    print(cal_plot)
   }
 
   result <- list(
@@ -651,7 +653,7 @@ print.lineup_calibration <- function(x, ...) {
   print(x$calibration_data, n = Inf)
 
   if (!is.null(x$plot)) {
-    cat("\nPlot available in $plot\n")
+    cat("\nPlot: save this object first, then extract it with x$plot\n")
   }
 
   invisible(x)

@@ -60,7 +60,9 @@ init_python <- function() {
     stop(
       "Missing required Python packages: ", paste(missing, collapse = ", "), "\n",
       "Run install_r4lineups_python() to install them, or manually:\n",
-      "  pip install deepface opencv-python numpy tf-keras",
+      "  pip install deepface opencv-python numpy tf-keras\n",
+      "These require Python ", .tf_python_min, " to ", .tf_python_max,
+      " (TensorFlow wheel availability); see ?install_r4lineups_python.",
       call. = FALSE
     )
   }

@@ -165,13 +165,15 @@ make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
   }
   overall_accuracy <- total_correct / (total_correct + total_incorrect)
 
-  list(
+  out <- list(
     cac_data = cac_results,
     overall_accuracy = overall_accuracy,
     n_total_suspect_ids = total_correct + total_incorrect,
     lineup_size = lineup_size,
     innocent_suspect_method = innocent_method
   )
+  class(out) <- c("lineup_cac_data", "list")
+  out
 }
 
 
@@ -268,10 +270,12 @@ make_cac <- function(data, lineup_size = 6, confidence_bins = NULL,
                           confidence_bins = confidence_bins)
 
   # Create plot
+  # The plot is always built, so that it is available as $plot and to the
+  # plot() method. show_plot controls only whether it is displayed now:
+  # suppressing display should not destroy the object.
+  cac_plot <- make_cac_gg(cac_obj, ...)
   if (show_plot) {
-    cac_plot <- make_cac_gg(cac_obj, ...)
-  } else {
-    cac_plot <- NULL
+    print(cac_plot)
   }
 
   result <- list(
@@ -302,7 +306,7 @@ print.lineup_cac <- function(x, ...) {
   print(x$cac_data, n = Inf)
 
   if (!is.null(x$plot)) {
-    cat("\nPlot available in $plot\n")
+    cat("\nPlot: use plot(x), or save the object and extract x$plot\n")
   }
 
   invisible(x)

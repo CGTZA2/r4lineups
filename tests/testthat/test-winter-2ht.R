@@ -77,3 +77,33 @@ test_that("plot methods return ggplot objects", {
   expect_s3_class(plot_2ht_parameters(fit), "ggplot")
   expect_s3_class(plot_2ht_fit(fit), "ggplot")
 })
+
+test_that("plot_2ht_parameters accepts a bootstrap object and uses its intervals", {
+  # Regression test. The function rejected winter_2ht_boot objects, although the
+  # documentation offered confidence intervals "if bootstrapped", and it drew
+  # normal-approximation intervals that ran outside [0, 1] for parameters near a
+  # boundary -- b's lower limit came out negative on lineup_example, which is an
+  # impossible value for a probability.
+  counts <- c(n_tp_suspect = 300, n_tp_filler = 150, n_tp_reject = 250,
+              n_ta_suspect =  60, n_ta_filler = 240, n_ta_reject = 400)
+
+  fit  <- fit_winter_2ht(counts, lineup_size = 6)
+  boot <- boot_winter_2ht(counts, lineup_size = 6, nboot = 30,
+                          method = "percentile", seed = 99)
+
+  p_fit  <- plot_2ht_parameters(fit)
+  p_boot <- plot_2ht_parameters(boot)
+
+  expect_s3_class(p_fit, "ggplot")
+  expect_s3_class(p_boot, "ggplot")
+
+  # Intervals must stay inside the parameter space in both cases
+  expect_true(all(p_fit$data$lower >= 0), info = "normal interval clamped at 0")
+  expect_true(all(p_fit$data$upper <= 1), info = "normal interval clamped at 1")
+  expect_true(all(p_boot$data$lower >= 0))
+  expect_true(all(p_boot$data$upper <= 1))
+
+  # The bootstrap object's intervals should be the percentile ones, not the
+  # normal approximation, so the two generally differ
+  expect_false(isTRUE(all.equal(p_fit$data$lower, p_boot$data$lower)))
+})

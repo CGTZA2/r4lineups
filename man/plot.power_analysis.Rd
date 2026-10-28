@@ -11,6 +11,10 @@
 
 \item{...}{Additional arguments (ignored)}
 }
+\value{
+A ggplot object, returned invisibly. Because it is an ordinary
+  ggplot, further layers and themes can be added to it.
+}
 \description{
 Plot Power Analysis Results
 }

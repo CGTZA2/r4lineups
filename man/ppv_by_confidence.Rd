@@ -9,7 +9,8 @@ ppv_by_confidence(
   lineup_size = 6,
   confidence_bins = NULL,
   correction = c("nominal", "effective", "none"),
-  effective_size_data = NULL
+  effective_size_data = NULL,
+  quiet = FALSE
 )
 }
 \arguments{
@@ -32,13 +33,19 @@ ppv_by_confidence(
 \item{effective_size_data}{Optional dataframe with pre-computed effective sizes
 per confidence bin (must have columns: conf_level, effective_size).
 If NULL and correction="effective", computes from data.}
+
+\item{quiet}{Logical. Suppress the note issued when \code{correction} is not
+applied because the data designate an innocent suspect. Default
+\code{FALSE}.}
 }
 \value{
 A list containing:
   \itemize{
     \item ppv_data: Dataframe with PPV by confidence level
     \item overall_ppv: Overall PPV across all confidence levels
-    \item correction_method: The correction method used
+    \item correction_method: The correction method requested
+    \item innocent_suspect_method: "designated" when target-absent trials
+      identify an innocent suspect directly, otherwise the estimation route
     \item lineup_size: Nominal lineup size
   }
 }
@@ -69,6 +76,17 @@ have no designated innocent suspect, the correction also relies on the
 pseudo-distribution assumption of spreading filler choices over lineup
 members, which is a modeling approximation.
 }
+\section{When the correction is ignored}{
+
+Lineup-size corrections exist to \emph{estimate} how many of the observed
+target-absent identifications fell on an innocent suspect, in data where no
+innocent suspect was designated. When the data do designate one, that count
+is observed rather than estimated, and \code{correction} has no work to do:
+all three methods return the same PPV. This is correct, not a fault, but it
+is easy to mistake for one, so a message is issued unless \code{quiet =
+TRUE}. \code{lineup_example} is data of this kind.
+}
+
 \examples{
 data(lineup_example)
 # Nominal correction (assumes fair lineup)

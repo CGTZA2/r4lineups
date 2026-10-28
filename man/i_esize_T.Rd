@@ -2,19 +2,19 @@
 % Please edit documentation in R/i_esize_T.R
 \name{i_esize_T}
 \alias{i_esize_T}
-\title{I Component of Tredoux Effective Size (Tredoux, 1998)}
+\title{I Component of Effective Size (Tredoux, 1998)}
 \usage{
-i_esize_T(lineup_table)
+i_esize_T(lineup_tab)
 }
 \arguments{
-\item{lineup_table}{A table of lineup choices.}
+\item{lineup_tab}{A table of lineup choices.}
 }
 \value{
 A scalar: the diversity index I.
 }
 \description{
 Computes the Agresti-Agresti index of diversity I, the intermediate quantity
-used to construct Tredoux's effective size E' = 1/(1 - I).
+used to construct effective size E' = 1/(1 - I) (Tredoux, 1998).
 }
 \details{
 Tredoux (1998) used Agresti and Agresti's (1978) index of diversity:
@@ -26,8 +26,8 @@ Tredoux (1998) used Agresti and Agresti's (1978) index of diversity:
 }
 \examples{
 lineup_vec <- round(runif(100, 1, 6))
-lineup_table <- table(lineup_vec)
-i <- i_esize_T(lineup_table)
+lineup_tab <- table(lineup_vec)
+i <- i_esize_T(lineup_tab)
 }
 \references{
 Agresti, A., & Agresti, B. F. (1978). Statistical analysis of qualitative

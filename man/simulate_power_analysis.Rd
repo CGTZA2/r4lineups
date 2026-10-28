@@ -7,52 +7,92 @@
 simulate_power_analysis(
   sample_sizes,
   d_prime,
+  d_prime_null = 0,
   n_simulations = 1000,
-  stat_function = NULL,
+  test_function = NULL,
   alpha = 0.05,
+  lineup_size = 6,
+  n_bootstrap = 200,
+  seed = NULL,
+  verbose = TRUE,
   ...
 )
 }
 \arguments{
-\item{sample_sizes}{Integer vector. Sample sizes to test (e.g., c(50, 100, 200))}
+\item{sample_sizes}{Integer vector. Sample sizes per condition to test
+(e.g., c(50, 100, 200)). Each is used for both target-present and
+target-absent lineups in each condition.}
 
-\item{d_prime}{Numeric. True effect size (d') to detect}
+\item{d_prime}{Numeric. Discriminability of the condition of interest.}
 
-\item{n_simulations}{Integer. Number of simulations per sample size (default = 1000)}
+\item{d_prime_null}{Numeric. Discriminability of the comparison condition.
+Defaults to 0, which asks how often the procedure can be shown to
+discriminate better than chance. Set it to a non-zero value to ask the more
+usual question of how often two working procedures can be told apart.}
 
-\item{stat_function}{Function. Takes a dataframe and returns a statistic.
-Default computes pAUC from ROC analysis.}
+\item{n_simulations}{Integer. Number of simulated studies per sample size
+(default = 1000). Power is a proportion estimated from these, so its own
+standard error is roughly \code{sqrt(0.25 / n_simulations)}.}
+
+\item{test_function}{Function of two dataframes returning a p-value. Defaults
+to a bootstrap comparison of partial AUC via \code{\link{compare_pauc}}.}
 
 \item{alpha}{Numeric. Significance level (default = 0.05)}
 
-\item{...}{Additional arguments passed to simulate_lineup_data()}
+\item{lineup_size}{Integer. Lineup size for both conditions (default = 6)}
+
+\item{n_bootstrap}{Integer. Bootstrap resamples used by the default test
+(default = 200). This is the dominant cost: the default test is run
+\code{n_simulations} times for every sample size.}
+
+\item{seed}{Optional integer seed for reproducibility.}
+
+\item{verbose}{Logical. Report progress (default = TRUE).}
+
+\item{...}{Additional arguments passed to simulate_lineup_data(), for example
+\code{conf_levels} or \code{foil_bias}.}
 }
 \value{
-A dataframe with columns:
+A dataframe of class \code{power_analysis} with columns:
   \itemize{
-    \item sample_size: The N tested
-    \item mean_stat: Mean value of statistic
-    \item sd_stat: Standard deviation of statistic
-    \item ci_lower: Lower 95% CI
-    \item ci_upper: Upper 95% CI
-    \item power: Proportion of simulations where effect was detected
+    \item sample_size: N per condition
+    \item power: Proportion of simulated studies reaching significance
+    \item power_se: Standard error of that proportion
+    \item mean_effect: Mean observed difference in pAUC
+    \item sd_effect: Standard deviation of the observed difference
+    \item n_valid: Simulations that produced a usable test
   }
 }
 \description{
-Conducts power analysis by simulating data across different sample sizes
-and computing a statistic of interest (e.g., pAUC, d').
+Estimates statistical power to detect a difference in discriminability
+between two lineup conditions, by simulating both conditions at a range of
+sample sizes and recording how often the difference is detected.
+}
+\details{
+Power is the probability that a study of a given size detects an effect that
+is really there. Estimating it by simulation means specifying the effect,
+generating many studies of that size, applying the analysis you intend to
+use, and counting how often it reaches significance.
+
+That requires a null to test against, which is what \code{d_prime_null}
+supplies. Simulating a single condition and computing a statistic from it is
+not a power analysis, because no hypothesis is being tested.
 }
 \examples{
 \donttest{
-# Power to detect d' = 1.5 with pAUC
+# Power to show discriminability better than chance
 power_res <- simulate_power_analysis(
   sample_sizes = c(50, 100),
   d_prime = 1.5,
-  n_simulations = 100,
+  n_simulations = 20,
+  n_bootstrap = 100,
   conf_levels = 5,
   seed = 123
 )
 print(power_res)
 }
 
+}
+\seealso{
+\code{\link{compare_pauc}}, \code{\link{simulate_lineup_data}}
 }

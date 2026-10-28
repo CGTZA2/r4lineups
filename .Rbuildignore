@@ -42,3 +42,8 @@
 ^joss_paper_v2\.pdf$
 ^gem_report\.md$
 ^RELEASE_CHECKLIST\.md$
+^checkout\.qmd$
+^boot_line\.png$
+^data-raw$
+^Gmail.*\.pdf$
+^cran_submission_.*$

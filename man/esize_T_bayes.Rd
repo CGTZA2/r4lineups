@@ -2,10 +2,10 @@
 % Please edit documentation in R/esize_T_bayes.R
 \name{esize_T_bayes}
 \alias{esize_T_bayes}
-\title{Bayesian Posterior Distribution of Tredoux Effective Size}
+\title{Bayesian Posterior Distribution of Effective Size (Tredoux, 1998)}
 \usage{
 esize_T_bayes(
-  lineup_table,
+  lineup_tab,
   alpha = 0.5,
   S = 10000,
   credible_mass = 0.95,
@@ -13,7 +13,7 @@ esize_T_bayes(
 )
 }
 \arguments{
-\item{lineup_table}{A table of lineup choice counts (one entry per position).}
+\item{lineup_tab}{A table of lineup choice counts (one entry per position).}
 
 \item{alpha}{Dirichlet concentration parameter(s). A scalar (applied to
 all k positions) or a length-k numeric vector. Typical choices:
@@ -51,10 +51,10 @@ An object of class \code{"esize_T_bayes"} containing:
 }
 \description{
 Fits a Dirichlet-Multinomial conjugate model to mock-witness choice counts
-and returns the posterior distribution of the Tredoux effective size E'.
+and returns the posterior distribution of effective size E' (Tredoux, 1998).
 }
 \details{
-Tredoux's effective size E' = 1/sum(p_i^2) is mathematically identical
+Effective size E' = 1/sum(p_i^2) (Tredoux, 1998) is mathematically identical
   to the reciprocal of the Herfindahl-Hirschman concentration index
   (Herfindahl, 1950; Hirschman, 1945) and to the reciprocal of
   Simpson's (1949) concentration statistic lambda. The Bayesian approach
@@ -78,14 +78,14 @@ Tredoux's effective size E' = 1/sum(p_i^2) is mathematically identical
 }
 \examples{
 counts <- c(18, 7, 5, 4, 3, 3)
-lineup_table <- as.table(setNames(counts, 1:6))
+lineup_tab <- as.table(setNames(counts, 1:6))
 
 # Default Jeffreys prior
-result <- esize_T_bayes(lineup_table)
+result <- esize_T_bayes(lineup_tab)
 print(result)
 
 # With a fairness threshold
-result2 <- esize_T_bayes(lineup_table, threshold = 4)
+result2 <- esize_T_bayes(lineup_tab, threshold = 4)
 print(result2)
 
 # Plot the posterior

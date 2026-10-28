@@ -12,10 +12,21 @@
 #'  \code{diag_param()}. This is required; earlier releases attempted to infer
 #'  suspect positions from observed choices, which cannot be done validly.
 #'@param seed Optional integer seed for reproducible resampling.
+#'@param conf.level Confidence level for the percentile intervals and the
+#'                  per-pair intervals, and the complement of the level at which
+#'                  heterogeneity is declared. Defaults to 0.95.
 #'@details Computes bootstrapped diagnosticity ratio with chi-squared estimate,
-#'         significance level and confidence intervals for k lineup pairs
+#'         significance level and confidence intervals for k lineup pairs.
+#'
+#'         The interval on the pooled ratio and the chi-square answer different
+#'         questions, and can disagree. See \code{\link{homog_diag}} for the
+#'         distinction; as there, a note is printed whenever the k ratios are
+#'         heterogeneous and the pooled estimate should not be reported on its
+#'         own.
 #'@return Invisibly returns a list containing the observed mean diagnosticity,
-#'  chi-square statistic, percentile intervals, bootstrap draws, and \code{R}.
+#'  chi-square statistic with degrees of freedom and asymptotic p-value,
+#'  percentile intervals, a \code{heterogeneous} flag, a \code{parameters} data
+#'  frame of per-pair ratios and intervals, the bootstrap draws, and \code{R}.
 #'@references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'
@@ -58,7 +69,7 @@
 #'@importFrom stats setNames
 
 homog_diag_boot <- function(lineup_pres_list, lineup_abs_list, k, R = 100,
-                            pos_list = NULL, seed = NULL){
+                            pos_list = NULL, seed = NULL, conf.level = 0.95){
   if (is.null(pos_list)) {
     stop("pos_list is required because suspect positions cannot be inferred from choices.",
          call. = FALSE)
@@ -93,20 +104,35 @@ homog_diag_boot <- function(lineup_pres_list, lineup_abs_list, k, R = 100,
          call. = FALSE)
   }
   draws <- draws[, valid_draws, drop = FALSE]
-  alpha <- 0.025
+  alpha <- (1 - conf.level) / 2
   mean_ci <- stats::quantile(draws["mean", ], c(alpha, 1 - alpha), na.rm = TRUE)
   chi_ci <- stats::quantile(draws["chi_square", ], c(alpha, 1 - alpha), na.rm = TRUE)
 
+  observed_df <- nrow(observed) - 1L
+  observed_p <- stats::pchisq(observed_chi, df = observed_df, lower.tail = FALSE)
+  heterogeneous <- isTRUE(observed_p < 1 - conf.level)
+  pairs <- diag_pair_summary(observed, conf.level = conf.level)
+
+  print_diag_pairs(pairs, conf.level = conf.level)
+  cat("\n")
   cat("Mean diagnosticity ratio is", round(observed_mean, 3), "\n")
   cat("Confidence intervals (percentile)", round(mean_ci, 3), "\n")
   cat("Chi-squared estimate is", round(observed_chi, 3), "\n")
   cat("Confidence intervals (percentile):", round(chi_ci, 3), "\n")
+  cat(paste0("Sig (asymptotic, df = ", observed_df, "): "),
+      signif(observed_p, 4), "\n")
+  print_pooling_note(heterogeneous, conf.level = conf.level)
+  cat("\n")
 
   invisible(list(
     mean_diagnosticity = observed_mean,
     mean_ci = unname(mean_ci),
     chi_square = observed_chi,
     chi_square_ci = unname(chi_ci),
+    df = observed_df,
+    p_value = observed_p,
+    heterogeneous = heterogeneous,
+    parameters = pairs,
     draws = t(draws),
     R = as.integer(R),
     n_successful = ncol(draws)

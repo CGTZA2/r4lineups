@@ -1,9 +1,9 @@
 #' Effective Size with Confidence Intervals from Normal Theory (Tredoux, 1998)
 #'
-#' Computes Tredoux's effective size E' together with a confidence interval
+#' Computes effective size E' (Tredoux, 1998) together with a confidence interval
 #' derived from the normal-theory variance formula in Tredoux (1998).
 #'
-#' @param lineup_table A table of lineup choices.
+#' @param lineup_tab A table of lineup choices.
 #' @param alpha Confidence level as a decimal (e.g., 0.95 for a 95-percent CI).
 #' @details
 #'   The variance of the diversity index I is estimated via Tredoux's (1998)
@@ -13,6 +13,11 @@
 #'   to the E' scale via \eqn{E' = 1/(1-I)}. For small samples or skewed distributions,
 #'   bootstrap methods (\code{\link{esize_boot_dist}}) or the Bayesian posterior
 #'   (\code{\link{esize_T_bayes}}) may be preferred.
+#'
+#'   Note that this concerns the \emph{interval}. The point estimate itself is
+#'   also biased downward at small samples, since \eqn{E'} is a plug-in
+#'   estimator; see the \dQuote{Small-sample bias} section of
+#'   \code{\link{esize_T}}. This function uses the plug-in form.
 #'@references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'
@@ -33,28 +38,28 @@
 #'@examples
 #'#Data:
 #'lineup_vec <- round(runif(100, 1, 6))
-#'lineup_table <- table(lineup_vec)
+#'lineup_tab <- table(lineup_vec)
 #'
 #'#Call:
-#'e_ci <- esize_T_ci_n(lineup_table, .95)
+#'e_ci <- esize_T_ci_n(lineup_tab, .95)
 #'
 #'@importFrom stats qnorm
 #'@export
 
-esize_T_ci_n <- function(lineup_table, alpha){
-    datacheck3(lineup_table, length(lineup_table))
+esize_T_ci_n <- function(lineup_tab, alpha){
+    datacheck3(lineup_tab, length(lineup_tab))
     if (!is.numeric(alpha) || length(alpha) != 1L || !is.finite(alpha) ||
         alpha <= 0 || alpha >= 1) {
       stop("alpha must be a confidence level strictly between 0 and 1.", call. = FALSE)
     }
-    N = sum(lineup_table)
+    N = sum(lineup_tab)
     a <- 4/N
-    b <- sum((lineup_table/N)^3)
-    c <- (sum((lineup_table/N)^2)^2)
+    b <- sum((lineup_tab/N)^3)
+    c <- (sum((lineup_tab/N)^2)^2)
     var_i <- a*(b-c)
     sd_i <- sqrt(var_i)
-    ci_low <- i_esize_T(lineup_table) + qnorm((1-alpha)/2)*sd_i
-    ci_high <- i_esize_T(lineup_table) + qnorm(alpha+((1-alpha)/2))*sd_i
+    ci_low <- i_esize_T(lineup_tab) + qnorm((1-alpha)/2)*sd_i
+    ci_high <- i_esize_T(lineup_tab) + qnorm(alpha+((1-alpha)/2))*sd_i
     e_ci <- list(ci_low = 1/(1-ci_low), ci_high = 1/(1-ci_high))
     return(e_ci)
 }

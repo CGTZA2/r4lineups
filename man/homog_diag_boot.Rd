@@ -10,7 +10,8 @@ homog_diag_boot(
   k,
   R = 100,
   pos_list = NULL,
-  seed = NULL
+  seed = NULL,
+  conf.level = 0.95
 )
 }
 \arguments{
@@ -29,17 +30,29 @@ target was absent}
 suspect positions from observed choices, which cannot be done validly.}
 
 \item{seed}{Optional integer seed for reproducible resampling.}
+
+\item{conf.level}{Confidence level for the percentile intervals and the
+per-pair intervals, and the complement of the level at which
+heterogeneity is declared. Defaults to 0.95.}
 }
 \value{
 Invisibly returns a list containing the observed mean diagnosticity,
- chi-square statistic, percentile intervals, bootstrap draws, and \code{R}.
+ chi-square statistic with degrees of freedom and asymptotic p-value,
+ percentile intervals, a \code{heterogeneous} flag, a \code{parameters} data
+ frame of per-pair ratios and intervals, the bootstrap draws, and \code{R}.
 }
 \description{
 Function for computing bootstrapped estimates of homogeneity of diagnosticity ratio
 }
 \details{
 Computes bootstrapped diagnosticity ratio with chi-squared estimate,
-        significance level and confidence intervals for k lineup pairs
+        significance level and confidence intervals for k lineup pairs.
+
+        The interval on the pooled ratio and the chi-square answer different
+        questions, and can disagree. See \code{\link{homog_diag}} for the
+        distinction; as there, a note is printed whenever the k ratios are
+        heterogeneous and the pooled estimate should not be reported on its
+        own.
 }
 \examples{
 #Target present data:

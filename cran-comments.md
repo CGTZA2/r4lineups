@@ -41,8 +41,24 @@ successfully by the TeX-equipped GitHub Actions job described above.
 The final network-enabled run completed CRAN incoming feasibility checks. A
 separate URL/DOI audit returned zero failures.
 
-The checked archive is `r4lineups_2.1.0.tar.gz` (2,155,732 bytes), SHA-256
-`b83bec26b8ab0aaca3180b874b76ee2e1aedc7f5b5ce2b040492d2194ac7689d`.
+The archive was rebuilt on 27 October 2026 from the unchanged 2.1.0 sources,
+only to refresh the build time stamp (the August build triggered the "build
+time stamp is over a month old" NOTE). R code, documentation, tests and
+NAMESPACE are byte-identical to the August candidate. The rebuilt archive
+passes `R CMD check --as-cran --no-manual` on macOS/R 4.6.1 with 0 errors, 0
+warnings and 0 notes, both with CRAN purrr 1.2.2 and with development purrr
+1.2.2.9000. `urlchecker::url_check()` again returned no problems.
+
+The submitted archive is `r4lineups_2.1.0.tar.gz` (1,494,050 bytes), SHA-256
+`910a58c38c23eccbcb8a29e8491c6776fd2d1cdb6ea21dde15435f0004efa7d5`.
+
+## purrr::rerun() notice
+
+On 27 October 2026 the purrr maintainers warned that `rerun()` becomes defunct
+in the next purrr release, and that r4lineups 0.1.1 on CRAN imports it. This
+release no longer uses or imports `rerun()` (it was replaced by
+`purrr::map()`), and it passes its checks against the development version of
+purrr.
 
 ## Notes for CRAN reviewers
 

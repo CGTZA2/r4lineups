@@ -414,10 +414,12 @@ compute_dpp <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
   dpp_obj <- make_dpp(data, lineup_size = lineup_size)
 
   # Create plot
+  # The plot is always built, so that it is available as $plot and to the
+  # plot() method. show_plot controls only whether it is displayed now:
+  # suppressing display should not destroy the object.
+  dpp_plot <- plot_dpp(dpp_obj, ...)
   if (show_plot) {
-    dpp_plot <- plot_dpp(dpp_obj, ...)
-  } else {
-    dpp_plot <- NULL
+    print(dpp_plot)
   }
 
   result <- list(
@@ -455,7 +457,7 @@ print.lineup_dpp <- function(x, ...) {
   print(x$roc_data, n = Inf)
 
   if (!is.null(x$plot)) {
-    cat("\nPlot available in $plot\n")
+    cat("\nPlot: save this object first, then extract it with x$plot\n")
   }
 
   invisible(x)
