@@ -32,6 +32,7 @@ Imports:
     utils
 Suggests:
     bslib,
+    chromote,
     here,
     knitr,
     lme4,
