@@ -4,7 +4,7 @@
 \alias{homog_diag}
 \title{Master function: Homogeneity of diagnosticity ratio}
 \usage{
-homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
+homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k, conf.level = 0.95)
 }
 \arguments{
 \item{lineup_pres_list}{A list containing k vectors of lineup choices for k lineups, in which the
@@ -16,10 +16,18 @@ target was absent}
 \item{pos_list}{Suspect positions for each lineup pair. See \code{diag_param()}.}
 
 \item{k}{A vector indexing number of members in each lineup pair (nominal size). Must be specified by user (scalar).}
+
+\item{conf.level}{Confidence level for the per-pair intervals, and the
+complement of the level at which heterogeneity is declared.
+Defaults to 0.95.}
 }
 \value{
-Computes diagnosticity ratio with chi-squared estimate and significance
-        level for k lineup pairs
+Invisibly, a list with the pooled (precision-weighted) diagnosticity
+       ratio, the chi-square statistic and its degrees of freedom and p-value,
+       a \code{heterogeneous} flag, and a \code{parameters} data frame giving
+       the cell counts plus \eqn{d}, \eqn{\ln d}, its variance, its weight and
+       a confidence interval for each lineup pair. The same information is
+       printed.
 }
 \description{
 This function provides assesses the homogeneity of the diagnosticity ratio of
@@ -28,6 +36,17 @@ This function provides assesses the homogeneity of the diagnosticity ratio of
 \details{
 Master function for assessing homogeneity of diagnosticity ratio for
         k independent lineups.
+
+        The chi-square is Cochran's Q, \eqn{\sum w_i (\ln d_i - \ln \bar{d})^2},
+        so it measures the \emph{spread} of the k ratios around their pooled
+        value. It answers a different question from a confidence interval on
+        the pooled ratio, which asks whether the average ratio differs from 1.
+        The two can disagree: ratios that differ in direction (say 6, 1 and
+        0.44) give a very large Q while averaging to roughly 1. When Q is
+        significant the ratios do not share a common value, the pooled
+        estimate should not be reported as a single summary, and the pairs
+        should be interpreted separately. This function prints a note to that
+        effect and records it in the \code{heterogeneous} element.
 }
 \examples{
 #Target present data:

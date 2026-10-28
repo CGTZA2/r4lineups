@@ -1,7 +1,7 @@
 #'Effective Size
 #'
 #'Function for computing Effective Size
-#' @param lineup_table A table of lineup choices.
+#' @param lineup_tab A table of lineup choices.
 #' @param k Number of members in the lineup. Must be specified by the user (scalar).
 #' @param both Logical. Defaults to FALSE, returning Tredoux's adjusted effective
 #'   size estimate only. If TRUE, both Malpass's (1981) original formulation and
@@ -9,6 +9,10 @@
 #' @details Reduces the size of a lineup from a (corrected) nominal starting
 #'          value by the degree to which members are, in sum, chosen below
 #'          the level of chance expectation.
+#' @seealso \code{\link{esize_T}}, whose \dQuote{Small-sample bias} section
+#'   describes a downward bias affecting plug-in effective-size estimators at
+#'   small numbers of choices, and an optional correction.
+#'
 #' @references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'
@@ -38,17 +42,17 @@
 #'
 #'@export
 
-esize_m <- function (lineup_table, k, both =FALSE){
-  if (inherits(lineup_table, "table")) {
-    datacheck3(lineup_table, k)
+esize_m <- function (lineup_tab, k, both =FALSE){
+  if (inherits(lineup_tab, "table")) {
+    datacheck3(lineup_tab, k)
     counts <- numeric(k)
-    if (is.null(names(lineup_table))) {
-      counts[] <- as.numeric(lineup_table)
+    if (is.null(names(lineup_tab))) {
+      counts[] <- as.numeric(lineup_tab)
     } else {
-      counts[as.integer(names(lineup_table))] <- as.numeric(lineup_table)
+      counts[as.integer(names(lineup_tab))] <- as.numeric(lineup_tab)
     }
   } else {
-    lineup_vec <- typecheck(lineup_table)
+    lineup_vec <- typecheck(lineup_tab)
     datacheck1(lineup_vec, k)
     counts <- tabulate(as.integer(lineup_vec), nbins = k)
   }

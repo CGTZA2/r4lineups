@@ -1,7 +1,7 @@
 #'Bootstrapped Effective Size (Tredoux, 1998)
 #'
 #' Base function for generating bootstrapped Effective Size (Tredoux, 1998)
-#' @param lineup_table A vector of individual lineup choices. The historical
+#' @param lineup_tab A vector of individual lineup choices. The historical
 #'   argument name is retained for compatibility.
 #' @param d Indices for bootstrap resampling
 #' @details
@@ -32,12 +32,12 @@
 #'@examples
 #' # Choices from 50 mock witnesses to a 6-member lineup
 #' set.seed(1)
-#' lineup_table <- sample(1:6, 50, replace = TRUE)
+#' lineup_tab <- sample(1:6, 50, replace = TRUE)
 #' # E' for the observed data
-#' esize_T_boot(lineup_table, seq_along(lineup_table))
+#' esize_T_boot(lineup_tab, seq_along(lineup_tab))
 #'@export
 
-esize_T_boot <- function(lineup_table, d){
-  lineup_vec <- typecheck(lineup_table)
+esize_T_boot <- function(lineup_tab, d){
+  lineup_vec <- typecheck(lineup_tab)
   esize_T(table(lineup_vec[d]))
 }

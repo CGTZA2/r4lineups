@@ -12,7 +12,9 @@ plot_fullroc(
 )
 }
 \arguments{
-\item{fullroc_obj}{List output from make_fullroc_data()}
+\item{fullroc_obj}{Either the list returned by \code{make_fullroc_data()} or
+the \code{lineup_fullroc} object returned by \code{make_fullroc()}. The two
+record the ordering method in different places, and both are accepted.}
 
 \item{show_auc}{Logical. Whether to display AUC value on plot (default = TRUE)}
 
@@ -21,7 +23,8 @@ plot_fullroc(
 \item{title}{Character. Plot title (default = "Full ROC Curve (Smith & Yang, 2020)")}
 }
 \value{
-A ggplot2 object
+A ggplot2 object. Being an ordinary ggplot, it can be modified with
+  the usual \code{+} syntax, e.g. \code{p + ggplot2::theme_minimal()}.
 }
 \description{
 Creates a ggplot2 visualization of full ROC data from lineup identification

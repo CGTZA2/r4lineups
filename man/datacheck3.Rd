@@ -4,10 +4,10 @@
 \alias{datacheck3}
 \title{Helper function}
 \usage{
-datacheck3(lineup_table, k)
+datacheck3(lineup_tab, k)
 }
 \arguments{
-\item{lineup_table}{A table of lineup choices}
+\item{lineup_tab}{A table of lineup choices}
 
 \item{k}{Nominal size (i.e., total number of members in lineup)}
 }
@@ -22,6 +22,6 @@ This function ensures that a non-selected lineup member is not accidentally
 \examples{
 # Table of choices from 50 mock witnesses to a 6-member lineup
 set.seed(1)
-lineup_table <- table(sample(1:6, 50, replace = TRUE))
-datacheck3(lineup_table, 6)
+lineup_tab <- table(sample(1:6, 50, replace = TRUE))
+datacheck3(lineup_tab, 6)
 }

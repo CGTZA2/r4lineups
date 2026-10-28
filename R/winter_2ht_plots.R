@@ -4,7 +4,10 @@
 #' Creates a visual display of the parameter estimates from a fitted 2-HT model,
 #' with error bars showing 95\% confidence intervals.
 #'
-#' @param x A winter_2ht object from fit_winter_2ht()
+#' @param x A \code{winter_2ht} object, or a \code{winter_2ht_boot} object
+#'   from \code{\link{boot_winter_2ht}}. Given the latter, the plotted intervals
+#'   are the bootstrap percentile intervals; given the former they are normal
+#'   approximations clamped to [0, 1]. from fit_winter_2ht()
 #' @param ... Additional arguments passed to plotting functions
 #' @param which Character vector specifying which parameters to plot.
 #'   Default is c("dP", "dA", "b", "g") (all parameters).
@@ -23,21 +26,42 @@
 #' @export
 plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci = TRUE) {
 
+  # A bootstrap object carries percentile intervals, which are preferable here:
+  # all four parameters are probabilities bounded in [0, 1], and a normal
+  # interval around an estimate near a boundary runs outside the parameter
+  # space. Use them when they are available.
+  boot_ci <- NULL
+  if (inherits(x, "winter_2ht_boot")) {
+    boot_ci <- x$ci
+    x <- x$original_fit
+  }
   if (!inherits(x, "winter_2ht")) {
-    stop("x must be a winter_2ht object")
+    stop("x must be a winter_2ht or winter_2ht_boot object", call. = FALSE)
   }
 
   # Filter requested parameters
   params <- x$parameters[which]
   se <- x$se[which]
 
+  if (!is.null(boot_ci)) {
+    lower <- as.numeric(boot_ci[which, "Lower"])
+    upper <- as.numeric(boot_ci[which, "Upper"])
+  } else {
+    # Normal approximation, clamped to the parameter space. The clamp is a
+    # display fix, not an inferential one: an interval that reaches a boundary
+    # is a sign the normal approximation is poor there, and the bootstrap
+    # intervals from boot_winter_2ht() should be preferred.
+    lower <- pmax(0, as.numeric(params) - 1.96 * as.numeric(se))
+    upper <- pmin(1, as.numeric(params) + 1.96 * as.numeric(se))
+  }
+
   # Create data frame for plotting
   plot_data <- data.frame(
     parameter = factor(names(params), levels = names(params)),
     estimate = as.numeric(params),
     se = as.numeric(se),
-    lower = as.numeric(params) - 1.96 * as.numeric(se),
-    upper = as.numeric(params) + 1.96 * as.numeric(se)
+    lower = lower,
+    upper = upper
   )
 
   # Create labels

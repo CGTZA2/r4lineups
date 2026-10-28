@@ -305,3 +305,46 @@ test_that("bootstrap CI contains true parameter (single condition)", {
   expect_gte(true_d, res$boot_ci["lower", "d1"])
   expect_lte(true_d, res$boot_ci["upper", "d1"])
 })
+
+test_that("bootstrap reports converged and failed replicate counts", {
+  # Regression test. Replicates that fail to converge are left as NA rows in
+  # boot_params, so sd(fit$boot_params[, 1]) returns NA with no explanation
+  # unless the counts are recorded.
+  fit <- fit_max_sdt(
+    n_hit = 69, n_tp_choose = 82, n_fa = 64, N_tp = 96, N_ta = 106,
+    n = 6, nboot = 60, seed = 21
+  )
+
+  expect_true(all(c("boot_n_used", "boot_n_failed") %in% names(fit)))
+  expect_equal(fit$boot_n_used + fit$boot_n_failed, 60)
+  expect_equal(fit$boot_n_used, sum(stats::complete.cases(fit$boot_params)))
+  expect_gt(fit$boot_n_used, 0)
+
+  # Intervals rest only on the converged replicates
+  expect_true(all(is.finite(fit$boot_ci)))
+})
+
+test_that("fit_max_sdt uses mutually exclusive response cells", {
+  # The five cells must partition each condition's sample: a Pearson
+  # chi-square is defined for a partition. Some reference implementations fit
+  # total target-present choices alongside culprit IDs, counting the latter
+  # twice; this test pins our definition down.
+  fit <- fit_max_sdt(
+    n_hit = 69, n_tp_choose = 82, n_fa = 64, N_tp = 96, N_ta = 106, n = 6
+  )
+
+  obs <- fit$observed
+  expect_equal(unname(obs[["n_hit"]] + obs[["n_filler_tp"]] +
+                        obs[["n_reject_tp"]]), 96)
+  expect_equal(unname(obs[["n_fa"]] + obs[["n_reject_ta"]]), 106)
+
+  # Predicted counts must partition identically
+  pred <- fit$predicted
+  expect_equal(unname(pred[["n_hit"]] + pred[["n_filler_tp"]] +
+                        pred[["n_reject_tp"]]), 96, tolerance = 1e-6)
+  expect_equal(unname(pred[["n_fa"]] + pred[["n_reject_ta"]]), 106,
+               tolerance = 1e-6)
+
+  # df = 3 (two multinomials: 2 + 1) less 2 parameters
+  expect_equal(fit$df, 1)
+})

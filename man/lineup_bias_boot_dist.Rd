@@ -24,7 +24,11 @@ lineup_bias_boot_dist(
 \item{R}{Number of bootstrap resamples.}
 }
 \value{
-A numeric vector of bootstrap estimates.
+A numeric vector of bootstrap estimates, carrying an \code{"n"}
+  attribute equal to the number of lineup choices resampled. Because each
+  estimate is a count divided by \code{n}, the estimates fall on a discrete
+  lattice with spacing \code{1/n}; \code{\link{plot_lineup_bias_distribution}}
+  uses the attribute to bin at that resolution.
 }
 \description{
 Computes a bootstrap distribution for the target-position proportion.

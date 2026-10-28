@@ -1,9 +1,9 @@
-#' I Component of Tredoux Effective Size (Tredoux, 1998)
+#' I Component of Effective Size (Tredoux, 1998)
 #'
 #' Computes the Agresti-Agresti index of diversity I, the intermediate quantity
-#' used to construct Tredoux's effective size E' = 1/(1 - I).
+#' used to construct effective size E' = 1/(1 - I) (Tredoux, 1998).
 #'
-#' @param lineup_table A table of lineup choices.
+#' @param lineup_tab A table of lineup choices.
 #' @details
 #'   Tredoux (1998) used Agresti and Agresti's (1978) index of diversity:
 #'   \deqn{I = 1 - \frac{\sum_i o_i^2}{N^2},}
@@ -21,10 +21,10 @@
 #' @seealso \code{\link{esize_T}}
 #' @examples
 #' lineup_vec <- round(runif(100, 1, 6))
-#' lineup_table <- table(lineup_vec)
-#' i <- i_esize_T(lineup_table)
+#' lineup_tab <- table(lineup_vec)
+#' i <- i_esize_T(lineup_tab)
 #' @export
 
-i_esize_T <- function(lineup_table){
-  1 - 1 / esize_T(lineup_table)
+i_esize_T <- function(lineup_tab){
+  1 - 1 / esize_T(lineup_tab)
 }

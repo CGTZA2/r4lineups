@@ -23,8 +23,12 @@ compare_pauc(
 
 \item{lineup_size}{Integer. Number of people in lineup (default = 6)}
 
-\item{max_false_id_rate}{Numeric. Maximum false ID rate for pAUC calculation (default = NULL,
-which uses the maximum observed false ID rate across both conditions)}
+\item{max_false_id_rate}{Numeric. Upper limit of the false-ID rate region over
+which partial AUC is computed. Default \code{NULL} uses the largest region
+\emph{both} conditions actually reach, i.e. the smaller of their two maximum
+observed false-ID rates. Supplying a larger value means at least one
+condition is integrated only as far as its own data extend, so the two areas
+cover different intervals; a warning is issued in that case.}
 
 \item{n_bootstrap}{Integer. Number of bootstrap samples (default = 2000)}
 

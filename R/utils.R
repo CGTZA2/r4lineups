@@ -63,7 +63,16 @@ utils::globalVariables(c(
   "false_alarm_rate",
   "hit_rate",
   "target_present",
-  "z"
+  "z",
+  # multid plots
+  "component",
+  "end",
+  "estimate",
+  "kind",
+  "pos",
+  "start",
+  "threshold",
+  "value"
 ))
 
 # Determine how innocent-suspect identifications are represented in a

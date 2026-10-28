@@ -23,7 +23,8 @@ make_roc(data, lineup_size = 6, show_plot = TRUE, ...)
 \value{
 A list containing:
   \itemize{
-    \item plot: ggplot2 object (if show_plot = TRUE)
+    \item plot: ggplot2 object. Always returned, whatever show_plot is
+      set to; show_plot controls only whether it is displayed immediately
     \item roc_data: Dataframe with ROC curve points
     \item pauc: Partial area under the curve
     \item summary: Summary statistics

@@ -10,8 +10,16 @@ run_r4lineups_app()
 None. Launches a Shiny app.
 }
 \description{
-Launches the bundled Shiny app for interactive use of key r4lineups
-functionality (lineup bias, effective size, face similarity, ROC/CAC).
+Launches the bundled Shiny app. It covers lineup fairness from mock-witness
+choices (bias, effective and functional size, diagnosticity), Bayesian
+posteriors, Lee and Penrod's Multi-d' model, ROC/CAC/full ROC with pAUC
+comparison, calibration and decision analyses (ANRI, DPP, expected utility,
+Bayesian and BREE curves, RAC), expected information gain and PPV ranges,
+and, when Python is available, face similarity. Every result is computed by
+an exported r4lineups function.
+}
+\details{
+The app needs the suggested packages \pkg{shiny}, \pkg{bslib} and \pkg{DT}.
 }
 \examples{
 \dontrun{

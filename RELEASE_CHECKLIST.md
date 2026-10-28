@@ -40,8 +40,16 @@ historical and must not be submitted.
 - [x] Insert verified CI results in `cran-comments.md` and the audit report.
 - [x] Confirm that the repository candidate tarball still matches the size and
   SHA-256 above; if package inputs changed, rebuild and repeat every check.
-- [ ] Submit that exact archive to CRAN. Do not submit either stale historical
-  archive.
+- [x] 27 October 2026: rebuilt from the unchanged 2.1.0 sources to clear the
+  stale build-time-stamp NOTE; R code, documentation, tests and NAMESPACE are
+  byte-identical. The new candidate is
+  `cran_submission_2026-10-27/r4lineups_2.1.0.tar.gz`, 1,494,050 bytes,
+  SHA-256 `910a58c38c23eccbcb8a29e8491c6776fd2d1cdb6ea21dde15435f0004efa7d5`.
+  `R CMD check --as-cran --no-manual` gives 0/0/0 with CRAN purrr 1.2.2 and
+  with development purrr 1.2.2.9000 (prompted by the purrr `rerun()` defunct
+  notice). The August archive above is superseded.
+- [ ] Submit the 27 October archive to CRAN. Do not submit either stale
+  historical archive or the August 2.1.0 build.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit `v2.1.0`
   and create the GitHub release.
 - [ ] Submit the synchronized JOSS paper.

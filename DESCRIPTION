@@ -1,6 +1,6 @@
 Package: r4lineups
 Title: Statistical Inference on Lineup Fairness
-Version: 2.1.0
+Version: 2.2.0
 URL: https://github.com/CGTZA2/r4lineups, https://cgtza2.github.io/r4lineups/
 BugReports: https://github.com/CGTZA2/r4lineups/issues
 Authors@R: c(
@@ -31,8 +31,9 @@ Imports:
     tibble,
     utils
 Suggests:
+    bslib,
+    chromote,
     here,
-    jsonlite,
     knitr,
     lme4,
     pander,
@@ -41,7 +42,8 @@ Suggests:
     rmarkdown,
     Rtsne,
     shiny,
-    shinyWidgets,
+    shinytest2,
+    splines,
     testthat (>= 3.0.0),
     umap
 License: MIT + file LICENSE

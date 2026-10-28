@@ -41,7 +41,11 @@
 #'   \item{convergence}{Convergence code from \code{optim()} (0 = success).}
 #'   \item{constrain_d, constrain_c, n_conditions, n}{Input metadata.}
 #'   \item{boot_ci}{Bootstrap confidence intervals (if nboot > 0).}
-#'   \item{boot_params}{Full bootstrap parameter matrix (if nboot > 0).}
+#'   \item{boot_params}{Full bootstrap parameter matrix (if nboot > 0). Rows for
+#'     replicates that failed to converge are \code{NA}, so summarise with
+#'     \code{na.rm = TRUE}.}
+#'   \item{boot_n_used, boot_n_failed}{Number of bootstrap replicates that
+#'     converged and that did not (if nboot > 0).}
 #' }
 #'
 #' @details
@@ -70,11 +74,45 @@
 #' scope of this function.
 #'
 #' Parametric bootstrap CIs are obtained by simulating data from the fitted model
-#' and re-fitting.
+#' and re-fitting. Replicates that fail to converge are dropped and counted in
+#' \code{boot_n_failed}.
+#'
+#' @section Provenance:
+#' The implementation follows R scripts written by Andrew M. Smith (Iowa State
+#' University) for the analyses in Reisberg and Pezdek (2024), which fit what he
+#' describes as \dQuote{the MAX SDT model (sometimes called the
+#' compound-decision model)}. The default example counts are the Profile-lineup
+#' condition from that work. The constrained fits (\code{constrain_d},
+#' \code{constrain_c}) and the nested chi-square comparison in
+#' \code{\link{compare_max_sdt}} follow the procedure described there.
+#'
+#' @section Relation to Smith's scripts:
+#' Estimates from this function will \strong{not} match those scripts exactly,
+#' and the reason is the set of cells entering the discrepancy function.
+#'
+#' Smith's scripts fit culprit identifications, \emph{total} target-present
+#' choices and \emph{total} target-absent choices, together with the rejection
+#' counts. Culprit identifications therefore enter twice — once on their own and
+#' again inside total target-present choices — so the cells do not partition the
+#' sample, and the filler count is never fitted directly.
+#'
+#' This function uses five mutually exclusive cells per condition: correct
+#' identification, filler identification, target-present rejection,
+#' target-absent choice, target-absent rejection. A Pearson chi-square is
+#' defined for a partition, so this form keeps the statistic and its degrees of
+#' freedom interpretable, and it fits the observed counts better on that
+#' criterion.
+#'
+#' On the Profile-lineup counts used in the examples below, the two give
+#' d' = 1.94 (this function) against d' = 1.78 (Smith's script) for the first
+#' condition. Neither is a coding error; they minimise different discrepancies.
 #'
 #' @references
 #' Duncan, M. (2006). \emph{A signal detection model of compound decision
 #' tasks}. DRDC Toronto TR 2006-256.
+#'
+#' Reisberg, D., & Pezdek, K. (2024). Data analysed with the MAX SDT model in
+#' scripts supplied by A. M. Smith (personal communication, 4 April 2024).
 #'
 #' Kaesler, M., Dunn, J. C., Ransom, K., & Semmler, C. (2020). Do sequential
 #' lineups impair underlying discriminability? \emph{Cognitive Research:
@@ -425,12 +463,27 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
       if (b_opt$convergence == 0) boot_mat[b, ] <- b_opt$par
     }
     good <- complete.cases(boot_mat)
+    n_failed <- sum(!good)
+    if (n_failed == nboot) {
+      stop("Every bootstrap replicate failed to converge; no intervals can be ",
+           "formed. The fit itself may be poorly determined.", call. = FALSE)
+    }
     tail_p <- (1 - ci_level) / 2
     result$boot_ci <- apply(boot_mat[good, , drop = FALSE], 2,
                             quantile, probs = c(tail_p, 1 - tail_p),
                             na.rm = TRUE)
     result$boot_params <- boot_mat
+    # Replicates that failed to converge are left as NA rows. Record how many,
+    # so that the count is visible rather than silently absorbed: a user taking
+    # sd() over boot_params otherwise gets NA with no explanation.
+    result$boot_n_failed <- n_failed
+    result$boot_n_used <- sum(good)
     rownames(result$boot_ci) <- c("lower", "upper")
+    if (n_failed > 0.1 * nboot) {
+      warning(n_failed, " of ", nboot, " bootstrap replicates failed to ",
+              "converge and were dropped. Intervals rest on ", sum(good),
+              " replicates and may be unreliable.", call. = FALSE)
+    }
   }
 
   class(result) <- "max_sdt_fit"

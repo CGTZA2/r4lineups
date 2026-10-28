@@ -7,7 +7,10 @@
 plot_2ht_parameters(x, ..., which = c("dP", "dA", "b", "g"), show_ci = TRUE)
 }
 \arguments{
-\item{x}{A winter_2ht object from fit_winter_2ht()}
+\item{x}{A \code{winter_2ht} object, or a \code{winter_2ht_boot} object
+from \code{\link{boot_winter_2ht}}. Given the latter, the plotted intervals
+are the bootstrap percentile intervals; given the former they are normal
+approximations clamped to [0, 1]. from fit_winter_2ht()}
 
 \item{...}{Additional arguments passed to plotting functions}
 

@@ -237,17 +237,64 @@ test_that("simulated data works with r4lineups functions", {
   expect_true("auc" %in% names(fullroc_result))
 })
 
-test_that("simulate_power_analysis basic functionality", {
-  skip_if_not(interactive(), "Power analysis is slow, skip in batch tests")
-
+test_that("simulate_power_analysis returns the documented structure", {
   power_result <- simulate_power_analysis(
-    sample_sizes = c(50, 100),
+    sample_sizes = c(40),
     d_prime = 1.5,
-    n_simulations = 10,  # Very small for testing
-    seed = 888
+    n_simulations = 6,
+    n_bootstrap = 25,
+    conf_levels = 5,
+    seed = 888,
+    verbose = FALSE
   )
 
   expect_s3_class(power_result, "power_analysis")
-  expect_true("power_curve" %in% names(power_result))
-  expect_true(is.data.frame(power_result$power_curve))
+  expect_true(is.data.frame(power_result))
+  expect_true(all(c("sample_size", "power", "power_se", "mean_effect",
+                    "sd_effect", "n_valid") %in% names(power_result)))
+  expect_true(power_result$power >= 0 && power_result$power <= 1)
+})
+
+test_that("power is not trivially 1 when there is no effect to detect", {
+  # Regression test. The previous implementation computed power as
+  # mean(stats > 0) where stats were pAUC values. Because an area is always
+  # positive, power was 1 for every sample size and every effect size, and the
+  # power curve was a flat line at 1. With no true difference, power must sit
+  # near alpha instead.
+  no_effect <- suppressWarnings(simulate_power_analysis(
+    sample_sizes = c(40),
+    d_prime = 1.0,
+    d_prime_null = 1.0,
+    n_simulations = 12,
+    n_bootstrap = 25,
+    conf_levels = 5,
+    alpha = 0.05,
+    seed = 4242,
+    verbose = FALSE
+  ))
+
+  expect_lt(no_effect$power, 0.5)
+})
+
+test_that("simulate_power_analysis validates its inputs", {
+  expect_error(
+    simulate_power_analysis(sample_sizes = numeric(0), d_prime = 1),
+    "numeric vector"
+  )
+  expect_error(
+    simulate_power_analysis(sample_sizes = c(50), d_prime = 1, alpha = 0),
+    "strictly between 0 and 1"
+  )
+  expect_error(
+    simulate_power_analysis(sample_sizes = c(50), d_prime = 1,
+                            d_prime_null = -1),
+    "non-negative"
+  )
+  # No detectable effect is a user error worth flagging, not a silent result
+  expect_warning(
+    simulate_power_analysis(sample_sizes = c(30), d_prime = 1,
+                            d_prime_null = 1.5, n_simulations = 2,
+                            n_bootstrap = 20, conf_levels = 5, verbose = FALSE),
+    "no effect to detect"
+  )
 })

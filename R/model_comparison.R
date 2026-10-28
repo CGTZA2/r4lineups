@@ -488,7 +488,12 @@ plot.model_comparison <- function(x, which = "all", ncol = 2, ...) {
 #' @param format Character. Output format: "console" (default), "markdown", "latex"
 #' @param digits Integer. Number of decimal places (default = 3)
 #'
-#' @return A formatted table (character string or dataframe)
+#' @return For \code{format = "console"}, the comparison dataframe. For
+#'   \code{"markdown"} and \code{"latex"}, a \code{knitr_kable} object, which
+#'   is a character vector with **one element per line**. Print it with
+#'   \code{cat(x, sep = "\n")} inside a chunk using \code{results = "asis"};
+#'   plain \code{cat(x)} joins the lines with spaces and the table collapses
+#'   into a single paragraph.
 #'
 #' @details
 #' Creates a publication-ready table with key statistics for each model:
@@ -552,17 +557,20 @@ format_comparison_table <- function(comparison_obj, format = "console", digits =
     # Return original comparison table for console printing
     return(comparison_obj$comparison_table)
   } else if (format == "markdown") {
-    # Use knitr::kable if available
+    # row.names = FALSE matters here: comparison_table inherits row names from
+    # the named parameter vectors it is assembled from ("dP", "dA", ...), which
+    # otherwise appear as a spurious unlabelled first column.
     if (requireNamespace("knitr", quietly = TRUE)) {
-      return(knitr::kable(comparison_obj$comparison_table, format = "markdown"))
+      return(knitr::kable(comparison_obj$comparison_table, format = "markdown",
+                          row.names = FALSE))
     } else {
       warning("knitr package not available, returning dataframe")
       return(comparison_obj$comparison_table)
     }
   } else if (format == "latex") {
-    # Use knitr::kable if available
     if (requireNamespace("knitr", quietly = TRUE)) {
-      return(knitr::kable(comparison_obj$comparison_table, format = "latex"))
+      return(knitr::kable(comparison_obj$comparison_table, format = "latex",
+                          row.names = FALSE))
     } else {
       warning("knitr package not available, returning dataframe")
       return(comparison_obj$comparison_table)

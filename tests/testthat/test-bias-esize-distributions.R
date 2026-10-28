@@ -13,3 +13,83 @@ testthat::test_that("esize_boot_dist returns expected length", {
   testthat::expect_length(dist_t, 200)
   testthat::expect_length(dist_m, 200)
 })
+
+testthat::test_that("bootstrap distributions record the resampled sample size", {
+  set.seed(1)
+  vec <- sample(1:6, 200, replace = TRUE)
+  testthat::expect_equal(
+    attr(lineup_bias_boot_dist(vec, target_pos = 3, k = 6, R = 50), "n"), 200
+  )
+  testthat::expect_equal(
+    attr(esize_boot_dist(vec, k = 6, R = 50), "n"), 200
+  )
+})
+
+testthat::test_that("boot_lattice_binwidth recovers the lattice spacing", {
+  # Values on a 1/n lattice: spacing is returned.
+  lattice <- c(0, 1, 2, 3, 5, 7) / 94
+  testthat::expect_equal(boot_lattice_binwidth(lattice), 1 / 94)
+
+  # An explicit n fixes the spacing exactly, even when the observed values
+  # happen to skip a lattice position.
+  testthat::expect_equal(
+    boot_lattice_binwidth(c(0, 2, 4, 6) / 94, n = 94), 1 / 94
+  )
+})
+
+testthat::test_that("boot_lattice_binwidth declines non-lattice input", {
+  set.seed(1)
+  # Continuous values: no lattice to bin on.
+  testthat::expect_null(boot_lattice_binwidth(stats::runif(1000)))
+  # Too few distinct values to establish a spacing.
+  testthat::expect_null(boot_lattice_binwidth(c(0.1, 0.2)))
+  # On a lattice, but far too fine to draw one bar per attainable value.
+  testthat::expect_null(boot_lattice_binwidth(seq_len(500) / 10000))
+})
+
+testthat::test_that("bias plot bins a discrete proportion on its lattice", {
+  set.seed(1)
+  vec <- sample(1:8, 94, replace = TRUE)
+  dist <- lineup_bias_boot_dist(vec, target_pos = 2, k = 8, R = 500)
+
+  layer_data <- ggplot2::ggplot_build(
+    plot_lineup_bias_distribution(dist, target_pos = 2)
+  )$data[[1]]
+
+  # One bar per attainable proportion, so the bin width is exactly 1/n.
+  testthat::expect_equal(unique(round(diff(layer_data$x), 8)),
+                         round(1 / 94, 8))
+
+  # Every bar covers exactly one attainable value, so no bar is empty purely
+  # because it fell between two of them.
+  attainable <- sort(unique(as.vector(dist)))
+  testthat::expect_equal(sum(layer_data$count > 0), length(attainable))
+})
+
+testthat::test_that("bias plot honours explicit bins and binwidth", {
+  set.seed(1)
+  vec <- sample(1:8, 94, replace = TRUE)
+  dist <- lineup_bias_boot_dist(vec, target_pos = 2, k = 8, R = 500)
+
+  by_bins <- ggplot2::ggplot_build(
+    plot_lineup_bias_distribution(dist, bins = 15)
+  )$data[[1]]
+  testthat::expect_equal(nrow(by_bins), 15)
+
+  by_width <- ggplot2::ggplot_build(
+    plot_lineup_bias_distribution(dist, binwidth = 0.02)
+  )$data[[1]]
+  testthat::expect_equal(unique(round(diff(by_width$x), 8)), 0.02)
+})
+
+testthat::test_that("esize plot falls back to fixed bins when near-continuous", {
+  set.seed(1)
+  vec <- sample(1:8, 94, replace = TRUE)
+  dist <- esize_boot_dist(vec, k = 8, metric = "tredoux", R = 500)
+
+  testthat::expect_null(boot_lattice_binwidth(as.vector(dist)))
+  layer_data <- ggplot2::ggplot_build(
+    plot_esize_distribution(dist)
+  )$data[[1]]
+  testthat::expect_equal(nrow(layer_data), 30)
+})

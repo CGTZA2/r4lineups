@@ -5,8 +5,23 @@
 #'@param lineup_vec A numeric vector of lineup choices
 #'@param target_pos A numeric vector indexing all lineup members
 #'@param k Number of members in lineup. Must be specified by user (scalar).
-#'@param conf Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).
+#'@param conf Confidence level for the intervals, e.g. 0.95 for 95 percent
+#'            intervals. Defaults to 0.95. May be specified by user (scalar).
 #'@param R Number of bootstrap replications. Defaults to 1000.
+#'@return A single integer: the number of lineup members whose bootstrapped
+#'        confidence interval for the proportion choosing them includes the
+#'        chance value \eqn{1/k}. These are the members that a mock witness
+#'        chose at a rate not distinguishable from guessing.
+#'@details Because the result is a count of members rather than a continuous
+#'         quantity, it changes only in whole steps as \code{conf} varies, and
+#'         it is flat across ranges of \code{conf} in which no member's interval
+#'         crosses \eqn{1/k}. A value that does not move when \code{conf} is
+#'         changed from, say, 0.95 to 0.99 is therefore expected behaviour and
+#'         not a sign that the argument is being ignored. Widening the interval
+#'         can only ever increase the count.
+#'
+#'         Intervals are computed by \code{\link{lineup_boot_allprop}}, and are
+#'         not corrected for the fact that \code{k} of them are examined at once.
 #'@examples
 #'#Data:
 #'lineup_vec <- round(runif(100, 1, 6))

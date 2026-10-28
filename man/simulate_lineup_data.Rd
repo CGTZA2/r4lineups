@@ -12,6 +12,7 @@ simulate_lineup_data(
   lineup_size = 6,
   conf_levels = 5,
   decision_rule = c("max", "best_rest", "ensemble", "integration"),
+  foil_bias = NULL,
   include_response_time = FALSE,
   seed = NULL
 )
@@ -45,6 +46,14 @@ returns binary decision only (default = 5)}
   \item "integration" - Sum memory strengths across all members
 }}
 
+\item{foil_bias}{Numeric vector of length \code{lineup_size - 1}, giving the
+mean memory strength of each foil. Defaults to \code{NULL}, which places
+every foil at \code{N(0, 1)}. Supplying a vector makes the foils differ in
+how plausible they are, so that they are no longer interchangeable. Values
+are means on the same scale as \code{d_prime}: a foil at \code{0.5} is
+chosen more often than one at \code{-0.5}, and a strongly negative value
+produces a foil that is rarely or never chosen — a null foil.}
+
 \item{include_response_time}{Logical. Whether to simulate response times
 correlated with memory strength (default = FALSE)}
 
@@ -55,7 +64,15 @@ A dataframe with columns:
   \itemize{
     \item participant_id: Unique ID for each trial
     \item target_present: Logical. TRUE if target in lineup
-    \item identification: Character. "suspect", "filler", or "reject"
+    \item lineup_member: Integer. Position of the lineup member actually
+      chosen, or 0 for a rejection. Each foil is simulated separately and
+      retains its own identity; foils are not treated as interchangeable
+    \item suspect_pos: Integer. Position occupied by the suspect (1 by
+      construction; the target in target-present lineups, the designated
+      innocent suspect in target-absent lineups)
+    \item identification: Character. "suspect", "filler", or "reject",
+      derived from lineup_member and suspect_pos. See
+      \code{\link{classify_lineup_choices}}
     \item confidence: Numeric (if conf_levels specified). Confidence rating
     \item response_time: Numeric (if include_response_time = TRUE). RT in ms
   }
@@ -106,6 +123,16 @@ reaction-time or drift-diffusion model:
   \item A bounded noisy function of decision strength
 }
 }
+\section{Foil identity}{
+
+Memory strengths are drawn independently for every lineup member, so the
+foils are distinguishable and are not exchangeable. \code{lineup_member}
+preserves which member was chosen; \code{identification} is a derived
+summary of it. Analyses that need member-level information (for example the
+effective-size correction in \code{\link{make_ppv_range}}) can therefore use
+\code{lineup_member} directly rather than working from the collapsed labels.
+}
+
 \examples{
 # Basic simulation: strong memory with MAX rule (default)
 strong_memory <- simulate_lineup_data(

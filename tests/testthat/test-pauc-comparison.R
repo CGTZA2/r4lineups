@@ -227,3 +227,40 @@ test_that("compare_pauc ROC objects included", {
   expect_true("roc_data" %in% names(comparison$roc1))
   expect_true("roc_data" %in% names(comparison$roc2))
 })
+
+test_that("default pAUC region is one both curves actually reach", {
+  # Regression test. The default cutoff used to be the LARGER of the two
+  # curves' maximum false-ID rates. The curve that stopped earlier was then
+  # integrated only as far as its own data extended, so the two areas covered
+  # different intervals and were not comparable. The default is now the largest
+  # region both conditions attain.
+  data1 <- create_test_data_pauc(seed = 311)
+  data2 <- create_test_data_pauc(seed = 312)
+
+  comparison <- suppressMessages(compare_pauc(
+    data1, data2, n_bootstrap = 30, seed = 913
+  ))
+
+  reach1 <- max(comparison$roc1$roc_data$false_id_rate)
+  reach2 <- max(comparison$roc2$roc_data$false_id_rate)
+
+  expect_equal(comparison$max_false_id_rate, min(reach1, reach2))
+  expect_lte(comparison$max_false_id_rate, reach1)
+  expect_lte(comparison$max_false_id_rate, reach2)
+})
+
+test_that("a cutoff beyond one curve's reach is warned about", {
+  data1 <- create_test_data_pauc(seed = 321)
+  data2 <- create_test_data_pauc(seed = 322)
+
+  reach <- min(
+    max(make_rocdata(data1, lineup_size = 6)$roc_data$false_id_rate),
+    max(make_rocdata(data2, lineup_size = 6)$roc_data$false_id_rate)
+  )
+
+  expect_warning(
+    compare_pauc(data1, data2, max_false_id_rate = reach + 0.05,
+                 n_bootstrap = 20, seed = 914),
+    "cover different intervals"
+  )
+})

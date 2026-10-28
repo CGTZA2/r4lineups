@@ -14,7 +14,12 @@ format_comparison_table(comparison_obj, format = "console", digits = 3)
 \item{digits}{Integer. Number of decimal places (default = 3)}
 }
 \value{
-A formatted table (character string or dataframe)
+For \code{format = "console"}, the comparison dataframe. For
+  \code{"markdown"} and \code{"latex"}, a \code{knitr_kable} object, which
+  is a character vector with **one element per line**. Print it with
+  \code{cat(x, sep = "\n")} inside a chunk using \code{results = "asis"};
+  plain \code{cat(x)} joins the lines with spaces and the table collapses
+  into a single paragraph.
 }
 \description{
 Creates a formatted table comparing model fits for publication or reporting.

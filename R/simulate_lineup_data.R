@@ -157,6 +157,13 @@
 #'     \item "ensemble" - Best strength minus the mean of all lineup members
 #'     \item "integration" - Sum memory strengths across all members
 #'   }
+#' @param foil_bias Numeric vector of length \code{lineup_size - 1}, giving the
+#'   mean memory strength of each foil. Defaults to \code{NULL}, which places
+#'   every foil at \code{N(0, 1)}. Supplying a vector makes the foils differ in
+#'   how plausible they are, so that they are no longer interchangeable. Values
+#'   are means on the same scale as \code{d_prime}: a foil at \code{0.5} is
+#'   chosen more often than one at \code{-0.5}, and a strongly negative value
+#'   produces a foil that is rarely or never chosen — a null foil.
 #' @param include_response_time Logical. Whether to simulate response times
 #'   correlated with memory strength (default = FALSE)
 #' @param seed Integer. Random seed for reproducibility (default = NULL)
@@ -165,10 +172,26 @@
 #'   \itemize{
 #'     \item participant_id: Unique ID for each trial
 #'     \item target_present: Logical. TRUE if target in lineup
-#'     \item identification: Character. "suspect", "filler", or "reject"
+#'     \item lineup_member: Integer. Position of the lineup member actually
+#'       chosen, or 0 for a rejection. Each foil is simulated separately and
+#'       retains its own identity; foils are not treated as interchangeable
+#'     \item suspect_pos: Integer. Position occupied by the suspect (1 by
+#'       construction; the target in target-present lineups, the designated
+#'       innocent suspect in target-absent lineups)
+#'     \item identification: Character. "suspect", "filler", or "reject",
+#'       derived from lineup_member and suspect_pos. See
+#'       \code{\link{classify_lineup_choices}}
 #'     \item confidence: Numeric (if conf_levels specified). Confidence rating
 #'     \item response_time: Numeric (if include_response_time = TRUE). RT in ms
 #'   }
+#'
+#' @section Foil identity:
+#' Memory strengths are drawn independently for every lineup member, so the
+#' foils are distinguishable and are not exchangeable. \code{lineup_member}
+#' preserves which member was chosen; \code{identification} is a derived
+#' summary of it. Analyses that need member-level information (for example the
+#' effective-size correction in \code{\link{make_ppv_range}}) can therefore use
+#' \code{lineup_member} directly rather than working from the collapsed labels.
 #'
 #' @details
 #' This function implements signal detection models with multiple decision rules:
@@ -270,6 +293,7 @@ simulate_lineup_data <- function(n_tp = 100,
                                   lineup_size = 6,
                                   conf_levels = 5,
                                   decision_rule = c("max", "best_rest", "ensemble", "integration"),
+                                  foil_bias = NULL,
                                   include_response_time = FALSE,
                                   seed = NULL) {
 
@@ -304,6 +328,23 @@ simulate_lineup_data <- function(n_tp = 100,
       length(include_response_time) != 1L || is.na(include_response_time)) {
     stop("include_response_time must be TRUE or FALSE.", call. = FALSE)
   }
+  # foil_bias shifts the mean strength of each foil, so that foils differ in how
+  # plausible they are. NULL keeps every foil at N(0, 1), the previous
+  # behaviour, so existing calls are unaffected.
+  if (is.null(foil_bias)) {
+    foil_bias <- rep(0, lineup_size - 1L)
+  } else {
+    if (!is.numeric(foil_bias) || anyNA(foil_bias) ||
+        any(!is.finite(foil_bias))) {
+      stop("foil_bias must be a finite numeric vector.", call. = FALSE)
+    }
+    if (length(foil_bias) != lineup_size - 1L) {
+      stop("foil_bias must have one value per foil, i.e. lineup_size - 1 = ",
+           lineup_size - 1L, " values.", call. = FALSE)
+    }
+    foil_bias <- as.numeric(foil_bias)
+  }
+
   criteria <- .simulation_criteria(c_criterion, conf_levels)
   if (!is.null(conf_levels)) conf_levels <- as.integer(conf_levels)
 
@@ -315,7 +356,8 @@ simulate_lineup_data <- function(n_tp = 100,
     # Sample memory strength for each lineup member
     # Target: N(d', 1), Fillers: N(0, 1)
     target_strength <- rnorm(1, mean = d_prime, sd = 1)
-    filler_strengths <- rnorm(lineup_size - 1, mean = 0, sd = 1)
+    # foil_bias makes some foils systematically more plausible than others
+    filler_strengths <- rnorm(lineup_size - 1, mean = foil_bias, sd = 1)
     all_strengths <- c(target_strength, filler_strengths)
 
     # Apply decision rule to compute decision variable
@@ -357,6 +399,8 @@ simulate_lineup_data <- function(n_tp = 100,
     all_data[[length(all_data) + 1]] <- data.frame(
       participant_id = i,
       target_present = TRUE,
+      lineup_member = if (makes_id) as.integer(max_position) else 0L,
+      suspect_pos = 1L,
       identification = identification,
       confidence = ifelse(!is.null(conf_levels), conf, NA),
       response_time = rt,
@@ -366,8 +410,10 @@ simulate_lineup_data <- function(n_tp = 100,
 
   # --- Target-Absent Lineups ---
   for (i in 1:n_ta) {
-    # All lineup members are fillers: N(0, 1)
-    filler_strengths <- rnorm(lineup_size, mean = 0, sd = 1)
+    # Position 1 is the designated innocent suspect and carries no foil bias;
+    # positions 2..k are the foils, which do.
+    filler_strengths <- c(rnorm(1, mean = 0, sd = 1),
+                          rnorm(lineup_size - 1, mean = foil_bias, sd = 1))
 
     # Apply decision rule to compute decision variable
     decision_result <- .apply_decision_rule(
@@ -407,6 +453,8 @@ simulate_lineup_data <- function(n_tp = 100,
     all_data[[length(all_data) + 1]] <- data.frame(
       participant_id = n_tp + i,
       target_present = FALSE,
+      lineup_member = if (makes_id) as.integer(max_position) else 0L,
+      suspect_pos = 1L,
       identification = identification,
       confidence = ifelse(!is.null(conf_levels), conf, NA),
       response_time = rt,
@@ -439,6 +487,7 @@ simulate_lineup_data <- function(n_tp = 100,
     lineup_size = lineup_size,
     conf_levels = conf_levels,
     decision_rule = decision_rule,
+    foil_bias = foil_bias,
     seed = seed
   )
 
@@ -463,6 +512,10 @@ print.simulated_lineup_data <- function(x, ...) {
   cat("  Lineup size:", params$lineup_size, "\n")
   if (!is.null(params$decision_rule)) {
     cat("  Decision rule:", params$decision_rule, "\n")
+  }
+  if (!is.null(params$foil_bias) && any(params$foil_bias != 0)) {
+    cat("  Foil bias (mean strength per foil):",
+        paste(format(params$foil_bias, digits = 2), collapse = ", "), "\n")
   }
   if (!is.null(params$conf_levels)) {
     cat("  Confidence levels:", params$conf_levels, "\n")
@@ -497,6 +550,23 @@ print.simulated_lineup_data <- function(x, ...) {
 
   cat("\n  Suspect ID Accuracy:", round(accuracy, 3), "\n")
 
+  # Foils are simulated individually, so the spread of choices across members
+  # is informative in its own right: a member nobody chose is a null foil.
+  if (!is.null(x$lineup_member)) {
+    chosen <- x$lineup_member[x$lineup_member > 0L]
+    counts <- table(factor(chosen, levels = seq_len(params$lineup_size)))
+    cat("\n  Choices by lineup member (0 = rejection, excluded):\n")
+    cat("    pos:", paste(format(seq_len(params$lineup_size), width = 4),
+                          collapse = ""), "\n")
+    cat("    cnt:", paste(format(as.integer(counts), width = 4),
+                          collapse = ""), "\n")
+    null_foils <- which(as.integer(counts) == 0L)
+    if (length(null_foils) > 0L) {
+      cat("    Null foils (never chosen):",
+          paste(null_foils, collapse = ", "), "\n")
+    }
+  }
+
   cat("\nFirst 10 rows:\n")
   print(head(as.data.frame(x), 10))
 
@@ -506,34 +576,63 @@ print.simulated_lineup_data <- function(x, ...) {
 
 #' Simulate Power Analysis for Lineup Studies
 #'
-#' Conducts power analysis by simulating data across different sample sizes
-#' and computing a statistic of interest (e.g., pAUC, d').
+#' Estimates statistical power to detect a difference in discriminability
+#' between two lineup conditions, by simulating both conditions at a range of
+#' sample sizes and recording how often the difference is detected.
 #'
-#' @param sample_sizes Integer vector. Sample sizes to test (e.g., c(50, 100, 200))
-#' @param d_prime Numeric. True effect size (d') to detect
-#' @param n_simulations Integer. Number of simulations per sample size (default = 1000)
-#' @param stat_function Function. Takes a dataframe and returns a statistic.
-#'   Default computes pAUC from ROC analysis.
+#' @param sample_sizes Integer vector. Sample sizes per condition to test
+#'   (e.g., c(50, 100, 200)). Each is used for both target-present and
+#'   target-absent lineups in each condition.
+#' @param d_prime Numeric. Discriminability of the condition of interest.
+#' @param d_prime_null Numeric. Discriminability of the comparison condition.
+#'   Defaults to 0, which asks how often the procedure can be shown to
+#'   discriminate better than chance. Set it to a non-zero value to ask the more
+#'   usual question of how often two working procedures can be told apart.
+#' @param n_simulations Integer. Number of simulated studies per sample size
+#'   (default = 1000). Power is a proportion estimated from these, so its own
+#'   standard error is roughly \code{sqrt(0.25 / n_simulations)}.
+#' @param test_function Function of two dataframes returning a p-value. Defaults
+#'   to a bootstrap comparison of partial AUC via \code{\link{compare_pauc}}.
 #' @param alpha Numeric. Significance level (default = 0.05)
-#' @param ... Additional arguments passed to simulate_lineup_data()
+#' @param lineup_size Integer. Lineup size for both conditions (default = 6)
+#' @param n_bootstrap Integer. Bootstrap resamples used by the default test
+#'   (default = 200). This is the dominant cost: the default test is run
+#'   \code{n_simulations} times for every sample size.
+#' @param seed Optional integer seed for reproducibility.
+#' @param verbose Logical. Report progress (default = TRUE).
+#' @param ... Additional arguments passed to simulate_lineup_data(), for example
+#'   \code{conf_levels} or \code{foil_bias}.
 #'
-#' @return A dataframe with columns:
+#' @details
+#' Power is the probability that a study of a given size detects an effect that
+#' is really there. Estimating it by simulation means specifying the effect,
+#' generating many studies of that size, applying the analysis you intend to
+#' use, and counting how often it reaches significance.
+#'
+#' That requires a null to test against, which is what \code{d_prime_null}
+#' supplies. Simulating a single condition and computing a statistic from it is
+#' not a power analysis, because no hypothesis is being tested.
+#'
+#' @return A dataframe of class \code{power_analysis} with columns:
 #'   \itemize{
-#'     \item sample_size: The N tested
-#'     \item mean_stat: Mean value of statistic
-#'     \item sd_stat: Standard deviation of statistic
-#'     \item ci_lower: Lower 95% CI
-#'     \item ci_upper: Upper 95% CI
-#'     \item power: Proportion of simulations where effect was detected
+#'     \item sample_size: N per condition
+#'     \item power: Proportion of simulated studies reaching significance
+#'     \item power_se: Standard error of that proportion
+#'     \item mean_effect: Mean observed difference in pAUC
+#'     \item sd_effect: Standard deviation of the observed difference
+#'     \item n_valid: Simulations that produced a usable test
 #'   }
+#'
+#' @seealso \code{\link{compare_pauc}}, \code{\link{simulate_lineup_data}}
 #'
 #' @examples
 #' \donttest{
-#' # Power to detect d' = 1.5 with pAUC
+#' # Power to show discriminability better than chance
 #' power_res <- simulate_power_analysis(
 #'   sample_sizes = c(50, 100),
 #'   d_prime = 1.5,
-#'   n_simulations = 100,
+#'   n_simulations = 20,
+#'   n_bootstrap = 100,
 #'   conf_levels = 5,
 #'   seed = 123
 #' )
@@ -543,90 +642,165 @@ print.simulated_lineup_data <- function(x, ...) {
 #' @export
 simulate_power_analysis <- function(sample_sizes,
                                      d_prime,
+                                     d_prime_null = 0,
                                      n_simulations = 1000,
-                                     stat_function = NULL,
+                                     test_function = NULL,
                                      alpha = 0.05,
+                                     lineup_size = 6,
+                                     n_bootstrap = 200,
+                                     seed = NULL,
+                                     verbose = TRUE,
                                      ...) {
 
-  # Default statistic: pAUC from ROC
-  if (is.null(stat_function)) {
-    stat_function <- function(data, ...) {
-      # Simple pAUC calculation
-      roc_obj <- tryCatch(
-        make_roc(data, lineup_size = 6, show_plot = FALSE),
+  if (!is.numeric(sample_sizes) || length(sample_sizes) < 1L ||
+      anyNA(sample_sizes) || any(sample_sizes < 2)) {
+    stop("sample_sizes must be a numeric vector of sizes of at least 2.",
+         call. = FALSE)
+  }
+  if (!is.numeric(alpha) || length(alpha) != 1L || alpha <= 0 || alpha >= 1) {
+    stop("alpha must be strictly between 0 and 1.", call. = FALSE)
+  }
+  if (!is.numeric(d_prime_null) || length(d_prime_null) != 1L ||
+      !is.finite(d_prime_null) || d_prime_null < 0) {
+    stop("d_prime_null must be a finite non-negative scalar.", call. = FALSE)
+  }
+  if (d_prime_null >= d_prime) {
+    warning("d_prime_null is not smaller than d_prime, so there is no effect ",
+            "to detect. Power will approximate alpha.", call. = FALSE)
+  }
+
+  if (!is.null(seed)) {
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
+  }
+
+  # The default test compares partial AUC between the two conditions and
+  # returns its p-value. Any function of two dataframes returning a p-value can
+  # be supplied instead.
+  if (is.null(test_function)) {
+    test_function <- function(data1, data2) {
+      cmp <- tryCatch(
+        compare_pauc(data1, data2, lineup_size = lineup_size,
+                     n_bootstrap = n_bootstrap),
         error = function(e) NULL
       )
-      if (is.null(roc_obj)) return(NA)
-      return(roc_obj$pauc)
+      if (is.null(cmp)) return(c(p = NA_real_, effect = NA_real_))
+      c(p = cmp$p_value, effect = cmp$pauc1 - cmp$pauc2)
     }
   }
 
   results <- list()
 
   for (n in sample_sizes) {
-    cat("Simulating sample size:", n, "\n")
-
-    stats <- numeric(n_simulations)
-
-    for (sim in 1:n_simulations) {
-      # Simulate data
-      sim_data <- simulate_lineup_data(
-        n_tp = n,
-        n_ta = n,
-        d_prime = d_prime,
-        ...
-      )
-
-      # Compute statistic
-      stats[sim] <- stat_function(sim_data)
+    if (isTRUE(verbose)) {
+      message("Simulating sample size ", n, " (", n_simulations, " studies)")
     }
 
-    # Remove NAs
-    stats <- stats[!is.na(stats)]
+    p_values <- rep(NA_real_, n_simulations)
+    effects  <- rep(NA_real_, n_simulations)
 
-    # Compute summary
+    for (sim in seq_len(n_simulations)) {
+      data_effect <- as.data.frame(simulate_lineup_data(
+        n_tp = n, n_ta = n, d_prime = d_prime,
+        lineup_size = lineup_size, ...
+      ))
+      data_null <- as.data.frame(simulate_lineup_data(
+        n_tp = n, n_ta = n, d_prime = d_prime_null,
+        lineup_size = lineup_size, ...
+      ))
+
+      out <- suppressWarnings(suppressMessages(
+        test_function(data_effect, data_null)
+      ))
+      # A test_function may return a bare p-value or a named p/effect pair.
+      if (length(out) >= 2L && !is.null(names(out))) {
+        p_values[sim] <- out[["p"]]
+        effects[sim]  <- out[["effect"]]
+      } else {
+        p_values[sim] <- out[[1]]
+      }
+    }
+
+    valid <- !is.na(p_values)
+    n_valid <- sum(valid)
+    power <- if (n_valid > 0) mean(p_values[valid] < alpha) else NA_real_
+
     results[[length(results) + 1]] <- data.frame(
       sample_size = n,
-      mean_stat = mean(stats),
-      sd_stat = sd(stats),
-      ci_lower = quantile(stats, alpha / 2),
-      ci_upper = quantile(stats, 1 - alpha / 2),
-      power = mean(stats > 0)  # Simplified: prop > 0
+      power       = power,
+      # Binomial standard error of the estimated proportion, so readers can see
+      # how much of any non-monotonicity is simulation noise.
+      power_se    = if (n_valid > 0) sqrt(power * (1 - power) / n_valid) else NA_real_,
+      mean_effect = mean(effects, na.rm = TRUE),
+      sd_effect   = stats::sd(effects, na.rm = TRUE),
+      n_valid     = n_valid
     )
   }
 
   result_df <- do.call(rbind, results)
+  rownames(result_df) <- NULL
+  attr(result_df, "alpha") <- alpha
+  attr(result_df, "d_prime") <- d_prime
+  attr(result_df, "d_prime_null") <- d_prime_null
+  attr(result_df, "n_simulations") <- n_simulations
   class(result_df) <- c("power_analysis", "data.frame")
-  return(result_df)
+  result_df
 }
 
 
 # Declare global variables used in ggplot2 aes()
-utils::globalVariables(c("sample_size", "power"))
+utils::globalVariables(c("sample_size", "power", "power_se"))
 
 #' Plot Power Analysis Results
+#'
 #' @param x A power_analysis object
 #' @param ... Additional arguments (ignored)
+#'
+#' @return A ggplot object, returned invisibly. Because it is an ordinary
+#'   ggplot, further layers and themes can be added to it.
+#'
 #' @export
 plot.power_analysis <- function(x, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("ggplot2 is required for plotting power analysis results")
   }
 
-  p <- ggplot2::ggplot(x, ggplot2::aes(x = sample_size, y = power)) +
+  d_prime <- attr(x, "d_prime")
+  d_null  <- attr(x, "d_prime_null")
+  n_sims  <- attr(x, "n_simulations")
+
+  subtitle <- if (!is.null(d_prime)) {
+    sprintf("Detecting d' = %.2f against d' = %.2f, %s simulated studies per point",
+            d_prime, d_null, format(n_sims))
+  } else NULL
+
+  p <- ggplot2::ggplot(x, ggplot2::aes(x = sample_size, y = power))
+
+  # Monte Carlo error matters here: without it a reader reads noise between
+  # adjacent points as a real dip in power.
+  if ("power_se" %in% names(x)) {
+    p <- p + ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = pmax(0, power - 1.96 * power_se),
+                   ymax = pmin(1, power + 1.96 * power_se)),
+      fill = "steelblue", alpha = 0.18
+    )
+  }
+
+  p <- p +
+    ggplot2::geom_hline(yintercept = 0.80, linetype = "dashed",
+                        color = "red", linewidth = 0.8) +
     ggplot2::geom_line(linewidth = 1, color = "steelblue") +
     ggplot2::geom_point(size = 3, color = "steelblue") +
-    ggplot2::geom_hline(yintercept = 0.80, linetype = "dashed",
-                        color = "red", size = 0.8) +
-    ggplot2::theme_bw(base_size = 14) +
+    ggplot2::theme_bw(base_size = 12) +
     ggplot2::labs(
-      x = "Sample Size (per condition)",
+      x = "Sample size (per condition)",
       y = "Power",
-      title = "Power Analysis for Lineup Study",
-      caption = "Red line = 80% power threshold"
+      title = "Power to detect a difference in discriminability",
+      subtitle = subtitle,
+      caption = "Dashed line = 80% power. Band = 95% Monte Carlo interval."
     ) +
-    ggplot2::scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.1))
+    ggplot2::scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2))
 
   print(p)
-  invisible(x)
+  invisible(p)
 }

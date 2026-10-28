@@ -4,15 +4,15 @@
 \alias{esize_T_ci_n}
 \title{Effective Size with Confidence Intervals from Normal Theory (Tredoux, 1998)}
 \usage{
-esize_T_ci_n(lineup_table, alpha)
+esize_T_ci_n(lineup_tab, alpha)
 }
 \arguments{
-\item{lineup_table}{A table of lineup choices.}
+\item{lineup_tab}{A table of lineup choices.}
 
 \item{alpha}{Confidence level as a decimal (e.g., 0.95 for a 95-percent CI).}
 }
 \description{
-Computes Tredoux's effective size E' together with a confidence interval
+Computes effective size E' (Tredoux, 1998) together with a confidence interval
 derived from the normal-theory variance formula in Tredoux (1998).
 }
 \details{
@@ -23,14 +23,19 @@ The variance of the diversity index I is estimated via Tredoux's (1998)
   to the E' scale via \eqn{E' = 1/(1-I)}. For small samples or skewed distributions,
   bootstrap methods (\code{\link{esize_boot_dist}}) or the Bayesian posterior
   (\code{\link{esize_T_bayes}}) may be preferred.
+
+  Note that this concerns the \emph{interval}. The point estimate itself is
+  also biased downward at small samples, since \eqn{E'} is a plug-in
+  estimator; see the \dQuote{Small-sample bias} section of
+  \code{\link{esize_T}}. This function uses the plug-in form.
 }
 \examples{
 #Data:
 lineup_vec <- round(runif(100, 1, 6))
-lineup_table <- table(lineup_vec)
+lineup_tab <- table(lineup_vec)
 
 #Call:
-e_ci <- esize_T_ci_n(lineup_table, .95)
+e_ci <- esize_T_ci_n(lineup_tab, .95)
 
 }
 \references{

@@ -8,7 +8,8 @@ install_r4lineups_python(
   method = "auto",
   envname = NULL,
   pip_options = NULL,
-  gpu = FALSE
+  gpu = FALSE,
+  python_version = NULL
 )
 }
 \arguments{
@@ -21,6 +22,13 @@ installs to the system Python or currently active environment.}
 
 \item{gpu}{Logical. If TRUE, installs tensorflow with GPU support.
 Default is FALSE.}
+
+\item{python_version}{Python version to build the virtual environment with,
+e.g. \code{"3.11"}. Defaults to \code{NULL}, which leaves the choice to
+reticulate but still checks the result against the supported range.}
+}
+\value{
+\code{TRUE}, invisibly.
 }
 \description{
 Installs the required Python packages using pip. This function should be run
@@ -36,6 +44,17 @@ This function installs:
   \item mediapipe - For 468-point face mesh (optional but recommended)
   \item retinaface - Best face detector
 }
+
+\strong{Python version.} TensorFlow publishes wheels for a limited range of
+Python versions (currently 3.9 to 3.12). On a machine whose default
+interpreter is newer than that, pip finds no TensorFlow distribution at all
+and the install fails partway through with
+\code{No matching distribution found for tensorflow}, after downloading the
+other packages. This function therefore checks the interpreter before
+installing anything, and stops with an explanatory message if it is outside
+the supported range. Pass \code{python_version} to select a suitable
+interpreter, which requires \code{envname} so that a virtual environment can
+be built from it.
 }
 \examples{
 \dontrun{
@@ -44,6 +63,10 @@ install_r4lineups_python()
 
 # Install to a virtual environment
 install_r4lineups_python(envname = "r4lineups-face-env")
+
+# Build the environment with a TensorFlow-supported interpreter
+install_r4lineups_python(envname = "r4lineups-face-env",
+                         python_version = "3.11")
 
 # Install with GPU support
 install_r4lineups_python(gpu = TRUE)

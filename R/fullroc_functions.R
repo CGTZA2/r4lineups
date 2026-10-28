@@ -93,6 +93,23 @@ make_fullroc_data <- function(data,
     stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
   }
 
+  # Ordering the categories by their sample diagnosticity ratios uses the same
+  # data twice, which bows the curve upward. The bias is not small: with 15
+  # decision-by-confidence cells and 100 observations per arm, data with no true
+  # signal at all return a mean AUC near 0.65. It is worth saying so, because
+  # the resulting value looks like a modest positive result.
+  if (identical(order, "diagnosticity")) {
+    n_per_arm <- min(sum(data$target_present), sum(!data$target_present))
+    if (n_per_arm < 1000L) {
+      message("Ordering categories by their sample diagnosticity ratios is ",
+              "optimistically biased: the ordering is estimated from the same ",
+              "data used to compute the AUC. With roughly ", n_per_arm,
+              " lineups per arm the bias can be substantial. Use ",
+              "order = \"apriori\" for inference or between-condition ",
+              "comparisons; see vignette(\"fullroc_analysis\").")
+    }
+  }
+
   # Bin confidence if requested
   if (!is.null(conf_bins)) {
     data$conf_bin <- cut(data$confidence,
@@ -245,7 +262,7 @@ make_fullroc_data <- function(data,
     auc <- auc + (width * height)
   }
 
-  list(
+  out <- list(
     roc_data = roc_data,
     auc = auc,
     order_used = order,
@@ -255,6 +272,8 @@ make_fullroc_data <- function(data,
     lineup_size = lineup_size,
     innocent_suspect_method = innocent_method
   )
+  class(out) <- c("lineup_fullroc_data", "list")
+  out
 }
 
 
@@ -273,7 +292,8 @@ make_fullroc_data <- function(data,
 #'
 #' @return A list containing:
 #'   \itemize{
-#'     \item plot: ggplot2 object (if show_plot = TRUE)
+#'     \item plot: ggplot2 object. Always returned, whatever show_plot is
+#'       set to; show_plot controls only whether it is displayed immediately
 #'     \item roc_data: Dataframe with ROC curve points
 #'     \item auc: Full area under the curve
 #'     \item diagnosticity_table: Table with diagnosticity ratios
@@ -320,10 +340,12 @@ make_fullroc <- function(data,
   )
 
   # Create plot
+  # The plot is always built, so that it is available as $plot and to the
+  # plot() method. show_plot controls only whether it is displayed now:
+  # suppressing display should not destroy the object.
+  fullroc_plot <- plot_fullroc(fullroc_obj, ...)
   if (show_plot) {
-    fullroc_plot <- plot_fullroc(fullroc_obj, ...)
-  } else {
-    fullroc_plot <- NULL
+    print(fullroc_plot)
   }
 
   # Create summary
@@ -356,12 +378,15 @@ make_fullroc <- function(data,
 #' Creates a ggplot2 visualization of full ROC data from lineup identification
 #' experiments using the Smith & Yang (2020) method.
 #'
-#' @param fullroc_obj List output from make_fullroc_data()
+#' @param fullroc_obj Either the list returned by \code{make_fullroc_data()} or
+#'   the \code{lineup_fullroc} object returned by \code{make_fullroc()}. The two
+#'   record the ordering method in different places, and both are accepted.
 #' @param show_auc Logical. Whether to display AUC value on plot (default = TRUE)
 #' @param point_labels Logical. Whether to label points (default = FALSE, can be crowded)
 #' @param title Character. Plot title (default = "Full ROC Curve (Smith & Yang, 2020)")
 #'
-#' @return A ggplot2 object
+#' @return A ggplot2 object. Being an ordinary ggplot, it can be modified with
+#'   the usual \code{+} syntax, e.g. \code{p + ggplot2::theme_minimal()}.
 #'
 #' @examples
 #' data(lineup_example)
@@ -378,6 +403,19 @@ plot_fullroc <- function(fullroc_obj,
   roc_data <- fullroc_obj$roc_data
   auc <- fullroc_obj$auc
 
+  # make_fullroc_data() stores the ordering method at $order_used, while
+  # make_fullroc() stores it at $summary$order_method. Accept either, rather
+  # than silently labelling the plot "Ordering method: " with nothing after it.
+  order_used <- fullroc_obj$order_used
+  if (is.null(order_used)) {
+    order_used <- fullroc_obj$summary$order_method
+  }
+
+  if (is.null(roc_data) || is.null(auc) || is.null(order_used)) {
+    stop("fullroc_obj must be output from make_fullroc_data() or make_fullroc().",
+         call. = FALSE)
+  }
+
   # Create base plot
   p <- ggplot(roc_data, aes(x = cumulative_false_alarm_rate, y = cumulative_hit_rate)) +
     geom_line(linewidth = 1, color = "darkblue") +
@@ -388,7 +426,7 @@ plot_fullroc <- function(fullroc_obj,
       x = "Cumulative False Alarm Rate (Innocent Suspect)",
       y = "Cumulative Hit Rate (Guilty Suspect)",
       title = title,
-      subtitle = paste0("Ordering method: ", fullroc_obj$order_used),
+      subtitle = paste0("Ordering method: ", order_used),
       caption = "Includes ALL responses: suspect IDs, filler IDs, and rejections\nDashed line represents chance performance"
     ) +
     coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
@@ -436,8 +474,8 @@ plot_fullroc <- function(fullroc_obj,
 print.lineup_fullroc <- function(x, show_diagnosticity = TRUE, ...) {
   cat("\n=== Full Lineup ROC Analysis (Smith & Yang, 2020) ===\n\n")
   cat("Full AUC:", round(x$auc, 3), "\n")
-  cat("Target-present lineups:", x$summary$n_target_present, "\n")
-  cat("Target-absent lineups:", x$summary$n_target_absent, "\n")
+  cat("Target-present trials (N):", x$summary$n_target_present, "\n")
+  cat("Target-absent trials (N):", x$summary$n_target_absent, "\n")
   cat("Lineup size:", x$summary$lineup_size, "\n")
   cat("Ordering method:", x$summary$order_method, "\n")
   cat("Operating points:", x$summary$n_operating_points, "\n\n")
@@ -459,7 +497,7 @@ print.lineup_fullroc <- function(x, show_diagnosticity = TRUE, ...) {
   }
 
   if (!is.null(x$plot)) {
-    cat("\nPlot available in $plot\n")
+    cat("\nPlot: use plot(x), or save the object and extract x$plot\n")
   }
 
   invisible(x)

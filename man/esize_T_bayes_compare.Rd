@@ -2,7 +2,7 @@
 % Please edit documentation in R/esize_T_bayes.R
 \name{esize_T_bayes_compare}
 \alias{esize_T_bayes_compare}
-\title{Bayesian Comparison of Tredoux Effective Size Across Two Lineups}
+\title{Bayesian Comparison of Effective Size (Tredoux, 1998) Across Two Lineups}
 \usage{
 esize_T_bayes_compare(
   table_a,

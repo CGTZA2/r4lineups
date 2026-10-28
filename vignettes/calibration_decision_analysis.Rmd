@@ -12,6 +12,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+> **Acknowledgement.** Large language models supplied by Anthropic and OpenAI
+> were used in preparing this vignette, to assist with checking code, testing
+> the veracity of the approaches described, and on occasion editing the text.
+> Responsibility for the content rests with the authors.
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -25,7 +30,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-This vignette demonstrates five advanced statistical methods for analyzing eyewitness identification data in **r4lineups**:
+This vignette demonstrates five statistical methods for analyzing eyewitness identification data in **r4lineups**:
 
 1. **Calibration Analysis** - Assessing confidence-accuracy correspondence
 2. **Bayesian Information-Gain Curves** - Evaluating diagnostic value of evidence
@@ -33,26 +38,96 @@ This vignette demonstrates five advanced statistical methods for analyzing eyewi
 4. **Deviation from Perfect Performance (DPP)** - ROC-based truncation-robust metric
 5. **ANRI** - Bias-corrected resolution index with bootstrap inference
 
-These methods complement the traditional lineup fairness measures by providing sophisticated analyses of identification accuracy, confidence calibration, and decision-making utility.
+These methods complement the traditional lineup fairness measures by providing
+sophisticated analyses of identification accuracy, confidence calibration, and
+decision-making utility.
+
+They answer different questions, and it is worth being clear which is which
+before working through them.
+
+**Calibration analysis** asks whether a witness's confidence *means* what it
+appears to mean: when witnesses say they are 90% sure, are they right 90% of the
+time? It yields a calibration curve and three summary statistics, and it is the
+oldest of the five in eyewitness work (Juslin, Olsson & Winman, 1996).
+
+**Bayesian information-gain analysis** asks a different question: given a
+particular identification response, how much should a rational observer revise
+their belief that the suspect is guilty? This is the framework of Wells, Yang
+and Smalarz (2015), and it makes explicit something the other methods leave
+implicit — that the evidential value of an identification depends on the prior
+probability of guilt, which is a property of the investigation and not of the
+witness.
+
+**Expected utility analysis** goes one step further and asks what a policy
+*should* be. Given the costs of a wrongful identification and the benefits of a
+correct one, at what confidence level should an identification be acted upon?
+Lampinen, Smith and Wells (2019) set out the framework and, importantly, show
+that it can disagree with ROC-based conclusions about which procedure is better.
+
+**Deviation from perfect performance (DPP)** is a discriminability measure,
+proposed by Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) as an
+alternative to partial area under the ROC curve. Their argument is that pAUC
+does not track the diagnostic utility of a lineup, and DPP does.
+
+**ANRI** is a small-sample correction to the normalized resolution index. NRI
+(Yaniv, Yates & Smith, 1991) is positively biased when the number of confidence
+bins is large relative to sample size; ANRI removes that bias so that resolution
+can be compared across studies and tested formally.
 
 ## Data Format
 
-All methods in this vignette require a dataframe with the following columns:
+All methods in this vignette require a dataframe with at least the following
+columns:
 
 - `target_present`: Logical. TRUE if the guilty suspect is in the lineup
 - `identification`: Character. "suspect", "filler", or "reject"
 - `confidence`: Numeric. Confidence rating (any scale)
 
-We'll use the built-in `lineup_example` dataset throughout.
+We use the built-in `lineup_example` dataset throughout. It contains 700
+target-present and 700 target-absent lineups of size 6.
 
 ```{r load-data}
 library(r4lineups)
 data(lineup_example)
 
-# Examine the data structure
 head(lineup_example)
-str(lineup_example)
 ```
+
+### Why there is a `lineup_member` column
+
+`lineup_example` records two further columns, and the reason is worth stating
+because it applies to any lineup data you collect or simulate yourself.
+
+`identification` collapses a witness's decision into three categories. That is
+what the analysis functions consume, but it is *not* what should be recorded.
+The raw datum is **which lineup member the witness chose** — `lineup_member`,
+with `0` for a rejection — together with the suspect's position, `suspect_pos`.
+The label is then derived:
+
+```{r classify-demo}
+head(classify_lineup_choices(
+  lineup_example[, c("lineup_member", "suspect_pos")],
+  k = 6
+))
+```
+
+This matters because **foils are not interchangeable**. They differ in how
+plausible they are, and a foil that nobody ever chooses is not a functioning
+alternative to the suspect at all — it is precisely what makes a lineup unfair.
+Recording only "filler" throws that information away. In `lineup_example` the
+five foils attract very different numbers of choices:
+
+```{r foil-usage}
+lineup_table(
+  lineup_example$lineup_member[lineup_example$lineup_member > 0],
+  k = 6, suspect_pos = 1
+)
+```
+
+`lineup_example` is simulated, and it is simulated at the level of individual
+foils: each is given its own mean memory strength rather than being drawn from a
+common distribution. See `?simulate_lineup_data` and its `foil_bias` argument if
+you want to generate data of your own on the same basis.
 
 ## 1. Calibration Analysis
 
@@ -86,39 +161,141 @@ The calibration plot shows:
 - **Points below diagonal**: Overconfident (confidence exceeds accuracy)
 - **Point size**: Sample size in each bin
 
-```{r calibration-plot, eval=FALSE}
-# The plot is automatically displayed, but you can save it:
-ggsave("calibration_plot.png", cal_result$plot, width = 8, height = 6)
+```{r calibration-plot}
+cal_result$plot
+```
+
+Accuracy rises steadily across the confidence bins, from about 76% in the lowest
+to about 96% in the highest, so confidence here is genuinely informative. The
+points sit *above* the diagonal, however, which means these witnesses are
+**under**confident: they are more accurate than their stated confidence implies.
+That is the direction the O/U statistic reports.
+
+The plot is an ordinary **ggplot2** object, so it can be modified and saved in
+the usual way. `ggsave()` picks its output format from the file extension alone,
+so the same call writes PNG, PDF, SVG or TIFF depending on what you ask for:
+
+```{r calibration-save}
+outfile <- file.path(tempdir(), "calibration_plot.png")
+ggplot2::ggsave(outfile, cal_result$plot, width = 8, height = 6, dpi = 300)
+
+# Change only the extension to change the format:
+#   ggsave("calibration_plot.pdf", cal_result$plot)   # vector, for print
+#   ggsave("calibration_plot.svg", cal_result$plot)   # vector, for the web
 ```
 
 ### Calibration by Condition
 
-Compare calibration across experimental conditions:
+The question here is whether calibration differs between two identification
+procedures. To answer it we need data from two procedures, and `lineup_example`
+records only one, so we simulate them.
+
+The comparison is only meaningful if the two conditions genuinely differ. We
+give Procedure A the stronger memory evidence (`d_prime = 1.8` against `1.1`),
+as might arise from better viewing conditions or a better-constructed lineup,
+and give the two lineups different foil quality as well. Note that both are
+seeded, so the results below are reproducible rather than changing on every
+rebuild.
+
+```{r simulate-procedures}
+# Procedure A: stronger evidence, and foils that are reasonable alternatives
+data_proc_a <- as.data.frame(simulate_lineup_data(
+  n_tp = 400, n_ta = 400, d_prime = 1.8, c_criterion = 0.9,
+  lineup_size = 6, conf_levels = 9,
+  foil_bias = c(0.4, 0.2, 0.0, -0.3, -0.8), seed = 101
+))
+
+# Procedure B: weaker evidence, and one near-useless foil
+data_proc_b <- as.data.frame(simulate_lineup_data(
+  n_tp = 400, n_ta = 400, d_prime = 1.1, c_criterion = 0.9,
+  lineup_size = 6, conf_levels = 9,
+  foil_bias = c(0.5, 0.1, -0.2, -0.9, -2.0), seed = 102
+))
+
+# Put confidence on the same 20-100 scale used by lineup_example
+conf_scale <- round(seq(20, 100, length.out = 9))
+data_proc_a$confidence <- conf_scale[data_proc_a$confidence]
+data_proc_b$confidence <- conf_scale[data_proc_b$confidence]
+
+# Combine into one frame with a condition variable
+procedures <- rbind(
+  transform(data_proc_a, procedure = "Procedure A"),
+  transform(data_proc_b, procedure = "Procedure B")
+)
+```
 
 ```{r calibration-by-condition}
-# Add a grouping variable (for demonstration)
-lineup_example$procedure <- sample(
-  c("Simultaneous", "Sequential"),
-  nrow(lineup_example),
-  replace = TRUE
-)
-
-# Compute calibration by condition
 cal_by_cond <- make_calibration_by_condition(
-  lineup_example,
+  procedures,
   condition_var = "procedure",
   confidence_bins = c(0, 60, 80, 100)
 )
 
 print(cal_by_cond)
 
-# Plot comparison
 cal_by_cond$plot
 ```
 
 ## 2. Bayesian Information-Gain Analysis
 
-Bayesian analysis evaluates how much an identification response changes our belief about guilt, quantified as information gain (reduction in uncertainty).
+Bayesian analysis evaluates how much an identification response changes our
+belief about guilt, quantified as information gain (reduction in uncertainty).
+The framework is that of Wells, Yang and Smalarz (2015).
+
+### The arithmetic, briefly
+
+Let \(G\) denote the event that the suspect is guilty and \(x\) a particular
+identification response — say, a suspect identification made with confidence
+above 80. Bayes' theorem gives the posterior probability of guilt as
+
+\[
+P(G \mid x) \;=\;
+\frac{P(x \mid G)\,P(G)}{P(x \mid G)\,P(G) + P(x \mid \neg G)\,\bigl(1 - P(G)\bigr)}
+\]
+
+The two conditional probabilities are estimated directly from the data:
+\(P(x \mid G)\) is the proportion of target-present witnesses who gave response
+\(x\), and \(P(x \mid \neg G)\) the proportion of target-absent witnesses who did.
+Their ratio is the **likelihood ratio**,
+
+\[
+\mathrm{LR}(x) \;=\; \frac{P(x \mid G)}{P(x \mid \neg G)}
+\]
+
+and it is the whole of what the identification contributes. An \(\mathrm{LR}\) of
+1 means the response is uninformative; larger values point towards guilt, smaller
+towards innocence. `make_bayes_curves()` returns these quantities in
+`$likelihoods`:
+
+```{r bayes-likelihoods}
+lik <- make_bayes_curves(
+  lineup_example,
+  response_categories = "confidence",
+  confidence_bins = c(0, 60, 80, 100)
+)$likelihoods
+
+knitr::kable(
+  transform(
+    as.data.frame(lik)[, c("response", "p_x_given_guilty",
+                           "p_x_given_innocent", "n_guilty", "n_innocent")],
+    LR = round(lik$p_x_given_guilty / lik$p_x_given_innocent, 2)
+  ),
+  digits = 3, row.names = FALSE,
+  caption = "Response likelihoods and likelihood ratios, lineup_example."
+)
+```
+
+A high-confidence suspect identification carries a likelihood ratio of roughly
+25 here, while a rejection carries one of about 0.3 — that is, it is evidence
+*against* guilt. Note also that the likelihood ratio, not the posterior, is the
+portable quantity: it belongs to the identification procedure, whereas the
+posterior additionally depends on the prior, which belongs to the investigation.
+
+One practical warning. If no target-absent witness ever produces a given
+response, the estimated \(P(x \mid \neg G)\) is zero, the likelihood ratio is
+infinite, and the posterior curve is pinned at 1.0 for every prior. That is
+almost always a sign of too few observations or too narrow a bin rather than of
+perfectly diagnostic evidence, and `make_bayes_curves()` warns when it happens.
 
 ### Prior-Posterior Curves
 
@@ -142,12 +319,27 @@ The plot shows how each response type updates prior belief:
 - **Lines below diagonal**: Evidence decreases guilt belief (diagnostic of innocence)
 - **Steeper slopes**: More diagnostic evidence
 
+The prior-posterior curve is due to Wells, Yang and Smalarz (2015), who
+introduced it along with the base-rate effect-equivalency curve used later in
+this vignette. The implementation here is written directly from that paper; it
+is not adapted from another package.
+
+**On the shape of these curves.** They are strongly curved, and that curvature
+is not an artefact of any smoothing — no loess or spline is fitted anywhere in
+these plots. The curve is the exact plot of the equation above as \(P(G)\) varies
+from 0 to 1, and Bayes' theorem is nonlinear in the prior. The characteristic
+S-shape is the substantive point of the display: the same identification moves
+belief a great deal when the prior is middling, and very little when the prior is
+already near 0 or near 1. Evidence that would transform a genuinely uncertain
+case can do almost nothing to a case that is already close to settled.
+
 ### Information Gain
 
-Information gain quantifies uncertainty reduction:
+Information gain quantifies uncertainty reduction, measured in bits. Where the
+posterior curve says *where belief ends up*, information gain says *how much was
+learned*, which is greatest when the prior leaves most room for revision:
 
 ```{r bayes-information-gain}
-# Plot information gain
 plot_bayes_information_gain(bayes_result)
 ```
 
@@ -173,16 +365,36 @@ suspect_responses <- grep("^suspect_", unique(bayes_conf$curves$response), value
 plot_bayes_prior_posterior(bayes_conf, selected_responses = suspect_responses)
 ```
 
+Splitting suspect identifications by confidence separates three quite different
+kinds of evidence. The highest-confidence band sits well above the others across
+the whole range of priors, which is the Bayesian restatement of the calibration
+result found earlier: high-confidence identifications from this procedure are
+worth considerably more than low-confidence ones.
+
+The three curves stay clearly apart and none is pinned to the top of the plot.
+A curve that *is* pinned flat at 1.0 signals the zero-cell problem described
+above, not evidence of unusual strength.
+
 ### Base-Rate Equivalency of Evidence (BREE)
 
-BREE curves compare the diagnostic value of two procedures:
+The base-rate effect-equivalency curve, also from Wells, Yang and Smalarz
+(2015), answers a question that comes up whenever two procedures are compared
+and neither dominates: *how much better is one than the other, expressed in
+units anyone can interpret?*
+
+The idea is to express the difference as an exchange rate between base rates.
+Suppose Procedure A, applied to a case with a 20% prior probability of guilt,
+yields a certain posterior after a suspect identification. We can then ask what
+prior Procedure B would need in order to reach that same posterior. If B needs a
+40% prior to get where A got from 20%, then A is worth as much as a doubling of
+the base rate — and a doubling of the base rate is something an investigator has
+an intuition about, in a way that a difference in pAUC is not.
+
+Plotting that correspondence for every prior gives the BREE curve. The diagonal
+is the null result of no difference; the further the curve departs from it, the
+larger the advantage.
 
 ```{r bree}
-# Create two procedure datasets (for demonstration)
-data_proc_a <- lineup_example[lineup_example$procedure == "Simultaneous", ]
-data_proc_b <- lineup_example[lineup_example$procedure == "Sequential", ]
-
-# Compute BREE curve for suspect identifications
 bree_result <- make_bree_curve(
   data_proc_a,
   data_proc_b,
@@ -192,23 +404,55 @@ bree_result <- make_bree_curve(
 plot_bree(bree_result)
 ```
 
-The BREE curve shows equivalent base rates for equal posterior probabilities. Points above the diagonal indicate Procedure A requires higher base rates to achieve the same posterior as Procedure B.
+The curve lies below the diagonal throughout, meaning Procedure B requires a
+*higher* prior probability of guilt to reach any given posterior — which is
+simply to say that a suspect identification from Procedure A is worth more. The
+gap is widest at low base rates, which is the practically important region: it is
+exactly where cases are most uncertain that the difference between the two
+procedures matters most.
 
 ## 3. Expected Utility Analysis
 
-Expected utility analysis evaluates identification procedures considering costs and benefits of different outcomes.
+The methods so far describe how good a procedure is. Expected utility analysis
+asks what should be *done* about it, and it is the framework of Lampinen, Smith
+and Wells (2019).
+
+The motivating observation is that discriminability measures are silent about
+consequences. An ROC curve treats a missed identification of a guilty suspect
+and the identification of an innocent one as two kinds of error, without saying
+how much worse one is than the other. But everyone agrees they are not equally
+bad, and once that is admitted, the question of which procedure is preferable
+cannot be settled without saying by how much. Lampinen et al. show that ROC
+analysis and expected utility analysis can rank the same two procedures
+differently — the dissociation their title refers to — so the choice of framework
+is not a technicality.
 
 ### Define Utility Matrix
 
+The costs and benefits must be stated explicitly. That is often felt to be the
+uncomfortable part of the exercise, but the values are being assumed either way;
+utility analysis only makes them visible and open to argument.
+
+Four outcomes need a value, on any common scale:
+
 ```{r utility-matrix}
-# Define costs/benefits (on same scale)
 utility_matrix <- c(
-  tp = 1.0,    # True positive (correct suspect ID): Benefit
-  fn = -0.5,   # False negative (reject/filler ID when guilty): Cost
-  fp = -2.0,   # False positive (suspect ID when innocent): Major cost
-  tn = 0.5     # True negative (reject/filler ID when innocent): Benefit
+  tp =  1.0,   # Correct identification of a guilty suspect: a benefit
+  fn = -0.5,   # Failing to identify a guilty suspect: a cost
+  fp = -2.0,   # Identifying an innocent suspect: the most serious cost
+  tn =  0.5    # Correctly declining to identify an innocent suspect: a benefit
 )
 ```
+
+The relative magnitudes carry the argument. Here a wrongful identification is
+set at four times the cost of a missed one (`-2.0` against `-0.5`), and twice the
+absolute value of a correct identification's benefit. That is a moral and legal
+judgement, not a statistical one, and it is the natural place for disagreement.
+Someone who set `fp = -10` would be expressing Blackstone's ratio; the analysis
+below would then recommend a considerably stricter confidence threshold. Because
+the choice matters this much, it is worth reporting the sensitivity of the
+conclusion to it, which is what the base-rate section does for the other key
+assumption.
 
 ### Compute Utility Curves
 
@@ -233,38 +477,107 @@ The plot shows:
 - **Optimal threshold**: Maximum utility point
 - **Comparison with "all identifications"** strategy
 
+Reading it from right to left: a very strict threshold acts on almost nothing,
+so little is gained and little is risked. Relaxing the threshold admits
+identifications that are mostly correct, and utility climbs. Past the optimum,
+each further relaxation admits more wrongful identifications than correct ones,
+and because those carry four times the weight, utility falls away again. The
+maximum is the criterion at which the marginal identification is exactly worth
+acting on.
+
+This is the shape Lampinen et al. (2019) describe. Note that the curve is
+usually rather flat near its peak, which is reassuring for practice: thresholds
+somewhat either side of the optimum lose very little, so the recommendation does
+not depend on locating the maximum precisely.
+
 ### Compare Procedures
 
-```{r utility-comparison, eval=FALSE}
-# Compare two procedures (requires datasets from BREE section)
-# First compute utility for each procedure separately
+`max_utility` is a list rather than a single number: it reports the best
+expected utility together with the criterion that achieves it, and the hit and
+false-alarm rates at that criterion. Ask for the element you want.
+
+```{r utility-comparison}
+# Compare the two procedures simulated in the BREE section above
 util_proc_a <- make_utility_curves(data_proc_a, base_rate = 0.5,
                                    utility_matrix = utility_matrix)
 util_proc_b <- make_utility_curves(data_proc_b, base_rate = 0.5,
                                    utility_matrix = utility_matrix)
 
-cat("Procedure A max utility:", round(util_proc_a$max_utility, 3), "\n")
-cat("Procedure B max utility:", round(util_proc_b$max_utility, 3), "\n")
+knitr::kable(
+  data.frame(
+    Procedure = c("A (d' = 1.8)", "B (d' = 1.1)"),
+    `Max expected utility` = round(c(util_proc_a$max_utility$expected_utility,
+                                     util_proc_b$max_utility$expected_utility), 3),
+    `Optimal criterion` = c(util_proc_a$max_utility$criterion,
+                            util_proc_b$max_utility$criterion),
+    check.names = FALSE
+  ),
+  caption = "Expected utility at the optimal confidence criterion, simulated data (200 target-present and 200 target-absent lineups per procedure)."
+)
 ```
+
+The procedure with the stronger evidence supports both a higher expected utility
+and a stricter criterion: it can afford to wait for high-confidence
+identifications because it gets more of them.
 
 ### Sensitivity to Base Rate
 
 Examine how utility depends on base rate:
 
-```{r utility-base-rates, eval=FALSE}
+```{r utility-base-rates}
 # Test multiple base rates
 base_rates <- c(0.2, 0.5, 0.8)
 
-for (br in base_rates) {
+sensitivity <- do.call(rbind, lapply(base_rates, function(br) {
   util <- make_utility_curves(lineup_example, base_rate = br,
-                              utility_matrix = utility_matrix)
-  cat("Base rate:", br, "  Max utility:", round(util$max_utility, 3), "\n")
-}
+                              utility_matrix = utility_matrix,
+                              lineup_size = 6)
+  data.frame(
+    `Base rate` = br,
+    `Max expected utility` = round(util$max_utility$expected_utility, 3),
+    `Optimal criterion` = util$max_utility$criterion,
+    check.names = FALSE
+  )
+}))
+
+knitr::kable(
+  sensitivity,
+  row.names = FALSE,
+  caption = "Sensitivity of expected utility to the assumed base rate, lineup_example data."
+)
 ```
+
+Base rate matters a great deal. When guilty suspects are rare, a false
+identification is both more likely and more costly relative to the benefit of a
+correct one, so the optimal criterion becomes stricter and the attainable
+utility falls.
 
 ## 4. Deviation from Perfect Performance (DPP)
 
-DPP quantifies how far an ROC curve deviates from perfect performance. It's robust to ROC truncation (missing low-confidence data).
+DPP quantifies how far an ROC curve deviates from perfect performance, and it is
+robust to ROC truncation — that is, to witnesses not using the full confidence
+scale.
+
+It was proposed by Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) as a
+replacement for partial area under the ROC curve, and the reason is worth
+stating because it is contested. Lineup ROC curves cannot be traced over their
+full range: the observed false-alarm rate only extends as far as witnesses'
+willingness to choose takes it, and that endpoint differs between procedures.
+pAUC handles this by integrating over a restricted region, but the choice of
+region is then itself a problem. Take the region from the procedure with the
+shorter curve and information from the other is discarded; take a common region
+and the comparison is made somewhere neither procedure was actually operating.
+Smith et al. argue that pAUC consequently fails to track which procedure has
+greater diagnostic utility, and that DPP does.
+
+DPP takes a different approach: rather than integrating over a region, it
+measures how far the observed ROC falls short of the best curve attainable given
+the false-alarm rate the procedure actually reached. Because the comparison is
+made against a benchmark defined by the data themselves, curves of different
+lengths remain comparable.
+
+This is an active disagreement rather than settled ground, and the pAUC vignette
+takes up the other side of it.
 
 ### Basic DPP
 
@@ -293,10 +606,20 @@ The plot shows:
 - **Red dashed line**: Perfect ROC given the maximum false alarm rate
 - **Shaded area**: Deviation from perfect performance
 
+The shaded area is the quantity of interest, and it has a concrete reading: it
+is the improvement that would be available if this procedure extracted
+everything its witnesses had to give, without their choosing any more often than
+they already do. A large shaded area means the procedure is leaving
+discriminability unclaimed; a small one means the procedure is close to the best
+that could be done at that rate of choosing.
+
 ### Compare DPP Between Groups
 
+The comparison is the usual use. Here the two simulated procedures from earlier
+differ in the strength of the evidence they generate, so Procedure A should show
+the smaller deviation:
+
 ```{r dpp-comparison}
-# Compare procedures (using datasets from BREE section)
 dpp_comparison <- compare_dpp(
   data_proc_a,
   data_proc_b,
@@ -320,7 +643,23 @@ Use DPP when:
 
 ## 5. ANRI: Adjusted Normalized Resolution Index
 
-ANRI corrects NRI for small-sample bias, making it more appropriate for hypothesis testing and group comparisons.
+ANRI corrects NRI for small-sample bias, making it more appropriate for
+hypothesis testing and group comparisons.
+
+Resolution is the third of the properties confidence can have, alongside
+calibration and over/underconfidence. A witness could be poorly calibrated —
+systematically over- or underconfident — and yet have excellent resolution, if
+their confidence still ranked correct identifications above incorrect ones.
+Resolution is arguably the property that matters most in practice, since a
+systematic bias can be corrected for once known, whereas an inability to
+discriminate cannot.
+
+NRI (Yaniv, Yates & Smith, 1991) measures this, but it is **positively biased**:
+some apparent resolution arises from sampling noise alone. Splitting a sample
+into more confidence bins gives noise more opportunity to look like signal, so
+the bias grows with the number of bins and shrinks with sample size. Two studies
+using different numbers of bins therefore cannot have their NRIs compared
+directly. ANRI estimates and removes that bias.
 
 ### Basic ANRI
 
@@ -342,29 +681,42 @@ ANRI is always ≤ NRI because it removes positive bias. The bias correction is 
 
 ### Bootstrap Confidence Intervals
 
+A point estimate is not much use on its own, so the interval comes from a
+bootstrap. `n_bootstrap = 100` keeps this vignette quick; use 2000 or more for
+anything you intend to report.
+
 ```{r anri-bootstrap}
-# Compute ANRI with bootstrap CIs
 anri_boot <- bootstrap_anri(
   lineup_example,
   confidence_bins = c(0, 60, 80, 100),
-  n_bootstrap = 100,  # Use 2000+ for publications
+  n_bootstrap = 100,
   conf_level = 0.95,
   seed = 123
 )
 
-print(anri_boot)
-
-cat("\nANRI:", round(anri_boot$anri, 3), "\n")
-cat("95% CI: [", round(anri_boot$ci_lower, 3), ",",
-    round(anri_boot$ci_upper, 3), "]\n")
+knitr::kable(
+  data.frame(
+    Statistic = c("NRI (uncorrected)", "ANRI (bias-corrected)"),
+    Estimate  = round(c(anri_boot$nri, anri_boot$anri), 3),
+    `95% CI`  = c("—", sprintf("[%.3f, %.3f]",
+                               anri_boot$ci_lower, anri_boot$ci_upper)),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "Resolution with bootstrap interval, lineup_example, 3 confidence bins."
+)
 ```
 
 ### Compare Groups
 
+The comparison uses the two simulated procedures, which differ in the strength
+of the evidence they generate. Because they were simulated with genuinely
+different parameters, any difference found here reflects that design rather than
+chance group assignment.
+
 ```{r anri-comparison}
-# Compare ANRI between procedures
 anri_comparison <- compare_anri(
-  lineup_example,
+  procedures,
   group_var = "procedure",
   confidence_bins = c(0, 60, 80, 100),
   n_bootstrap = 100,
@@ -373,11 +725,7 @@ anri_comparison <- compare_anri(
 
 print(anri_comparison)
 
-# Plot comparison
 plot_anri_comparison(anri_comparison)
-
-# Plot bootstrap distribution
-plot_anri_difference_distribution(anri_comparison)
 ```
 
 The comparison provides:
@@ -385,71 +733,165 @@ The comparison provides:
 - **Point estimates** for each group
 - **Difference with CI**: Tests whether groups differ
 - **Significance test**: CI excludes 0 = significant difference
-- **Bootstrap distributions**: For diagnostic checks
+
+The bootstrap difference distribution is available as
+`plot_anri_difference_distribution(anri_comparison)` if you want to inspect its
+shape — worth doing when an interval looks surprising, since a heavily skewed or
+multimodal distribution is a sign the bins are too thin somewhere.
 
 ### When to Use ANRI vs NRI
 
-Use ANRI when:
+The considerations, rather than rules:
 
-- Sample size is modest (N < 200)
-- Number of bins is small (J = 3-5)
-- Comparing across studies with different bin counts
-- Conducting formal statistical tests
+ANRI is the safer default whenever the bias it corrects could be material —
+modest samples (say a few hundred or fewer), several confidence bins, or any
+comparison across studies that binned confidence differently. Because the bias
+grows with the bin-to-sample ratio, it is exactly the studies most likely to be
+compared informally that are least comparable on raw NRI. Formal tests should
+use ANRI, since testing a biased estimate against zero tests the wrong thing.
 
-Use NRI when:
+NRI remains reasonable when the correction is negligible — large samples with
+few bins, where ANRI and NRI will agree closely anyway — or when the point is to
+compare with older published work that reported NRI. In the analysis above the
+two differ by very little, which is what a sample of this size should produce.
 
-- Sample size is very large (N > 500)
-- You're only reporting descriptive statistics
-- Comparing to older studies that reported NRI
+Reporting both, as the table above does, costs nothing and lets a reader see the
+size of the correction for themselves.
 
 ## Integrating Multiple Methods
 
 For a comprehensive analysis, combine these methods:
 
-```{r comprehensive-analysis, eval=FALSE}
-# 1. Calibration: Are witnesses well-calibrated?
-cal <- make_calibration(data, confidence_bins = c(0, 60, 80, 100))
+Each method answers a different question, so a full analysis runs several. The
+five calls below use `lineup_example`; substitute your own data frame.
 
-# 2. DPP: Overall discriminability
-dpp <- make_dpp(data, lineup_size = 6)
+```{r comprehensive-analysis}
+bins <- c(0, 60, 80, 100)
 
-# 3. ANRI: Resolution with inference
-anri <- bootstrap_anri(data, confidence_bins = c(0, 60, 80, 100),
-                       n_bootstrap = 2000)
+# 1. Calibration: does confidence mean what it says?
+cal <- make_calibration(lineup_example, confidence_bins = bins,
+                        show_plot = FALSE)
 
-# 4. Utility: Policy decisions
-util <- make_utility_curves(data, base_rate = 0.5,
-                            utility_matrix = utility_matrix)
+# 2. DPP: overall discriminability
+dpp <- make_dpp(lineup_example, lineup_size = 6)
 
-# 5. Bayesian: Information value
-bayes <- make_bayes_curves(data, response_categories = "confidence",
-                           confidence_bins = c(0, 60, 80, 100))
+# 3. ANRI: resolution, with inference
+anri <- bootstrap_anri(lineup_example, confidence_bins = bins,
+                       n_bootstrap = 100, seed = 789)
+
+# 4. Utility: what should be done about it?
+util <- make_utility_curves(lineup_example, base_rate = 0.5,
+                            utility_matrix = utility_matrix,
+                            lineup_size = 6)
+
+# 5. Bayesian: what is an identification worth as evidence?
+bayes <- make_bayes_curves(lineup_example, response_categories = "confidence",
+                           confidence_bins = bins)
+
+knitr::kable(
+  data.frame(
+    Method   = c("Calibration (C)", "Over/underconfidence (O/U)",
+                 "DPP", "ANRI", "Max expected utility"),
+    Estimate = round(c(cal$C, cal$OU, dpp$dpp, anri$anri,
+                       util$max_utility$expected_utility), 3)
+  ),
+  row.names = FALSE,
+  caption = "Summary across all five methods, lineup_example."
+)
 ```
 
 ## Reporting Results
 
 ### Example Write-Up
 
-"We analyzed identification performance using calibration analysis, DPP, and ANRI with bootstrap inference. Witnesses showed moderate calibration (C = 0.12, O/U = -0.05), indicating slight overconfidence. The DPP was 0.34 (95% CI [0.28, 0.41]), indicating performance well above chance but below perfection. Resolution, measured by ANRI, was 0.25 (95% CI [0.15, 0.36]), demonstrating that confidence ratings provided meaningful discrimination between correct and incorrect identifications.
+Every number below is computed from the objects created above rather than typed
+in, so this passage cannot drift out of step with the analysis it describes. The
+same discipline is worth adopting in a manuscript.
 
-Expected utility analysis revealed that a confidence threshold of 75% maximized utility (EU = 0.42) given a base rate of 50% and the specified cost matrix. Bayesian analysis showed that high-confidence suspect identifications provided the most information gain (mean IG = 0.48 bits), substantially reducing uncertainty about guilt."
+```{r writeup-values, include = FALSE}
+hi <- lik[lik$response == "suspect_(80,100]", ]
+hi_lr <- hi$p_x_given_guilty / hi$p_x_given_innocent
+ou_dir <- if (cal$OU < 0) "underconfident" else "overconfident"
+```
+
+> We analysed identification performance using calibration analysis, deviation
+> from perfect performance (DPP), and the adjusted normalized resolution index
+> (ANRI) with bootstrap inference, using `r nrow(lineup_example)` lineups of
+> size 6 (`r sum(lineup_example$target_present)` target-present,
+> `r sum(!lineup_example$target_present)` target-absent).
+>
+> Witnesses were well calibrated overall (C = `r round(cal$C, 3)`), but
+> systematically **`r ou_dir`** (O/U = `r round(cal$OU, 3)`): accuracy in the
+> lowest confidence band was substantially higher than stated confidence implied.
+> DPP was `r round(dpp$dpp, 3)`, indicating performance above chance but well
+> short of what was attainable at the observed rate of choosing. Resolution,
+> measured by ANRI, was `r round(anri$anri, 3)`
+> (95% CI [`r round(anri$ci_lower, 3)`, `r round(anri$ci_upper, 3)`]), against an
+> uncorrected NRI of `r round(anri$nri, 3)`.
+>
+> Expected utility analysis assumed a base rate of 50% and the cost matrix
+> u(correct suspect ID) = `r utility_matrix[["tp"]]`,
+> u(missed guilty suspect) = `r utility_matrix[["fn"]]`,
+> u(innocent suspect ID) = `r utility_matrix[["fp"]]`,
+> u(correct rejection) = `r utility_matrix[["tn"]]`; that is, a wrongful
+> identification was weighted four times as heavily as a missed one. Under those
+> assumptions a confidence criterion of
+> `r util$max_utility$criterion` maximised expected utility
+> (EU = `r round(util$max_utility$expected_utility, 3)`).
+>
+> Bayesian analysis showed that high-confidence suspect identifications were the
+> most informative response, with a likelihood ratio of
+> `r round(hi_lr, 1)` (based on `r hi$n_guilty` guilty-suspect and
+> `r hi$n_innocent` innocent-suspect identifications in that band).
+
+Note the last parenthesis. The likelihood ratio there rests on very few
+target-absent observations, and reporting the counts alongside the ratio is what
+allows a reader to judge how much weight it will bear.
 
 ## References
 
 **Calibration:**
-- Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity of confidence in eyewitness identification. *Journal of Experimental Psychology: Learning, Memory, and Cognition, 22*(5), 1304-1316.
 
-**Bayesian Analysis:**
-- Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect-equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
+- Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity of
+  confidence in eyewitness identification: Comments on what can be inferred from
+  the low confidence-accuracy correlation. *Journal of Experimental Psychology:
+  Learning, Memory, and Cognition, 22*(5), 1304-1316.
+- Brewer, N., & Wells, G. L. (2006). The confidence-accuracy relationship in
+  eyewitness identification: Effects of lineup instructions, foil similarity, and
+  target-absent base rates. *Journal of Experimental Psychology: Applied, 12*(1),
+  11-30.
+
+**Bayesian information gain and BREE:**
+
+- Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
+  Bayesian information gain, base-rate effect-equivalency curves, and reasonable
+  suspicion. *Law and Human Behavior, 39*(2), 99-122.
 
 **Expected Utility:**
-- Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in eyewitness identification practice. *Journal of Applied Research in Memory and Cognition, 8*(1), 29-38.
+
+- Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
+  eyewitness identification practice: Dissociations between receiver operating
+  characteristic (ROC) analysis and expected utility analysis. *Law and Human
+  Behavior, 43*(1), 26-44.
 
 **DPP:**
-- Mickes, L. (2015). Receiver operating characteristic analysis and confidence-accuracy characteristic analysis in investigations of system variables and estimator variables that affect eyewitness memory. *Journal of Applied Research in Memory and Cognition, 4*(2), 93-102.
+
+- Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova, S.
+  (2019). Deviation from perfect performance measures the diagnostic utility of
+  eyewitness lineups but partial area under the ROC curve does not. *Journal of
+  Applied Research in Memory and Cognition, 8*(1), 50-59.
 
 **ANRI:**
-- Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of discrimination skill in probabilistic judgment. *Psychological Bulletin, 110*(3), 611-617.
+
+- Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of discrimination
+  skill in probabilistic judgment. *Psychological Bulletin, 110*(3), 611-617.
+
+**Related, on CAC analysis:**
+
+- Mickes, L. (2015). Receiver operating characteristic analysis and
+  confidence-accuracy characteristic analysis in investigations of system
+  variables and estimator variables that affect eyewitness memory. *Journal of
+  Applied Research in Memory and Cognition, 4*(2), 93-102.
 
 ## Session Info
 

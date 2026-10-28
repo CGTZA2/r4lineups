@@ -9,6 +9,9 @@
 #' @param pip_options Additional options to pass to pip (e.g., "--user").
 #' @param gpu Logical. If TRUE, installs tensorflow with GPU support.
 #'   Default is FALSE.
+#' @param python_version Python version to build the virtual environment with,
+#'   e.g. \code{"3.11"}. Defaults to \code{NULL}, which leaves the choice to
+#'   reticulate but still checks the result against the supported range.
 #'
 #' @details
 #' This function installs:
@@ -21,6 +24,19 @@
 #'   \item retinaface - Best face detector
 #' }
 #'
+#' \strong{Python version.} TensorFlow publishes wheels for a limited range of
+#' Python versions (currently 3.9 to 3.12). On a machine whose default
+#' interpreter is newer than that, pip finds no TensorFlow distribution at all
+#' and the install fails partway through with
+#' \code{No matching distribution found for tensorflow}, after downloading the
+#' other packages. This function therefore checks the interpreter before
+#' installing anything, and stops with an explanatory message if it is outside
+#' the supported range. Pass \code{python_version} to select a suitable
+#' interpreter, which requires \code{envname} so that a virtual environment can
+#' be built from it.
+#'
+#' @return \code{TRUE}, invisibly.
+#'
 #' @examples
 #' \dontrun{
 #' # Basic installation
@@ -28,6 +44,10 @@
 #'
 #' # Install to a virtual environment
 #' install_r4lineups_python(envname = "r4lineups-face-env")
+#'
+#' # Build the environment with a TensorFlow-supported interpreter
+#' install_r4lineups_python(envname = "r4lineups-face-env",
+#'                          python_version = "3.11")
 #'
 #' # Install with GPU support
 #' install_r4lineups_python(gpu = TRUE)
@@ -37,7 +57,8 @@
 install_r4lineups_python <- function(method = "auto",
                                   envname = NULL,
                                   pip_options = NULL,
-                                  gpu = FALSE) {
+                                  gpu = FALSE,
+                                  python_version = NULL) {
 
   packages <- c(
     "deepface",
@@ -56,17 +77,58 @@ install_r4lineups_python <- function(method = "auto",
     packages <- c(packages, "tensorflow")
   }
 
+  if (!is.null(python_version) && is.null(envname)) {
+    stop("python_version requires envname, so that a virtual environment can ",
+         "be created from that interpreter.", call. = FALSE)
+  }
+
   message("Installing Python dependencies for r4lineups...")
   message("Packages: ", paste(packages, collapse = ", "))
 
   if (!is.null(envname)) {
     # Create virtual environment if it doesn't exist
     if (!reticulate::virtualenv_exists(envname)) {
+      # Check that an interpreter of the requested version actually exists
+      # before handing off to reticulate, which otherwise fails with
+      # "Suitable Python installation for creating a venv not found" and does
+      # not say how to obtain one.
+      if (!is.null(python_version)) {
+        starter <- tryCatch(
+          reticulate::virtualenv_starter(python_version),
+          error = function(e) character(0)
+        )
+        if (length(starter) == 0L || !nzchar(starter[[1L]])) {
+          available <- tryCatch(reticulate::virtualenv_starter(all = TRUE),
+                                error = function(e) NULL)
+          have <- if (is.null(available) || nrow(available) == 0L) {
+            "none were found"
+          } else {
+            paste("found:", paste(unique(available$version), collapse = ", "))
+          }
+          stop("No Python ", python_version, " interpreter is available to ",
+               "build a virtual environment from (", have, ").",
+               "\n\nInstall one first, then retry:\n",
+               "  reticulate::install_python(version = \"", python_version,
+               "\")\n",
+               "  install_r4lineups_python(envname = \"", envname,
+               "\", python_version = \"", python_version, "\")",
+               "\n\nAlternatively install Python ", python_version,
+               " from https://www.python.org/downloads/ .",
+               call. = FALSE)
+        }
+      }
       message("Creating virtual environment: ", envname)
-      reticulate::virtualenv_create(envname)
+      args <- list(envname = envname)
+      if (!is.null(python_version)) {
+        args$version <- python_version
+      }
+      do.call(reticulate::virtualenv_create, args)
     }
     reticulate::use_virtualenv(envname, required = TRUE)
   }
+
+  # Fail before downloading anything if the interpreter cannot host TensorFlow.
+  .check_tensorflow_python()
 
   # Install packages
   reticulate::py_install(
@@ -265,4 +327,43 @@ available_detectors <- function() {
     "centerface",
     "skip"
   )
+}
+
+
+# Minimum and maximum Python versions for which TensorFlow publishes wheels.
+# Update these when TensorFlow's supported range changes.
+.tf_python_min <- "3.9"
+.tf_python_max <- "3.12"
+
+
+# Resolves the Python interpreter reticulate would use and checks it against the
+# range TensorFlow supports. pip otherwise fails partway through the install
+# with "No matching distribution found for tensorflow", which does not name the
+# actual cause.
+.check_tensorflow_python <- function(min_version = .tf_python_min,
+                                     max_version = .tf_python_max) {
+  cfg <- tryCatch(reticulate::py_discover_config(), error = function(e) NULL)
+  if (is.null(cfg) || is.null(cfg$version)) {
+    warning("Could not determine the Python version; skipping the TensorFlow ",
+            "compatibility check. If installation fails with 'No matching ",
+            "distribution found for tensorflow', use Python ", min_version,
+            " to ", max_version, ".", call. = FALSE)
+    return(invisible(NA))
+  }
+
+  version <- package_version(cfg$version)
+  if (version < package_version(min_version) ||
+      version > package_version(paste0(max_version, ".999"))) {
+    stop("Python ", cfg$version, " was found at ", cfg$python, ", but ",
+         "TensorFlow only publishes wheels for Python ", min_version, " to ",
+         max_version, ". Installing now would download the other dependencies ",
+         "and then fail with 'No matching distribution found for tensorflow'.",
+         "\n\nObtain a supported Python, then build an environment from it:\n",
+         "  reticulate::install_python(version = \"", min_version, "\")\n",
+         "  install_r4lineups_python(envname = \"r4lineups-face-env\", ",
+         "python_version = \"", min_version, "\")",
+         call. = FALSE)
+  }
+
+  invisible(TRUE)
 }

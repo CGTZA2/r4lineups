@@ -17,6 +17,7 @@ guidance.
 | `information_error_rate_analysis.Rmd` | Expected information gain and PPV/error-rate ranges | Confidence-based lineup data | `make_eig()`, `make_ppv_range()`, `plot_ppv_range()` |
 | `winter_2ht_model.Rmd` | Winter two-high-threshold model | Aggregate TP/TA response counts or standardized data | `fit_winter_2ht()`, `boot_winter_2ht()`, `plot_2ht_parameters()` |
 | `msdt_model.Rmd` | Multi-item SDT helper functions | Rejection rates and model parameters | `estimate_msdt_params()`, `plot_msdt_joint()` |
+| `multid_model.Rmd` | Lee & Penrod Multi-d′ model | TP/TA suspect, filler and rejection data or counts | `make_multid()`, `compare_multid()` |
 | `lineup_memory_models.Rmd` | Wixted lineup-memory model fitting through the optional pinned pyWitness engine | Fair simultaneous-lineup trial data with ordered confidence | `fit_lineup_models()`, `check_pywitness_deps()`, `install_pywitness()` |
 | `model_comparison.Rmd` | Cross-model summaries for the same data | Standardized confidence-based lineup data | `compare_models()`, `format_comparison_table()` |
 | `pauc_statistical_comparison.Rmd` | Bootstrap pAUC comparisons | Two standardized confidence-based datasets | `compare_pauc()` |

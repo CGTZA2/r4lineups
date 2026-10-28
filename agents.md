@@ -175,6 +175,11 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `estimate_msdt_params()` — convenience wrapper for gamma + d′.
 - `plot_msdt_joint()` — joint density contour plot (suspect vs max filler).
 
+### Multi‑d′ model (Lee & Penrod, 2019)
+- `make_multid()` — d′(GI), d′(GFp), d′(IFa), d′(FaFp), d′(RaRp) + TP/TA lineup‑bias indices from TP/TA data or counts; bootstrap CIs; cumulative by confidence; fair‑lineup reference for d′(IFa).
+- `compare_multid()` — differences between two conditions on every index (bootstrap SE/CI/p).
+- `plot.multid()` — decomposition waterfall, index dot plot, or indices by confidence.
+
 ### Simulation & power
 - `simulate_lineup_data()` — synthetic lineup data generator.
 - `simulate_power_analysis()` — power simulation (ROC/lineup comparisons).
@@ -199,6 +204,7 @@ These wrappers combine data creation, analysis, and plotting:
 - **Winter 2‑HT**: `fit_winter_2ht()` + `plot_2ht_parameters()` + `plot_2ht_fit()`; `boot_winter_2ht()` for CIs
 - **Face similarity**: `get_embedding()`/`batch_embeddings()` + `lineup_similarity()` + plots (`plot_lineup_similarity()`, `plot_embedding_space()`)
 - **SDT GLM/GLMM**: `fit_sdt_glm()`/`fit_sdt_glmm()` + `extract_sdt_metrics()`
+- **Multi‑d′**: `make_multid()` + `plot.multid()`; `compare_multid()` for two conditions
 
 ## Vignettes (current)
 
@@ -211,6 +217,7 @@ These wrappers combine data creation, analysis, and plotting:
 - `sdt_glm_analysis.Rmd` — SDT via GLM/GLMM (old/new recognition)
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from counts
 - `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions
+- `multid_model.Rmd` — Lee & Penrod Multi‑d′ model
 
 ## Current status and TODO (high‑level)
 
@@ -234,3 +241,4 @@ These wrappers combine data creation, analysis, and plotting:
 - Most analyses expect either a **lineup vector** (mock‑witness choices) or a **data frame** with `target_present`, `identification`, and `confidence` for confidence‑based methods.
 - `make_*()` functions typically return structured S3 objects with `print()`, `summary()`, and `plot()` methods.
 - For face similarity, ensure Python deps are installed (`install_r4lineups_python()`), and set `MPLCONFIGDIR` if matplotlib cache issues appear.
+- The Shiny app (`inst/shiny/r4lineups_app`) is a thin `app.R` plus one module per tab in its `R/` folder (`mod_*.R`, helpers in `utils.R`). Modules call only exported package functions. `tests/testthat/test-shiny-app.R` checks each module against direct package calls with `shiny::testServer()`; `test-shiny-app-browser.R` is an opt-in headless-Chrome smoke test (install the package, then set `R4LINEUPS_TEST_APP=true`).

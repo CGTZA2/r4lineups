@@ -15,17 +15,20 @@ reference:
 - title: "Data preparation and validation"
   desc: "Validate, standardize, and simulate lineup data."
   contents:
+  - classify_lineup_choices
   - create_example_lineup_data
   - datacheck1
   - datacheck2
   - datacheck3
   - line73
   - lineup_example
+  - lineup_table
   - mickwick
   - mockdata
   - nortje2012
   - plot.power_analysis
   - print.lineup_data
+  - print.lineup_table
   - simulate_lineup_data
   - simulate_power_analysis
   - standardize_lineup_data
@@ -94,6 +97,7 @@ reference:
   - make_roc
   - make_roc_gg
   - make_rocdata
+  - plot_roc_cac
   - print.lineup_cac
   - print.lineup_rac
   - print.lineup_roc
@@ -190,6 +194,12 @@ reference:
   - fit_max_sdt
   - max_filler_moments
   - plot_msdt_joint
+- title: "Multi-d' model (Lee & Penrod)"
+  desc: "Multiple empirical d' indices from the full TP/TA response table, including resultant lineup-bias indices."
+  contents:
+  - compare_multid
+  - make_multid
+  - plot.multid
 - title: "Wixted lineup-memory models (optional pyWitness engine)"
   desc: "Fit and compare Independent Observations, Ensemble, and Integration models for fair simultaneous lineups."
   contents:

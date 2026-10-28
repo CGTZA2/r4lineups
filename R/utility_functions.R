@@ -554,10 +554,12 @@ compare_utility <- function(data_proc_a,
   )
 
   # Create plot
+  # The plot is always built, so that it is available as $plot and to the
+  # plot() method. show_plot controls only whether it is displayed now:
+  # suppressing display should not destroy the object.
+  util_plot <- plot_utility_difference(util_diff, ...)
   if (show_plot) {
-    util_plot <- plot_utility_difference(util_diff, ...)
-  } else {
-    util_plot <- NULL
+    print(util_plot)
   }
 
   result <- list(
@@ -604,7 +606,7 @@ print.lineup_utility_comparison <- function(x, ...) {
   }
 
   if (!is.null(x$plot)) {
-    cat("\nPlot available in $plot\n")
+    cat("\nPlot: save this object first, then extract it with x$plot\n")
   }
 
   invisible(x)

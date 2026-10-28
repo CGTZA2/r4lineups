@@ -152,6 +152,23 @@ make_bayes_curves <- function(data,
     ))
   }
 
+  # A zero likelihood makes the ratio unbounded, so the prior-posterior curve
+  # for that response is pinned flat at 0 or 1 for every prior. The plot then
+  # looks broken rather than informative, so say what happened.
+  degenerate <- likelihood_results$response[
+    likelihood_results$p_x_given_guilty == 0 |
+      likelihood_results$p_x_given_innocent == 0
+  ]
+  if (length(degenerate) > 0) {
+    warning("No observations in one arm for response category ",
+            paste(sQuote(degenerate), collapse = ", "),
+            ". The likelihood ratio is unbounded, so the prior-posterior ",
+            "curve is flat at 0 or 1 for every prior. This usually means the ",
+            "confidence bins are too narrow, or the sample too small, for the ",
+            "rate being estimated rather than that the evidence is perfectly ",
+            "diagnostic.", call. = FALSE)
+  }
+
   # Compute prior-posterior curves for each response type
   curve_results <- tibble::tibble(
     response = character(),
