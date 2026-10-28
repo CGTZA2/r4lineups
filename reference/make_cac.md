@@ -40,21 +40,22 @@ A list containing CAC data and plot
 ``` r
 data(lineup_example)
 cac_result <- make_cac(lineup_example, confidence_bins = c(0, 60, 80, 100))
+
 print(cac_result)
 #> 
 #> === Lineup CAC Analysis ===
 #> 
-#> Overall Accuracy: 0.8 
-#> Total Suspect IDs: 75 
+#> Overall Accuracy: 0.825 
+#> Total Suspect IDs: 503 
 #> Lineup size: 6 
 #> 
 #> CAC Data:
 #> # A tibble: 3 × 6
 #>   confidence n_correct n_incorrect n_total accuracy     se
 #>   <chr>          <int>       <int>   <int>    <dbl>  <dbl>
-#> 1 [0,60]             5           5      10    0.5   0.158 
-#> 2 (60,80]           17          10      27    0.630 0.0929
-#> 3 (80,100]          38           0      38    1     0     
+#> 1 [0,60]           233          72     305    0.764 0.0243
+#> 2 (60,80]           82          12      94    0.872 0.0344
+#> 3 (80,100]         100           4     104    0.962 0.0189
 #> 
-#> Plot available in $plot
+#> Plot: use plot(x), or save the object and extract x$plot
 ```

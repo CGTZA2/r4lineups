@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -380,6 +381,15 @@
 <code><a href="reference/plot_msdt_joint.html">plot_msdt_joint()</a></code> — joint density contour plot (suspect vs max filler).</li>
 </ul></div>
 <div class="section level3">
+<h3 id="multid-model-lee--penrod-2019">Multi‑d′ model (Lee &amp; Penrod, 2019)<a class="anchor" aria-label="anchor" href="#multid-model-lee--penrod-2019"></a></h3>
+<ul><li>
+<code><a href="reference/make_multid.html">make_multid()</a></code> — d′(GI), d′(GFp), d′(IFa), d′(FaFp), d′(RaRp) + TP/TA lineup‑bias indices from TP/TA data or counts; bootstrap CIs; cumulative by confidence; fair‑lineup reference for d′(IFa).</li>
+<li>
+<code><a href="reference/compare_multid.html">compare_multid()</a></code> — differences between two conditions on every index (bootstrap SE/CI/p).</li>
+<li>
+<code><a href="reference/plot.multid.html">plot.multid()</a></code> — decomposition waterfall, index dot plot, or indices by confidence.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="simulation--power">Simulation &amp; power<a class="anchor" aria-label="anchor" href="#simulation--power"></a></h3>
 <ul><li>
 <code><a href="reference/simulate_lineup_data.html">simulate_lineup_data()</a></code> — synthetic lineup data generator.</li>
@@ -431,6 +441,8 @@
 <li>
 <strong>SDT GLM/GLMM</strong>: <code><a href="reference/fit_sdt_glm.html">fit_sdt_glm()</a></code>/<code><a href="reference/fit_sdt_glmm.html">fit_sdt_glmm()</a></code> + <code><a href="reference/extract_sdt_metrics.html">extract_sdt_metrics()</a></code>
 </li>
+<li>
+<strong>Multi‑d′</strong>: <code><a href="reference/make_multid.html">make_multid()</a></code> + <code><a href="reference/plot.multid.html">plot.multid()</a></code>; <code><a href="reference/compare_multid.html">compare_multid()</a></code> for two conditions</li>
 </ul></div>
 <div class="section level2">
 <h2 id="vignettes-current">Vignettes (current)<a class="anchor" aria-label="anchor" href="#vignettes-current"></a></h2>
@@ -452,6 +464,8 @@
 <code>sdt_summary_comparisons.Rmd</code> — SDT summary‑level comparisons from counts</li>
 <li>
 <code>msdt_model.Rmd</code> — multi‑item SDT (mSDT) core functions</li>
+<li>
+<code>multid_model.Rmd</code> — Lee &amp; Penrod Multi‑d′ model</li>
 </ul></div>
 <div class="section level2">
 <h2 id="current-status-and-todo-highlevel">Current status and TODO (high‑level)<a class="anchor" aria-label="anchor" href="#current-status-and-todo-highlevel"></a></h2>
@@ -464,6 +478,7 @@
 <li>
 <code>make_*()</code> functions typically return structured S3 objects with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</li>
 <li>For face similarity, ensure Python deps are installed (<code><a href="reference/install_r4lineups_python.html">install_r4lineups_python()</a></code>), and set <code>MPLCONFIGDIR</code> if matplotlib cache issues appear.</li>
+<li>The Shiny app (<code>inst/shiny/r4lineups_app</code>) is a thin <code>app.R</code> plus one module per tab in its <code>R/</code> folder (<code>mod_*.R</code>, helpers in <code>utils.R</code>). Modules call only exported package functions. <code>tests/testthat/test-shiny-app.R</code> checks each module against direct package calls with <code><a href="https://rdrr.io/pkg/shiny/man/testServer.html" class="external-link">shiny::testServer()</a></code>; <code>test-shiny-app-browser.R</code> is an opt-in headless-Chrome smoke test (install the package, then set <code>R4LINEUPS_TEST_APP=true</code>).</li>
 </ul></div>
 </div>
 

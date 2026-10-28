@@ -173,9 +173,16 @@ plot_lineup_similarity(lineup)
 
 ## Shiny app
 
-The app bundles key analyses (bias, effective size, Bayesian inference,
-ROC/CAC, EIG/PPV, face similarity). It is an interactive companion to
-the package, not a complete replacement for the R API.
+The app covers lineup fairness from mock-witness choices (bias,
+effective and functional size, diagnosticity and its homogeneity),
+Bayesian posteriors, Lee and Penrod’s Multi-d′ model, ROC/CAC/full ROC
+with pAUC comparison, calibration and decision analyses (ANRI, DPP,
+expected utility, Bayesian and BREE curves, RAC), expected information
+gain and PPV ranges, and face similarity when Python is set up.
+Confidence-based data are loaded once, on the Data tab, and any column
+can be used to compare two groups. Every number shown comes from an
+exported r4lineups function, so results can be reproduced in R. The app
+needs the suggested packages `shiny`, `bslib` and `DT`.
 
 Package documentation is available at
 <https://cgtza2.github.io/r4lineups/>.

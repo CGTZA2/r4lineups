@@ -76,6 +76,7 @@ data(lineup_example)
 # Compute full PPV range
 ppv_range <- ppv_range_by_confidence(lineup_example,
                                      confidence_bins = c(0, 60, 80, 100))
+#> Target-absent lineups contain a designated innocent suspect, so innocent-suspect IDs are counted directly and no lineup-size correction is applied. The nominal, effective and uncorrected estimates are therefore identical for these data. The three diverge only when no innocent suspect is designated and the number of innocent-suspect IDs has to be estimated from the filler IDs.
 print(ppv_range)
 #> 
 #> === Lineup PPV Range Analysis ===
@@ -83,20 +84,21 @@ print(ppv_range)
 #> Lineup size: 6 
 #> 
 #> Overall PPV by correction method:
-#>   Nominal (best-case): 0.595 
-#>   Effective (realistic): 0.595 
-#>   None (worst-case): 0.595 
+#>   Nominal (best-case): 0.825 
+#>   Effective (realistic): 0.825 
+#>   None (worst-case): 0.825 
 #> 
 #> PPV range by confidence level:
 #>  confidence ppv_nominal ppv_effective ppv_none effective_size error_rate
-#>      [0,60]       0.500         0.500    0.500             NA      0.265
-#>     (60,80]       0.630         0.630    0.630             NA      1.000
+#>      [0,60]       0.764         0.764    0.764             NA      0.662
+#>     (60,80]       0.872         0.872    0.872             NA      1.000
+#>    (80,100]       0.962         0.962    0.962             NA      1.000
 
 # Access individual corrections
 ppv_range$ppv_nominal$overall_ppv
-#> [1] 0.5945946
+#> [1] 0.8250497
 ppv_range$ppv_effective$overall_ppv
-#> [1] 0.5945946
+#> [1] 0.8250497
 ppv_range$ppv_none$overall_ppv
-#> [1] 0.5945946
+#> [1] 0.8250497
 ```

@@ -20,6 +20,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/model_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/msdt_model.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/articles/multid_model.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/pauc_statistical_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/rac_analysis.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/articles/sdt_glm_analysis.html</loc></url>
@@ -41,11 +42,13 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/check_python_deps.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/check_pywitness_deps.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/chi_diag.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_anri.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_dpp.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_eff_sizes.boot.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_max_sdt.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_models.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/compare_multid.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_pauc.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_sdt_summary.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/compare_utility.html</loc></url>
@@ -139,6 +142,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/lineup_prop_tab.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/lineup_prop_vec.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/lineup_similarity.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/lineup_table.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/ln_diag_ratio.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_bayes_curves.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_bree_curve.html</loc></url>
@@ -155,6 +159,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_eig_data.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_fullroc.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_fullroc_data.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/make_multid.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_ppv_range.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_rac.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/make_rac_gg.html</loc></url>
@@ -173,6 +178,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.esize_T_bayes_compare.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.lineup_model_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.model_comparison.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/plot.multid.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.pauc_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.power_analysis.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot.sdt_roc_fit.html</loc></url>
@@ -198,6 +204,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot_lineup_similarity.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot_msdt_joint.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot_ppv_range.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot_similarity_distribution.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot_utility_curves.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/plot_utility_difference.html</loc></url>
@@ -219,6 +226,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_rac.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_roc.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_similarity.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_table.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_utility_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.model_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.pauc_comparison.html</loc></url>

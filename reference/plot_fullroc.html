@@ -9,7 +9,7 @@ experiments using the Smith &amp;amp; Yang (2020) method."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,12 +28,13 @@ experiments using the Smith &amp;amp; Yang (2020) method."></head><body>
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -73,7 +74,9 @@ experiments using the Smith &amp; Yang (2020) method.</p>
 
 
 <dl><dt id="arg-fullroc-obj">fullroc_obj<a class="anchor" aria-label="anchor" href="#arg-fullroc-obj"></a></dt>
-<dd><p>List output from make_fullroc_data()</p></dd>
+<dd><p>Either the list returned by <code><a href="make_fullroc_data.html">make_fullroc_data()</a></code> or
+the <code>lineup_fullroc</code> object returned by <code><a href="make_fullroc.html">make_fullroc()</a></code>. The two
+record the ordering method in different places, and both are accepted.</p></dd>
 
 
 <dt id="arg-show-auc">show_auc<a class="anchor" aria-label="anchor" href="#arg-show-auc"></a></dt>
@@ -90,13 +93,15 @@ experiments using the Smith &amp; Yang (2020) method.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A ggplot2 object</p>
+    <p>A ggplot2 object. Being an ordinary ggplot, it can be modified with
+  the usual <code>+</code> syntax, e.g. <code>p + ggplot2::theme_minimal()</code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fullroc_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_fullroc_data.html">make_fullroc_data</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").</span>
 <span class="r-in"><span><span class="fu">plot_fullroc</span><span class="op">(</span><span class="va">fullroc_result</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_fullroc-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

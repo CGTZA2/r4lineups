@@ -1,5 +1,423 @@
 # Changelog
 
+## r4lineups 2.2.0 (2026-10-28)
+
+### Breaking changes
+
+- The first argument of
+  [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md),
+  [`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md),
+  [`i_esize_T()`](https://cgtza2.github.io/r4lineups/reference/i_esize_T.md),
+  [`gen_linevec()`](https://cgtza2.github.io/r4lineups/reference/gen_linevec.md),
+  [`lineup_prop_tab()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_tab.md),
+  [`allfoilbias()`](https://cgtza2.github.io/r4lineups/reference/allfoilbias.md),
+  [`datacheck3()`](https://cgtza2.github.io/r4lineups/reference/datacheck3.md),
+  [`esize_T_boot()`](https://cgtza2.github.io/r4lineups/reference/esize_T_boot.md),
+  [`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md)
+  and
+  [`esize_T_ci_n()`](https://cgtza2.github.io/r4lineups/reference/esize_T_ci_n.md)
+  is renamed from `lineup_table` to `lineup_tab`, so that it no longer
+  collides with the new
+  [`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+  function (see below). Code that calls these functions positionally is
+  unaffected; code that passes the argument by name (e.g.
+  `esize_T(lineup_table = x)`) must be updated to
+  `esize_T(lineup_tab = x)`.
+
+- [`simulate_power_analysis()`](https://cgtza2.github.io/r4lineups/reference/simulate_power_analysis.md)
+  now performs an actual power analysis and its arguments have changed
+  accordingly. It takes `d_prime_null` (the comparison condition),
+  `n_bootstrap`, `lineup_size`, `seed` and `verbose`; the former
+  `stat_function` argument is replaced by `test_function`, which takes
+  two dataframes and returns a p-value. The returned columns are now
+  `sample_size`, `power`, `power_se`, `mean_effect`, `sd_effect` and
+  `n_valid`. See the bug-fix entry below for why this was necessary.
+
+- `lineup_example` has been regenerated and now has 1400 rows rather
+  than 200, with `lineup_member` and `suspect_pos` columns. Numeric
+  results computed from it will differ from previous versions.
+
+### Bug fixes
+
+- [`simulate_power_analysis()`](https://cgtza2.github.io/r4lineups/reference/simulate_power_analysis.md)
+  computed power as the proportion of simulations in which the pAUC
+  exceeded zero. A partial area under a curve is always positive, so
+  that proportion was **always exactly 1**, for every sample size and
+  every effect size, and the resulting power curve was a flat line at
+  the top of the plot. Power is now the proportion of simulated studies
+  in which a test of the difference between two conditions reaches
+  significance, using
+  [`compare_pauc()`](https://cgtza2.github.io/r4lineups/reference/compare_pauc.md)
+  by default. The single test covering this function was skipped and
+  additionally asserted a field the function never returned, so the
+  fault could not have been caught; it has been replaced with tests that
+  run.
+
+- [`make_roc()`](https://cgtza2.github.io/r4lineups/reference/make_roc.md),
+  [`make_cac()`](https://cgtza2.github.io/r4lineups/reference/make_cac.md),
+  [`make_rac()`](https://cgtza2.github.io/r4lineups/reference/make_rac.md),
+  [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md),
+  [`make_calibration()`](https://cgtza2.github.io/r4lineups/reference/make_calibration.md)
+  and
+  [`compute_dpp()`](https://cgtza2.github.io/r4lineups/reference/compute_dpp.md)
+  set `$plot` to `NULL` when called with `show_plot = FALSE`, so
+  suppressing display also destroyed the plot object. `result$plot` was
+  then `NULL` and nothing could be drawn from it — the cause of several
+  “the plot does not show” reports. The plot is now always built, and
+  `show_plot` controls only whether it is displayed immediately, which
+  is what its documentation always said it did.
+
+- [`compare_pauc()`](https://cgtza2.github.io/r4lineups/reference/compare_pauc.md)
+  chose its default region of integration as the **larger** of the two
+  conditions’ maximum false-ID rates. Since neither curve extends past
+  its own maximum and no extrapolation is performed, the curve that
+  stopped sooner was integrated over a smaller interval than the other,
+  so the two “partial areas” covered different regions and were not
+  comparable. In testing, this understated a real difference by around
+  14%. The default is now the largest region **both** curves attain, a
+  message reports it when the two differ, and an explicit
+  `max_false_id_rate` beyond either curve’s reach now warns.
+
+- [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+  and
+  [`make_fullroc_data()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc_data.md)
+  now report that the default `order = "diagnosticity"` is
+  optimistically biased. Because the ordering of evidence categories is
+  estimated from the same data used to compute the area, data containing
+  no signal at all return a mean AUC of roughly 0.65 at 100 lineups per
+  arm, 0.60 at 200 and 0.55 at 1000, against a true value of 0.5.
+  A-priori ordering is unbiased at every sample size tested. The default
+  is unchanged, since it is the ordering Smith et al. describe, but a
+  message now points to `order = "apriori"` for inferential use.
+
+- [`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
+  failed with `non-finite finite-difference value` when the data
+  contained almost no lineup rejections. The detect-absence parameter
+  `dA` is identified by rejections, so the likelihood is nearly flat
+  without them. It now stops with a message naming the actual problem
+  and the likely cause — a decision criterion so liberal that witnesses
+  never reject.
+  [`compare_models()`](https://cgtza2.github.io/r4lineups/reference/compare_models.md)
+  had silently omitted the 2-HT model in this situation, so every
+  downstream section that referred to it produced no output.
+
+- `format_comparison_table(format = "markdown")` produced a table that
+  rendered as a single run-on paragraph. It returns a `knitr_kable`
+  object, which is a character vector with one element per line, and the
+  vignette printed it with `cat(x)` — joining the lines with spaces. The
+  vignette now uses `cat(x, sep = "\n")` and the return value is
+  documented as line-per-element. The markdown and latex forms also
+  called `kable()` without `row.names = FALSE`, so row names inherited
+  from the named parameter vectors (“dP”, “dA”, …) appeared as a
+  spurious unlabelled first column.
+
+- [`plot_2ht_parameters()`](https://cgtza2.github.io/r4lineups/reference/plot_2ht_parameters.md)
+  rejected `winter_2ht_boot` objects, although its documentation offered
+  confidence intervals “if bootstrapped”. It now accepts them and draws
+  the bootstrap percentile intervals. For a plain fit it still draws
+  normal approximations, but clamped to \[0, 1\]: all four parameters
+  are probabilities, and on `lineup_example` the interval for `b`
+  previously ran to -0.023.
+
+- [`plot.esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/plot.esize_T_bayes.md)
+  packed the credible interval into the plot title using an embedded
+  newline, producing a two-line 74-character title laid out as a single
+  text grob — the usual cause of a heading running off the top of a
+  rendered figure. The interval is now a subtitle. The other five
+  Bayesian plot methods were checked and none had the same fault.
+
+- Effective size is no longer referred to eponymously as “Tredoux
+  effective size” in documentation, printed output or plot labels; it is
+  now “effective size” with the citation (Tredoux, 1998). Affects
+  [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md),
+  [`i_esize_T()`](https://cgtza2.github.io/r4lineups/reference/i_esize_T.md),
+  [`esize_T_ci_n()`](https://cgtza2.github.io/r4lineups/reference/esize_T_ci_n.md)
+  and the
+  [`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md)
+  family.
+
+- [`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
+  left bootstrap replicates that failed to converge as `NA` rows in
+  `boot_params` without recording how many, so
+  `sd(fit$boot_params[, 1])` returned `NA` unexplained. It now reports
+  `boot_n_used` and `boot_n_failed`, warns when more than 10% fail, and
+  errors rather than returning meaningless intervals if all of them do.
+  Its documentation also gained a “Provenance” section crediting the R
+  scripts of A. M. Smith from which the implementation follows, and a
+  “Relation to Smith’s scripts” section explaining why estimates differ:
+  this function uses five mutually exclusive response cells, whereas
+  those scripts fit total target-present choices alongside culprit
+  identifications, counting the latter twice.
+
+- [`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md)
+  failed with reticulate’s opaque
+  `Suitable Python installation for creating a venv not found` when
+  `python_version` named a version not present on the machine, without
+  saying how to obtain one. It now checks first, reports which versions
+  it did find, and gives the
+  [`reticulate::install_python()`](https://rstudio.github.io/reticulate/reference/install_python.html)
+  call needed.
+
+- `Vignette.Rmd` drew random numbers – simulated ages and every
+  bootstrap – without a seed, so its output changed on every build.
+  Seeded once in setup.
+
+- [`make_bayes_curves()`](https://cgtza2.github.io/r4lineups/reference/make_bayes_curves.md)
+  now warns when a response category has no observations in one arm. The
+  likelihood ratio is then unbounded and the prior-posterior curve is
+  pinned flat at 0 or 1, which looks like a plotting fault rather than a
+  data problem.
+
+- The member-level branch of the effective-size calculation in
+  [`ppv_by_confidence()`](https://cgtza2.github.io/r4lineups/reference/ppv_by_confidence.md)
+  counted rejections as a lineup position and did not tabulate over all
+  positions, so unchosen members were dropped. This branch was
+  previously unreachable, as no dataset supplied a `lineup_member`
+  column.
+
+- [`plot_lineup_bias_distribution()`](https://cgtza2.github.io/r4lineups/reference/plot_lineup_bias_distribution.md)
+  and
+  [`plot_esize_distribution()`](https://cgtza2.github.io/r4lineups/reference/plot_esize_distribution.md)
+  no longer draw ragged histograms with structural gaps. A bootstrapped
+  lineup proportion is a count over a fixed denominator, so the
+  replicates fall on a lattice with spacing `1/n`; binning them at a
+  fixed 30 bins left bins that contained no attainable value empty
+  regardless of the data, and made bins that straddled two attainable
+  values twice as tall as their neighbours. The bin width is now chosen
+  to match the lattice, giving one bar per attainable value. Estimates
+  that are effectively continuous still use 30 bins. Both functions
+  gained `bins` and `binwidth` arguments for explicit control.
+
+- [`plot_fullroc()`](https://cgtza2.github.io/r4lineups/reference/plot_fullroc.md)
+  labelled the plot `"Ordering method: "` with nothing after it when
+  given the output of
+  [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md),
+  because the ordering method is recorded at `$order_used` on a
+  [`make_fullroc_data()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc_data.md)
+  object but at `$summary$order_method` on a
+  [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+  object. Both shapes are now accepted, and an object carrying neither
+  raises an informative error.
+
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html) now works on
+  the ROC and CAC objects.
+  [`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md),
+  [`make_cacdata()`](https://cgtza2.github.io/r4lineups/reference/make_cacdata.md)
+  and
+  [`make_fullroc_data()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc_data.md)
+  returned unclassed lists, so `plot(x)` dispatched to
+  [`plot.default()`](https://rdrr.io/r/graphics/plot.default.html) and
+  failed; the package registered `print` methods for these objects but
+  no `plot` methods. Added
+  [`plot.lineup_roc()`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md),
+  [`plot.lineup_cac()`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md),
+  [`plot.lineup_fullroc()`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md)
+  and methods for the corresponding `*_data` classes, all reusing the
+  existing
+  [`make_roc_gg()`](https://cgtza2.github.io/r4lineups/reference/make_roc_gg.md),
+  [`make_cac_gg()`](https://cgtza2.github.io/r4lineups/reference/make_cac_gg.md)
+  and
+  [`plot_fullroc()`](https://cgtza2.github.io/r4lineups/reference/plot_fullroc.md)
+  builders.
+
+- [`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md)
+  pinned no Python version, so reticulate could select an interpreter
+  newer than any for which TensorFlow publishes wheels, and the install
+  failed partway through with
+  `No matching distribution found for tensorflow`. It now checks the
+  interpreter before downloading anything and stops with an actionable
+  message, and gained a `python_version` argument for building the
+  virtual environment from a supported interpreter.
+
+### New features
+
+- New
+  [`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md)
+  implements Lee and Penrod’s (2019) Multi-d’ model. From target-present
+  and target-absent lineup data (trial-level or counts) it computes
+  d’(GI), d’(GFp), d’(IFa), d’(FaFp) and d’(RaRp), the TP and TA
+  lineup-bias indices, the criterion and the diagnosticity ratio, with
+  optional bootstrap intervals and a cumulative breakdown by confidence.
+  Because the model uses total filler rates, a fair lineup does not give
+  d’(IFa) = 0, so the result also reports the d’(IFa) a perfectly fair
+  lineup would give at the observed rejection rate.
+  [`compare_multid()`](https://cgtza2.github.io/r4lineups/reference/compare_multid.md)
+  compares two conditions, and
+  [`plot.multid()`](https://cgtza2.github.io/r4lineups/reference/plot.multid.md)
+  draws the decomposition of d’(GI), the indices, or the indices by
+  confidence. The tests reproduce Lee and Penrod’s Tables 3, 4 and
+
+  9.  See
+      [`vignette("multid_model")`](https://cgtza2.github.io/r4lineups/articles/multid_model.md).
+
+- [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
+  gained an `unbiased` argument. The default (`FALSE`) is the plug-in
+  estimator as before, so no existing result changes. `unbiased = TRUE`
+  applies the small-sample correction `N(N-1) / sum(o(o-1))`. The
+  plug-in form is biased **downward**, by approximately
+  `k(k-1)/(N + k - 1)`: a perfectly fair six-person lineup assessed with
+  50 choices returns about 5.47 rather than 6, and with 20 choices about
+  4.87. The correction removes essentially all of it in simulation, at a
+  variance cost that disappears by about 100 choices. The bias, the
+  evidence and the choice between the two forms are documented in
+  [`?esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md),
+  with cross-references from
+  [`?esize_m`](https://cgtza2.github.io/r4lineups/reference/esize_m.md)
+  and
+  [`?esize_T_ci_n`](https://cgtza2.github.io/r4lineups/reference/esize_T_ci_n.md).
+
+- New
+  [`classify_lineup_choices()`](https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.md)
+  derives identification outcomes (suspect ID, foil ID, rejection) from
+  the raw record of which lineup member each witness chose. Lineup data
+  should record the member chosen, with the collapsed label derived from
+  it rather than stored in its place, because foils are not
+  interchangeable and a foil nobody ever chooses is what makes a lineup
+  unfair.
+
+- [`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
+  gained a `foil_bias` argument, giving each foil its own mean memory
+  strength so that foils differ in plausibility rather than being drawn
+  from a common distribution. The default (`NULL`) preserves the
+  previous behaviour exactly.
+
+- [`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
+  now returns `lineup_member` (the position chosen, 0 for a rejection)
+  and `suspect_pos` alongside `identification`. The chosen position was
+  already computed internally and discarded.
+
+- [`plot.power_analysis()`](https://cgtza2.github.io/r4lineups/reference/plot.power_analysis.md)
+  shows a Monte Carlo interval around the power curve, so that apparent
+  dips between adjacent points can be recognised as simulation noise,
+  and returns the ggplot object invisibly for further modification.
+
+- [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md)
+  and
+  [`homog_diag_boot()`](https://cgtza2.github.io/r4lineups/reference/homog_diag_boot.md)
+  now report the diagnosticity ratio and a confidence interval for each
+  lineup pair, not just the pooled mean and the chi-square. The
+  chi-square is Cochran’s Q, which measures how far the k ratios lie
+  from their pooled value; that is a different question from whether the
+  pooled ratio differs from 1, and the two can disagree sharply. Ratios
+  of 6.0, 1.0 and 0.44 give Q = 45.6 (p \< .0001) while pooling to 1.06,
+  because they cancel on the log scale — an output that reads as “highly
+  significant, but no diagnosticity” unless the per-pair values are
+  visible. Both functions now print a note stating whether the ratios
+  are heterogeneous and, when they are, that the pooled estimate
+  averages quantities that are not estimating a common parameter and
+  should not be reported on its own. The returned list gained a
+  `heterogeneous` flag, and
+  [`homog_diag_boot()`](https://cgtza2.github.io/r4lineups/reference/homog_diag_boot.md)
+  gained `df` and `p_value`; the `parameters` element now carries `d`,
+  `ln_d`, `var_lnd`, `wi`, `lower` and `upper` alongside the existing
+  cell counts. Both functions gained a `conf.level` argument, which also
+  sets the level for
+  [`homog_diag_boot()`](https://cgtza2.github.io/r4lineups/reference/homog_diag_boot.md)’s
+  percentile intervals (default 0.95, unchanged from the previous
+  hard-coded value).
+
+- Added
+  [`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md),
+  which tabulates lineup choices across all `k` positions so that null
+  foils — members no mock witness chose — appear as explicit zeroes
+  rather than being silently dropped by
+  [`table()`](https://rdrr.io/r/base/table.html). Its print method names
+  the null foils and marks the nominated suspect. The result inherits
+  from `table`, so it can be passed to
+  [`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md),
+  [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
+  and the other table-taking functions unchanged.
+
+### Shiny app
+
+- The app bundled with
+  [`run_r4lineups_app()`](https://cgtza2.github.io/r4lineups/reference/run_r4lineups_app.md)
+  has been rebuilt on `bslib`, with one module per analysis. Every
+  number it shows now comes from an exported r4lineups function; the
+  app’s own copy of the Malpass effective-size formula is gone.
+- The ROC, CAC, full ROC, pAUC, EIG and PPV analyses previously assumed
+  a six-person lineup whatever the data. Lineup size is now set on a new
+  Data tab, which loads one confidence-based data set (built-in or
+  uploaded) for all of these analyses and lets any column define two
+  groups to compare.
+- New tabs cover the diagnosticity ratio and its homogeneity test, Lee
+  and Penrod’s Multi-d’ model, and calibration and decision analyses
+  (ANRI, DPP, expected utility, Bayesian and BREE curves, RAC). The
+  fairness tab adds the binomial test against chance, bootstrap
+  distributions, functional size and the corrected E’.
+- Bootstrap and posterior analyses now run when *Run analysis* is
+  clicked rather than on every keystroke, take a seed, and are computed
+  once, so a table’s interval and the plotted distribution come from the
+  same draws. Messages and warnings from the package are shown beside
+  the results.
+- Every table downloads as CSV and every plot as PNG. “Download ROC/CAC
+  data” previously wrote an `.rds` file.
+- The app no longer counts sessions on disk or fetches download totals
+  from CRAN and GitHub at start-up.
+- The face similarity tab now includes the Python setup that used to be
+  the first tab, and is hidden when `reticulate` is unavailable.
+- [`run_r4lineups_app()`](https://cgtza2.github.io/r4lineups/reference/run_r4lineups_app.md)
+  checks that `shiny`, `bslib` and `DT` are installed. `bslib` and
+  `shinytest2` join Suggests; `shinyWidgets` and `jsonlite` leave.
+
+### Output and documentation
+
+- [`make_racdata()`](https://cgtza2.github.io/r4lineups/reference/make_racdata.md)
+  labels response-time bins in plain notation, e.g. `[2390,4810]` rather
+  than `[2.39e+03,4.81e+03]`.
+
+- ROC and CAC print methods now say
+  `"Plot: use plot(x), or save the object and extract x$plot"` rather
+  than the cryptic `"Plot available in $plot"`.
+
+- [`print.lineup_roc()`](https://cgtza2.github.io/r4lineups/reference/print.lineup_roc.md)
+  and
+  [`print.lineup_fullroc()`](https://cgtza2.github.io/r4lineups/reference/print.lineup_fullroc.md)
+  now report `"Target-present trials (N)"` rather than
+  `"Target-present lineups"`, which read as a count of lineups when it
+  is a count of witnesses.
+
+- [`make_roc_gg()`](https://cgtza2.github.io/r4lineups/reference/make_roc_gg.md)
+  now names the ROC variant in the title, so a partial ROC is not
+  mistaken for a full ROC, and records the data source in the caption.
+  It gained `title` and `data_source` arguments.
+
+- [`eff_size_per_foils()`](https://cgtza2.github.io/r4lineups/reference/eff_size_per_foils.md)
+  had no `@return` documentation at all. Documented that it returns a
+  count of lineup members, so it changes only in whole steps as `conf`
+  varies and is flat across ranges of `conf` in which no member’s
+  interval crosses `1/k`.
+
+- [`eff_size_per_foils()`](https://cgtza2.github.io/r4lineups/reference/eff_size_per_foils.md)
+  and
+  [`lineup_boot_allprop()`](https://cgtza2.github.io/r4lineups/reference/lineup_boot_allprop.md)
+  both described `conf` as “Desired level of alpha”; it is a confidence
+  level. Documented also that
+  [`lineup_boot_allprop()`](https://cgtza2.github.io/r4lineups/reference/lineup_boot_allprop.md)
+  applies no multiplicity correction across the `k` intervals it
+  returns.
+
+- The main vignette has been substantially revised: corrected a typo
+  (`line_df$linep_vec`), a reference to a nonexistent `sample_data`
+  dataset, an inverted functional size formula (`D/N` for `N/D`), a
+  misstated proportion (“0.14%” for 14%), a misattributed sentence (“He
+  instead proposed” for “Tredoux instead proposed”), and inline code
+  spans that reflowed into a paragraph instead of forming a code chunk.
+  Added sections on null foils, normal-theory versus bootstrap
+  intervals, multiplicity across lineup members, functional size
+  exceeding nominal size, the `boot.ci()` warnings, the
+  `*_data()`/wrapper distinction in the ROC and CAC functions, and raw
+  data format for ROC analysis. The homogeneity section now separates
+  the two questions the output answers — whether the k ratios agree with
+  one another (chi-square) and whether the average ratio differs from 1
+  (interval on the pooled ratio) — with a worked heterogeneous example
+  in which every ratio is diagnostic, followed by a cautionary example
+  in which ratios pointing in opposite directions give a very large
+  chi-square while pooling to roughly 1. The unsupported version 1
+  `face_sim()` section has been retired in favour of a pointer to the
+  face similarity vignette, and the vignette closes with a linked index
+  of the other vignettes.
+
 ## r4lineups 2.1.0 (2026-08-10)
 
 - Added an explicit authorship and acknowledgements statement

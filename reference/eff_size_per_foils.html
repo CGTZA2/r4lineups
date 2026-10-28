@@ -9,7 +9,7 @@ within the CI for chance guessing"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,12 +28,13 @@ within the CI for chance guessing"></head><body>
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -80,13 +81,33 @@ within the CI for chance guessing</p>
 
 
 <dt id="arg-conf">conf<a class="anchor" aria-label="anchor" href="#arg-conf"></a></dt>
-<dd><p>Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).</p></dd>
+<dd><p>Confidence level for the intervals, e.g. 0.95 for 95 percent
+intervals. Defaults to 0.95. May be specified by user (scalar).</p></dd>
 
 
 <dt id="arg-r">R<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
 <dd><p>Number of bootstrap replications. Defaults to 1000.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A single integer: the number of lineup members whose bootstrapped
+       confidence interval for the proportion choosing them includes the
+       chance value \(1/k\). These are the members that a mock witness
+       chose at a rate not distinguishable from guessing.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Because the result is a count of members rather than a continuous
+        quantity, it changes only in whole steps as <code>conf</code> varies, and
+        it is flat across ranges of <code>conf</code> in which no member's interval
+        crosses \(1/k\). A value that does not move when <code>conf</code> is
+        changed from, say, 0.95 to 0.99 is therefore expected behaviour and
+        not a sign that the argument is being ignored. Widening the interval
+        can only ever increase the count.</p>
+<p>Intervals are computed by <code><a href="lineup_boot_allprop.html">lineup_boot_allprop</a></code>, and are
+        not corrected for the fact that <code>k</code> of them are examined at once.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Malpass, R S. (1981). Effective size and defendant bias in eyewitness

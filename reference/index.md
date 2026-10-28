@@ -4,6 +4,8 @@
 
 Validate, standardize, and simulate lineup data.
 
+- [`classify_lineup_choices()`](https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.md)
+  : Classify Raw Lineup Choices into Identification Outcomes
 - [`create_example_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/create_example_lineup_data.md)
   : Create Example Lineup Data
 - [`datacheck1()`](https://cgtza2.github.io/r4lineups/reference/datacheck1.md)
@@ -16,6 +18,8 @@ Validate, standardize, and simulate lineup data.
   line73
 - [`lineup_example`](https://cgtza2.github.io/r4lineups/reference/lineup_example.md)
   : Example Lineup Identification Data
+- [`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+  : Tabulate Lineup Choices, Including Null Foils
 - [`mickwick`](https://cgtza2.github.io/r4lineups/reference/mickwick.md)
   : Confidence & Accuracy data (Mickes & Wixted)
 - [`mockdata`](https://cgtza2.github.io/r4lineups/reference/mockdata.md)
@@ -26,6 +30,8 @@ Validate, standardize, and simulate lineup data.
   : Plot Power Analysis Results
 - [`print(`*`<lineup_data>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.lineup_data.md)
   : Print Method for Lineup Data
+- [`print(`*`<lineup_table>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.lineup_table.md)
+  : Print Method for lineup_table Objects
 - [`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
   : Simulate Lineup Identification Data
 - [`simulate_power_analysis()`](https://cgtza2.github.io/r4lineups/reference/simulate_power_analysis.md)
@@ -79,18 +85,19 @@ Tredoux’s E’, Malpass’s effective size, and inference on them.
 - [`esize_m_boot()`](https://cgtza2.github.io/r4lineups/reference/esize_m_boot.md)
   : Bootstrapped Effective Size
 - [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
-  : Tredoux Effective Size (Tredoux, 1998)
+  : Effective Size (Tredoux, 1998)
 - [`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md)
-  : Bayesian Posterior Distribution of Tredoux Effective Size
+  : Bayesian Posterior Distribution of Effective Size (Tredoux, 1998)
 - [`esize_T_bayes_compare()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes_compare.md)
-  : Bayesian Comparison of Tredoux Effective Size Across Two Lineups
+  : Bayesian Comparison of Effective Size (Tredoux, 1998) Across Two
+  Lineups
 - [`esize_T_boot()`](https://cgtza2.github.io/r4lineups/reference/esize_T_boot.md)
   : Bootstrapped Effective Size (Tredoux, 1998)
 - [`esize_T_ci_n()`](https://cgtza2.github.io/r4lineups/reference/esize_T_ci_n.md)
   : Effective Size with Confidence Intervals from Normal Theory
   (Tredoux, 1998)
 - [`i_esize_T()`](https://cgtza2.github.io/r4lineups/reference/i_esize_T.md)
-  : I Component of Tredoux Effective Size (Tredoux, 1998)
+  : I Component of Effective Size (Tredoux, 1998)
 
 ## Functional size
 
@@ -159,6 +166,13 @@ time-accuracy analysis.
   : Plot ROC Curve for Lineup Identification
 - [`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md)
   : Compute ROC Data for Lineup Identification
+- [`plot(`*`<lineup_roc_data>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md)
+  [`plot(`*`<lineup_roc>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md)
+  [`plot(`*`<lineup_cac_data>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md)
+  [`plot(`*`<lineup_cac>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md)
+  [`plot(`*`<lineup_fullroc_data>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md)
+  [`plot(`*`<lineup_fullroc>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot_roc_cac.md)
+  : Plot Methods for ROC and CAC Objects
 - [`print(`*`<lineup_cac>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.lineup_cac.md)
   : Print Method for lineup_cac Objects
 - [`print(`*`<lineup_rac>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.lineup_rac.md)
@@ -355,6 +369,18 @@ fitting.
   : Max Filler Distribution Moments
 - [`plot_msdt_joint()`](https://cgtza2.github.io/r4lineups/reference/plot_msdt_joint.md)
   : Plot mSDT Joint Distributions
+
+## Multi-d’ model (Lee & Penrod)
+
+Multiple empirical d’ indices from the full TP/TA response table,
+including resultant lineup-bias indices.
+
+- [`compare_multid()`](https://cgtza2.github.io/r4lineups/reference/compare_multid.md)
+  : Compare Multi-d' Indices Between Two Conditions
+- [`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md)
+  : Multi-d' Model of Lineup Performance (Lee & Penrod, 2019)
+- [`plot(`*`<multid>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.multid.md)
+  : Plot a Multi-d' Analysis
 
 ## Wixted lineup-memory models (optional pyWitness engine)
 

@@ -131,16 +131,16 @@ data(lineup_example)
 util <- make_utility_curves(lineup_example)
 util$max_utility
 #> $expected_utility
-#>     tp 
-#> 0.3125 
+#>        tp 
+#> 0.2882143 
 #> 
 #> $criterion
-#> [1] 60
+#> [1] 30
 #> 
 #> $hit_rate
-#> [1] 0.6
+#> [1] 0.5557143
 #> 
 #> $false_alarm_rate
-#> [1] 0.11
+#> [1] 0.1028571
 #> 
 ```

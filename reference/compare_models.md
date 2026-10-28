@@ -124,6 +124,7 @@ comparison <- compare_models(lineup_example)
 #> Fitting 2-HT model...
 #> Computing EIG...
 #> Computing Full ROC...
+#> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").
 #> 
 #> Model comparison complete!
 print(comparison)
@@ -131,22 +132,22 @@ print(comparison)
 #> === Lineup Model Comparison ===
 #> 
 #> Models fit: 2ht, eig, fullroc 
-#> Sample size: 200 
+#> Sample size: 1400 
 #> Lineup size: 6 
 #> 
 #> Comparison Table:
-#>                          Model                   Measure     Value
-#>     2-HT (Winter et al., 2022)            Log-likelihood -187.6900
-#>     2-HT (Winter et al., 2022)                       AIC  383.3700
-#>     2-HT (Winter et al., 2022)                       BIC  396.5700
-#>     2-HT (Winter et al., 2022)   dP (detection presence)    0.4870
-#>     2-HT (Winter et al., 2022)    dA (detection absence)    0.3170
-#>      EIG (Starns et al., 2023) Expected Information Gain    0.3691
-#>      EIG (Starns et al., 2023)    Information Efficiency   36.9000
-#>      EIG (Starns et al., 2023)             Prior Entropy    1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC    0.8589
-#>  Full ROC (Smith & Yang, 2020)          Operating Points   15.0000
-#>  Full ROC (Smith & Yang, 2020)              Max Hit Rate    1.0000
+#>                          Model                   Measure      Value
+#>     2-HT (Winter et al., 2022)            Log-likelihood -1280.6300
+#>     2-HT (Winter et al., 2022)                       AIC  2569.2600
+#>     2-HT (Winter et al., 2022)                       BIC  2590.2400
+#>     2-HT (Winter et al., 2022)   dP (detection presence)     0.5260
+#>     2-HT (Winter et al., 2022)    dA (detection absence)     0.1070
+#>      EIG (Starns et al., 2023) Expected Information Gain     0.2189
+#>      EIG (Starns et al., 2023)    Information Efficiency    21.9000
+#>      EIG (Starns et al., 2023)             Prior Entropy     1.0000
+#>  Full ROC (Smith & Yang, 2020)                  Full AUC     0.7775
+#>  Full ROC (Smith & Yang, 2020)          Operating Points    19.0000
+#>  Full ROC (Smith & Yang, 2020)              Max Hit Rate     1.0000
 #>               Interpretation
 #>            Model fit quality
 #>              Lower is better
@@ -169,27 +170,27 @@ summary(comparison)
 #> === Model Comparison Summary ===
 #> 
 #> Dataset:
-#>   Total observations: 200 
-#>   Target-present: 100 
-#>   Target-absent: 100 
+#>   Total observations: 1400 
+#>   Target-present: 700 
+#>   Target-absent: 700 
 #>   Lineup size: 6 
 #> 
 #> Models fitted: 3 
 #>    2ht, eig, fullroc 
 #> 
 #> --- 2-HT Model Summary ---
-#>   Parameters: dP = 0.487 , dA = 0.317 , b = 0.149 , g = 0.495 
-#>   AIC: 383.37 
-#>   BIC: 396.57 
+#>   Parameters: dP = 0.526 , dA = 0.107 , b = 0.009 , g = 0.796 
+#>   AIC: 2569.26 
+#>   BIC: 2590.24 
 #> 
 #> --- EIG Summary ---
-#>   EIG: 0.3691 bits
-#>   Information efficiency: 36.9 %
-#>   Number of response categories: 15 
+#>   EIG: 0.2189 bits
+#>   Information efficiency: 21.9 %
+#>   Number of response categories: 19 
 #> 
 #> --- Full ROC Summary ---
-#>   Full AUC: 0.8589 
-#>   Operating points: 15 
+#>   Full AUC: 0.7775 
+#>   Operating points: 19 
 #>   Ordering method: diagnosticity 
 #> 
 #> ---
@@ -214,50 +215,50 @@ comparison$fitted_models$`2ht`
 #> ==================================================
 #> 
 #> Sample size:
-#>   Target-present: 100
-#>   Target-absent:  100
-#>   Total:          200
+#>   Target-present: 700
+#>   Target-absent:  700
+#>   Total:          1400
 #>   Lineup size:    6
 #> 
 #> Parameter Estimates:
 #>                       Estimate     SE
-#> dP (culprit presence)   0.4875 0.0755
-#> dA (culprit absence)    0.3167 0.1318
-#> b  (biased selection)   0.1493 0.0648
-#> g  (guessing)           0.4954 0.0794
+#> dP (culprit presence)   0.5262 0.0231
+#> dA (culprit absence)    0.1067 0.0333
+#> b  (biased selection)   0.0093 0.0164
+#> g  (guessing)           0.7961 0.0227
 #> 
-#> Log-likelihood: -187.69
-#> AIC: 383.37
-#> BIC: 396.57
+#> Log-likelihood: -1280.63
+#> AIC: 2569.26
+#> BIC: 2590.24
 comparison$fitted_models$eig
 #> 
 #> === Expected Information Gain (EIG) Analysis ===
 #> 
-#> EIG: 0.3691 bits
+#> EIG: 0.2189 bits
 #> Prior probability of guilt: 0.5 
 #> Prior entropy: 1 bits
-#> Information efficiency: 36.9 %
+#> Information efficiency: 21.9 %
 #> 
 #> Sample sizes:
-#>   Target-present (guilty): 100 
-#>   Target-absent (innocent): 100 
+#>   Target-present (guilty): 700 
+#>   Target-absent (innocent): 700 
 #> 
 #> Top response categories by information gain:
-#> (Showing up to 10 of 15 total)
+#> (Showing up to 10 of 19 total)
 #> 
 #> # A tibble: 10 × 6
 #>    response    identification confidence_level p_response posterior_guilty
 #>    <chr>       <chr>          <chr>            <chr>      <chr>           
-#>  1 suspect_100 suspect        100              0.085      1.000           
-#>  2 suspect_90  suspect        90               0.105      1.000           
-#>  3 reject_60   reject         60               0.045      0.000           
-#>  4 suspect_50  suspect        50               0.020      0.000           
-#>  5 filler_70   filler         70               0.040      0.125           
-#>  6 reject_40   reject         40               0.120      0.167           
-#>  7 suspect_60  suspect        60               0.030      0.833           
-#>  8 reject_20   reject         20               0.060      0.250           
-#>  9 reject_50   reject         50               0.105      0.286           
-#> 10 filler_60   filler         60               0.050      0.300           
+#>  1 suspect_100 suspect        100              0.049      1.000           
+#>  2 suspect_60  suspect        60               0.049      0.928           
+#>  3 suspect_70  suspect        70               0.040      0.893           
+#>  4 suspect_90  suspect        90               0.026      0.889           
+#>  5 suspect_80  suspect        80               0.027      0.842           
+#>  6 suspect_50  suspect        50               0.054      0.776           
+#>  7 suspect_40  suspect        40               0.047      0.758           
+#>  8 reject_20   reject         20               0.191      0.250           
+#>  9 filler_100  filler         100              0.019      0.259           
+#> 10 filler_30   filler         30               0.079      0.300           
 #> # ℹ 1 more variable: information_gain <chr>
 #> 
 #> Full response data available in $response_data

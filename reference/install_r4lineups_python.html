@@ -9,7 +9,7 @@ once after installing the r4lineups package."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,12 +28,13 @@ once after installing the r4lineups package."></head><body>
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -64,7 +65,8 @@ once after installing the r4lineups package.</p>
 <span>  method <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  envname <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pip_options <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gpu <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  gpu <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  python_version <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -89,7 +91,17 @@ installs to the system Python or currently active environment.</p></dd>
 <dd><p>Logical. If TRUE, installs tensorflow with GPU support.
 Default is FALSE.</p></dd>
 
+
+<dt id="arg-python-version">python_version<a class="anchor" aria-label="anchor" href="#arg-python-version"></a></dt>
+<dd><p>Python version to build the virtual environment with,
+e.g. <code>"3.11"</code>. Defaults to <code>NULL</code>, which leaves the choice to
+reticulate but still checks the result against the supported range.</p></dd>
+
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p><code>TRUE</code>, invisibly.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function installs:</p><ul><li><p>deepface - Main face analysis library</p></li>
@@ -98,7 +110,17 @@ Default is FALSE.</p></dd>
 <li><p>tf-keras - TensorFlow/Keras backend</p></li>
 <li><p>mediapipe - For 468-point face mesh (optional but recommended)</p></li>
 <li><p>retinaface - Best face detector</p></li>
-</ul></div>
+</ul><p><strong>Python version.</strong> TensorFlow publishes wheels for a limited range of
+Python versions (currently 3.9 to 3.12). On a machine whose default
+interpreter is newer than that, pip finds no TensorFlow distribution at all
+and the install fails partway through with
+<code>No matching distribution found for tensorflow</code>, after downloading the
+other packages. This function therefore checks the interpreter before
+installing anything, and stops with an explanatory message if it is outside
+the supported range. Pass <code>python_version</code> to select a suitable
+interpreter, which requires <code>envname</code> so that a virtual environment can
+be built from it.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -108,6 +130,10 @@ Default is FALSE.</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Install to a virtual environment</span></span></span>
 <span class="r-in"><span><span class="fu">install_r4lineups_python</span><span class="op">(</span>envname <span class="op">=</span> <span class="st">"r4lineups-face-env"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Build the environment with a TensorFlow-supported interpreter</span></span></span>
+<span class="r-in"><span><span class="fu">install_r4lineups_python</span><span class="op">(</span>envname <span class="op">=</span> <span class="st">"r4lineups-face-env"</span>,</span></span>
+<span class="r-in"><span>                         python_version <span class="op">=</span> <span class="st">"3.11"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Install with GPU support</span></span></span>
 <span class="r-in"><span><span class="fu">install_r4lineups_python</span><span class="op">(</span>gpu <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>

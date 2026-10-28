@@ -13,7 +13,11 @@ plot_2ht_parameters(x, ..., which = c("dP", "dA", "b", "g"), show_ci = TRUE)
 
 - x:
 
-  A winter_2ht object from fit_winter_2ht()
+  A `winter_2ht` object, or a `winter_2ht_boot` object from
+  [`boot_winter_2ht`](https://cgtza2.github.io/r4lineups/reference/boot_winter_2ht.md).
+  Given the latter, the plotted intervals are the bootstrap percentile
+  intervals; given the former they are normal approximations clamped to
+  \[0, 1\]. from fit_winter_2ht()
 
 - ...:
 

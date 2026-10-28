@@ -12,7 +12,8 @@ ppv_by_confidence(
   lineup_size = 6,
   confidence_bins = NULL,
   correction = c("nominal", "effective", "none"),
-  effective_size_data = NULL
+  effective_size_data = NULL,
+  quiet = FALSE
 )
 ```
 
@@ -49,6 +50,11 @@ ppv_by_confidence(
   bin (must have columns: conf_level, effective_size). If NULL and
   correction="effective", computes from data.
 
+- quiet:
+
+  Logical. Suppress the note issued when `correction` is not applied
+  because the data designate an innocent suspect. Default `FALSE`.
+
 ## Value
 
 A list containing:
@@ -57,7 +63,10 @@ A list containing:
 
 - overall_ppv: Overall PPV across all confidence levels
 
-- correction_method: The correction method used
+- correction_method: The correction method requested
+
+- innocent_suspect_method: "designated" when target-absent trials
+  identify an innocent suspect directly, otherwise the estimation route
 
 - lineup_size: Nominal lineup size
 
@@ -87,6 +96,16 @@ correction also relies on the pseudo-distribution assumption of
 spreading filler choices over lineup members, which is a modeling
 approximation.
 
+## When the correction is ignored
+
+Lineup-size corrections exist to *estimate* how many of the observed
+target-absent identifications fell on an innocent suspect, in data where
+no innocent suspect was designated. When the data do designate one, that
+count is observed rather than estimated, and `correction` has no work to
+do: all three methods return the same PPV. This is correct, not a fault,
+but it is easy to mistake for one, so a message is issued unless
+`quiet = TRUE`. `lineup_example` is data of this kind.
+
 ## References
 
 Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
@@ -101,9 +120,11 @@ data(lineup_example)
 ppv_result <- ppv_by_confidence(lineup_example,
                                 correction = "nominal",
                                 confidence_bins = c(0, 60, 80, 100))
+#> Target-absent lineups contain a designated innocent suspect, so innocent-suspect IDs are counted directly and the 'nominal' correction is not applied. All correction methods return the same PPV for these data. Lineup-size corrections apply only when no innocent suspect is designated.
 
 # Effective size correction (accounts for bias)
 ppv_result <- ppv_by_confidence(lineup_example,
                                 correction = "effective",
                                 confidence_bins = c(0, 60, 80, 100))
+#> Target-absent lineups contain a designated innocent suspect, so innocent-suspect IDs are counted directly and the 'effective' correction is not applied. All correction methods return the same PPV for these data. Lineup-size corrections apply only when no innocent suspect is designated.
 ```

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -57,7 +58,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_roc_gg</span><span class="op">(</span><span class="va">rocobj_list</span>, show_pauc <span class="op">=</span> <span class="cn">TRUE</span>, point_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_roc_gg</span><span class="op">(</span></span>
+<span>  <span class="va">rocobj_list</span>,</span>
+<span>  show_pauc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  point_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  title <span class="op">=</span> <span class="st">"Partial ROC Curve (suspect IDs only)"</span>,</span>
+<span>  data_source <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,7 +72,8 @@
 
 
 <dl><dt id="arg-rocobj-list">rocobj_list<a class="anchor" aria-label="anchor" href="#arg-rocobj-list"></a></dt>
-<dd><p>List output from make_rocdata()</p></dd>
+<dd><p>List output from make_rocdata(), or the lineup_roc object
+from make_roc()</p></dd>
 
 
 <dt id="arg-show-pauc">show_pauc<a class="anchor" aria-label="anchor" href="#arg-show-pauc"></a></dt>
@@ -75,10 +83,22 @@
 <dt id="arg-point-labels">point_labels<a class="anchor" aria-label="anchor" href="#arg-point-labels"></a></dt>
 <dd><p>Logical. Whether to label points with confidence levels (default = TRUE)</p></dd>
 
+
+<dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
+<dd><p>Character. Plot title. The default names the ROC variant, so that
+a partial ROC is not mistaken for a full ROC (see <code><a href="plot_fullroc.html">plot_fullroc</a></code>).</p></dd>
+
+
+<dt id="arg-data-source">data_source<a class="anchor" aria-label="anchor" href="#arg-data-source"></a></dt>
+<dd><p>Character. Name of the dataset the curve was computed from,
+appended to the caption. Defaults to the <code>"data_source"</code> attribute
+recorded by <code><a href="make_rocdata.html">make_rocdata</a></code>, and is omitted when unavailable.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A ggplot2 object</p>
+    <p>A ggplot2 object. Being an ordinary ggplot, it can be modified with
+  the usual <code>+</code> syntax, e.g. <code>p + ggplot2::theme_minimal()</code>.</p>
     </div>
 
     <div class="section level2">

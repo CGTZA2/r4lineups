@@ -1,17 +1,18 @@
-# I Component of Tredoux Effective Size (Tredoux, 1998)
+# I Component of Effective Size (Tredoux, 1998)
 
 Computes the Agresti-Agresti index of diversity I, the intermediate
-quantity used to construct Tredoux's effective size E' = 1/(1 - I).
+quantity used to construct effective size E' = 1/(1 - I) (Tredoux,
+1998).
 
 ## Usage
 
 ``` r
-i_esize_T(lineup_table)
+i_esize_T(lineup_tab)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A table of lineup choices.
 
@@ -44,6 +45,6 @@ fairness. *Law and Human Behavior, 22*(2), 217-237.
 
 ``` r
 lineup_vec <- round(runif(100, 1, 6))
-lineup_table <- table(lineup_vec)
-i <- i_esize_T(lineup_table)
+lineup_tab <- table(lineup_vec)
+i <- i_esize_T(lineup_tab)
 ```

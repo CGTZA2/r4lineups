@@ -9,7 +9,7 @@ identification dataset, providing a side-by-side descriptive table."></head><bod
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,12 +28,13 @@ identification dataset, providing a side-by-side descriptive table."></head><bod
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -156,6 +157,7 @@ Psychological Science, 15</em>(3), 589-607.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting 2-HT model...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Computing EIG...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Computing Full ROC...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Model comparison complete!</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span></span>
@@ -163,22 +165,22 @@ Psychological Science, 15</em>(3), 589-607.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === Lineup Model Comparison ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Models fit: 2ht, eig, fullroc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Sample size: 200 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample size: 1400 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Lineup size: 6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Comparison Table:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          Model                   Measure     Value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)            Log-likelihood -187.6900</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)                       AIC  383.3700</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)                       BIC  396.5700</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)   dP (detection presence)    0.4870</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)    dA (detection absence)    0.3170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023) Expected Information Gain    0.3691</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023)    Information Efficiency   36.9000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023)             Prior Entropy    1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)                  Full AUC    0.8589</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)          Operating Points   15.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate    1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                          Model                   Measure      Value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)            Log-likelihood -1280.6300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)                       AIC  2569.2600</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)                       BIC  2590.2400</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)   dP (detection presence)     0.5260</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2-HT (Winter et al., 2022)    dA (detection absence)     0.1070</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023) Expected Information Gain     0.2189</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023)    Information Efficiency    21.9000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023)             Prior Entropy     1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)                  Full AUC     0.7775</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)          Operating Points    19.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate     1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Interpretation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Model fit quality</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Lower is better</span>
@@ -201,27 +203,27 @@ Psychological Science, 15</em>(3), 589-607.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === Model Comparison Summary ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dataset:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Total observations: 200 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-present: 100 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-absent: 100 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Total observations: 1400 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-present: 700 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-absent: 700 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Lineup size: 6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Models fitted: 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    2ht, eig, fullroc </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> --- 2-HT Model Summary ---</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters: dP = 0.487 , dA = 0.317 , b = 0.149 , g = 0.495 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   AIC: 383.37 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   BIC: 396.57 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters: dP = 0.526 , dA = 0.107 , b = 0.009 , g = 0.796 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   AIC: 2569.26 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   BIC: 2590.24 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> --- EIG Summary ---</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   EIG: 0.3691 bits</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Information efficiency: 36.9 %</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of response categories: 15 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   EIG: 0.2189 bits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Information efficiency: 21.9 %</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of response categories: 19 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> --- Full ROC Summary ---</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Full AUC: 0.8589 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Operating points: 15 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Full AUC: 0.7775 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Operating points: 19 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Ordering method: diagnosticity </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
@@ -246,50 +248,50 @@ Psychological Science, 15</em>(3), 589-607.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ==================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample size:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-present: 100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-absent:  100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Total:          200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-present: 700</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-absent:  700</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Total:          1400</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Lineup size:    6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Parameter Estimates:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       Estimate     SE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dP (culprit presence)   0.4875 0.0755</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dA (culprit absence)    0.3167 0.1318</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> b  (biased selection)   0.1493 0.0648</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> g  (guessing)           0.4954 0.0794</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dP (culprit presence)   0.5262 0.0231</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dA (culprit absence)    0.1067 0.0333</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b  (biased selection)   0.0093 0.0164</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g  (guessing)           0.7961 0.0227</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Log-likelihood: -187.69</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> AIC: 383.37</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BIC: 396.57</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Log-likelihood: -1280.63</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AIC: 2569.26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> BIC: 2590.24</span>
 <span class="r-in"><span><span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === Expected Information Gain (EIG) Analysis ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> EIG: 0.3691 bits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> EIG: 0.2189 bits</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior probability of guilt: 0.5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Prior entropy: 1 bits</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Information efficiency: 36.9 %</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Information efficiency: 21.9 %</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample sizes:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-present (guilty): 100 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-absent (innocent): 100 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-present (guilty): 700 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Target-absent (innocent): 700 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Top response categories by information gain:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Showing up to 10 of 15 total)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Showing up to 10 of 19 total)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 10 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    response    identification confidence_level p_response posterior_guilty</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> suspect_100 suspect        100              0.085      1.000           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> suspect_90  suspect        90               0.105      1.000           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> reject_60   reject         60               0.045      0.000           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> suspect_50  suspect        50               0.020      0.000           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> filler_70   filler         70               0.040      0.125           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> reject_40   reject         40               0.120      0.167           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> suspect_60  suspect        60               0.030      0.833           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> reject_20   reject         20               0.060      0.250           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> reject_50   reject         50               0.105      0.286           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> filler_60   filler         60               0.050      0.300           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> suspect_100 suspect        100              0.049      1.000           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> suspect_60  suspect        60               0.049      0.928           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> suspect_70  suspect        70               0.040      0.893           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> suspect_90  suspect        90               0.026      0.889           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> suspect_80  suspect        80               0.027      0.842           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> suspect_50  suspect        50               0.054      0.776           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> suspect_40  suspect        40               0.047      0.758           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> reject_20   reject         20               0.191      0.250           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> filler_100  filler         100              0.019      0.259           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> filler_30   filler         30               0.079      0.300           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more variable: information_gain &lt;chr&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Full response data available in $response_data</span>

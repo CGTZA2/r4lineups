@@ -9,7 +9,7 @@ target-present and target-absent lineups, including confidence ratings."></head>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,12 +28,13 @@ target-present and target-absent lineups, including confidence ratings."></head>
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -65,8 +66,14 @@ target-present and target-absent lineups, including confidence ratings.</p>
 
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
-    <p>A data frame with 200 rows and 3 variables:</p><dl><dt>target_present</dt>
+    <p>A data frame with 1400 rows and 5 variables:</p><dl><dt>target_present</dt>
 <dd><p>Logical indicating whether the guilty suspect was in the lineup</p></dd>
+
+  <dt>lineup_member</dt>
+<dd><p>Integer position of the lineup member chosen, with 0 for a rejection</p></dd>
+
+  <dt>suspect_pos</dt>
+<dd><p>Integer position occupied by the suspect (1 throughout)</p></dd>
 
   <dt>identification</dt>
 <dd><p>Character indicating the witness decision: "suspect", "filler", or "reject"</p></dd>
@@ -78,30 +85,62 @@ target-present and target-absent lineups, including confidence ratings.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
-    <p>Simulated data for package examples</p>
+    <p>Simulated with <code><a href="simulate_lineup_data.html">simulate_lineup_data</a></code>. The generating
+  script is <code>data-raw/lineup_example.R</code>, which carries the acceptance
+  criteria the dataset must satisfy as explicit checks.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This dataset is used for demonstrating ROC, CAC, and EIG analyses in the
-r4lineups package. It contains 100 target-present lineups and 100 target-absent
-lineups with realistic distributions of identification decisions and confidence
-ratings.</p>
+r4lineups package. It contains 700 target-present and 700 target-absent
+lineups of size 6.</p>
+<p><code>lineup_member</code> records <em>which</em> member each witness chose, so foils
+keep their separate identities and are not treated as interchangeable. They
+are not merely simulated separately: each foil is given its own mean memory
+strength, so some are strong alternatives to the suspect and others are
+chosen only rarely. In this dataset the five foils attract roughly 248, 203,
+115, 53 and 10 identifications respectively.</p>
+<p><code>identification</code> is derived from <code>lineup_member</code> and
+<code>suspect_pos</code>, and can be recovered exactly with
+<code><a href="classify_lineup_choices.html">classify_lineup_choices</a></code>; it is retained because the analysis
+functions in this package take it directly.</p>
+<p>High confidence is strongly diagnostic here but deliberately <em>not</em>
+perfect: a small number of innocent suspects are identified at the highest
+confidence levels, as happens in real cases. Data in which no innocent
+suspect is ever identified with high confidence produces an infinite
+likelihood ratio and degenerate prior-posterior curves.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="classify_lineup_choices.html">classify_lineup_choices</a></code>, <code><a href="lineup_table.html">lineup_table</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 'data.frame':	200 obs. of  3 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_present: logi  TRUE TRUE TRUE TRUE TRUE TRUE ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ identification: chr  "suspect" "reject" "suspect" "filler" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ confidence    : num  90 50 90 50 50 90 70 40 90 60 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 'data.frame':	1400 obs. of  5 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_present: logi  FALSE FALSE TRUE TRUE TRUE FALSE ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ lineup_member : int  2 3 2 1 1 0 1 1 1 4 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ suspect_pos   : int  1 1 1 1 1 1 1 1 1 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ identification: chr  "filler" "filler" "filler" "suspect" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ confidence    : num  40 50 40 80 60 20 60 70 20 50 ...</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">$</span><span class="va">identification</span>, <span class="va">lineup_example</span><span class="op">$</span><span class="va">target_present</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           FALSE TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   filler     24   18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   reject     61   22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   suspect    15   60</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   filler    411  218</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   reject    201   67</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   suspect    88  415</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Which lineup members were chosen, and were any never chosen?</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="lineup_table.html">lineup_table</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">$</span><span class="va">lineup_member</span><span class="op">[</span><span class="va">lineup_example</span><span class="op">$</span><span class="va">lineup_member</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>             k <span class="op">=</span> <span class="fl">6</span>, suspect_pos <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Lineup choices (k = 6, N = 1132)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pos:  1*    2    3    4   5   6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cnt: 503  248  203  115  53  10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  * = nominated suspect</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

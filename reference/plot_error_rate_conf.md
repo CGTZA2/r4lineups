@@ -39,6 +39,7 @@ Higher confidence should generally be associated with lower error rates
 data(lineup_example)
 ppv_range <- ppv_range_by_confidence(lineup_example,
                                      confidence_bins = c(0, 60, 80, 100))
+#> Target-absent lineups contain a designated innocent suspect, so innocent-suspect IDs are counted directly and no lineup-size correction is applied. The nominal, effective and uncorrected estimates are therefore identical for these data. The three diverge only when no innocent suspect is designated and the number of innocent-suspect IDs has to be estimated from the filler IDs.
 plot_error_rate_conf(ppv_range)
 
 ```

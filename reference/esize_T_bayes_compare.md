@@ -1,4 +1,4 @@
-# Bayesian Comparison of Tredoux Effective Size Across Two Lineups
+# Bayesian Comparison of Effective Size (Tredoux, 1998) Across Two Lineups
 
 Fits independent Dirichlet-Multinomial models to two lineup tables and
 returns the posterior distribution of the difference in Tredoux E'.
@@ -113,7 +113,7 @@ tab_b <- as.table(setNames(counts_b, 1:6))
 
 result <- esize_T_bayes_compare(tab_a, tab_b)
 print(result)
-#> Bayesian Comparison: Tredoux Effective Size (E'_A vs E'_B)
+#> Bayesian Comparison: Effective Size E' (Tredoux, 1998), A vs B
 #> -----------------------------------------------------------
 #>   Lineup A: k = 6, N = 45   |   Lineup B: k = 6, N = 50
 #>   S (draws): 10000    Prior: Dirichlet(alpha = 0.50)

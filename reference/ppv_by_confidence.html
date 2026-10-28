@@ -11,7 +11,7 @@ innocent-suspect identification rates."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,12 +30,13 @@ innocent-suspect identification rates."></head><body>
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -68,7 +69,8 @@ innocent-suspect identification rates.</p>
 <span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  confidence_bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  correction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nominal"</span>, <span class="st">"effective"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
-<span>  effective_size_data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  effective_size_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,12 +105,20 @@ innocent-suspect identification rates.</p>
 per confidence bin (must have columns: conf_level, effective_size).
 If NULL and correction="effective", computes from data.</p></dd>
 
+
+<dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
+<dd><p>Logical. Suppress the note issued when <code>correction</code> is not
+applied because the data designate an innocent suspect. Default
+<code>FALSE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list containing:</p><ul><li><p>ppv_data: Dataframe with PPV by confidence level</p></li>
 <li><p>overall_ppv: Overall PPV across all confidence levels</p></li>
-<li><p>correction_method: The correction method used</p></li>
+<li><p>correction_method: The correction method requested</p></li>
+<li><p>innocent_suspect_method: "designated" when target-absent trials
+      identify an innocent suspect directly, otherwise the estimation route</p></li>
 <li><p>lineup_size: Nominal lineup size</p></li>
 </ul></div>
     <div class="section level2">
@@ -129,6 +139,18 @@ pseudo-distribution assumption of spreading filler choices over lineup
 members, which is a modeling approximation.</p>
     </div>
     <div class="section level2">
+    <h2 id="when-the-correction-is-ignored">When the correction is ignored<a class="anchor" aria-label="anchor" href="#when-the-correction-is-ignored"></a></h2>
+
+
+<p>Lineup-size corrections exist to <em>estimate</em> how many of the observed
+target-absent identifications fell on an innocent suspect, in data where no
+innocent suspect was designated. When the data do designate one, that count
+is observed rather than estimated, and <code>correction</code> has no work to do:
+all three methods return the same PPV. This is correct, not a fault, but it
+is easy to mistake for one, so a message is issued unless <code>quiet =
+TRUE</code>. <code>lineup_example</code> is data of this kind.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Fitzgerald, R. J., Tredoux, C. G., &amp; Juncu, S. (2023). Estimation of
 eyewitness error rates in fair and biased lineups.
@@ -142,11 +164,13 @@ eyewitness error rates in fair and biased lineups.
 <span class="r-in"><span><span class="va">ppv_result</span> <span class="op">&lt;-</span> <span class="fu">ppv_by_confidence</span><span class="op">(</span><span class="va">lineup_example</span>,</span></span>
 <span class="r-in"><span>                                correction <span class="op">=</span> <span class="st">"nominal"</span>,</span></span>
 <span class="r-in"><span>                                confidence_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Target-absent lineups contain a designated innocent suspect, so innocent-suspect IDs are counted directly and the 'nominal' correction is not applied. All correction methods return the same PPV for these data. Lineup-size corrections apply only when no innocent suspect is designated.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Effective size correction (accounts for bias)</span></span></span>
 <span class="r-in"><span><span class="va">ppv_result</span> <span class="op">&lt;-</span> <span class="fu">ppv_by_confidence</span><span class="op">(</span><span class="va">lineup_example</span>,</span></span>
 <span class="r-in"><span>                                correction <span class="op">=</span> <span class="st">"effective"</span>,</span></span>
 <span class="r-in"><span>                                confidence_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Target-absent lineups contain a designated innocent suspect, so innocent-suspect IDs are counted directly and the 'effective' correction is not applied. All correction methods return the same PPV for these data. Lineup-size corrections apply only when no innocent suspect is designated.</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

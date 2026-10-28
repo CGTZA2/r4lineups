@@ -6,12 +6,12 @@ lineup member
 ## Usage
 
 ``` r
-lineup_prop_tab(lineup_table, target_pos)
+lineup_prop_tab(lineup_tab, target_pos)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A table of lineup choices
 
@@ -36,10 +36,10 @@ empirically assessing the fairness of a lineup. *Law and Human Behavior,
 ``` r
 #Data:
 lineup_vec <- round(runif(100, 1))
-lineup_table <- table(lineup_vec)
+lineup_tab <- table(lineup_vec)
 
 #Call:
-lineup_prop_tab(lineup_table, 3)
+lineup_prop_tab(lineup_tab, 3)
 #> [1] 0
 lineup_prop_tab(table(lineup_vec), 2)
 #> [1] 0

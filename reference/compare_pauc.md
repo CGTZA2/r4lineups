@@ -37,8 +37,12 @@ compare_pauc(
 
 - max_false_id_rate:
 
-  Numeric. Maximum false ID rate for pAUC calculation (default = NULL,
-  which uses the maximum observed false ID rate across both conditions)
+  Numeric. Upper limit of the false-ID rate region over which partial
+  AUC is computed. Default `NULL` uses the largest region *both*
+  conditions actually reach, i.e. the smaller of their two maximum
+  observed false-ID rates. Supplying a larger value means at least one
+  condition is integrated only as far as its own data extend, so the two
+  areas cover different intervals; a warning is issued in that case.
 
 - n_bootstrap:
 
@@ -146,6 +150,7 @@ comparison <- compare_pauc(
   n_bootstrap = 200,
   seed = 123
 )
+#> The two conditions reach different maximum false-ID rates (0.1328 and 0.1185). Partial AUC is computed over the largest region both attain, up to 0.1185. Set max_false_id_rate explicitly to override.
 #> Computing bootstrap standard errors (200 samples)...
 #> Done!
 
@@ -154,19 +159,19 @@ print(comparison)
 #> === pAUC Comparison Analysis ===
 #> 
 #> Conditions:
-#>   Procedure A: pAUC = 0.0508 (SE = 0.0235)
-#>   Procedure B: pAUC = 0.1 (SE = 0.0192)
+#>   Procedure A: pAUC = 0.0511 (SE = 0.0044)
+#>   Procedure B: pAUC = 0.0468 (SE = 0.005)
 #> 
-#> Difference: -0.0492
-#>   95% CI: [-0.1064, 0.008]
+#> Difference: 0.0043
+#>   95% CI: [-0.0088, 0.0175]
 #> 
 #> Statistical Test:
-#>   Z = -1.685
-#>   p-value = 0.09192
+#>   Z = 0.642
+#>   p-value = 0.5207
 #> 
-#> Interpretation: Procedure B has higher discriminability than Procedure A (ns)
+#> Interpretation: Procedure A has higher discriminability than Procedure B (ns)
 #> 
-#> Max false ID rate cutoff: 0.2
+#> Max false ID rate cutoff: 0.1185
 #> Bootstrap samples: 200
 #> 
 #> Note: *** p<0.001, ** p<0.01, * p<0.05, ns = not significant

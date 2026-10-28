@@ -118,9 +118,11 @@ identification performance. *Perspectives on Psychological Science,
 data(lineup_example)
 # Compute full ROC with diagnosticity ordering
 fullroc_result <- make_fullroc_data(lineup_example)
+#> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").
 print(fullroc_result$auc)
-#> [1] 0.8589
+#> [1] 0.7774776
 
 # Compute full ROC with specified confidence bins
 fullroc_binned <- make_fullroc_data(lineup_example, conf_bins = c(0, 60, 80, 100))
+#> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").
 ```

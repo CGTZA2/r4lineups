@@ -1,5 +1,11 @@
 # Information and Error-Rate Metrics
 
+> **Acknowledgement.** Large language models supplied by Anthropic and
+> OpenAI were used in preparing this vignette, to assist with checking
+> code, testing the veracity of the approaches described, and on
+> occasion editing the text. Responsibility for the content rests with
+> the authors.
+
 ## Introduction
 
 This vignette demonstrates two complementary approaches for evaluating
@@ -19,109 +25,362 @@ with `target_present`, `identification`, and `confidence` columns.
 library(r4lineups)
 data(lineup_example)
 head(lineup_example)
-#>   target_present identification confidence
-#> 1           TRUE        suspect         90
-#> 2           TRUE         reject         50
-#> 3           TRUE        suspect         90
-#> 4           TRUE         filler         50
-#> 5           TRUE         filler         50
-#> 6           TRUE        suspect         90
+#>   target_present lineup_member suspect_pos identification confidence
+#> 1          FALSE             2           1         filler         40
+#> 2          FALSE             3           1         filler         50
+#> 3           TRUE             2           1         filler         40
+#> 4           TRUE             1           1        suspect         80
+#> 5           TRUE             1           1        suspect         60
+#> 6          FALSE             0           1         reject         20
 ```
 
 ## 1. Expected Information Gain (EIG)
 
-EIG summarizes how informative lineup responses are about guilt. Higher
-values indicate greater uncertainty reduction. You can compute EIG with
-or without confidence binning.
+### In plain terms
+
+Before running a lineup, you are uncertain whether the suspect is
+guilty. After the witness responds, you are — usually — less uncertain.
+EIG measures **how much of that uncertainty the procedure removes, on
+average**.
+
+The unit is the **bit**, which has a concrete meaning: one bit is the
+uncertainty in a fair coin toss. If you begin thinking guilt is a coin
+toss and end up certain, you have gained exactly 1 bit. An EIG of 0
+means the responses told you nothing; an EIG of 1 (with a 50% prior)
+would mean every response resolved the case completely.
+
+The virtue of this is that it grades *every* response, not just
+identifications. A confident rejection is informative — it makes guilt
+less likely — and EIG counts that, where a measure built only from
+suspect identifications cannot.
+
+### The arithmetic
+
+Uncertainty is Shannon entropy. For a probability $`p`$ of guilt,
+
+``` math
+H(p) = -p \log_2 p - (1-p) \log_2 (1-p)
+```
+
+which is 1 bit at $`p = 0.5`$ and 0 bits at $`p = 0`$ or $`p = 1`$.
+
+For each response category $`x`$ — a decision crossed with a confidence
+bin — Bayes’ theorem gives a posterior $`P(G \mid x)`$, and the
+information that response carried is the drop in entropy:
+
+``` math
+\mathrm{IG}(x) = H\bigl(P(G)\bigr) - H\bigl(P(G \mid x)\bigr)
+```
+
+EIG is the average of those, weighted by how often each response occurs:
+
+``` math
+\mathrm{EIG} = \sum_x P(x)\,\Bigl[H\bigl(P(G)\bigr) - H\bigl(P(G \mid x)\bigr)\Bigr]
+```
+
+Two consequences are worth noting. Individual responses can have
+**negative** information gain — a response that moves belief towards 0.5
+increases uncertainty — but the expectation over all responses cannot be
+negative. And EIG depends on the prior $`P(G)`$, which is set by
+`prior_guilt` and is a property of the investigation, not of the
+procedure.
 
 ``` r
 
-# Compute EIG with binned confidence
- eig_obj <- make_eig(
+eig_obj <- make_eig(
   lineup_example,
   confidence_bins = c(0, 60, 80, 100),
   show_plot = FALSE
 )
 
-# EIG value (bits)
 eig_obj$eig
-#> [1] 0.2836494
+#> [1] 0.2011801
 ```
+
+Against a prior entropy of 1 bit, that is 20% of the uncertainty removed
+— informative, but a long way from resolving the question.
 
 ### Response-level information gain
 
-The EIG object includes per-response information gain and posterior
-probabilities.
-
 ``` r
 
-head(eig_obj$response_data)
-#> # A tibble: 6 × 11
-#>   response         n_guilty n_innocent p_x_given_guilty p_x_given_innocent
-#>   <chr>               <dbl>      <dbl>            <dbl>              <dbl>
-#> 1 suspect_(80,100]       38          0             0.38               0   
-#> 2 filler_(60,80]          1          7             0.01               0.07
-#> 3 reject_[0,60]          22         61             0.22               0.61
-#> 4 suspect_(60,80]        17         10             0.17               0.1 
-#> 5 filler_[0,60]          17         17             0.17               0.17
-#> 6 suspect_[0,60]          5          5             0.05               0.05
-#> # ℹ 6 more variables: identification <chr>, confidence_level <chr>,
-#> #   p_response <dbl>, posterior_guilty <dbl>, posterior_entropy <dbl>,
-#> #   information_gain <dbl>
+knitr::kable(
+  head(as.data.frame(eig_obj$response_data), 8),
+  digits = 4, row.names = FALSE,
+  caption = "Per-response information gain and posterior probability of guilt, lineup_example."
+)
 ```
+
+| response | n_guilty | n_innocent | p_x_given_guilty | p_x_given_innocent | identification | confidence_level | p_response | posterior_guilty | posterior_entropy | information_gain |
+|:---|---:|---:|---:|---:|:---|:---|---:|---:|---:|---:|
+| suspect\_(80,100\] | 100 | 4 | 0.1429 | 0.0057 | suspect | (80,100\] | 0.0743 | 0.9615 | 0.2352 | 0.7648 |
+| suspect\_(60,80\] | 82 | 12 | 0.1171 | 0.0171 | suspect | (60,80\] | 0.0671 | 0.8723 | 0.5510 | 0.4490 |
+| suspect\_\[0,60\] | 233 | 72 | 0.3329 | 0.1029 | suspect | \[0,60\] | 0.2179 | 0.7639 | 0.7884 | 0.2116 |
+| reject\_\[0,60\] | 67 | 201 | 0.0957 | 0.2871 | reject | \[0,60\] | 0.1914 | 0.2500 | 0.8113 | 0.1887 |
+| filler\_(80,100\] | 13 | 30 | 0.0186 | 0.0429 | filler | (80,100\] | 0.0307 | 0.3023 | 0.8841 | 0.1159 |
+| filler\_\[0,60\] | 165 | 322 | 0.2357 | 0.4600 | filler | \[0,60\] | 0.3479 | 0.3388 | 0.9237 | 0.0763 |
+| filler\_(60,80\] | 40 | 59 | 0.0571 | 0.0843 | filler | (60,80\] | 0.0707 | 0.4040 | 0.9733 | 0.0267 |
+
+Per-response information gain and posterior probability of guilt,
+lineup_example. {.table style="width:100%;"}
 
 ### Plots
 
 ``` r
 
-# Information gain by response category
 plot_eig(eig_obj)
-
-# Posterior probability of guilt by response category
-plot_eig_posteriors(eig_obj)
 ```
 
-## 2. PPV-range estimation
-
-PPV-range estimation compares **nominal-size**, **effective-size**, and
-**no correction** assumptions about false IDs. This yields a range of
-plausible PPV values rather than a single estimate.
+![](information_error_rate_analysis_files/figure-html/plot_eig-1.png)
 
 ``` r
 
-ppv_range <- make_ppv_range(
+plot_eig_posteriors(eig_obj)
+```
+
+![](information_error_rate_analysis_files/figure-html/plot_eig_posteriors-1.png)
+
+## 2. PPV-range estimation
+
+Positive predictive value is the proportion of suspect identifications
+that are correct: hits / (hits + false alarms). The difficulty is the
+denominator. In field data you observe that *someone* was identified,
+but not whether a target-absent identification landed on the suspect or
+on a foil — and only the former is a wrongful identification.
+
+The response is to *estimate* the innocent-suspect identifications from
+the observed errors, and the estimate depends on an assumption about
+lineup size (Fitzgerald, Tredoux & Juncu, 2023):
+
+- **Nominal size.** Errors are spread evenly over all $`k`$ members, so
+  $`1/k`$ of them fall on the innocent suspect. The most optimistic
+  assumption, and it requires the lineup to be perfectly fair.
+- **Effective size.** Errors are spread over the members that actually
+  attract choices, estimated from the data. Fewer functioning
+  alternatives means more errors land on the suspect.
+- **No correction.** Every mistaken identification is treated as an
+  innocent-suspect identification. The worst case, and a genuine lower
+  bound.
+
+Reporting all three gives a *range* rather than a single figure resting
+on an assumption that cannot be checked.
+
+### When the three coincide, and why
+
+`lineup_example` has a **designated innocent suspect**: its
+target-absent lineups record whether the identification fell on the
+suspect or a foil. When that is known, nothing needs estimating, and the
+corrections have no work to do:
+
+``` r
+
+ppv_designated <- make_ppv_range(
   lineup_example,
   lineup_size = 6,
   show_plots = FALSE
 )
 
-# Overall PPV under each correction
-ppv_range$ppv_nominal$overall_ppv
-#> [1] 0.5945946
-ppv_range$ppv_effective$overall_ppv
-#> [1] 0.5945946
-ppv_range$ppv_none$overall_ppv
-#> [1] 0.5945946
+knitr::kable(
+  data.frame(
+    Correction = c("Nominal size", "Effective size", "None"),
+    `Overall PPV` = round(c(ppv_designated$ppv_nominal$overall_ppv,
+                            ppv_designated$ppv_effective$overall_ppv,
+                            ppv_designated$ppv_none$overall_ppv), 4),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "PPV under three corrections, lineup_example -- which designates an innocent suspect, so all three coincide."
+)
 ```
+
+| Correction     | Overall PPV |
+|:---------------|------------:|
+| Nominal size   |       0.825 |
+| Effective size |       0.825 |
+| None           |       0.825 |
+
+PPV under three corrections, lineup_example – which designates an
+innocent suspect, so all three coincide. {.table}
+
+All three are identical, and that is correct rather than a fault: the
+count being corrected for is observed directly.
+[`make_ppv_range()`](https://cgtza2.github.io/r4lineups/reference/make_ppv_range.md)
+says so when it happens.
+
+### When they diverge
+
+The corrections matter when no innocent suspect is designated — the
+usual situation with field data. We can create that case by relabelling
+the target-absent suspect identifications as foil identifications, which
+is exactly the information loss that occurs when the lineup did not
+nominate a suspect in advance:
+
+``` r
+
+no_designation <- lineup_example
+ta_suspect <- !no_designation$target_present &
+               no_designation$identification == "suspect"
+no_designation$identification[ta_suspect] <- "filler"
+
+ppv_estimated <- make_ppv_range(
+  no_designation,
+  lineup_size = 6,
+  show_plots = FALSE
+)
+
+knitr::kable(
+  data.frame(
+    Correction = c("Nominal size (best case)",
+                   "Effective size",
+                   "None (worst case)"),
+    `Overall PPV` = round(c(ppv_estimated$ppv_nominal$overall_ppv,
+                            ppv_estimated$ppv_effective$overall_ppv,
+                            ppv_estimated$ppv_none$overall_ppv), 4),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "PPV under three corrections, same data with the innocent-suspect designation removed. This is the range the method exists to report."
+)
+```
+
+| Correction               | Overall PPV |
+|:-------------------------|------------:|
+| Nominal size (best case) |      0.8331 |
+| Effective size           |      0.7691 |
+| None (worst case)        |      0.4540 |
+
+PPV under three corrections, same data with the innocent-suspect
+designation removed. This is the range the method exists to report.
+{.table}
+
+The spread is large — from about 0.45 to about 0.83 — and that spread is
+the finding. An analysis reporting only the nominal-size figure would be
+asserting that the lineup was perfectly fair, which is precisely what is
+unknown.
+
+The effective-size correction sits between the two because the lineup’s
+members do not attract choices equally:
+
+``` r
+
+knitr::kable(
+  data.frame(
+    `Confidence bin` = ppv_estimated$ppv_effective$ppv_data$confidence,
+    `Effective size` = round(ppv_estimated$ppv_effective$ppv_data$effective_size, 2),
+    `Error rate`     = round(ppv_estimated$ppv_effective$ppv_data$error_rate, 3),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "Effective size estimated within each confidence bin, against a nominal size of 6."
+)
+```
+
+| Confidence bin | Effective size | Error rate |
+|:---------------|---------------:|-----------:|
+| 20             |           4.55 |      0.314 |
+| 30             |           4.58 |      1.000 |
+| 40             |           3.98 |      1.000 |
+| 50             |           4.07 |      1.000 |
+| 60             |           3.45 |      1.000 |
+| 70             |           3.33 |      1.000 |
+| 80             |           3.77 |      1.000 |
+| 90             |           3.63 |      1.000 |
+| 100            |           3.33 |      1.000 |
+
+Effective size estimated within each confidence bin, against a nominal
+size of 6. {.table}
 
 ### Plots
 
 ``` r
 
-# PPV range across confidence bins
-plot_ppv_range(ppv_range)
-
-# Effective size (confidence-based) used in corrections
-plot_effective_size_conf(ppv_range)
+plot_ppv_range(ppv_estimated)
 ```
+
+![](information_error_rate_analysis_files/figure-html/plot_ppv_range-1.png)
+
+``` r
+
+plot_effective_size_conf(ppv_estimated)
+```
+
+![](information_error_rate_analysis_files/figure-html/plot_effective_size-1.png)
 
 ## Interpretation guidance
 
-- **EIG** is best for comparing how much information each response
-  category provides (e.g., high-confidence suspect IDs
-  vs. low-confidence IDs).
-- **PPV range** is useful when false-identification rates are uncertain
-  and lineup size corrections materially affect the PPV estimate.
+- **EIG** grades every response category, including rejections, and
+  reports how much uncertainty the procedure removes overall. Use it to
+  compare procedures, or to identify which responses carry the evidence.
+- **PPV range** answers the question a court asks — how often is an
+  identification of this kind correct — and makes visible how much the
+  answer depends on an untestable assumption about lineup size.
 
-These tools are intended to complement ROC/CAC analyses, not replace
-them.
+The two are complementary: EIG is base-rate-dependent through
+`prior_guilt` and covers all responses; PPV concerns identifications
+only, and is the quantity with direct forensic meaning.
+
+## Technical Details
+
+### EIG
+
+Computed over response categories formed by crossing decision with
+confidence bin. For each category the posterior comes from Bayes’
+theorem using the observed likelihoods $`P(x \mid G)`$ and
+$`P(x \mid \neg G)`$, estimated as response proportions within the
+target-present and target-absent arms respectively. Entropies are in
+bits (base-2 logarithms). The prior is set by `prior_guilt`, defaulting
+to 0.5, at which the prior entropy is exactly 1 bit.
+
+EIG inherits the binning issue discussed in
+[`vignette("calibration_decision_analysis")`](https://cgtza2.github.io/r4lineups/articles/calibration_decision_analysis.md):
+it is computed over discrete categories, so a category with no
+observations in one arm gives an unbounded likelihood ratio, and the
+number of bins is a researcher decision that affects the result.
+
+### PPV range
+
+With a designated innocent suspect, innocent-suspect identifications are
+counted directly and no correction is applied. Otherwise, writing $`e`$
+for the target-absent error rate within a confidence bin:
+
+``` math
+\hat{r}_{\text{nominal}} = e/k, \qquad
+\hat{r}_{\text{effective}} = e/\hat{E}, \qquad
+\hat{r}_{\text{none}} = e
+```
+
+where $`\hat{E}`$ is effective size estimated within the bin. PPV then
+follows as hits / (hits + estimated innocent-suspect identifications).
+
+### Assumptions
+
+1.  Target-present and target-absent lineups are independent samples.
+2.  The nominal-size correction assumes a perfectly fair lineup. It is a
+    bound, not an estimate.
+3.  Effective size is estimated per confidence bin, so bins with few
+    observations give unstable corrections — check the counts before
+    relying on a bin.
+4.  Effective size is itself a plug-in estimate and is biased downward
+    at small samples; see the “Small-sample bias” section of
+    [`?esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md).
+    A downward-biased effective size makes the correction *more*
+    conservative, so the effect is in the safe direction, but it is not
+    negligible.
+
+## References
+
+Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
+eyewitness error rates in fair and biased lineups. *Law and Human
+Behavior, 47*(4), 463-483.
+
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
+for assessing the effectiveness of eyewitness identification procedures:
+Expected information gain. *Psychological Review, 130*(3), 677-719.
+
+## Further Reading
+
+- [`?make_eig`](https://cgtza2.github.io/r4lineups/reference/make_eig.md),
+  [`?make_ppv_range`](https://cgtza2.github.io/r4lineups/reference/make_ppv_range.md)
+- [`vignette("calibration_decision_analysis")`](https://cgtza2.github.io/r4lineups/articles/calibration_decision_analysis.md)
+  for the Bayesian information-gain curves, which report the same
+  evidence on a per-response rather than expected basis

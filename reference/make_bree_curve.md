@@ -97,12 +97,12 @@ odd <- seq(1, nrow(lineup_example), by = 2)
 bree <- make_bree_curve(lineup_example[odd, ], lineup_example[-odd, ])
 head(bree$bree_curve)
 #> # A tibble: 6 × 4
-#>   prior_a posterior_a prior_b   delta
-#>     <dbl>       <dbl>   <dbl>   <dbl>
-#> 1    0.01      0.0571  0.0198 0.00980
-#> 2    0.02      0.109   0.0392 0.0192 
-#> 3    0.03      0.157   0.0583 0.0283 
-#> 4    0.04      0.2     0.0769 0.0369 
-#> 5    0.05      0.24    0.0952 0.0452 
-#> 6    0.06      0.277   0.113  0.0532 
+#>   prior_a posterior_a prior_b     delta
+#>     <dbl>       <dbl>   <dbl>     <dbl>
+#> 1    0.01      0.0433 0.00901 -0.000991
+#> 2    0.02      0.0838 0.0180  -0.00196 
+#> 3    0.03      0.122  0.0271  -0.00292 
+#> 4    0.04      0.157  0.0361  -0.00385 
+#> 5    0.05      0.191  0.0452  -0.00477 
+#> 6    0.06      0.223  0.0543  -0.00567 
 ```

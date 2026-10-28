@@ -12,7 +12,8 @@ homog_diag_boot(
   k,
   R = 100,
   pos_list = NULL,
-  seed = NULL
+  seed = NULL,
+  conf.level = 0.95
 )
 ```
 
@@ -47,15 +48,30 @@ homog_diag_boot(
 
   Optional integer seed for reproducible resampling.
 
+- conf.level:
+
+  Confidence level for the percentile intervals and the per-pair
+  intervals, and the complement of the level at which heterogeneity is
+  declared. Defaults to 0.95.
+
 ## Value
 
 Invisibly returns a list containing the observed mean diagnosticity,
-chi-square statistic, percentile intervals, bootstrap draws, and `R`.
+chi-square statistic with degrees of freedom and asymptotic p-value,
+percentile intervals, a `heterogeneous` flag, a `parameters` data frame
+of per-pair ratios and intervals, the bootstrap draws, and `R`.
 
 ## Details
 
 Computes bootstrapped diagnosticity ratio with chi-squared estimate,
-significance level and confidence intervals for k lineup pairs
+significance level and confidence intervals for k lineup pairs.
+
+The interval on the pooled ratio and the chi-square answer different
+questions, and can disagree. See
+[`homog_diag`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md)
+for the distinction; as there, a note is printed whenever the k ratios
+are heterogeneous and the pooled estimate should not be reported on its
+own.
 
 ## References
 
@@ -100,8 +116,19 @@ pos_list <- c(3, 2, 1)
 k <- c(6, 5, 4)
 homog_diag_boot(lineup_pres_list, lineup_abs_list, k, R = 20,
                pos_list = pos_list, seed = 1)
+#> Diagnosticity ratio for each lineup pair:
+#>  pair     d       95% CI
+#>     1 1.000 [0.54, 1.84]
+#>     2 1.000 [0.52, 1.94]
+#>     3 1.000 [0.34, 2.93]
+#> 
 #> Mean diagnosticity ratio is 1 
 #> Confidence intervals (percentile) 0.757 1.395 
 #> Chi-squared estimate is 0 
 #> Confidence intervals (percentile): 0.333 4.967 
+#> Sig (asymptotic, df = 2):  1 
+#> 
+#> Note: no evidence of heterogeneity (p >= 0.05), so the ratios are
+#> consistent with a common value and the pooled mean is a reasonable summary.
+#> 
 ```

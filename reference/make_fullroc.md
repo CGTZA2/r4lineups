@@ -52,7 +52,8 @@ make_fullroc(
 
 A list containing:
 
-- plot: ggplot2 object (if show_plot = TRUE)
+- plot: ggplot2 object. Always returned, whatever show_plot is set to;
+  show_plot controls only whether it is displayed immediately
 
 - roc_data: Dataframe with ROC curve points
 
@@ -82,9 +83,13 @@ identification performance. *Perspectives on Psychological Science,
 data(lineup_example)
 # Compute and plot full ROC
 result <- make_fullroc(lineup_example)
+#> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").
+
 print(result$auc)
-#> [1] 0.8589
+#> [1] 0.7774776
 
 # With custom confidence bins
 result2 <- make_fullroc(lineup_example, conf_bins = c(0, 60, 80, 100))
+#> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").
+
 ```

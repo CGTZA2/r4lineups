@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul>
 </li>
@@ -78,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-08-12</h4>
+            <h4 data-toc-skip class="date">2026-10-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/information_error_rate_analysis.Rmd" class="external-link"><code>vignettes/information_error_rate_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>information_error_rate_analysis.Rmd</code></div>
@@ -86,6 +87,13 @@ Naylor</h4>
 
     
     
+<blockquote>
+<p><strong>Acknowledgement.</strong> Large language models supplied by
+Anthropic and OpenAI were used in preparing this vignette, to assist
+with checking code, testing the veracity of the approaches described,
+and on occasion editing the text. Responsibility for the content rests
+with the authors.</p>
+</blockquote>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -108,92 +116,448 @@ frame with <code>target_present</code>, <code>identification</code>, and
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CGTZA2/r4lineups" class="external-link">r4lineups</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   target_present identification confidence</span></span>
-<span><span class="co">#&gt; 1           TRUE        suspect         90</span></span>
-<span><span class="co">#&gt; 2           TRUE         reject         50</span></span>
-<span><span class="co">#&gt; 3           TRUE        suspect         90</span></span>
-<span><span class="co">#&gt; 4           TRUE         filler         50</span></span>
-<span><span class="co">#&gt; 5           TRUE         filler         50</span></span>
-<span><span class="co">#&gt; 6           TRUE        suspect         90</span></span></code></pre></div>
+<span><span class="co">#&gt;   target_present lineup_member suspect_pos identification confidence</span></span>
+<span><span class="co">#&gt; 1          FALSE             2           1         filler         40</span></span>
+<span><span class="co">#&gt; 2          FALSE             3           1         filler         50</span></span>
+<span><span class="co">#&gt; 3           TRUE             2           1         filler         40</span></span>
+<span><span class="co">#&gt; 4           TRUE             1           1        suspect         80</span></span>
+<span><span class="co">#&gt; 5           TRUE             1           1        suspect         60</span></span>
+<span><span class="co">#&gt; 6          FALSE             0           1         reject         20</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="expected-information-gain-eig">1. Expected Information Gain (EIG)<a class="anchor" aria-label="anchor" href="#expected-information-gain-eig"></a>
 </h2>
-<p>EIG summarizes how informative lineup responses are about guilt.
-Higher values indicate greater uncertainty reduction. You can compute
-EIG with or without confidence binning.</p>
+<div class="section level3">
+<h3 id="in-plain-terms">In plain terms<a class="anchor" aria-label="anchor" href="#in-plain-terms"></a>
+</h3>
+<p>Before running a lineup, you are uncertain whether the suspect is
+guilty. After the witness responds, you are — usually — less uncertain.
+EIG measures <strong>how much of that uncertainty the procedure removes,
+on average</strong>.</p>
+<p>The unit is the <strong>bit</strong>, which has a concrete meaning:
+one bit is the uncertainty in a fair coin toss. If you begin thinking
+guilt is a coin toss and end up certain, you have gained exactly 1 bit.
+An EIG of 0 means the responses told you nothing; an EIG of 1 (with a
+50% prior) would mean every response resolved the case completely.</p>
+<p>The virtue of this is that it grades <em>every</em> response, not
+just identifications. A confident rejection is informative — it makes
+guilt less likely — and EIG counts that, where a measure built only from
+suspect identifications cannot.</p>
+</div>
+<div class="section level3">
+<h3 id="the-arithmetic">The arithmetic<a class="anchor" aria-label="anchor" href="#the-arithmetic"></a>
+</h3>
+<p>Uncertainty is Shannon entropy. For a probability
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+of guilt,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mo stretchy="false" form="prefix">(</mo><mi>p</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mi>p</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>2</mn></msub><mi>p</mi><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false" form="postfix">)</mo><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>2</mn></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+H(p) = -p \log_2 p - (1-p) \log_2 (1-p)
+</annotation></semantics></math></p>
+<p>which is 1 bit at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p = 0.5</annotation></semantics></math>
+and 0 bits at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">p = 0</annotation></semantics></math>
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">p = 1</annotation></semantics></math>.</p>
+<p>For each response category
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+— a decision crossed with a confidence bin — Bayes’ theorem gives a
+posterior
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo>∣</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(G \mid x)</annotation></semantics></math>,
+and the information that response carried is the drop in entropy:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">I</mi><mi mathvariant="normal">G</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>H</mi><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo>−</mo><mi>H</mi><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo>∣</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+\mathrm{IG}(x) = H\bigl(P(G)\bigr) - H\bigl(P(G \mid x)\bigr)
+</annotation></semantics></math></p>
+<p>EIG is the average of those, weighted by how often each response
+occurs:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">E</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">G</mi></mrow><mo>=</mo><munder><mo>∑</mo><mi>x</mi></munder><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">[</mo><mi>H</mi><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo>−</mo><mi>H</mi><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo>∣</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">
+\mathrm{EIG} = \sum_x P(x)\,\Bigl[H\bigl(P(G)\bigr) - H\bigl(P(G \mid x)\bigr)\Bigr]
+</annotation></semantics></math></p>
+<p>Two consequences are worth noting. Individual responses can have
+<strong>negative</strong> information gain — a response that moves
+belief towards 0.5 increases uncertainty — but the expectation over all
+responses cannot be negative. And EIG depends on the prior
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(G)</annotation></semantics></math>,
+which is set by <code>prior_guilt</code> and is a property of the
+investigation, not of the procedure.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compute EIG with binned confidence</span></span>
-<span> <span class="va">eig_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eig.html">make_eig</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">eig_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eig.html">make_eig</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_example</span>,</span>
 <span>  confidence_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span>,</span>
 <span>  show_plot <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># EIG value (bits)</span></span>
 <span><span class="va">eig_obj</span><span class="op">$</span><span class="va">eig</span></span>
-<span><span class="co">#&gt; [1] 0.2836494</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.2011801</span></span></code></pre></div>
+<p>Against a prior entropy of 1 bit, that is 20% of the uncertainty
+removed — informative, but a long way from resolving the question.</p>
+</div>
 <div class="section level3">
 <h3 id="response-level-information-gain">Response-level information gain<a class="anchor" aria-label="anchor" href="#response-level-information-gain"></a>
 </h3>
-<p>The EIG object includes per-response information gain and posterior
-probabilities.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">eig_obj</span><span class="op">$</span><span class="va">response_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
-<span><span class="co">#&gt;   response         n_guilty n_innocent p_x_given_guilty p_x_given_innocent</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> suspect_(80,100]       38          0             0.38               0   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> filler_(60,80]          1          7             0.01               0.07</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> reject_[0,60]          22         61             0.22               0.61</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> suspect_(60,80]        17         10             0.17               0.1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> filler_[0,60]          17         17             0.17               0.17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> suspect_[0,60]          5          5             0.05               0.05</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: identification &lt;chr&gt;, confidence_level &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   p_response &lt;dbl&gt;, posterior_guilty &lt;dbl&gt;, posterior_entropy &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   information_gain &lt;dbl&gt;</span></span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">eig_obj</span><span class="op">$</span><span class="va">response_data</span><span class="op">)</span>, <span class="fl">8</span><span class="op">)</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Per-response information gain and posterior probability of guilt, lineup_example."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table style="width:100%;" class="table">
+<caption>Per-response information gain and posterior probability of
+guilt, lineup_example.</caption>
+<colgroup>
+<col width="10%">
+<col width="5%">
+<col width="6%">
+<col width="10%">
+<col width="11%">
+<col width="8%">
+<col width="10%">
+<col width="6%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">response</th>
+<th align="right">n_guilty</th>
+<th align="right">n_innocent</th>
+<th align="right">p_x_given_guilty</th>
+<th align="right">p_x_given_innocent</th>
+<th align="left">identification</th>
+<th align="left">confidence_level</th>
+<th align="right">p_response</th>
+<th align="right">posterior_guilty</th>
+<th align="right">posterior_entropy</th>
+<th align="right">information_gain</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">suspect_(80,100]</td>
+<td align="right">100</td>
+<td align="right">4</td>
+<td align="right">0.1429</td>
+<td align="right">0.0057</td>
+<td align="left">suspect</td>
+<td align="left">(80,100]</td>
+<td align="right">0.0743</td>
+<td align="right">0.9615</td>
+<td align="right">0.2352</td>
+<td align="right">0.7648</td>
+</tr>
+<tr class="even">
+<td align="left">suspect_(60,80]</td>
+<td align="right">82</td>
+<td align="right">12</td>
+<td align="right">0.1171</td>
+<td align="right">0.0171</td>
+<td align="left">suspect</td>
+<td align="left">(60,80]</td>
+<td align="right">0.0671</td>
+<td align="right">0.8723</td>
+<td align="right">0.5510</td>
+<td align="right">0.4490</td>
+</tr>
+<tr class="odd">
+<td align="left">suspect_[0,60]</td>
+<td align="right">233</td>
+<td align="right">72</td>
+<td align="right">0.3329</td>
+<td align="right">0.1029</td>
+<td align="left">suspect</td>
+<td align="left">[0,60]</td>
+<td align="right">0.2179</td>
+<td align="right">0.7639</td>
+<td align="right">0.7884</td>
+<td align="right">0.2116</td>
+</tr>
+<tr class="even">
+<td align="left">reject_[0,60]</td>
+<td align="right">67</td>
+<td align="right">201</td>
+<td align="right">0.0957</td>
+<td align="right">0.2871</td>
+<td align="left">reject</td>
+<td align="left">[0,60]</td>
+<td align="right">0.1914</td>
+<td align="right">0.2500</td>
+<td align="right">0.8113</td>
+<td align="right">0.1887</td>
+</tr>
+<tr class="odd">
+<td align="left">filler_(80,100]</td>
+<td align="right">13</td>
+<td align="right">30</td>
+<td align="right">0.0186</td>
+<td align="right">0.0429</td>
+<td align="left">filler</td>
+<td align="left">(80,100]</td>
+<td align="right">0.0307</td>
+<td align="right">0.3023</td>
+<td align="right">0.8841</td>
+<td align="right">0.1159</td>
+</tr>
+<tr class="even">
+<td align="left">filler_[0,60]</td>
+<td align="right">165</td>
+<td align="right">322</td>
+<td align="right">0.2357</td>
+<td align="right">0.4600</td>
+<td align="left">filler</td>
+<td align="left">[0,60]</td>
+<td align="right">0.3479</td>
+<td align="right">0.3388</td>
+<td align="right">0.9237</td>
+<td align="right">0.0763</td>
+</tr>
+<tr class="odd">
+<td align="left">filler_(60,80]</td>
+<td align="right">40</td>
+<td align="right">59</td>
+<td align="right">0.0571</td>
+<td align="right">0.0843</td>
+<td align="left">filler</td>
+<td align="left">(60,80]</td>
+<td align="right">0.0707</td>
+<td align="right">0.4040</td>
+<td align="right">0.9733</td>
+<td align="right">0.0267</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level3">
 <h3 id="plots">Plots<a class="anchor" aria-label="anchor" href="#plots"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Information gain by response category</span></span>
-<span><span class="fu"><a href="../reference/plot_eig.html">plot_eig</a></span><span class="op">(</span><span class="va">eig_obj</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Posterior probability of guilt by response category</span></span>
-<span><span class="fu"><a href="../reference/plot_eig_posteriors.html">plot_eig_posteriors</a></span><span class="op">(</span><span class="va">eig_obj</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_eig.html">plot_eig</a></span><span class="op">(</span><span class="va">eig_obj</span><span class="op">)</span></span></code></pre></div>
+<p><img src="information_error_rate_analysis_files/figure-html/plot_eig-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_eig_posteriors.html">plot_eig_posteriors</a></span><span class="op">(</span><span class="va">eig_obj</span><span class="op">)</span></span></code></pre></div>
+<p><img src="information_error_rate_analysis_files/figure-html/plot_eig_posteriors-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="ppv-range-estimation">2. PPV-range estimation<a class="anchor" aria-label="anchor" href="#ppv-range-estimation"></a>
 </h2>
-<p>PPV-range estimation compares <strong>nominal-size</strong>,
-<strong>effective-size</strong>, and <strong>no correction</strong>
-assumptions about false IDs. This yields a range of plausible PPV values
-rather than a single estimate.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ppv_range</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_ppv_range.html">make_ppv_range</a></span><span class="op">(</span></span>
+<p>Positive predictive value is the proportion of suspect
+identifications that are correct: hits / (hits + false alarms). The
+difficulty is the denominator. In field data you observe that
+<em>someone</em> was identified, but not whether a target-absent
+identification landed on the suspect or on a foil — and only the former
+is a wrongful identification.</p>
+<p>The response is to <em>estimate</em> the innocent-suspect
+identifications from the observed errors, and the estimate depends on an
+assumption about lineup size (Fitzgerald, Tredoux &amp; Juncu,
+2023):</p>
+<ul>
+<li>
+<strong>Nominal size.</strong> Errors are spread evenly over all
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+members, so
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mi>k</mi></mrow><annotation encoding="application/x-tex">1/k</annotation></semantics></math>
+of them fall on the innocent suspect. The most optimistic assumption,
+and it requires the lineup to be perfectly fair.</li>
+<li>
+<strong>Effective size.</strong> Errors are spread over the members
+that actually attract choices, estimated from the data. Fewer
+functioning alternatives means more errors land on the suspect.</li>
+<li>
+<strong>No correction.</strong> Every mistaken identification is
+treated as an innocent-suspect identification. The worst case, and a
+genuine lower bound.</li>
+</ul>
+<p>Reporting all three gives a <em>range</em> rather than a single
+figure resting on an assumption that cannot be checked.</p>
+<div class="section level3">
+<h3 id="when-the-three-coincide-and-why">When the three coincide, and why<a class="anchor" aria-label="anchor" href="#when-the-three-coincide-and-why"></a>
+</h3>
+<p><code>lineup_example</code> has a <strong>designated innocent
+suspect</strong>: its target-absent lineups record whether the
+identification fell on the suspect or a foil. When that is known,
+nothing needs estimating, and the corrections have no work to do:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ppv_designated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_ppv_range.html">make_ppv_range</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_example</span>,</span>
 <span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  show_plots <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Overall PPV under each correction</span></span>
-<span><span class="va">ppv_range</span><span class="op">$</span><span class="va">ppv_nominal</span><span class="op">$</span><span class="va">overall_ppv</span></span>
-<span><span class="co">#&gt; [1] 0.5945946</span></span>
-<span><span class="va">ppv_range</span><span class="op">$</span><span class="va">ppv_effective</span><span class="op">$</span><span class="va">overall_ppv</span></span>
-<span><span class="co">#&gt; [1] 0.5945946</span></span>
-<span><span class="va">ppv_range</span><span class="op">$</span><span class="va">ppv_none</span><span class="op">$</span><span class="va">overall_ppv</span></span>
-<span><span class="co">#&gt; [1] 0.5945946</span></span></code></pre></div>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Correction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Nominal size"</span>, <span class="st">"Effective size"</span>, <span class="st">"None"</span><span class="op">)</span>,</span>
+<span>    `Overall PPV` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ppv_designated</span><span class="op">$</span><span class="va">ppv_nominal</span><span class="op">$</span><span class="va">overall_ppv</span>,</span>
+<span>                            <span class="va">ppv_designated</span><span class="op">$</span><span class="va">ppv_effective</span><span class="op">$</span><span class="va">overall_ppv</span>,</span>
+<span>                            <span class="va">ppv_designated</span><span class="op">$</span><span class="va">ppv_none</span><span class="op">$</span><span class="va">overall_ppv</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"PPV under three corrections, lineup_example -- which designates an innocent suspect, so all three coincide."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>PPV under three corrections, lineup_example – which designates
+an innocent suspect, so all three coincide.</caption>
+<thead><tr class="header">
+<th align="left">Correction</th>
+<th align="right">Overall PPV</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Nominal size</td>
+<td align="right">0.825</td>
+</tr>
+<tr class="even">
+<td align="left">Effective size</td>
+<td align="right">0.825</td>
+</tr>
+<tr class="odd">
+<td align="left">None</td>
+<td align="right">0.825</td>
+</tr>
+</tbody>
+</table>
+<p>All three are identical, and that is correct rather than a fault: the
+count being corrected for is observed directly.
+<code><a href="../reference/make_ppv_range.html">make_ppv_range()</a></code> says so when it happens.</p>
+</div>
+<div class="section level3">
+<h3 id="when-they-diverge">When they diverge<a class="anchor" aria-label="anchor" href="#when-they-diverge"></a>
+</h3>
+<p>The corrections matter when no innocent suspect is designated — the
+usual situation with field data. We can create that case by relabelling
+the target-absent suspect identifications as foil identifications, which
+is exactly the information loss that occurs when the lineup did not
+nominate a suspect in advance:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">no_designation</span> <span class="op">&lt;-</span> <span class="va">lineup_example</span></span>
+<span><span class="va">ta_suspect</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="va">no_designation</span><span class="op">$</span><span class="va">target_present</span> <span class="op">&amp;</span></span>
+<span>               <span class="va">no_designation</span><span class="op">$</span><span class="va">identification</span> <span class="op">==</span> <span class="st">"suspect"</span></span>
+<span><span class="va">no_designation</span><span class="op">$</span><span class="va">identification</span><span class="op">[</span><span class="va">ta_suspect</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"filler"</span></span>
+<span></span>
+<span><span class="va">ppv_estimated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_ppv_range.html">make_ppv_range</a></span><span class="op">(</span></span>
+<span>  <span class="va">no_designation</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  show_plots <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Correction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Nominal size (best case)"</span>,</span>
+<span>                   <span class="st">"Effective size"</span>,</span>
+<span>                   <span class="st">"None (worst case)"</span><span class="op">)</span>,</span>
+<span>    `Overall PPV` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ppv_estimated</span><span class="op">$</span><span class="va">ppv_nominal</span><span class="op">$</span><span class="va">overall_ppv</span>,</span>
+<span>                            <span class="va">ppv_estimated</span><span class="op">$</span><span class="va">ppv_effective</span><span class="op">$</span><span class="va">overall_ppv</span>,</span>
+<span>                            <span class="va">ppv_estimated</span><span class="op">$</span><span class="va">ppv_none</span><span class="op">$</span><span class="va">overall_ppv</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"PPV under three corrections, same data with the innocent-suspect designation removed. This is the range the method exists to report."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>PPV under three corrections, same data with the
+innocent-suspect designation removed. This is the range the method
+exists to report.</caption>
+<thead><tr class="header">
+<th align="left">Correction</th>
+<th align="right">Overall PPV</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Nominal size (best case)</td>
+<td align="right">0.8331</td>
+</tr>
+<tr class="even">
+<td align="left">Effective size</td>
+<td align="right">0.7691</td>
+</tr>
+<tr class="odd">
+<td align="left">None (worst case)</td>
+<td align="right">0.4540</td>
+</tr>
+</tbody>
+</table>
+<p>The spread is large — from about 0.45 to about 0.83 — and that spread
+is the finding. An analysis reporting only the nominal-size figure would
+be asserting that the lineup was perfectly fair, which is precisely what
+is unknown.</p>
+<p>The effective-size correction sits between the two because the
+lineup’s members do not attract choices equally:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    `Confidence bin` <span class="op">=</span> <span class="va">ppv_estimated</span><span class="op">$</span><span class="va">ppv_effective</span><span class="op">$</span><span class="va">ppv_data</span><span class="op">$</span><span class="va">confidence</span>,</span>
+<span>    `Effective size` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ppv_estimated</span><span class="op">$</span><span class="va">ppv_effective</span><span class="op">$</span><span class="va">ppv_data</span><span class="op">$</span><span class="va">effective_size</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    `Error rate`     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ppv_estimated</span><span class="op">$</span><span class="va">ppv_effective</span><span class="op">$</span><span class="va">ppv_data</span><span class="op">$</span><span class="va">error_rate</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Effective size estimated within each confidence bin, against a nominal size of 6."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Effective size estimated within each confidence bin, against a
+nominal size of 6.</caption>
+<thead><tr class="header">
+<th align="left">Confidence bin</th>
+<th align="right">Effective size</th>
+<th align="right">Error rate</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">20</td>
+<td align="right">4.55</td>
+<td align="right">0.314</td>
+</tr>
+<tr class="even">
+<td align="left">30</td>
+<td align="right">4.58</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">40</td>
+<td align="right">3.98</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="even">
+<td align="left">50</td>
+<td align="right">4.07</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">60</td>
+<td align="right">3.45</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="even">
+<td align="left">70</td>
+<td align="right">3.33</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">80</td>
+<td align="right">3.77</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="even">
+<td align="left">90</td>
+<td align="right">3.63</td>
+<td align="right">1.000</td>
+</tr>
+<tr class="odd">
+<td align="left">100</td>
+<td align="right">3.33</td>
+<td align="right">1.000</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section level3">
 <h3 id="plots-1">Plots<a class="anchor" aria-label="anchor" href="#plots-1"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># PPV range across confidence bins</span></span>
-<span><span class="fu"><a href="../reference/plot_ppv_range.html">plot_ppv_range</a></span><span class="op">(</span><span class="va">ppv_range</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Effective size (confidence-based) used in corrections</span></span>
-<span><span class="fu"><a href="../reference/plot_effective_size_conf.html">plot_effective_size_conf</a></span><span class="op">(</span><span class="va">ppv_range</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ppv_range.html">plot_ppv_range</a></span><span class="op">(</span><span class="va">ppv_estimated</span><span class="op">)</span></span></code></pre></div>
+<p><img src="information_error_rate_analysis_files/figure-html/plot_ppv_range-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_effective_size_conf.html">plot_effective_size_conf</a></span><span class="op">(</span><span class="va">ppv_estimated</span><span class="op">)</span></span></code></pre></div>
+<p><img src="information_error_rate_analysis_files/figure-html/plot_effective_size-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 </div>
 <div class="section level2">
@@ -201,16 +565,102 @@ rather than a single estimate.</p>
 </h2>
 <ul>
 <li>
-<strong>EIG</strong> is best for comparing how much information each
-response category provides (e.g., high-confidence suspect IDs
-vs. low-confidence IDs).</li>
+<strong>EIG</strong> grades every response category, including
+rejections, and reports how much uncertainty the procedure removes
+overall. Use it to compare procedures, or to identify which responses
+carry the evidence.</li>
 <li>
-<strong>PPV range</strong> is useful when false-identification rates
-are uncertain and lineup size corrections materially affect the PPV
-estimate.</li>
+<strong>PPV range</strong> answers the question a court asks — how
+often is an identification of this kind correct — and makes visible how
+much the answer depends on an untestable assumption about lineup
+size.</li>
 </ul>
-<p>These tools are intended to complement ROC/CAC analyses, not replace
-them.</p>
+<p>The two are complementary: EIG is base-rate-dependent through
+<code>prior_guilt</code> and covers all responses; PPV concerns
+identifications only, and is the quantity with direct forensic
+meaning.</p>
+</div>
+<div class="section level2">
+<h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
+</h2>
+<div class="section level3">
+<h3 id="eig">EIG<a class="anchor" aria-label="anchor" href="#eig"></a>
+</h3>
+<p>Computed over response categories formed by crossing decision with
+confidence bin. For each category the posterior comes from Bayes’
+theorem using the observed likelihoods
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>∣</mo><mi>G</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(x \mid G)</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>∣</mo><mo>¬</mo><mi>G</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(x \mid \neg G)</annotation></semantics></math>,
+estimated as response proportions within the target-present and
+target-absent arms respectively. Entropies are in bits (base-2
+logarithms). The prior is set by <code>prior_guilt</code>, defaulting to
+0.5, at which the prior entropy is exactly 1 bit.</p>
+<p>EIG inherits the binning issue discussed in
+<code><a href="../articles/calibration_decision_analysis.html">vignette("calibration_decision_analysis")</a></code>: it is computed
+over discrete categories, so a category with no observations in one arm
+gives an unbounded likelihood ratio, and the number of bins is a
+researcher decision that affects the result.</p>
+</div>
+<div class="section level3">
+<h3 id="ppv-range">PPV range<a class="anchor" aria-label="anchor" href="#ppv-range"></a>
+</h3>
+<p>With a designated innocent suspect, innocent-suspect identifications
+are counted directly and no correction is applied. Otherwise, writing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>e</mi><annotation encoding="application/x-tex">e</annotation></semantics></math>
+for the target-absent error rate within a confidence bin:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>r</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">nominal</mtext></msub><mo>=</mo><mi>e</mi><mi>/</mi><mi>k</mi><mo>,</mo><mspace width="2.0em"></mspace><msub><mover><mi>r</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">effective</mtext></msub><mo>=</mo><mi>e</mi><mi>/</mi><mover><mi>E</mi><mo accent="true">̂</mo></mover><mo>,</mo><mspace width="2.0em"></mspace><msub><mover><mi>r</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">none</mtext></msub><mo>=</mo><mi>e</mi></mrow><annotation encoding="application/x-tex">
+\hat{r}_{\text{nominal}} = e/k, \qquad
+\hat{r}_{\text{effective}} = e/\hat{E}, \qquad
+\hat{r}_{\text{none}} = e
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>E</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{E}</annotation></semantics></math>
+is effective size estimated within the bin. PPV then follows as hits /
+(hits + estimated innocent-suspect identifications).</p>
+</div>
+<div class="section level3">
+<h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>Target-present and target-absent lineups are independent
+samples.</li>
+<li>The nominal-size correction assumes a perfectly fair lineup. It is a
+bound, not an estimate.</li>
+<li>Effective size is estimated per confidence bin, so bins with few
+observations give unstable corrections — check the counts before relying
+on a bin.</li>
+<li>Effective size is itself a plug-in estimate and is biased downward
+at small samples; see the “Small-sample bias” section of
+<code><a href="../reference/esize_T.html">?esize_T</a></code>. A downward-biased effective size makes the
+correction <em>more</em> conservative, so the effect is in the safe
+direction, but it is not negligible.</li>
+</ol>
+</div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Fitzgerald, R. J., Tredoux, C. G., &amp; Juncu, S. (2023). Estimation
+of eyewitness error rates in fair and biased lineups. <em>Law and Human
+Behavior, 47</em>(4), 463-483.</p>
+<p>Starns, J. J., Cohen, A. L., &amp; Rotello, C. M. (2023). A complete
+method for assessing the effectiveness of eyewitness identification
+procedures: Expected information gain. <em>Psychological Review,
+130</em>(3), 677-719.</p>
+</div>
+<div class="section level2">
+<h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../reference/make_eig.html">?make_eig</a></code>, <code><a href="../reference/make_ppv_range.html">?make_ppv_range</a></code>
+</li>
+<li>
+<code><a href="../articles/calibration_decision_analysis.html">vignette("calibration_decision_analysis")</a></code> for the
+Bayesian information-gain curves, which report the same evidence on a
+per-response rather than expected basis</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

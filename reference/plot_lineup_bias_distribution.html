@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -57,7 +58,12 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_lineup_bias_distribution</span><span class="op">(</span><span class="va">boot_values</span>, target_pos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_lineup_bias_distribution</span><span class="op">(</span></span>
+<span>  <span class="va">boot_values</span>,</span>
+<span>  target_pos <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  binwidth <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,16 +71,42 @@
 
 
 <dl><dt id="arg-boot-values">boot_values<a class="anchor" aria-label="anchor" href="#arg-boot-values"></a></dt>
-<dd><p>Numeric vector of bootstrap estimates.</p></dd>
+<dd><p>Numeric vector of bootstrap estimates, as returned by
+<code><a href="lineup_bias_boot_dist.html">lineup_bias_boot_dist</a></code>.</p></dd>
 
 
 <dt id="arg-target-pos">target_pos<a class="anchor" aria-label="anchor" href="#arg-target-pos"></a></dt>
 <dd><p>Optional target position label for title.</p></dd>
 
+
+<dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
+<dd><p>Number of histogram bins. Defaults to <code>NULL</code>, which selects
+the bin width automatically (see Details).</p></dd>
+
+
+<dt id="arg-binwidth">binwidth<a class="anchor" aria-label="anchor" href="#arg-binwidth"></a></dt>
+<dd><p>Histogram bin width. Defaults to <code>NULL</code>, which selects
+the bin width automatically (see Details). Takes precedence over
+<code>bins</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A ggplot object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Bootstrap estimates of a lineup proportion are counts divided by the
+  number of lineup choices, so they fall on a discrete lattice with spacing
+  <code>1/n</code> rather than on a continuum. Binning such values at an arbitrary
+  resolution produces a misleading histogram: bins that contain no attainable
+  value are empty regardless of the data, and bins that happen to straddle two
+  attainable values are twice as tall as their neighbours. When neither
+  <code>bins</code> nor <code>binwidth</code> is supplied, the lattice spacing is
+  recovered (from the <code>"n"</code> attribute when present, otherwise from the
+  values themselves) and used as the bin width, so each bar covers exactly one
+  attainable proportion. Estimates that are effectively continuous fall back
+  to 30 bins.</p>
     </div>
 
     <div class="section level2">

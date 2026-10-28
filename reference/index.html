@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -60,6 +61,13 @@
 
 
       <dl><dt>
+
+          <code><a href="classify_lineup_choices.html">classify_lineup_choices()</a></code>
+
+        </dt>
+        <dd>Classify Raw Lineup Choices into Identification Outcomes</dd>
+
+        <dt>
 
           <code><a href="create_example_lineup_data.html">create_example_lineup_data()</a></code>
 
@@ -103,6 +111,13 @@
 
         <dt>
 
+          <code><a href="lineup_table.html">lineup_table()</a></code>
+
+        </dt>
+        <dd>Tabulate Lineup Choices, Including Null Foils</dd>
+
+        <dt>
+
           <code><a href="mickwick.html">mickwick</a></code>
 
         </dt>
@@ -135,6 +150,13 @@
 
         </dt>
         <dd>Print Method for Lineup Data</dd>
+
+        <dt>
+
+          <code><a href="print.lineup_table.html">print(<i>&lt;lineup_table&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Method for lineup_table Objects</dd>
 
         <dt>
 
@@ -306,21 +328,21 @@
           <code><a href="esize_T.html">esize_T()</a></code>
 
         </dt>
-        <dd>Tredoux Effective Size (Tredoux, 1998)</dd>
+        <dd>Effective Size (Tredoux, 1998)</dd>
 
         <dt>
 
           <code><a href="esize_T_bayes.html">esize_T_bayes()</a></code>
 
         </dt>
-        <dd>Bayesian Posterior Distribution of Tredoux Effective Size</dd>
+        <dd>Bayesian Posterior Distribution of Effective Size (Tredoux, 1998)</dd>
 
         <dt>
 
           <code><a href="esize_T_bayes_compare.html">esize_T_bayes_compare()</a></code>
 
         </dt>
-        <dd>Bayesian Comparison of Tredoux Effective Size Across Two Lineups</dd>
+        <dd>Bayesian Comparison of Effective Size (Tredoux, 1998) Across Two Lineups</dd>
 
         <dt>
 
@@ -341,7 +363,7 @@
           <code><a href="i_esize_T.html">i_esize_T()</a></code>
 
         </dt>
-        <dd>I Component of Tredoux Effective Size (Tredoux, 1998)</dd>
+        <dd>I Component of Effective Size (Tredoux, 1998)</dd>
       </dl></div><div class="section level2">
       <h2 id="functional-size">Functional size<a class="anchor" aria-label="anchor" href="#functional-size"></a></h2>
 
@@ -551,6 +573,13 @@
 
         </dt>
         <dd>Compute ROC Data for Lineup Identification</dd>
+
+        <dt>
+
+          <code><a href="plot_roc_cac.html">plot(<i>&lt;lineup_roc_data&gt;</i>)</a></code> <code><a href="plot_roc_cac.html">plot(<i>&lt;lineup_roc&gt;</i>)</a></code> <code><a href="plot_roc_cac.html">plot(<i>&lt;lineup_cac_data&gt;</i>)</a></code> <code><a href="plot_roc_cac.html">plot(<i>&lt;lineup_cac&gt;</i>)</a></code> <code><a href="plot_roc_cac.html">plot(<i>&lt;lineup_fullroc_data&gt;</i>)</a></code> <code><a href="plot_roc_cac.html">plot(<i>&lt;lineup_fullroc&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot Methods for ROC and CAC Objects</dd>
 
         <dt>
 
@@ -1139,6 +1168,36 @@
 
         </dt>
         <dd>Plot mSDT Joint Distributions</dd>
+      </dl></div><div class="section level2">
+      <h2 id="multi-d-model-lee-penrod-">Multi-d’ model (Lee &amp; Penrod)<a class="anchor" aria-label="anchor" href="#multi-d-model-lee-penrod-"></a></h2>
+
+      <div class="section-desc"><p>Multiple empirical d’ indices from the full TP/TA response table, including resultant lineup-bias indices.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="compare_multid.html">compare_multid()</a></code>
+
+        </dt>
+        <dd>Compare Multi-d' Indices Between Two Conditions</dd>
+
+        <dt>
+
+          <code><a href="make_multid.html">make_multid()</a></code>
+
+        </dt>
+        <dd>Multi-d' Model of Lineup Performance (Lee &amp; Penrod, 2019)</dd>
+
+        <dt>
+
+          <code><a href="plot.multid.html">plot(<i>&lt;multid&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot a Multi-d' Analysis</dd>
       </dl></div><div class="section level2">
       <h2 id="wixted-lineup-memory-models-optional-pywitness-engine-">Wixted lineup-memory models (optional pyWitness engine)<a class="anchor" aria-label="anchor" href="#wixted-lineup-memory-models-optional-pywitness-engine-"></a></h2>
 

@@ -18,3 +18,8 @@ plot(x, ...)
 - ...:
 
   Additional arguments (ignored)
+
+## Value
+
+A ggplot object, returned invisibly. Because it is an ordinary ggplot,
+further layers and themes can be added to it.

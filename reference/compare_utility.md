@@ -61,6 +61,7 @@ comparison <- compare_utility(lineup_example[odd, ],
                               lineup_example[-odd, ],
                               base_rate_grid = seq(0.1, 0.9, 0.1),
                               utility_type = "max")
+
 print(comparison)
 #> 
 #> === Lineup Utility Comparison ===
@@ -70,17 +71,18 @@ print(comparison)
 #>   tp   fn   fp   tn 
 #>  1.0 -0.5 -2.0  0.5 
 #> 
-#> No crossover points - one procedure dominates across all base rates
+#> Crossover points (base rates where procedures are equivalent):
+#>    0.360, 0.827 
 #> 
 #> Utility difference at key base rates:
 #>   (Positive = Proc A better; Negative = Proc B better)
 #> 
-#>   Base rate 0.1: +0.0060
-#>   Base rate 0.3: +0.0180
-#>   Base rate 0.5: +0.0750
-#>   Base rate 0.7: +0.0450
-#>   Base rate 0.9: +0.0150
+#>   Base rate 0.1: +0.0154
+#>   Base rate 0.3: +0.0209
+#>   Base rate 0.5: -0.0078
+#>   Base rate 0.7: -0.0055
+#>   Base rate 0.9: +0.0032
 #> 
-#> Plot available in $plot
+#> Plot: save this object first, then extract it with x$plot
 # }
 ```

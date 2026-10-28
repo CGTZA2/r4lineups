@@ -1,370 +1,603 @@
 # Full ROC Analysis for Eyewitness Lineups
 
-## Introduction
-
-This vignette demonstrates the use of **full ROC (Receiver Operating
-Characteristic) curves** for analyzing eyewitness lineup data, following
-the method developed by Smith, Yang, and Wells (2020).
-
-### Why Full ROC?
-
-Traditional (partial) ROC analysis of lineup data only uses **suspect
-identifications**, ignoring filler identifications and lineup
-rejections. This creates several problems:
-
-1.  **Incomplete evidence**: Filler IDs and rejections also provide
-    diagnostic information about suspect guilt
-2.  **Biased comparisons**: Partial AUC (pAUC) systematically favors
-    more conservative procedures
-3.  **Limited range**: Partial ROC curves don’t span the full \[0,1\]
-    range
-4.  **Confounded with bias**: Cannot separate discriminability from
-    response bias
-
-The **full ROC method** addresses these issues by using ALL eyewitness
-responses.
-
-## The Key Insight: Two Signal Detection Tasks
-
-Smith et al. (2020) recognized that lineup procedures involve **two
-simultaneous signal detection tasks**:
-
-### 1. Eyewitness Task (3 × 2)
-
-- Determine if culprit is present AND identify them
-- Three responses: suspect ID, filler ID, or reject
-- Two states: culprit present or absent
-
-### 2. Investigator Task (2 × 2)
-
-- Determine if suspect is guilty
-- Two decisions: arrest or release
-- Two states: guilty or innocent suspect
-- **Key point**: Investigator knows which lineup members are fillers
-
-The investigator uses the witness’s decision (and confidence) as
-evidence to decide about the suspect. The **full ROC measures
-investigator discriminability**, not just eyewitness memory.
-
-## Basic Usage
-
-### Data Structure
-
-Your data needs three columns:
+> **Acknowledgement.** Large language models supplied by Anthropic and
+> OpenAI were used in preparing this vignette, to assist with checking
+> code, testing the veracity of the approaches described, and on
+> occasion editing the text. Responsibility for the content rests with
+> the authors.
 
 ``` r
 
 library(r4lineups)
-
-data <- data.frame(
-  target_present = c(TRUE, TRUE, FALSE, FALSE, ...),  # Logical
-  identification = c("suspect", "filler", "reject", ...),  # Character
-  confidence = c(90, 70, 80, 50, ...)  # Numeric
-)
+library(ggplot2)
 ```
 
-### Compute Full ROC
+## Introduction
 
-``` r
+This vignette demonstrates **full ROC curves** for eyewitness lineup
+data, following the method of Smith, Yang and Wells (2020).
 
-# Main function
-result <- make_fullroc(
-  data,
-  conf_bins = NULL,           # Optional: bin confidence
-  order = "diagnosticity",    # or "apriori"
-  lineup_size = 6,
-  show_plot = TRUE
-)
+**Attribution.** The method is theirs, and a reference implementation
+exists as the R package **fullROC** (Yang & Smith). The implementation
+here was written from the published description and adapted into this
+package’s data conventions; it is not a fork of that package.
 
-# View results
-print(result)
-print(result$auc)
+### Every response, not just suspect identifications
 
-# Access plot
-print(result$plot)
-```
+Conventional ROC analysis of lineup data uses **only suspect
+identifications**. A witness who picks a foil, and a witness who rejects
+the lineup entirely, contribute nothing to either axis.
 
-## Example 1: Strong vs. Weak Memory
+Spelling out what actually happens when a witness views a lineup makes
+the omission clear. There are six possible outcomes:
 
-Let’s simulate data for two viewing conditions:
-
-``` r
-
-set.seed(123)
-
-# Strong memory (clear viewing)
-strong_data <- data.frame(
-  target_present = c(rep(TRUE, 100), rep(FALSE, 100)),
-  identification = c(
-    # Target-present: high suspect ID rate
-    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
-           prob = c(0.70, 0.15, 0.15)),
-    # Target-absent: low false ID rate
-    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
-           prob = c(0.10, 0.30, 0.60))
-  ),
-  confidence = sample(seq(0, 100, 10), 200, replace = TRUE)
-)
-
-# Weak memory (degraded viewing)
-weak_data <- data.frame(
-  target_present = c(rep(TRUE, 100), rep(FALSE, 100)),
-  identification = c(
-    # Target-present: lower suspect ID rate
-    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
-           prob = c(0.35, 0.35, 0.30)),
-    # Target-absent: higher false ID rate
-    sample(c("suspect", "filler", "reject"), 100, replace = TRUE,
-           prob = c(0.25, 0.40, 0.35))
-  ),
-  confidence = sample(seq(0, 100, 10), 200, replace = TRUE)
-)
-
-# Compute full ROCs
-strong_roc <- make_fullroc(strong_data)
-weak_roc <- make_fullroc(weak_data)
-
-# Compare
-cat("Strong memory AUC:", strong_roc$auc, "\n")
-cat("Weak memory AUC:", weak_roc$auc, "\n")
-```
-
-Expected result: Strong memory condition should have substantially
-higher AUC (e.g., 0.85 vs. 0.65).
-
-## Example 2: Custom Confidence Bins
-
-Instead of using every unique confidence value, you can create bins:
-
-``` r
-
-# Create Low (0-60), Medium (60-80), High (80-100) bins
-result_binned <- make_fullroc(
-  data,
-  conf_bins = c(0, 60, 80, 100),
-  order = "diagnosticity"
-)
-
-# This creates cleaner ROC curves with fewer operating points
-# Useful when you have many confidence levels
-```
-
-## Ordering Methods
-
-### Diagnosticity Ordering (Default)
-
-Orders response categories by their empirical diagnosticity ratio (DR =
-Hit Rate / False Alarm Rate):
-
-``` r
-
-result <- make_fullroc(data, order = "diagnosticity")
-```
-
-- High DR (e.g., 10.0): Strong evidence of guilt (e.g., high-confidence
-  suspect ID)
-- DR ≈ 1.0: Neutral evidence
-- Low DR (e.g., 0.1): Strong evidence of innocence (e.g.,
-  high-confidence rejection)
-
-**Caution — optimistic bias.** Because the ordering is chosen from the
-*sample* diagnosticity ratios, the curve is bowed upward by noise alone:
-even identical target-present and target-absent response distributions
-produce an AUC slightly above 0.5. The bias grows with the number of
-decision × confidence cells and shrinks with sample size. Diagnosticity
-ordering is useful for exploration, but for inference or comparisons
-across conditions prefer a-priori ordering (below) or benchmark against
-a permutation baseline.
-
-### A-priori Ordering
-
-Uses theoretical ordering:
-
-``` r
-
-result <- make_fullroc(data, order = "apriori")
-```
-
-Order (from evidence of guilt → evidence of innocence): 1. Suspect IDs:
-high confidence → low confidence 2. Filler IDs: low confidence → high
-confidence 3. Rejections: low confidence → high confidence
-
-Rationale: - High-confidence suspect IDs are strong evidence of guilt -
-Low-confidence filler IDs/rejections are strong evidence of innocence
-(rare when guilty, common when innocent)
-
-Because the ordering is fixed in advance rather than estimated from the
-data, a-priori ordering does not suffer from the optimistic bias
-described above and is the safer choice for hypothesis tests and
-between-condition comparisons (this is why Smith & Yang, 2020, offer
-it).
-
-## Understanding the Output
-
-### The Diagnosticity Table
-
-This shows non-cumulative rates for each decision × confidence category:
-
-``` r
-
-result <- make_fullroc(data)
-head(result$diagnosticity_table)
-```
-
-Columns: - `decision`: suspect, filler, or reject - `conf_bin`:
-confidence level - `hit_rate`: P(this response \| target present) -
-`false_alarm_rate`: P(this response \| target absent) -
-`diagnosticity_ratio`: hit_rate / false_alarm_rate - `cumulative_*`:
-Running sum (for ROC curve)
-
-### The ROC Data
-
-``` r
-
-head(result$roc_data)
-```
-
-Each row is an operating point (decision criterion) on the ROC curve: -
-`cumulative_hit_rate`: Y-axis (correct IDs of guilty suspects) -
-`cumulative_false_alarm_rate`: X-axis (false IDs of innocent suspects)
-
-### The AUC
-
-``` r
-
-result$auc
-```
-
-- **0.50**: Chance performance
-- **0.60-0.70**: Weak discriminability
-- **0.70-0.80**: Moderate discriminability
-- **0.80-0.90**: Good discriminability
-- **0.90-1.00**: Excellent discriminability
-
-## Comparing Procedures
-
-### When One ROC Dominates
-
-If Procedure A’s ROC is above Procedure B’s across the **entire** range:
-
-``` r
-
-# Procedure A dominates if its ROC curve is always above Procedure B's
-# This means A is unambiguously superior regardless of:
-#   - Base rate assumptions
-#   - Cost/utility functions
-#   - Operating points chosen
-```
-
-### When ROC Curves Cross
-
-When curves cross, there’s no clear winner without additional
-assumptions. You need:
-
-1.  **Base rate**: How often is the suspect actually guilty?
-2.  **Costs**: Relative cost of missed ID vs. false ID
-3.  **Utility analysis**: Use expected utility framework (see Lampinen
-    et al., 2019)
-
-## Full ROC vs. Partial ROC
-
-``` r
-
-# Traditional partial ROC
-partial <- make_roc(data)
-print(partial$pauc)  # Partial AUC
-
-# Full ROC
-full <- make_fullroc(data)
-print(full$auc)  # Full AUC
-
-# These are NOT comparable!
-# pAUC only uses suspect IDs
-# Full AUC uses ALL evidence
-```
-
-Key differences:
-
-| Feature | Partial ROC | Full ROC |
+| Witness response | Target-present lineup | Target-absent lineup |
 |----|----|----|
-| Responses | Suspect IDs only | ALL responses |
-| Range | Limited (often 0-0.30) | Full (0-1.0) |
-| Measure | pAUC | AUC |
-| Bias | Favors conservative procedures | Ordering-dependent; sample-DR ordering is an upper bound |
-| Evidence | Inculpatory only | Inculpatory + exculpatory |
+| Picks the suspect | **Correct identification** — used by both methods | **False identification** — used by both methods |
+| Picks a foil | Filler identification — an error, *discarded* by partial ROC | Filler identification — a protected outcome, *discarded* by partial ROC |
+| Picks nobody | Incorrect rejection — a miss, *discarded* by partial ROC | **Correct rejection** — *discarded* by partial ROC |
 
-## Practical Recommendations
+Four of the six outcomes are set aside. Yet they carry information. A
+witness who picks a foil has demonstrably failed to recognise the
+culprit, and in a target-absent lineup has done the innocent suspect a
+service. A confident rejection is evidence *against* the suspect’s
+guilt, and an investigator would certainly treat it as such.
 
-1.  **Use full ROC when the inferential target is total evidentiary
-    value**
-    - Uses inculpatory and exculpatory responses
-    - Uses all available evidence
-    - Aligns with real investigator decisions
-2.  **Pre-specify ordering for confirmatory comparisons**
-    - `order = "apriori"` avoids choosing the order from the same sample
-    - Diagnosticity ordering is useful as an exploratory upper-bound
-      estimate, but its AUC is optimistically biased and can be unstable
-      across samples
-3.  **Bin confidence if needed**
-    - Creates cleaner ROC curves
-    - Reduces noise from sparse confidence levels
-    - Example: `conf_bins = c(0, 60, 80, 100)`
-4.  **Check for curve dominance**
-    - If one curve dominates → clear winner
-    - If curves cross → need utility analysis
-5.  **Report full results**
-    - AUC value
-    - Sample sizes (target-present, target-absent)
-    - Number of operating points
-    - Ordering method used
+The full ROC method uses all six.
 
-## Mathematical Details
+### Why the partial ROC curve does not span the full range
 
-### Algorithm
+This is worth being concrete about, because it is the practical reason
+full ROC was proposed.
 
-For each decision × confidence category:
+An ROC curve is traced by progressively relaxing the criterion for
+accepting evidence. In conventional lineup ROC analysis, the only lever
+is confidence among suspect identifications: start with the
+highest-confidence suspect IDs and work down. When every suspect
+identification has been included, the curve stops.
 
-1.  Compute non-cumulative rates:
-    ``` math
-    HR_i = \frac{\text{count}(response_i | target\_present)}{N_{present}}
-    ```
-    ``` math
-    FAR_i = \frac{\text{count}(response_i | target\_absent)}{N_{absent}}
-    ```
+It stops at the point given by the overall suspect identification rates
+in the two arms — typically well under 0.3 on the x-axis, because most
+witnesses in a target-absent lineup do *not* pick the innocent suspect;
+they pick a foil or reject. There is no way to continue the curve,
+because there are no further suspect identifications to admit.
 
-2.  Compute diagnosticity ratio:
-    ``` math
-    DR_i = \frac{HR_i}{FAR_i}
-    ```
+``` r
 
-3.  Order categories by $`DR_i`$ (descending)
+data(lineup_example)
 
-4.  Compute cumulative rates:
-    ``` math
-    CHR_k = \sum_{i=1}^{k} HR_i
-    ```
-    ``` math
-    CFAR_k = \sum_{i=1}^{k} FAR_i
-    ```
+partial <- make_roc(lineup_example, lineup_size = 6, show_plot = FALSE)
+full    <- make_fullroc(lineup_example, lineup_size = 6, show_plot = FALSE)
 
-5.  Calculate AUC (trapezoidal rule):
-    ``` math
-    AUC = \sum_{i=2}^{n} \frac{(CFAR_i - CFAR_{i-1}) \times (CHR_i + CHR_{i-1})}{2}
-    ```
+knitr::kable(
+  data.frame(
+    Method = c("Partial ROC (suspect IDs only)", "Full ROC (all responses)"),
+    `False-ID axis spans` = c(
+      sprintf("0 to %.3f", max(partial$roc_data$false_id_rate)),
+      sprintf("0 to %.3f", max(full$roc_data$cumulative_false_alarm_rate))
+    ),
+    `Area reported` = c(
+      sprintf("pAUC = %.4f", partial$pauc),
+      sprintf("AUC = %.4f", full$auc)
+    ),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "Range covered by the two methods, lineup_example (700 target-present and 700 target-absent lineups of size 6)."
+)
+```
 
-### Edge Cases
+| Method                         | False-ID axis spans | Area reported |
+|:-------------------------------|:--------------------|:--------------|
+| Partial ROC (suspect IDs only) | 0 to 0.126          | pAUC = 0.0533 |
+| Full ROC (all responses)       | 0 to 1.000          | AUC = 0.7775  |
 
-- **FAR = 0**: Use small epsilon (default 0.001) to compute DR
-- **HR = FAR = 0**: Set DR = 1.0 (neutral evidence), remove from ROC
-- **Empty bins**: Automatically removed
+Range covered by the two methods, lineup_example (700 target-present and
+700 target-absent lineups of size 6). {.table}
+
+The full ROC reaches 1.0 because once foil identifications and
+rejections are admitted as evidence, every witness eventually
+contributes, and the cumulative rates must reach 1 in both arms.
+
+**The two areas are not comparable.** A pAUC of 0.06 and an AUC of 0.78
+are not in competition; they are computed over different ranges from
+different subsets of the data. Never report one as though it were the
+other.
+
+## The key insight: two signal detection tasks
+
+Smith et al. (2020) argue that a lineup involves **two** signal
+detection problems, and that the conventional analysis conflates them.
+
+**The eyewitness task.** The witness must decide whether the culprit is
+present and, if so, which member they are. Three responses, two states
+of the world. This is a question about *memory*.
+
+**The investigator task.** The investigator must decide whether to
+proceed against the suspect. Two decisions, two states. Crucially, the
+investigator **knows which lineup members are foils** — so a foil
+identification is not an ambiguous outcome to them, it is informative
+evidence that the witness could not recognise the culprit.
+
+The full ROC measures **investigator discriminability**: how well
+someone using the witness’s response as evidence can separate guilty
+from innocent suspects. That is a different quantity from eyewitness
+discriminability, and it is arguably the one that matters for policy,
+since it is the investigator who acts.
+
+This is also the source of the main objection to the method — that an
+AUC near 0.8 may describe the investigator’s inferential position rather
+than the witness’s memory, and readers may conflate the two. Keeping the
+label “investigator discriminability” attached to the number is the
+simplest guard.
+
+## Basic usage
+
+### Data structure
+
+Three columns are required: `target_present`, `identification` and
+`confidence`. `lineup_example` has them, along with the member-level
+columns this package records.
+
+``` r
+
+str(lineup_example)
+#> 'data.frame':    1400 obs. of  5 variables:
+#>  $ target_present: logi  FALSE FALSE TRUE TRUE TRUE FALSE ...
+#>  $ lineup_member : int  2 3 2 1 1 0 1 1 1 4 ...
+#>  $ suspect_pos   : int  1 1 1 1 1 1 1 1 1 1 ...
+#>  $ identification: chr  "filler" "filler" "filler" "suspect" ...
+#>  $ confidence    : num  40 50 40 80 60 20 60 70 20 50 ...
+```
+
+As elsewhere in this package, the data are simulated at the level of
+**individual foils** — each foil has its own mean memory strength, so
+the foils are not interchangeable — and `identification` is derived from
+`lineup_member` rather than stored in its place. See
+[`?simulate_lineup_data`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
+and its `foil_bias` argument.
+
+### Compute a full ROC
+
+``` r
+
+result <- make_fullroc(
+  lineup_example,
+  lineup_size = 6,
+  order       = "apriori",
+  show_plot   = FALSE
+)
+
+print(result)
+#> 
+#> === Full Lineup ROC Analysis (Smith & Yang, 2020) ===
+#> 
+#> Full AUC: 0.76 
+#> Target-present trials (N): 700 
+#> Target-absent trials (N): 700 
+#> Lineup size: 6 
+#> Ordering method: apriori 
+#> Operating points: 19 
+#> 
+#> ROC Data (first 10 points):
+#>    cumulative_hit_rate cumulative_false_alarm_rate evidence_label
+#> 1           0.00000000                 0.000000000         origin
+#> 2           0.09714286                 0.000000000    suspect_100
+#> 3           0.14285714                 0.005714286     suspect_90
+#> 4           0.18857143                 0.014285714     suspect_80
+#> 5           0.26000000                 0.022857143     suspect_70
+#> 6           0.35142857                 0.030000000     suspect_60
+#> 7           0.43571429                 0.054285714     suspect_50
+#> 8           0.50714286                 0.077142857     suspect_40
+#> 9           0.55571429                 0.102857143     suspect_30
+#> 10          0.59285714                 0.125714286     suspect_20
+#> 
+#> 
+#> Diagnosticity Table (ordered by evidence strength):
+#>  evidence_label    hit_rate false_alarm_rate diagnosticity_ratio
+#>     suspect_100 0.097142857      0.000000000          97.1428571
+#>      suspect_90 0.045714286      0.005714286           8.0000000
+#>      suspect_80 0.045714286      0.008571429           5.3333333
+#>      suspect_70 0.071428571      0.008571429           8.3333333
+#>      suspect_60 0.091428571      0.007142857          12.8000000
+#>      suspect_50 0.084285714      0.024285714           3.4705882
+#>      suspect_40 0.071428571      0.022857143           3.1250000
+#>      suspect_30 0.048571429      0.025714286           1.8888889
+#>      suspect_20 0.037142857      0.022857143           1.6250000
+#>       filler_20 0.047142857      0.108571429           0.4342105
+#>       filler_30 0.047142857      0.110000000           0.4285714
+#>       filler_40 0.054285714      0.098571429           0.5507246
+#>       filler_50 0.054285714      0.090000000           0.6031746
+#>       filler_60 0.032857143      0.052857143           0.6216216
+#>       filler_70 0.037142857      0.062857143           0.5909091
+#>       filler_80 0.020000000      0.021428571           0.9333333
+#>       filler_90 0.008571429      0.014285714           0.6000000
+#>      filler_100 0.010000000      0.028571429           0.3500000
+#>       reject_20 0.095714286      0.287142857           0.3333333
+#> 
+#> Plot: use plot(x), or save the object and extract x$plot
+```
+
+``` r
+
+result$plot + theme_minimal(base_size = 12)
+```
+
+![](fullroc_analysis_files/figure-html/fullroc_plot-1.png)
+
+The curve runs corner to corner, and each point is one operating point:
+a threshold on the ordered evidence categories.
+
+## Ordering methods, and a warning about the default
+
+Building the curve requires the response categories — every combination
+of decision and confidence level — to be placed in order from “strongest
+evidence of guilt” to “strongest evidence of innocence”. The two
+available orderings differ in where that order comes from, and the
+difference matters a great deal more than it might appear.
+
+### A-priori ordering
+
+`order = "apriori"` fixes the order in advance on theoretical grounds:
+
+1.  Suspect identifications, from high confidence down to low
+2.  Filler identifications, from low confidence up to high
+3.  Rejections, from low confidence up to high
+
+The reasoning is that a confident suspect identification is the
+strongest evidence of guilt, while a confident rejection or a confident
+filler identification is the strongest evidence of innocence.
+
+### Diagnosticity ordering
+
+`order = "diagnosticity"` instead sorts the categories by their
+**observed** diagnosticity ratio, $`DR = HR / FAR`$, computed from the
+data at hand.
+
+That sounds more principled — why assume an order when you can measure
+it? — but it uses the same data twice: once to choose the ordering that
+makes the curve bow as far upward as possible, and again to compute the
+area under it. The result is optimistically biased.
+
+### How large is the bias?
+
+Large enough to matter. The following simulates data with **no signal
+whatsoever** — the response distribution is identical in target-present
+and target-absent lineups, so the true AUC is exactly 0.5 — and computes
+the AUC both ways.
+
+``` r
+
+null_auc <- function(n_per_arm, n_reps = 15, seed = 7) {
+  set.seed(seed)
+  out <- t(vapply(seq_len(n_reps), function(i) {
+    d <- data.frame(
+      target_present = rep(c(TRUE, FALSE), each = n_per_arm),
+      identification = sample(c("suspect", "filler", "reject"),
+                              2 * n_per_arm, replace = TRUE,
+                              prob = c(0.2, 0.3, 0.5)),
+      confidence     = sample(seq(20, 100, 20), 2 * n_per_arm, replace = TRUE)
+    )
+    c(diagnosticity = make_fullroc(d, lineup_size = 6,
+                                   show_plot = FALSE)$auc,
+      apriori       = make_fullroc(d, lineup_size = 6, order = "apriori",
+                                   show_plot = FALSE)$auc)
+  }, numeric(2)))
+  colMeans(out)
+}
+
+bias_table <- do.call(rbind, lapply(c(100, 200, 500, 1000), function(n) {
+  a <- null_auc(n)
+  data.frame(`Lineups per arm` = n,
+             `Diagnosticity ordering` = round(a[["diagnosticity"]], 3),
+             `A-priori ordering` = round(a[["apriori"]], 3),
+             check.names = FALSE)
+}))
+
+knitr::kable(
+  bias_table, row.names = FALSE,
+  caption = "Mean AUC from data containing NO signal at all, so the true AUC is 0.500. Simulated, 15 replications per row, 15 decision-by-confidence categories."
+)
+```
+
+| Lineups per arm | Diagnosticity ordering | A-priori ordering |
+|----------------:|-----------------------:|------------------:|
+|             100 |                  0.655 |             0.482 |
+|             200 |                  0.601 |             0.490 |
+|             500 |                  0.568 |             0.494 |
+|            1000 |                  0.544 |             0.496 |
+
+Mean AUC from data containing NO signal at all, so the true AUC is
+0.500. Simulated, 15 replications per row, 15 decision-by-confidence
+categories. {.table}
+
+With 100 lineups per arm — an entirely ordinary study size — pure noise
+returns an AUC around 0.65 under diagnosticity ordering. On the
+interpretive scale often quoted for AUC, that is “weak to moderate
+discriminability”. It is nothing of the kind: there is no signal in
+these data at all.
+
+A-priori ordering sits at 0.5 throughout, as it should.
+
+The bias shrinks as the sample grows, roughly with the square root, but
+it is still around 0.05 at 1000 lineups per arm. It also grows with the
+number of decision-by-confidence categories, so binning confidence
+reduces it.
+
+**Recommendation.** Use `order = "apriori"` for anything inferential:
+hypothesis tests, comparisons between conditions, published estimates.
+Diagnosticity ordering is defensible only as an exploratory upper bound,
+and should be labelled as such.
+[`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+emits a message when diagnosticity ordering is used on a modest sample,
+for this reason.
+
+## Binning confidence
+
+Binning reduces the number of operating points, which produces a cleaner
+curve and — as noted above — a smaller optimism bias when diagnosticity
+ordering is used.
+
+``` r
+
+binned <- make_fullroc(
+  lineup_example,
+  conf_bins   = c(0, 60, 80, 100),
+  order       = "apriori",
+  lineup_size = 6,
+  show_plot   = FALSE
+)
+
+knitr::kable(
+  data.frame(
+    Version = c("All confidence levels", "Three bins (0-60, 60-80, 80-100)"),
+    `Operating points` = c(nrow(result$roc_data), nrow(binned$roc_data)),
+    AUC = round(c(result$auc, binned$auc), 4),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "Effect of binning confidence, lineup_example, a-priori ordering."
+)
+```
+
+| Version                          | Operating points |    AUC |
+|:---------------------------------|-----------------:|-------:|
+| All confidence levels            |               20 | 0.7596 |
+| Three bins (0-60, 60-80, 80-100) |                8 | 0.7599 |
+
+Effect of binning confidence, lineup_example, a-priori ordering.
+{.table}
+
+The AUCs are close, which is the reassuring case. A large discrepancy
+would suggest the curve is being driven by sparse categories.
+
+## Understanding the output
+
+### The diagnosticity table
+
+Non-cumulative rates for each decision-by-confidence category:
+
+``` r
+
+knitr::kable(
+  head(as.data.frame(result$diagnosticity_table)[
+    , c("decision", "conf_bin", "hit_rate", "false_alarm_rate",
+        "diagnosticity_ratio")], 8),
+  digits = 4, row.names = FALSE,
+  caption = "Non-cumulative response rates and diagnosticity ratios, lineup_example (first 8 categories under a-priori ordering)."
+)
+```
+
+| decision | conf_bin | hit_rate | false_alarm_rate | diagnosticity_ratio |
+|:---------|:---------|---------:|-----------------:|--------------------:|
+| suspect  | 100      |   0.0971 |           0.0000 |             97.1429 |
+| suspect  | 90       |   0.0457 |           0.0057 |              8.0000 |
+| suspect  | 80       |   0.0457 |           0.0086 |              5.3333 |
+| suspect  | 70       |   0.0714 |           0.0086 |              8.3333 |
+| suspect  | 60       |   0.0914 |           0.0071 |             12.8000 |
+| suspect  | 50       |   0.0843 |           0.0243 |              3.4706 |
+| suspect  | 40       |   0.0714 |           0.0229 |              3.1250 |
+| suspect  | 30       |   0.0486 |           0.0257 |              1.8889 |
+
+Non-cumulative response rates and diagnosticity ratios, lineup_example
+(first 8 categories under a-priori ordering). {.table}
+
+A ratio well above 1 means the response is more common when the suspect
+is guilty; well below 1, more common when innocent; near 1,
+uninformative.
+
+### The ROC data
+
+``` r
+
+knitr::kable(
+  head(as.data.frame(result$roc_data), 6),
+  digits = 4, row.names = FALSE,
+  caption = "Cumulative rates defining the ROC operating points, lineup_example."
+)
+```
+
+| cumulative_hit_rate | cumulative_false_alarm_rate | evidence_label |
+|--------------------:|----------------------------:|:---------------|
+|              0.0000 |                      0.0000 | origin         |
+|              0.0971 |                      0.0000 | suspect_100    |
+|              0.1429 |                      0.0057 | suspect_90     |
+|              0.1886 |                      0.0143 | suspect_80     |
+|              0.2600 |                      0.0229 | suspect_70     |
+|              0.3514 |                      0.0300 | suspect_60     |
+
+Cumulative rates defining the ROC operating points, lineup_example.
+{.table}
+
+### Interpreting the AUC
+
+The AUC has a direct probabilistic reading: it is the probability that a
+randomly chosen guilty suspect receives stronger evidence than a
+randomly chosen innocent one. 0.5 is chance.
+
+Descriptive labels — “0.7 is moderate”, “0.8 is good” — circulate
+widely, but they should be resisted here for two reasons. The bias
+demonstrated above means a number in the 0.6s may reflect no signal at
+all; and the quantity is *investigator* discriminability, which has no
+established interpretive convention in this literature. Report the
+value, the ordering method, the sample sizes, and let the comparison do
+the work.
+
+## Comparing procedures
+
+The most defensible comparison is **curve dominance**: if one
+procedure’s ROC lies above another’s across the whole range, it is
+superior at every operating point, whatever base rate or cost structure
+is assumed.
+
+``` r
+
+strong <- as.data.frame(simulate_lineup_data(
+  n_tp = 500, n_ta = 500, d_prime = 2.0, c_criterion = 0.9,
+  lineup_size = 6, conf_levels = 5,
+  foil_bias = c(0.4, 0.2, 0.0, -0.4, -1.0), seed = 11
+))
+
+weak <- as.data.frame(simulate_lineup_data(
+  n_tp = 500, n_ta = 500, d_prime = 1.2, c_criterion = 0.9,
+  lineup_size = 6, conf_levels = 5,
+  foil_bias = c(0.4, 0.2, 0.0, -0.4, -1.0), seed = 12
+))
+
+strong_roc <- make_fullroc(strong, lineup_size = 6, order = "apriori",
+                           show_plot = FALSE)
+weak_roc   <- make_fullroc(weak,   lineup_size = 6, order = "apriori",
+                           show_plot = FALSE)
+
+knitr::kable(
+  data.frame(
+    Condition = c("Strong memory (d' = 2.0)", "Weak memory (d' = 1.2)"),
+    AUC = round(c(strong_roc$auc, weak_roc$auc), 4)
+  ),
+  row.names = FALSE,
+  caption = "Full ROC AUC by viewing condition, simulated data (500 target-present and 500 target-absent lineups per condition, a-priori ordering)."
+)
+```
+
+| Condition                |    AUC |
+|:-------------------------|-------:|
+| Strong memory (d’ = 2.0) | 0.8443 |
+| Weak memory (d’ = 1.2)   | 0.6835 |
+
+Full ROC AUC by viewing condition, simulated data (500 target-present
+and 500 target-absent lineups per condition, a-priori ordering).
+{.table}
+
+``` r
+
+curves <- rbind(
+  transform(as.data.frame(strong_roc$roc_data), Condition = "Strong (d' = 2.0)"),
+  transform(as.data.frame(weak_roc$roc_data),   Condition = "Weak (d' = 1.2)")
+)
+
+ggplot(curves, aes(x = cumulative_false_alarm_rate, y = cumulative_hit_rate,
+                   colour = Condition)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dotted", colour = "grey60") +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.6) +
+  coord_equal() +
+  labs(
+    x = "Cumulative false alarm rate",
+    y = "Cumulative hit rate",
+    title = "Full ROC curves for two viewing conditions",
+    subtitle = "Simulated data, 500 target-present and 500 target-absent lineups per condition"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+![](fullroc_analysis_files/figure-html/comparison_plot-1.png)
+
+Here the stronger condition dominates: its curve is above the weaker one
+throughout, so no assumption about base rates or costs could reverse the
+conclusion.
+
+**When curves cross**, there is no procedure-level winner, and the
+choice depends on where you intend to operate. That requires a base rate
+and a cost structure — which is expected utility analysis, covered in
+[`vignette("calibration_decision_analysis")`](https://cgtza2.github.io/r4lineups/articles/calibration_decision_analysis.md).
+
+Note that this package provides no significance test for a difference
+between two full-ROC AUCs. The comparison above is descriptive.
+
+## Technical Details
+
+### How the curve is built
+
+For each decision-by-confidence category $`i`$ (three decisions times
+the number of confidence levels), the non-cumulative rates are
+
+``` math
+HR_i = \frac{n(\text{response}_i \mid \text{target present})}{N_{\text{present}}}, \qquad
+FAR_i = \frac{n(\text{response}_i \mid \text{target absent})}{N_{\text{absent}}}
+```
+
+and the diagnosticity ratio is $`DR_i = HR_i / FAR_i`$.
+
+Categories are then placed in order — by $`DR_i`$ descending, or by the
+a-priori scheme — and accumulated:
+
+``` math
+CHR_k = \sum_{i=1}^{k} HR_i, \qquad CFAR_k = \sum_{i=1}^{k} FAR_i
+```
+
+Because every response falls in exactly one category, both cumulative
+sums reach 1 when all categories are included, which is why the curve
+spans the full range. The area follows by the trapezoidal rule:
+
+``` math
+AUC = \sum_{i=2}^{n} \bigl(CFAR_i - CFAR_{i-1}\bigr)\cdot\frac{CHR_i + CHR_{i-1}}{2}
+```
+
+### Edge cases
+
+- $`FAR_i = 0`$: the ratio is undefined, so a small constant (`epsilon`,
+  default 0.001) is substituted. The affected category sorts to the top
+  under diagnosticity ordering, which is one route by which that
+  ordering becomes optimistic.
+- $`HR_i = FAR_i = 0`$: the category is empty and is removed.
+- Empty bins after `conf_bins` are applied are removed.
+
+### Assumptions
+
+1.  Target-present and target-absent lineups are independent samples.
+2.  Every witness contributes exactly one response, so the categories
+    partition the sample. If witnesses saw multiple lineups this is
+    violated.
+3.  Under diagnosticity ordering, the AUC is **not** an unbiased
+    estimate; see the demonstration above.
+4.  The quantity estimated is investigator discriminability, not
+    eyewitness discriminability.
+
+### No standard errors
+
+[`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+returns a point estimate only. There is no bootstrap interval for the
+full-ROC AUC in this package, and the optimism of diagnosticity ordering
+would not be repaired by one — a naive bootstrap that re-selects the
+ordering within each resample reproduces the bias rather than revealing
+it. For interval estimates, use a-priori ordering and bootstrap the AUC
+with the ordering held fixed.
+
+## Summary
+
+1.  Partial ROC uses one of six possible witness outcomes on each side;
+    full ROC uses all of them, which is why it spans the entire range.
+2.  pAUC and full AUC are not comparable numbers.
+3.  Full ROC measures **investigator** discriminability, not eyewitness
+    memory.
+4.  `order = "diagnosticity"` is optimistically biased — around +0.15 at
+    100 lineups per arm, and still +0.05 at 1000. Use
+    `order = "apriori"` for anything inferential.
+5.  Prefer curve dominance to a difference in AUC when comparing
+    procedures.
 
 ## References
-
-Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between
-investigator discriminability and eyewitness discriminability: A method
-for creating full receiver operating characteristic curves of lineup
-identification performance. *Perspectives on Psychological Science,
-15*(3), 589-607. <https://doi.org/10.1177/1745691620902426>
 
 Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
 eyewitness identification practice: Dissociations between receiver
@@ -375,6 +608,21 @@ National Research Council. (2014). *Identifying the culprit: Assessing
 eyewitness identification*. Washington, DC: The National Academies
 Press.
 
+Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between
+investigator discriminability and eyewitness discriminability: A method
+for creating full receiver operating characteristic curves of lineup
+identification performance. *Perspectives on Psychological Science,
+15*(3), 589-607.
+
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect equivalency curves, and
 reasonable suspicion. *Law and Human Behavior, 39*(1), 99-122.
+
+## Further Reading
+
+- [`?make_fullroc`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+  for complete parameter documentation
+- [`vignette("pauc_statistical_comparison")`](https://cgtza2.github.io/r4lineups/articles/pauc_statistical_comparison.md)
+  for the partial-ROC approach and its own difficulties
+- [`vignette("calibration_decision_analysis")`](https://cgtza2.github.io/r4lineups/articles/calibration_decision_analysis.md)
+  for DPP and expected utility

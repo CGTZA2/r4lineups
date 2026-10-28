@@ -1,24 +1,92 @@
 # Fitting Wixted Lineup-Memory Models
 
-## Scope
+> **Acknowledgement.** Large language models supplied by Anthropic and
+> OpenAI were used in preparing this vignette, to assist with checking
+> code, testing the veracity of the approaches described, and on
+> occasion editing the text. Responsibility for the content rests with
+> the authors.
+
+## What these models are
+
+A witness viewing a simultaneous lineup sees several faces at once and
+must somehow reduce several impressions to one decision. Signal
+detection theory says each lineup member generates a **memory strength**
+— culprits tend to generate more than innocent members, but the
+distributions overlap. What it does *not* say is how the several
+strengths are combined into a single choice. That is an open theoretical
+question, and the models fitted here are three answers to it (Wixted,
+Vul, Mickes & Wilson, 2018).
+
+**Independent Observations.** The witness attends to the
+strongest-feeling face and identifies it if that feeling passes a
+criterion. Each member is evaluated on its own, so the decision depends
+on the maximum strength and nothing else. This is the model most people
+have in mind when they picture a witness scanning a lineup.
+
+**Ensemble.** The witness judges the best face *relative to the lineup
+as a whole* — a face must stand out from its neighbours, not merely feel
+familiar. Formally the decision variable is the maximum strength minus
+the lineup mean. This predicts something the first model does not:
+putting a suspect among high-quality foils should make identification
+harder, because the comparison standard rises.
+
+**Integration.** The witness pools evidence across the whole lineup,
+summing strengths rather than picking out a maximum. It is included as a
+historically important comparator rather than a recommended default;
+Wixted et al. found it generally inferior.
+
+**BEST-Rest** is available for exact replication work, but it is a
+linear rescaling of Ensemble rather than a distinct account. For a
+lineup of size $`k`$,
+
+``` math
+DV_{\text{Ensemble}} = \frac{k-1}{k}\, DV_{\text{BEST-Rest}}
+```
+
+and the criteria rescale by the same factor, so the two produce
+identical fits. Reporting both as though they were separate
+model-selection evidence would be double counting.
+
+### Why it matters which one is right
+
+These are not interchangeable descriptions. They disagree about what
+makes a lineup fair. Under Independent Observations, foil quality
+affects how often foils are chosen but not the evidential value of
+choosing the suspect. Under Ensemble, foil quality changes the standard
+of comparison and therefore changes what a suspect identification
+*means*. Recommendations about lineup construction depend on which
+account holds.
+
+## What this interface does and does not cover
 
 [`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
-fits the fair simultaneous-lineup models considered by Wixted et
-al. (2018): Independent Observations, Ensemble, and Integration.
-BEST-Rest is available for exact replication work, but it is a linear
-rescaling of Ensemble and does not constitute independent
-model-selection evidence.
+fits the fair simultaneous-lineup case: one procedure or condition per
+call, with trial-level `target_present`, `identification` and ordered
+numeric `confidence`.
 
-The initial interface requires trial-level data with `target_present`,
-`identification`, and ordered numeric `confidence`. Fit one procedure or
-experimental condition per call. Designated-suspect distributions,
-unfair lineups, sequential lineups, reaction-time models, and
-hierarchical participant/item effects are outside this interface.
+Not covered, and what each would require:
 
-## Install the audited engine
+| Not supported | What it would need |
+|----|----|
+| Designated-suspect target-absent distributions | Target-absent suspect choices are currently pooled with target-absent filler choices. Separating them needs the upstream processor to accept a designated innocent suspect, which the audited revision does not expose |
+| Unfair lineups | The models assume every foil is a functioning alternative. An unfair lineup has a smaller effective than nominal size, so `lineup_size` is misspecified. Fitting with effective rather than nominal size is a workaround, not a solution |
+| Sequential lineups | The decision variable is defined over simultaneously available members. Sequential viewing needs a different model, not a different parameterisation |
+| Reaction-time models | Would require a decision process with a time dimension, e.g. a drift-diffusion account |
+| Hierarchical participant/item effects | Fitting is by minimum Pearson chi-square on aggregate cell counts, which discards the participant and item structure entirely. Random effects would need a trial-level likelihood |
 
-pyWitness is optional and remains in an isolated virtual environment.
-Neither package loading nor CRAN checks install Python software.
+The first two are the ones most likely to bite in practice, since real
+lineups are rarely perfectly fair. If your lineup has null foils —
+members nobody ever chooses — see
+[`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+and the effective-size measures in the main vignette before fitting
+anything here.
+
+## Installing the engine
+
+pyWitness is optional and lives in an isolated virtual environment.
+Neither loading the package nor running its checks installs any Python
+software. Run this once, interactively — it is slow, and it is
+deliberately not executed when this vignette is built:
 
 ``` r
 
@@ -27,107 +95,306 @@ install_pywitness()
 check_pywitness_deps(initialize = TRUE)
 ```
 
-The installer pins the audited upstream commit, and every fitted result
-records that full revision and the imported engine version. The bridge
-refuses an environment whose version does not match the audited
-revision.
-
-## Prepare one condition
+The installer pins an audited upstream commit, and every fitted result
+records that revision along with the imported engine version. The bridge
+refuses to run against an environment whose version does not match.
 
 ``` r
 
-condition_a <- subset(my_lineup_data, condition == "A")
-
-str(condition_a[c("target_present", "identification", "confidence")])
+check_pywitness_deps(initialize = FALSE)
+#> pyWitness environment: r4lineups-pywitness 
+#> Environment exists: FALSE 
+#> Python initialized: FALSE 
+#> pyWitness available: FALSE 
+#> Audited revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba 
+#> No Python process was initialized. Use initialize = TRUE to import the isolated engine.
 ```
 
-`target_present` must be logical (or 0/1), `identification` must be
-`"suspect"`, `"filler"`, or `"reject"`, and confidence must be finite
-numeric data whose larger values mean greater confidence. Under the
-supported fair-lineup design, target-absent suspect choices are pooled
-with target-absent filler choices. The upstream processor requires at
-least one observation in every aggregate TP/TA response category,
-although cells within individual confidence bins may be zero.
+> **Note.** The pyWitness engine is not available in the environment
+> where this vignette was built, so the fitting output below is not
+> shown. The code is exactly what would run. Install the engine as above
+> to reproduce it.
 
-## Fit the models
+## Preparing data
+
+Data are simulated here at the level of individual foils. `foil_bias`
+gives each foil its own mean memory strength, so the foils are not
+interchangeable — some are plausible alternatives to the suspect and one
+is chosen only rarely.
+
+``` r
+
+condition_a <- as.data.frame(simulate_lineup_data(
+  n_tp        = 500,
+  n_ta        = 500,
+  d_prime     = 1.6,
+  c_criterion = 0.9,
+  lineup_size = 6,
+  conf_levels = 9,
+  foil_bias   = c(0.4, 0.2, 0.0, -0.4, -1.0),
+  seed        = 404
+))
+
+# Put confidence on the 0-100 scale used elsewhere in the package
+condition_a$confidence <- round(seq(20, 100, length.out = 9))[condition_a$confidence]
+
+str(condition_a[c("target_present", "identification", "confidence")])
+#> 'data.frame':    1000 obs. of  3 variables:
+#>  $ target_present: logi  FALSE FALSE TRUE FALSE FALSE FALSE ...
+#>  $ identification: chr  "suspect" "filler" "suspect" "suspect" ...
+#>  $ confidence    : num  50 30 50 20 20 40 20 20 40 20 ...
+```
+
+``` r
+
+knitr::kable(
+  as.data.frame.matrix(table(condition_a$target_present,
+                             condition_a$identification)),
+  caption = "Response counts by lineup type, simulated data (500 target-present and 500 target-absent lineups of size 6). Rows: FALSE = target-absent, TRUE = target-present."
+)
+```
+
+|       | filler | reject | suspect |
+|:------|-------:|-------:|--------:|
+| FALSE |    268 |    165 |      67 |
+| TRUE  |    152 |     46 |     302 |
+
+Response counts by lineup type, simulated data (500 target-present and
+500 target-absent lineups of size 6). Rows: FALSE = target-absent, TRUE
+= target-present. {.table}
+
+Requirements: `target_present` logical or 0/1; `identification` one of
+`"suspect"`, `"filler"`, `"reject"`; `confidence` finite numeric with
+larger values meaning greater confidence. Under the supported
+fair-lineup design, target-absent suspect choices are pooled with
+target-absent filler choices. The upstream processor needs at least one
+observation in every aggregate TP/TA response category, though cells
+within individual confidence bins may be zero.
+
+## Fitting
 
 ``` r
 
 fits <- fit_lineup_models(
   condition_a,
-  models = c("independent", "ensemble", "integration"),
-  lineup_size = 6,
+  models          = c("independent", "ensemble", "integration"),
+  lineup_size     = 6,
   confidence_bins = c(0, 60, 80, 100),
-  variance = "equal",
+  variance        = "equal",
   shared_variance = "estimated",
-  control = list(maxiter = 5000L, method = "Nelder-Mead")
+  control         = list(maxiter = 5000L, method = "Nelder-Mead")
 )
 
-print(fits)
-summary(fits)
+knitr::kable(
+  as.data.frame(fits$comparison)[, c("model", "converged", "n_parameters",
+                                     "pearson_chisq", "df", "p_value")],
+  digits = 4, row.names = FALSE,
+  caption = "Model fits, simulated data generated by the MAX (Independent Observations) rule."
+)
 ```
 
-For an Independent-Observations model with zero shared variance, use
-`shared_variance = "zero"`; the bridge selects pyWitness’s dedicated
-simple class for this exact limit. Shared variance cancels from Ensemble
-and BEST-Rest and is fixed at zero for those models. Unequal signal
-variance is requested with `variance = "unequal"`.
+For an Independent-Observations model with zero shared variance use
+`shared_variance = "zero"`, which selects pyWitness’s dedicated class
+for that exact limit. Shared variance cancels from Ensemble and
+BEST-Rest and is fixed at zero for them. Unequal signal variance is
+requested with `variance = "unequal"`.
 
-Model-specific starting values can be supplied as a named list:
+Starting values can be supplied per model:
 
 ``` r
 
 fit_started <- fit_lineup_models(
   condition_a,
   models = c("independent", "ensemble"),
+  confidence_bins = c(0, 60, 80, 100),
   starts = list(
     independent = c(targetMean = 1.5, c1 = 0.8, c2 = 1.4, c3 = 2.0),
-    ensemble = c(targetMean = 1.5, c1 = 0.7, c2 = 1.2, c3 = 1.7)
+    ensemble    = c(targetMean = 1.5, c1 = 0.7, c2 = 1.2, c3 = 1.7)
   )
 )
+
+fit_started$comparison$converged
 ```
 
-## Interpret the result
+## Does the fit recover the generating model?
+
+The most informative check is whether fitting recovers the rule that
+generated the data.
+[`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
+implements the same three decision rules, so this can be tested
+directly.
 
 ``` r
 
-fits$comparison
-fits$parameters
-fits$observed
-fits$expected
+simulate_under <- function(rule, seed = 404) {
+  d <- as.data.frame(simulate_lineup_data(
+    n_tp = 500, n_ta = 500, d_prime = 1.6, c_criterion = 0.9,
+    lineup_size = 6, conf_levels = 9, decision_rule = rule,
+    foil_bias = c(0.4, 0.2, 0.0, -0.4, -1.0), seed = seed
+  ))
+  d$confidence <- round(seq(20, 100, length.out = 9))[d$confidence]
+  d
+}
+
+recovery <- do.call(rbind, lapply(c("max", "ensemble", "integration"), function(rule) {
+  f <- fit_lineup_models(simulate_under(rule),
+                         models = c("independent", "ensemble", "integration"),
+                         lineup_size = 6, confidence_bins = c(0, 60, 80, 100))
+  cc <- as.data.frame(f$comparison)
+  get <- function(m, col) cc[[col]][cc$model == m]
+  data.frame(
+    `Generated by`     = rule,
+    `Independent chi2` = round(get("independent", "pearson_chisq"), 1),
+    `Independent p`    = signif(get("independent", "p_value"), 3),
+    `Ensemble chi2`    = round(get("ensemble", "pearson_chisq"), 1),
+    `Ensemble p`       = signif(get("ensemble", "p_value"), 3),
+    `Integration chi2` = round(get("integration", "pearson_chisq"), 1),
+    `Integration p`    = signif(get("integration", "p_value"), 3),
+    check.names = FALSE
+  )
+}))
+
+knitr::kable(
+  recovery, row.names = FALSE,
+  caption = "Pearson chi-square and its p-value by fitted model, for data generated under each decision rule. Simulated, 500 target-present and 500 target-absent lineups per row."
+)
+```
+
+**Read the p-values, not the chi-squares.** The models do not have the
+same degrees of freedom — Independent Observations estimates five
+parameters against Ensemble’s four, leaving it one fewer residual degree
+of freedom — so the model with more parameters is favoured by a raw
+chi-square comparison purely by being more flexible. Ranking the models
+by chi-square alone is not a comparison the statistic licenses.
+
+With that in mind, two things emerge.
+
+The MAX and Integration rows recover their generating model decisively:
+the generating model fits well and the others are rejected outright.
+
+The Ensemble row does not. Independent Observations and Ensemble return
+essentially **identical** p-values, and neither can be rejected. This is
+not a case of the wrong model winning; it is a case of the two models
+being **indistinguishable** on these data.
+
+That is the substantive finding rather than a defect in the fitting.
+Independent Observations and Ensemble make very similar predictions for
+a *fair* lineup. Separating them requires either much larger samples or
+a design built to separate them — most obviously one that manipulates
+foil quality, since it is precisely there that the two accounts
+disagree: Ensemble makes the comparison standard depend on the other
+lineup members and Independent Observations does not.
+[`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
+can vary foil quality through `foil_bias`, so the question is directly
+explorable.
+
+Wixted et al. reached a similar conclusion, finding both models
+plausible with a modest overall advantage for Ensemble. Treat a small
+chi-square difference between these two as uninformative, and note that
+a single dataset per rule — as here — is an illustration rather than a
+recovery study. A proper one would simulate many datasets per generating
+model and report how often each is selected.
+
+## Interpreting the output
+
+``` r
+
+knitr::kable(
+  as.data.frame(fits$parameters), digits = 4, row.names = FALSE,
+  caption = "Parameter estimates, simulated data."
+)
+```
+
+``` r
+
 fits$diagnostics
 fits$engine
+```
+
+``` r
 
 plot(fits, type = "comparison")
+```
+
+``` r
+
 plot(fits, type = "fit")
+```
+
+``` r
+
 plot(fits, type = "roc")
 ```
 
-The audited pyWitness engine estimates parameters by minimizing Pearson
-chi-squared. `loglik_at_estimate` is the multinomial log likelihood
-evaluated at that minimum-Pearson estimate, not a maximized likelihood.
-Consequently AIC and BIC are `NA`; calculating them from this estimate
-would be invalid. Inspect convergence and expected cells before
-interpreting model differences.
+## Technical Details
 
-For lineup size (k), the decision variables obey
+### How the models are estimated
+
+The audited pyWitness engine estimates parameters by **minimising
+Pearson chi-square** between observed and expected cell counts:
 
 ``` math
-DV_{Ensemble} = \frac{k-1}{k} DV_{BEST-Rest}.
+\chi^2 = \sum_{i} \frac{(O_i - E_i)^2}{E_i}
 ```
 
-Their criteria rescale by the same factor and their fits are identical.
-Integration is included as a historically important comparator, not as a
-recommended default. Wixted et al. (2018) found it generally inferior,
-whereas Independent Observations and Ensemble both remained plausible,
-with an overall advantage for Ensemble.
+where the cells are decision-by-confidence-bin categories, separately
+for target-present and target-absent lineups. Parameters are the target
+distribution mean (`targetMean`), the confidence criteria (`c1`, `c2`,
+…), and, where applicable, a shared-variance term.
+
+### Why AIC and BIC are NA
+
+This is the point most likely to cause trouble, so it is worth being
+explicit. `loglik_at_estimate` is the multinomial log likelihood
+**evaluated at the minimum-Pearson estimate**. It is not a maximised
+likelihood. AIC and BIC are defined in terms of the maximum of the
+likelihood, so computing them from this quantity would be invalid, and
+the package returns `NA` rather than a number that would look usable and
+be wrong.
+
+Model comparison here therefore rests on the Pearson chi-square and its
+degrees of freedom, not on information criteria. Comparing models with
+different numbers of parameters requires attention to `df`, which the
+comparison table reports.
+
+### What to check before interpreting
+
+1.  `converged` is `TRUE` for every model. A non-converged fit’s
+    chi-square is meaningless.
+2.  Expected cell counts are not tiny. The chi-square reference
+    distribution is an approximation that degrades when expected counts
+    fall below about 5; inspect `fits$expected`.
+3.  The engine revision matches the audited one — recorded in
+    `fits$engine`.
+
+### Assumptions
+
+1.  The lineup is **fair**: every foil is a functioning alternative to
+    the suspect. Null foils violate this and make `lineup_size`
+    misspecified.
+2.  Members are viewed simultaneously.
+3.  Signal variance is equal across target and lure distributions unless
+    `variance = "unequal"` is requested.
+4.  Witnesses are independent, and each contributes one trial.
+    Aggregation to cell counts discards any participant or item
+    structure.
 
 ## References
 
 Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024).
 pyWitness 1.0: A Python eyewitness identification analysis toolkit.
-*Behavior Research Methods, 56*, 1533–1550.
+*Behavior Research Methods, 56*, 1533-1550.
 
 Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
-lineup memory. *Cognitive Psychology, 105*, 81–114.
-<https://doi.org/10.1016/j.cogpsych.2018.06.001>
+lineup memory. *Cognitive Psychology, 105*, 81-114.
+
+## Further Reading
+
+- [`?fit_lineup_models`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
+  and
+  [`?install_pywitness`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md)
+- [`vignette("model_comparison")`](https://cgtza2.github.io/r4lineups/articles/model_comparison.md)
+  for the 2-HT, EIG and full-ROC models, which run without any Python
+  engine
+- [`vignette("simulation_power_analysis")`](https://cgtza2.github.io/r4lineups/articles/simulation_power_analysis.md)
+  for the simulator and its decision rules

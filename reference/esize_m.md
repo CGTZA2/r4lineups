@@ -5,12 +5,12 @@ Function for computing Effective Size
 ## Usage
 
 ``` r
-esize_m(lineup_table, k, both = FALSE)
+esize_m(lineup_tab, k, both = FALSE)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A table of lineup choices.
 
@@ -58,6 +58,13 @@ S9-S26.
 Wells, G. L.,Leippe, M. R., & Ostrom, T. M. (1979). Guidelines for
 empirically assessing the fairness of a lineup. *Law and Human Behavior,
 3*(4), 285-293.
+
+## See also
+
+[`esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md),
+whose “Small-sample bias” section describes a downward bias affecting
+plug-in effective-size estimators at small numbers of choices, and an
+optional correction.
 
 ## Examples
 

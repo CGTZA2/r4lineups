@@ -6,12 +6,12 @@ accurate
 ## Usage
 
 ``` r
-datacheck3(lineup_table, k)
+datacheck3(lineup_tab, k)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A table of lineup choices
 
@@ -31,6 +31,6 @@ members is accurate.
 ``` r
 # Table of choices from 50 mock witnesses to a 6-member lineup
 set.seed(1)
-lineup_table <- table(sample(1:6, 50, replace = TRUE))
-datacheck3(lineup_table, 6)
+lineup_tab <- table(sample(1:6, 50, replace = TRUE))
+datacheck3(lineup_tab, 6)
 ```

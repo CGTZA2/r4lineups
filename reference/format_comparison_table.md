@@ -25,7 +25,11 @@ format_comparison_table(comparison_obj, format = "console", digits = 3)
 
 ## Value
 
-A formatted table (character string or dataframe)
+For `format = "console"`, the comparison dataframe. For `"markdown"` and
+`"latex"`, a `knitr_kable` object, which is a character vector with
+\*\*one element per line\*\*. Print it with `cat(x, sep = "\n")` inside
+a chunk using `results = "asis"`; plain `cat(x)` joins the lines with
+spaces and the table collapses into a single paragraph.
 
 ## Details
 
@@ -45,21 +49,22 @@ comparison <- compare_models(lineup_example)
 #> Fitting 2-HT model...
 #> Computing EIG...
 #> Computing Full ROC...
+#> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").
 #> 
 #> Model comparison complete!
 format_comparison_table(comparison)
-#>                            Model                   Measure     Value
-#> 1     2-HT (Winter et al., 2022)            Log-likelihood -187.6900
-#> 2     2-HT (Winter et al., 2022)                       AIC  383.3700
-#> 3     2-HT (Winter et al., 2022)                       BIC  396.5700
-#> dP    2-HT (Winter et al., 2022)   dP (detection presence)    0.4870
-#> dA    2-HT (Winter et al., 2022)    dA (detection absence)    0.3170
-#> 11     EIG (Starns et al., 2023) Expected Information Gain    0.3691
-#> 12     EIG (Starns et al., 2023)    Information Efficiency   36.9000
-#> 13     EIG (Starns et al., 2023)             Prior Entropy    1.0000
-#> 14 Full ROC (Smith & Yang, 2020)                  Full AUC    0.8589
-#> 15 Full ROC (Smith & Yang, 2020)          Operating Points   15.0000
-#> 16 Full ROC (Smith & Yang, 2020)              Max Hit Rate    1.0000
+#>                            Model                   Measure      Value
+#> 1     2-HT (Winter et al., 2022)            Log-likelihood -1280.6300
+#> 2     2-HT (Winter et al., 2022)                       AIC  2569.2600
+#> 3     2-HT (Winter et al., 2022)                       BIC  2590.2400
+#> dP    2-HT (Winter et al., 2022)   dP (detection presence)     0.5260
+#> dA    2-HT (Winter et al., 2022)    dA (detection absence)     0.1070
+#> 11     EIG (Starns et al., 2023) Expected Information Gain     0.2189
+#> 12     EIG (Starns et al., 2023)    Information Efficiency    21.9000
+#> 13     EIG (Starns et al., 2023)             Prior Entropy     1.0000
+#> 14 Full ROC (Smith & Yang, 2020)                  Full AUC     0.7775
+#> 15 Full ROC (Smith & Yang, 2020)          Operating Points    19.0000
+#> 16 Full ROC (Smith & Yang, 2020)              Max Hit Rate     1.0000
 #>                 Interpretation
 #> 1            Model fit quality
 #> 2              Lower is better

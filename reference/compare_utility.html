@@ -9,7 +9,7 @@ two lineup procedures."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,12 +28,13 @@ two lineup procedures."></head><body>
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -117,6 +118,7 @@ two lineup procedures.</p>
 <span class="r-in"><span>                              <span class="va">lineup_example</span><span class="op">[</span><span class="op">-</span><span class="va">odd</span>, <span class="op">]</span>,</span></span>
 <span class="r-in"><span>                              base_rate_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                              utility_type <span class="op">=</span> <span class="st">"max"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="compare_utility-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === Lineup Utility Comparison ===</span>
@@ -126,18 +128,19 @@ two lineup procedures.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   tp   fn   fp   tn </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1.0 -0.5 -2.0  0.5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No crossover points - one procedure dominates across all base rates</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Crossover points (base rates where procedures are equivalent):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    0.360, 0.827 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Utility difference at key base rates:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   (Positive = Proc A better; Negative = Proc B better)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.1: +0.0060</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.3: +0.0180</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.5: +0.0750</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.7: +0.0450</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.9: +0.0150</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.1: +0.0154</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.3: +0.0209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.5: -0.0078</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.7: -0.0055</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Base rate 0.9: +0.0032</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Plot available in $plot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Plot: save this object first, then extract it with x$plot</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

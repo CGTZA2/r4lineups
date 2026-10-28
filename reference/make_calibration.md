@@ -66,6 +66,7 @@ lineup_data <- data.frame(
 )
 cal_result <- make_calibration(lineup_data,
                                confidence_bins = c(0, 60, 80, 100))
+
 print(cal_result)
 #> 
 #> === Lineup Calibration Analysis ===
@@ -91,5 +92,5 @@ print(cal_result)
 #> 3 (80,100]    20            92.0    0.55         11           9
 #> # ℹ 1 more variable: mean_confidence_prop <dbl>
 #> 
-#> Plot available in $plot
+#> Plot: save this object first, then extract it with x$plot
 ```

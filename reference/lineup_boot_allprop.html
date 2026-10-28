@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -73,7 +74,8 @@
 
 
 <dt id="arg-conf">conf<a class="anchor" aria-label="anchor" href="#arg-conf"></a></dt>
-<dd><p>Desired level of alpha. Defaults to 0.95. May be specified by user (scalar).</p></dd>
+<dd><p>Confidence level for the intervals, e.g. 0.95 for 95 percent
+intervals. Defaults to 0.95. May be specified by user (scalar).</p></dd>
 
 
 <dt id="arg-r">R<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
@@ -82,13 +84,24 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a vector of bias corrected confidence intervals for
-       lineup proportion for each member in a lineup</p>
+    <p>A dataframe of <code>k</code> rows and two columns, <code>ci_low</code> and
+       <code>ci_high</code>, holding the bias-corrected and accelerated (BCa)
+       confidence interval for the proportion choosing each lineup member.
+       Rows are named by lineup position.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Function that computes bootstrapped lineup proportion using 1000 bootstrap draws
-        Calls 'boot function in 'boot' package</p>
+    <p>Computes a bootstrapped lineup proportion for each member in turn by
+        calling the <code>boot</code> function in the <code>boot</code> package. Where a
+        BCa interval cannot be computed, the percentile interval is used
+        instead.</p>
+<p>Note that the <code>k</code> intervals are each computed at the nominal
+        <code>conf</code> level, with <strong>no</strong> adjustment for the fact that
+        <code>k</code> of them are inspected together. Interpreting all of them at
+        once inflates the chance that at least one excludes the chance value
+        by more than the nominal amount. If a family-wise statement is wanted,
+        raise the level for each interval accordingly, e.g.
+        <code>conf = 1 - 0.05 / k</code> for a Bonferroni-style correction.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

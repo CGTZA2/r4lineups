@@ -13,7 +13,7 @@ supporting one or two conditions and optional cross-condition constraints."></he
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,12 +32,13 @@ supporting one or two conditions and optional cross-condition constraints."></he
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -186,7 +187,13 @@ Default 0 (no bootstrap). Set to e.g. 1000 to obtain bootstrap CIs.</p></dd>
 <dd><p>Bootstrap confidence intervals (if nboot &gt; 0).</p></dd>
 
   <dt>boot_params</dt>
-<dd><p>Full bootstrap parameter matrix (if nboot &gt; 0).</p></dd>
+<dd><p>Full bootstrap parameter matrix (if nboot &gt; 0). Rows for
+    replicates that failed to converge are <code>NA</code>, so summarise with
+    <code>na.rm = TRUE</code>.</p></dd>
+
+  <dt>boot_n_used, boot_n_failed</dt>
+<dd><p>Number of bootstrap replicates that
+    converged and that did not (if nboot &gt; 0).</p></dd>
 
 
 </dl></div>
@@ -213,12 +220,48 @@ unequal variances, confidence criteria, sequential presentation, unfair
 lineups, and the Ensemble and Integration decision variables are outside the
 scope of this function.</p>
 <p>Parametric bootstrap CIs are obtained by simulating data from the fitted model
-and re-fitting.</p>
+and re-fitting. Replicates that fail to converge are dropped and counted in
+<code>boot_n_failed</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="provenance">Provenance<a class="anchor" aria-label="anchor" href="#provenance"></a></h2>
+
+
+<p>The implementation follows R scripts written by Andrew M. Smith (Iowa State
+University) for the analyses in Reisberg and Pezdek (2024), which fit what he
+describes as “the MAX SDT model (sometimes called the
+compound-decision model)”. The default example counts are the Profile-lineup
+condition from that work. The constrained fits (<code>constrain_d</code>,
+<code>constrain_c</code>) and the nested chi-square comparison in
+<code><a href="compare_max_sdt.html">compare_max_sdt</a></code> follow the procedure described there.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="relation-to-smith-s-scripts">Relation to Smith's scripts<a class="anchor" aria-label="anchor" href="#relation-to-smith-s-scripts"></a></h2>
+
+
+<p>Estimates from this function will <strong>not</strong> match those scripts exactly,
+and the reason is the set of cells entering the discrepancy function.</p>
+<p>Smith's scripts fit culprit identifications, <em>total</em> target-present
+choices and <em>total</em> target-absent choices, together with the rejection
+counts. Culprit identifications therefore enter twice — once on their own and
+again inside total target-present choices — so the cells do not partition the
+sample, and the filler count is never fitted directly.</p>
+<p>This function uses five mutually exclusive cells per condition: correct
+identification, filler identification, target-present rejection,
+target-absent choice, target-absent rejection. A Pearson chi-square is
+defined for a partition, so this form keeps the statistic and its degrees of
+freedom interpretable, and it fits the observed counts better on that
+criterion.</p>
+<p>On the Profile-lineup counts used in the examples below, the two give
+d' = 1.94 (this function) against d' = 1.78 (Smith's script) for the first
+condition. Neither is a coding error; they minimise different discrepancies.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Duncan, M. (2006). <em>A signal detection model of compound decision
 tasks</em>. DRDC Toronto TR 2006-256.</p>
+<p>Reisberg, D., &amp; Pezdek, K. (2024). Data analysed with the MAX SDT model in
+scripts supplied by A. M. Smith (personal communication, 4 April 2024).</p>
 <p>Kaesler, M., Dunn, J. C., Ransom, K., &amp; Semmler, C. (2020). Do sequential
 lineups impair underlying discriminability? <em>Cognitive Research:
 Principles and Implications, 5</em>, 35. <a href="https://doi.org/10.1186/s41235-020-00234-5" class="external-link">doi:10.1186/s41235-020-00234-5</a></p>

@@ -1,5 +1,11 @@
 # Comparing Models for Eyewitness Identification Data
 
+> **Acknowledgement.** Large language models supplied by Anthropic and
+> OpenAI were used in preparing this vignette, to assist with checking
+> code, testing the veracity of the approaches described, and on
+> occasion editing the text. Responsibility for the content rests with
+> the authors.
+
 ## Introduction
 
 Eyewitness identification data can be analyzed using multiple
@@ -74,68 +80,83 @@ measure
 
 library(r4lineups)
 
-# Simulate example dataset with proper structure
-set.seed(2024)
-lineup_data <- simulate_lineup_data(
-  n_tp = 200,
-  n_ta = 200,
-  d_prime = 1.5,
+lineup_data <- as.data.frame(simulate_lineup_data(
+  n_tp        = 300,
+  n_ta        = 300,
+  d_prime     = 1.5,
+  c_criterion = 0.9,   # see the note below: 0 would be far too liberal
   lineup_size = 6,
-  conf_levels = 5
-)
+  conf_levels = 5,
+  foil_bias   = c(0.4, 0.2, 0.0, -0.4, -1.0),
+  seed        = 2024
+))
 
-# View structure
 head(lineup_data)
-#> 
-#> === Simulated Lineup Data ===
-#> 
-#> Simulation Parameters:
-#>   Target-present lineups: 200 
-#>   Target-absent lineups: 200 
-#>   d': 1.5 
-#>   Criteria: 0, 0.5, 1, 1.5, 2 
-#>   Lineup size: 6 
-#>   Decision rule: max 
-#>   Confidence levels: 5 
-#> 
-#> Data Summary:
-#>   Total trials: 6 
-#>   Target-present:
-#>     Suspect IDs: 1 
-#>     Filler IDs: 0 
-#>     Rejections: 0 
-#>   Target-absent:
-#>     Suspect IDs: 0 
-#>     Filler IDs: 5 
-#>     Rejections: 0 
-#> 
-#>   Suspect ID Accuracy: 0.545 
-#> 
-#> First 10 rows:
-#>   participant_id target_present identification confidence
-#> 1            212          FALSE         filler          2
-#> 2            173           TRUE        suspect          4
-#> 3            388          FALSE         filler          2
-#> 4            280          FALSE         filler          3
-#> 5            277          FALSE         filler          2
-#> 6            350          FALSE         filler          3
-str(lineup_data)
-#> Classes 'simulated_lineup_data' and 'data.frame':    400 obs. of  4 variables:
-#>  $ participant_id: int  212 173 388 280 277 350 60 12 81 331 ...
-#>  $ target_present: logi  FALSE TRUE FALSE FALSE FALSE FALSE ...
-#>  $ identification: chr  "filler" "suspect" "filler" "filler" ...
-#>  $ confidence    : int  2 4 2 3 2 3 3 3 4 3 ...
-#>  - attr(*, "simulation_params")=List of 9
-#>   ..$ n_tp         : int 200
-#>   ..$ n_ta         : int 200
-#>   ..$ d_prime      : num 1.5
-#>   ..$ c_criterion  : num 0
-#>   ..$ criteria     : num [1:5] 0 0.5 1 1.5 2
-#>   ..$ lineup_size  : int 6
-#>   ..$ conf_levels  : int 5
-#>   ..$ decision_rule: chr "max"
-#>   ..$ seed         : NULL
+#>   participant_id target_present lineup_member suspect_pos identification
+#> 1             64           TRUE             1           1        suspect
+#> 2             89           TRUE             1           1        suspect
+#> 3            573          FALSE             2           1         filler
+#> 4            393          FALSE             0           1         reject
+#> 5            188           TRUE             3           1         filler
+#> 6            526          FALSE             3           1         filler
+#>   confidence
+#> 1          5
+#> 2          3
+#> 3          5
+#> 4          1
+#> 5          2
+#> 6          5
 ```
+
+The `c_criterion = 0.9` is not incidental, and it is worth explaining
+because getting it wrong makes one of the three models impossible to
+fit.
+
+`c_criterion` is a threshold on the **maximum** of the lineup members’
+memory strengths, not a textbook signal-detection criterion. The maximum
+of six draws from a standard normal averages about 1.27, so a criterion
+of 0 — the function default — is cleared by almost every lineup, and
+produces a rejection rate near zero:
+
+``` r
+
+too_liberal <- as.data.frame(simulate_lineup_data(
+  n_tp = 300, n_ta = 300, d_prime = 1.5, c_criterion = 0,
+  lineup_size = 6, conf_levels = 5, seed = 2024
+))
+
+knitr::kable(
+  data.frame(
+    `c_criterion` = c(0, 0.9),
+    `Rejection rate (%)` = round(100 * c(
+      mean(too_liberal$identification == "reject"),
+      mean(lineup_data$identification == "reject")
+    ), 1),
+    check.names = FALSE
+  ),
+  row.names = FALSE,
+  caption = "Rejection rate under two decision criteria, simulated data (300 target-present and 300 target-absent lineups)."
+)
+```
+
+| c_criterion | Rejection rate (%) |
+|------------:|-------------------:|
+|         0.0 |                0.2 |
+|         0.9 |               20.5 |
+
+Rejection rate under two decision criteria, simulated data (300
+target-present and 300 target-absent lineups). {.table}
+
+The 2-HT model’s detect-absence parameter `dA` is identified almost
+entirely by rejections — it is the probability of correctly concluding
+the culprit is absent. With half a percent of witnesses rejecting, the
+likelihood is nearly flat in `dA` and the fit fails.
+[`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
+now detects this and says so; earlier versions failed with an opaque
+message about non-finite differences, and
+[`compare_models()`](https://cgtza2.github.io/r4lineups/reference/compare_models.md)
+simply omitted the model from its results, so every downstream section
+that referred to it silently produced nothing.
 
 ### Comparing All Models
 
@@ -154,19 +175,29 @@ print(comparison)
 #> 
 #> === Lineup Model Comparison ===
 #> 
-#> Models fit: eig, fullroc 
-#> Sample size: 400 
+#> Models fit: 2ht, eig, fullroc 
+#> Sample size: 600 
 #> Lineup size: 6 
 #> 
 #> Comparison Table:
-#>                          Model                   Measure   Value
-#>      EIG (Starns et al., 2023) Expected Information Gain  0.2116
-#>      EIG (Starns et al., 2023)    Information Efficiency 21.2000
-#>      EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7706
-#>  Full ROC (Smith & Yang, 2020)          Operating Points 11.0000
-#>  Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
+#>                          Model                   Measure     Value
+#>     2-HT (Winter et al., 2022)            Log-likelihood -557.8100
+#>     2-HT (Winter et al., 2022)                       AIC 1123.6200
+#>     2-HT (Winter et al., 2022)                       BIC 1141.2100
+#>     2-HT (Winter et al., 2022)   dP (detection presence)    0.4850
+#>     2-HT (Winter et al., 2022)    dA (detection absence)    0.0490
+#>      EIG (Starns et al., 2023) Expected Information Gain    0.1869
+#>      EIG (Starns et al., 2023)    Information Efficiency   18.7000
+#>      EIG (Starns et al., 2023)             Prior Entropy    1.0000
+#>  Full ROC (Smith & Yang, 2020)                  Full AUC    0.7471
+#>  Full ROC (Smith & Yang, 2020)          Operating Points   11.0000
+#>  Full ROC (Smith & Yang, 2020)              Max Hit Rate    1.0000
 #>               Interpretation
+#>            Model fit quality
+#>              Lower is better
+#>              Lower is better
+#>                       0 to 1
+#>                       0 to 1
 #>      Higher is better (bits)
 #>          Percentage (0-100%)
 #>          Maximum possible IG
@@ -177,7 +208,7 @@ print(comparison)
 #> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
-#> Available models: eig, fullroc
+#> Available models: 2ht, eig, fullroc
 ```
 
 ### Detailed Summary
@@ -190,21 +221,26 @@ summary(comparison)
 #> === Model Comparison Summary ===
 #> 
 #> Dataset:
-#>   Total observations: 400 
-#>   Target-present: 200 
-#>   Target-absent: 200 
+#>   Total observations: 600 
+#>   Target-present: 300 
+#>   Target-absent: 300 
 #>   Lineup size: 6 
 #> 
-#> Models fitted: 2 
-#>    eig, fullroc 
+#> Models fitted: 3 
+#>    2ht, eig, fullroc 
+#> 
+#> --- 2-HT Model Summary ---
+#>   Parameters: dP = 0.485 , dA = 0.049 , b = 0 , g = 0.754 
+#>   AIC: 1123.62 
+#>   BIC: 1141.21 
 #> 
 #> --- EIG Summary ---
-#>   EIG: 0.2116 bits
-#>   Information efficiency: 21.2 %
+#>   EIG: 0.1869 bits
+#>   Information efficiency: 18.7 %
 #>   Number of response categories: 11 
 #> 
 #> --- Full ROC Summary ---
-#>   Full AUC: 0.7706 
+#>   Full AUC: 0.7471 
 #>   Operating points: 11 
 #>   Ordering method: diagnosticity 
 #> 
@@ -236,24 +272,31 @@ plot(comparison, ncol = 2)
 # Access 2-HT model
 model_2ht <- comparison$fitted_models$`2ht`
 
-if (!is.null(model_2ht) && !is.null(model_2ht$parameters)) {
-  # View parameters
-  cat("2-HT Parameters:\n")
-  print(round(model_2ht$parameters, 3))
+knitr::kable(
+  data.frame(Parameter = names(model_2ht$parameters),
+             Estimate  = round(unname(model_2ht$parameters), 3),
+             SE        = round(unname(model_2ht$se), 3)),
+  row.names = FALSE,
+  caption = "2-HT parameter estimates with standard errors, simulated data."
+)
+```
 
-  # Standard errors
-  cat("\nStandard Errors:\n")
-  print(round(model_2ht$se, 3))
+| Parameter | Estimate |    SE |
+|:----------|---------:|------:|
+| dP        |    0.485 | 0.035 |
+| dA        |    0.049 | 0.057 |
+| b         |    0.000 | 0.024 |
+| g         |    0.754 | 0.036 |
 
-  # Model fit
-  cat("\nModel Fit:\n")
-  cat("  AIC:", round(model_2ht$aic, 2), "\n")
-  cat("  BIC:", round(model_2ht$bic, 2), "\n")
-  cat("  Log-likelihood:", round(model_2ht$loglik, 2), "\n")
-} else {
-  cat("2-HT model fitting did not converge with this dataset.\n")
-}
-#> 2-HT model fitting did not converge with this dataset.
+2-HT parameter estimates with standard errors, simulated data. {.table}
+
+``` r
+
+
+cat("AIC:", round(model_2ht$aic, 2),
+    " BIC:", round(model_2ht$bic, 2),
+    " log-likelihood:", round(model_2ht$loglik, 2), "\n")
+#> AIC: 1123.62  BIC: 1141.21  log-likelihood: -557.81
 ```
 
 **Interpreting 2-HT parameters (when available):**
@@ -272,10 +315,10 @@ model_eig <- comparison$fitted_models$eig
 
 # View EIG value
 cat("Expected Information Gain:", round(model_eig$eig, 4), "bits\n")
-#> Expected Information Gain: 0.2116 bits
+#> Expected Information Gain: 0.1869 bits
 cat("Information Efficiency:",
     round(model_eig$eig / model_eig$prior_entropy * 100, 1), "%\n")
-#> Information Efficiency: 21.2 %
+#> Information Efficiency: 18.7 %
 
 # Most informative responses
 cat("\nTop 5 most informative response categories:\n")
@@ -286,17 +329,17 @@ print(head(model_eig$response_data[, c("response", "information_gain",
 #> # A tibble: 5 × 3
 #>   response  information_gain posterior_guilty
 #>   <chr>                <dbl>            <dbl>
-#> 1 reject_1             1                0    
-#> 2 suspect_1            1                0    
-#> 3 suspect_4            0.670            0.939
-#> 4 suspect_5            0.441            0.870
-#> 5 filler_1             0.350            0.167
+#> 1 suspect_5            0.742            0.957
+#> 2 suspect_3            0.525            0.898
+#> 3 suspect_4            0.445            0.871
+#> 4 suspect_2            0.278            0.8  
+#> 5 suspect_1            0.119            0.7
 ```
 
 **Interpreting EIG:**
 
-- Total information provided: 0.212 bits
-- Efficiency: 21.2% of maximum possible
+- Total information provided: 0.187 bits
+- Efficiency: 18.7% of maximum possible
 - Most informative responses push posterior beliefs strongly toward
   guilt or innocence
 
@@ -309,7 +352,7 @@ model_fullroc <- comparison$fitted_models$fullroc
 
 # View AUC
 cat("Full ROC AUC:", round(model_fullroc$auc, 4), "\n")
-#> Full ROC AUC: 0.7706
+#> Full ROC AUC: 0.7471
 cat("Operating Points:", model_fullroc$summary$n_operating_points, "\n")
 #> Operating Points: 11
 
@@ -320,21 +363,21 @@ cat("\nTop 10 most diagnostic evidence categories:\n")
 print(head(model_fullroc$diagnosticity_table[, c("evidence_label",
                                                   "diagnosticity_ratio")], 10))
 #>    evidence_label diagnosticity_ratio
-#> 10      suspect_4          15.5000000
-#> 13      suspect_5           6.6666667
-#> 7       suspect_3           2.3750000
-#> 4       suspect_2           1.0000000
-#> 14       filler_5           0.6363636
-#> 11       filler_4           0.5675676
-#> 8        filler_3           0.5384615
-#> 5        filler_2           0.3673469
-#> 2        filler_1           0.2000000
-#> 1       suspect_1           0.0000000
+#> 13      suspect_5          22.0000000
+#> 7       suspect_3           8.8000000
+#> 10      suspect_4           6.7500000
+#> 4       suspect_2           4.0000000
+#> 1       suspect_1           2.3333333
+#> 14       filler_5           1.3333333
+#> 11       filler_4           1.1111111
+#> 8        filler_3           0.5312500
+#> 5        filler_2           0.4920635
+#> 2        filler_1           0.4666667
 ```
 
 **Interpreting Full ROC:**
 
-- AUC = 0.771: Investigator’s ability to discriminate
+- AUC = 0.747: Investigator’s ability to discriminate
 - Values closer to 1.0 indicate better discriminability
 - All witness responses contribute to overall discriminability
 
@@ -369,12 +412,19 @@ saturated.
 
 ``` r
 
-if ("2ht" %in% comparison$models_fit) {
-  cat("2-HT Model Fit:\n")
-  cat("  AIC:", round(comparison$fitted_models$`2ht`$aic, 2), "\n")
-  cat("  BIC:", round(comparison$fitted_models$`2ht`$bic, 2), "\n")
-  cat("\nUse only for comparisons with compatible likelihood models\n")
-}
+cat("2-HT Model Fit:\n")
+#> 2-HT Model Fit:
+cat("  AIC:", round(comparison$fitted_models$`2ht`$aic, 2), "\n")
+#>   AIC: 1123.62
+cat("  BIC:", round(comparison$fitted_models$`2ht`$bic, 2), "\n")
+#>   BIC: 1141.21
+cat("\nAIC and BIC compare likelihood-based models fitted to the same data.\n")
+#> 
+#> AIC and BIC compare likelihood-based models fitted to the same data.
+cat("EIG and full-ROC AUC are not likelihoods, so they cannot be ranked\n")
+#> EIG and full-ROC AUC are not likelihoods, so they cannot be ranked
+cat("against the 2-HT model by information criteria.\n")
+#> against the 2-HT model by information criteria.
 ```
 
 ## Advanced Usage
@@ -395,16 +445,26 @@ print(comparison_subset)
 #> 
 #> === Lineup Model Comparison ===
 #> 
-#> Models fit: eig 
-#> Sample size: 400 
+#> Models fit: 2ht, eig 
+#> Sample size: 600 
 #> Lineup size: 6 
 #> 
 #> Comparison Table:
-#>                      Model                   Measure   Value
-#>  EIG (Starns et al., 2023) Expected Information Gain  0.2116
-#>  EIG (Starns et al., 2023)    Information Efficiency 21.2000
-#>  EIG (Starns et al., 2023)             Prior Entropy  1.0000
+#>                       Model                   Measure     Value
+#>  2-HT (Winter et al., 2022)            Log-likelihood -557.8100
+#>  2-HT (Winter et al., 2022)                       AIC 1123.6200
+#>  2-HT (Winter et al., 2022)                       BIC 1141.2100
+#>  2-HT (Winter et al., 2022)   dP (detection presence)    0.4850
+#>  2-HT (Winter et al., 2022)    dA (detection absence)    0.0490
+#>   EIG (Starns et al., 2023) Expected Information Gain    0.1869
+#>   EIG (Starns et al., 2023)    Information Efficiency   18.7000
+#>   EIG (Starns et al., 2023)             Prior Entropy    1.0000
 #>           Interpretation
+#>        Model fit quality
+#>          Lower is better
+#>          Lower is better
+#>                   0 to 1
+#>                   0 to 1
 #>  Higher is better (bits)
 #>      Percentage (0-100%)
 #>      Maximum possible IG
@@ -412,7 +472,7 @@ print(comparison_subset)
 #> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
-#> Available models: eig
+#> Available models: 2ht, eig
 ```
 
 ### Using Confidence Bins
@@ -434,15 +494,15 @@ print(comparison_binned)
 #> === Lineup Model Comparison ===
 #> 
 #> Models fit: eig, fullroc 
-#> Sample size: 400 
+#> Sample size: 600 
 #> Lineup size: 6 
 #> 
 #> Comparison Table:
 #>                          Model                   Measure   Value
-#>      EIG (Starns et al., 2023) Expected Information Gain  0.1659
-#>      EIG (Starns et al., 2023)    Information Efficiency 16.6000
+#>      EIG (Starns et al., 2023) Expected Information Gain  0.1693
+#>      EIG (Starns et al., 2023)    Information Efficiency 16.9000
 #>      EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7246
+#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.7274
 #>  Full ROC (Smith & Yang, 2020)          Operating Points  3.0000
 #>  Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
 #>               Interpretation
@@ -473,7 +533,7 @@ comparison_prior <- compare_models(
 cat("EIG with prior = 0.3:\n")
 #> EIG with prior = 0.3:
 print(comparison_prior$fitted_models$eig$eig)
-#> [1] 0.1904357
+#> [1] 0.1694035
 ```
 
 ## Simulated Data Example
@@ -482,17 +542,12 @@ print(comparison_prior$fitted_models$eig$eig)
 
 ``` r
 
-# Simulate data with known d' = 1.5
-set.seed(2026)
-sim_data <- simulate_lineup_data(
-  n_tp = 200,
-  n_ta = 200,
-  d_prime = 1.5,
-  lineup_size = 6,
-  conf_levels = 5
-)
+sim_data <- as.data.frame(simulate_lineup_data(
+  n_tp = 300, n_ta = 300, d_prime = 1.5, c_criterion = 0.9,
+  lineup_size = 6, conf_levels = 5,
+  foil_bias = c(0.4, 0.2, 0.0, -0.4, -1.0), seed = 2026
+))
 
-# Fit all models
 sim_comparison <- compare_models(
   sim_data,
   models = c("2ht", "eig", "fullroc"),
@@ -503,19 +558,29 @@ print(sim_comparison)
 #> 
 #> === Lineup Model Comparison ===
 #> 
-#> Models fit: eig, fullroc 
-#> Sample size: 400 
+#> Models fit: 2ht, eig, fullroc 
+#> Sample size: 600 
 #> Lineup size: 6 
 #> 
 #> Comparison Table:
-#>                          Model                   Measure   Value
-#>      EIG (Starns et al., 2023) Expected Information Gain  0.2393
-#>      EIG (Starns et al., 2023)    Information Efficiency 23.9000
-#>      EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC  0.8038
-#>  Full ROC (Smith & Yang, 2020)          Operating Points 11.0000
-#>  Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
+#>                          Model                   Measure     Value
+#>     2-HT (Winter et al., 2022)            Log-likelihood -559.1500
+#>     2-HT (Winter et al., 2022)                       AIC 1126.3000
+#>     2-HT (Winter et al., 2022)                       BIC 1143.8900
+#>     2-HT (Winter et al., 2022)   dP (detection presence)    0.4950
+#>     2-HT (Winter et al., 2022)    dA (detection absence)    0.0260
+#>      EIG (Starns et al., 2023) Expected Information Gain    0.2264
+#>      EIG (Starns et al., 2023)    Information Efficiency   22.6000
+#>      EIG (Starns et al., 2023)             Prior Entropy    1.0000
+#>  Full ROC (Smith & Yang, 2020)                  Full AUC    0.7858
+#>  Full ROC (Smith & Yang, 2020)          Operating Points   11.0000
+#>  Full ROC (Smith & Yang, 2020)              Max Hit Rate    1.0000
 #>               Interpretation
+#>            Model fit quality
+#>              Lower is better
+#>              Lower is better
+#>                       0 to 1
+#>                       0 to 1
 #>      Higher is better (bits)
 #>          Percentage (0-100%)
 #>          Maximum possible IG
@@ -526,20 +591,53 @@ print(sim_comparison)
 #> Metrics describe different estimands and are not a single model-selection scale.
 #> 
 #> Access fitted models via: $fitted_models$<model_name>
-#> Available models: eig, fullroc
+#> Available models: 2ht, eig, fullroc
 ```
 
 ### Parameter Recovery Check
 
+A single fit tells you little. The useful check is whether the recovered
+parameters *move* as the generating parameter moves:
+
 ``` r
 
-# Check if 2-HT model recovers reasonable parameters
-if ("2ht" %in% sim_comparison$models_fit) {
-  cat("Known d' = 1.5 (moderate discriminability)\n")
-  cat("Recovered dP =", round(sim_comparison$fitted_models$`2ht`$parameters["dP"], 3), "\n")
-  cat("Expected: Moderate dP for moderate d'\n")
-}
+recovery <- do.call(rbind, lapply(c(0.5, 1.0, 1.5, 2.0, 2.5), function(dp) {
+  d <- as.data.frame(simulate_lineup_data(
+    n_tp = 400, n_ta = 400, d_prime = dp, c_criterion = 0.9,
+    lineup_size = 6, conf_levels = 5,
+    foil_bias = c(0.4, 0.2, 0.0, -0.4, -1.0), seed = 500 + round(10 * dp)
+  ))
+  fit <- fit_winter_2ht(d, lineup_size = 6,
+                        target_present = "target_present",
+                        identification = "identification")
+  data.frame(`True d'` = dp,
+             `Recovered dP` = round(fit$parameters[["dP"]], 3),
+             `Recovered dA` = round(fit$parameters[["dA"]], 3),
+             check.names = FALSE)
+}))
+
+knitr::kable(
+  recovery, row.names = FALSE,
+  caption = "2-HT detection parameters recovered from data simulated at known d', 400 lineups per arm."
+)
 ```
+
+| True d’ | Recovered dP | Recovered dA |
+|--------:|-------------:|-------------:|
+|     0.5 |        0.113 |        0.038 |
+|     1.0 |        0.313 |        0.140 |
+|     1.5 |        0.522 |        0.169 |
+|     2.0 |        0.677 |        0.124 |
+|     2.5 |        0.806 |        0.214 |
+
+2-HT detection parameters recovered from data simulated at known d’, 400
+lineups per arm. {.table}
+
+`dP` increases monotonically with the generating d′, which is the result
+the check is looking for. It is not on the same scale as d′ and should
+not be expected to equal it: the two models parameterise memory
+differently, and what validates the analysis is that the ordering is
+recovered.
 
 ## Practical Examples
 
@@ -560,11 +658,12 @@ procedure_eval <- compare_models(
 cat("Procedure Evaluation:\n\n")
 #> Procedure Evaluation:
 
-if ("2ht" %in% procedure_eval$models_fit) {
-  cat("2-HT: dP =", round(procedure_eval$fitted_models$`2ht`$parameters["dP"], 2),
-      "\n  → Detection ability is",
-      ifelse(procedure_eval$fitted_models$`2ht`$parameters["dP"] > 0.5, "good", "moderate"), "\n\n")
-}
+cat("2-HT: dP =", round(procedure_eval$fitted_models$`2ht`$parameters[["dP"]], 2),
+    "\n  → Detection ability is",
+    ifelse(procedure_eval$fitted_models$`2ht`$parameters[["dP"]] > 0.5,
+           "good", "moderate"), "\n\n")
+#> 2-HT: dP = 0.49 
+#>   → Detection ability is moderate
 
 if ("eig" %in% procedure_eval$models_fit) {
   cat("EIG =", round(procedure_eval$fitted_models$eig$eig, 3), "bits\n")
@@ -573,16 +672,16 @@ if ("eig" %in% procedure_eval$models_fit) {
               procedure_eval$fitted_models$eig$prior_entropy * 100, 0),
       "% of maximum information\n\n")
 }
-#> EIG = 0.212 bits
-#>   → Provides 21 % of maximum information
+#> EIG = 0.187 bits
+#>   → Provides 19 % of maximum information
 
 if ("fullroc" %in% procedure_eval$models_fit) {
   cat("Full ROC AUC =", round(procedure_eval$fitted_models$fullroc$auc, 3), "\n")
   cat("  → Discriminability is",
       ifelse(procedure_eval$fitted_models$fullroc$auc > 0.75, "good", "moderate"), "\n")
 }
-#> Full ROC AUC = 0.771 
-#>   → Discriminability is good
+#> Full ROC AUC = 0.747 
+#>   → Discriminability is moderate
 ```
 
 ### Example 2: Identifying Sources of Bias
@@ -591,41 +690,63 @@ Use 2-HT model to check for bias:
 
 ``` r
 
-if ("2ht" %in% comparison$models_fit) {
-  bias_param <- comparison$fitted_models$`2ht`$parameters["b"]
+params <- comparison$fitted_models$`2ht`$parameters
 
-  cat("Bias Parameter (b) =", round(bias_param, 3), "\n\n")
-
-  if (bias_param < 0.1) {
-    cat("Interpretation: Low bias - suspect does not stand out unfairly\n")
-  } else if (bias_param > 0.3) {
-    cat("Interpretation: High bias - suspect may stand out unfairly\n")
-    cat("Consider: Lineup construction, suspect appearance\n")
-  } else {
-    cat("Interpretation: Moderate bias level\n")
-  }
+bias_param <- params[["b"]]
+bias_reading <- if (bias_param < 0.1) {
+  "Low: the suspect does not appear to stand out unfairly"
+} else if (bias_param > 0.3) {
+  "High: the suspect may stand out. Check lineup construction"
+} else {
+  "Moderate"
 }
+
+knitr::kable(
+  data.frame(Parameter = "b (biased suspect selection)",
+             Estimate = round(bias_param, 3),
+             Reading = bias_reading),
+  row.names = FALSE,
+  caption = "2-HT bias parameter, simulated data (300 target-present and 300 target-absent lineups)."
+)
 ```
+
+| Parameter | Estimate | Reading |
+|:---|---:|:---|
+| b (biased suspect selection) | 0 | Low: the suspect does not appear to stand out unfairly |
+
+2-HT bias parameter, simulated data (300 target-present and 300
+target-absent lineups). {.table}
 
 ### Example 3: Comparing Detection vs. Guessing
 
 ``` r
 
-if ("2ht" %in% comparison$models_fit) {
-  dP <- comparison$fitted_models$`2ht`$parameters["dP"]
-  g <- comparison$fitted_models$`2ht`$parameters["g"]
-
-  cat("Detection (dP) =", round(dP, 3), "\n")
-  cat("Guessing (g) =", round(g, 3), "\n\n")
-
-  cat("Interpretation:\n")
-  if (dP > g) {
-    cat("  Memory-based identification dominates\n")
-  } else {
-    cat("  Guessing plays a significant role\n")
-  }
-}
+knitr::kable(
+  data.frame(
+    Parameter = c("dP (detect culprit present)",
+                  "dA (detect culprit absent)",
+                  "g (guessing-based selection)"),
+    Estimate  = round(c(params[["dP"]], params[["dA"]], params[["g"]]), 3)
+  ),
+  row.names = FALSE,
+  caption = "2-HT detection and guessing parameters, simulated data."
+)
 ```
+
+| Parameter                    | Estimate |
+|:-----------------------------|---------:|
+| dP (detect culprit present)  |    0.485 |
+| dA (detect culprit absent)   |    0.049 |
+| g (guessing-based selection) |    0.754 |
+
+2-HT detection and guessing parameters, simulated data. {.table}
+
+Detection and guessing are separately identified here, which is the
+point of the model: an identification rate on its own cannot tell you
+whether witnesses recognised the culprit or simply picked someone
+plausible. Note that `dP` and `g` are probabilities of different events
+and are not in competition — a procedure can have both high detection
+and a high tendency to choose when detection fails.
 
 ## Formatted Comparison Tables
 
@@ -636,43 +757,56 @@ if ("2ht" %in% comparison$models_fit) {
 # Console-friendly table
 table_console <- format_comparison_table(comparison, format = "console")
 print(table_console)
-#>                           Model                   Measure   Value
-#> 1     EIG (Starns et al., 2023) Expected Information Gain  0.2116
-#> 2     EIG (Starns et al., 2023)    Information Efficiency 21.2000
-#> 3     EIG (Starns et al., 2023)             Prior Entropy  1.0000
-#> 4 Full ROC (Smith & Yang, 2020)                  Full AUC  0.7706
-#> 5 Full ROC (Smith & Yang, 2020)          Operating Points 11.0000
-#> 6 Full ROC (Smith & Yang, 2020)              Max Hit Rate  1.0000
-#>                Interpretation
-#> 1     Higher is better (bits)
-#> 2         Percentage (0-100%)
-#> 3         Maximum possible IG
-#> 4      Higher is better (0-1)
-#> 5 Number of decision criteria
-#> 6            Cumulative (0-1)
+#>                            Model                   Measure     Value
+#> 1     2-HT (Winter et al., 2022)            Log-likelihood -557.8100
+#> 2     2-HT (Winter et al., 2022)                       AIC 1123.6200
+#> 3     2-HT (Winter et al., 2022)                       BIC 1141.2100
+#> dP    2-HT (Winter et al., 2022)   dP (detection presence)    0.4850
+#> dA    2-HT (Winter et al., 2022)    dA (detection absence)    0.0490
+#> 11     EIG (Starns et al., 2023) Expected Information Gain    0.1869
+#> 12     EIG (Starns et al., 2023)    Information Efficiency   18.7000
+#> 13     EIG (Starns et al., 2023)             Prior Entropy    1.0000
+#> 14 Full ROC (Smith & Yang, 2020)                  Full AUC    0.7471
+#> 15 Full ROC (Smith & Yang, 2020)          Operating Points   11.0000
+#> 16 Full ROC (Smith & Yang, 2020)              Max Hit Rate    1.0000
+#>                 Interpretation
+#> 1            Model fit quality
+#> 2              Lower is better
+#> 3              Lower is better
+#> dP                      0 to 1
+#> dA                      0 to 1
+#> 11     Higher is better (bits)
+#> 12         Percentage (0-100%)
+#> 13         Maximum possible IG
+#> 14      Higher is better (0-1)
+#> 15 Number of decision criteria
+#> 16            Cumulative (0-1)
 ```
 
 ### Markdown Format
 
 ``` r
 
-# Markdown format for reports
-if (requireNamespace("knitr", quietly = TRUE)) {
-  table_md <- format_comparison_table(comparison, format = "markdown")
-  cat(table_md)
-}
+table_md <- format_comparison_table(comparison, format = "markdown")
+
+# One element per line, so sep = "\n" is required. Plain cat(table_md) joins
+# the lines with spaces and the table collapses into a single paragraph.
+cat(table_md, sep = "\n")
 ```
 
-\|Model \|Measure \| Value\|Interpretation \|
-\|:—————————–\|:————————-\|——-:\|:—————————\| \|EIG (Starns et al.,
-2023) \|Expected Information Gain \| 0.2116\|Higher is better (bits) \|
-\|EIG (Starns et al., 2023) \|Information Efficiency \|
-21.2000\|Percentage (0-100%) \| \|EIG (Starns et al., 2023) \|Prior
-Entropy \| 1.0000\|Maximum possible IG \| \|Full ROC (Smith & Yang,
-2020) \|Full AUC \| 0.7706\|Higher is better (0-1) \| \|Full ROC (Smith
-& Yang, 2020) \|Operating Points \| 11.0000\|Number of decision criteria
-\| \|Full ROC (Smith & Yang, 2020) \|Max Hit Rate \| 1.0000\|Cumulative
-(0-1) \|
+| Model | Measure | Value | Interpretation |
+|:---|:---|---:|:---|
+| 2-HT (Winter et al., 2022) | Log-likelihood | -557.8100 | Model fit quality |
+| 2-HT (Winter et al., 2022) | AIC | 1123.6200 | Lower is better |
+| 2-HT (Winter et al., 2022) | BIC | 1141.2100 | Lower is better |
+| 2-HT (Winter et al., 2022) | dP (detection presence) | 0.4850 | 0 to 1 |
+| 2-HT (Winter et al., 2022) | dA (detection absence) | 0.0490 | 0 to 1 |
+| EIG (Starns et al., 2023) | Expected Information Gain | 0.1869 | Higher is better (bits) |
+| EIG (Starns et al., 2023) | Information Efficiency | 18.7000 | Percentage (0-100%) |
+| EIG (Starns et al., 2023) | Prior Entropy | 1.0000 | Maximum possible IG |
+| Full ROC (Smith & Yang, 2020) | Full AUC | 0.7471 | Higher is better (0-1) |
+| Full ROC (Smith & Yang, 2020) | Operating Points | 11.0000 | Number of decision criteria |
+| Full ROC (Smith & Yang, 2020) | Max Hit Rate | 1.0000 | Cumulative (0-1) |
 
 ## Interpretation Guidelines
 
@@ -757,7 +891,7 @@ cat("  → Each model provides unique insights\n")
 
 ### 1. Fit Multiple Models
 
-Don’t rely on a single model—each provides unique insights:
+Don’t rely on a single model, as each provides unique insights:
 
 ``` r
 
@@ -779,7 +913,7 @@ cat("  • Threshold-free performance (Full ROC)\n")
 
 ### 2. Report All Model Results
 
-When publishing, report results from all fitted models:
+When publishing, consider reporting results from all fitted models:
 
 ``` r
 
@@ -799,15 +933,117 @@ cat("  • Interpretation of each model's insights\n")
 
 ``` r
 
-if ("2ht" %in% comparison$models_fit) {
-  # Check goodness of fit
-  cat("2-HT Goodness of Fit:\n")
-  summary(comparison$fitted_models$`2ht`)
-
-  cat("\nIf χ² p-value < 0.05: Model may not fit well\n")
-  cat("Consider: Data quality, model assumptions\n")
-}
+summary(comparison$fitted_models$`2ht`)
+#> 
+#> Winter et al. (2022) Two-High Threshold MPT Model
+#> ==================================================
+#> 
+#> Sample size:
+#>   Target-present: 300
+#>   Target-absent:  300
+#>   Total:          600
+#>   Lineup size:    6
+#> 
+#> Parameter Estimates:
+#>                       Estimate     SE Lower_95 Upper_95
+#> dP (culprit presence)   0.4853 0.0353   0.4162   0.5545
+#> dA (culprit absence)    0.0494 0.0572  -0.0627   0.1614
+#> b  (biased selection)   0.0000 0.0239  -0.0468   0.0468
+#> g  (guessing)           0.7539 0.0355   0.6843   0.8235
+#> 
+#> 
+#> Model Fit:
+#>   Log-likelihood: -557.81
+#>   AIC: 1123.62
+#>   BIC: 1141.21
+#> 
+#> Observed vs. Expected Counts:
+#> 
+#> Target-Present Lineups:
+#>            Observed Expected      Residual
+#> Suspect ID      165      165  1.841166e-03
+#> Filler ID        97       97 -1.909498e-03
+#> Reject           38       38  6.833132e-05
+#> 
+#> Target-Absent Lineups:
+#>            Observed Expected     Residual
+#> Suspect ID       33     35.8 -2.833685981
+#> Filler ID       182    179.2  2.831570094
+#> Reject           85     85.0  0.002115887
+#> 
+#> Model identification:
+#>   Saturated (just-identified): 4 parameters, 4 data df, 0 residual df.
+#>   Absolute fit is not testable from a single condition (the model reproduces the
+#>   data by construction); use multiple conditions or constraints to test fit.
+#>   Residual obs-vs-expected discrepancy = 0.2688 (~= 0 confirms convergence).
 ```
+
+A chi-square p-value below 0.05 indicates that the model does not
+reproduce the observed response frequencies well. With large samples the
+test will detect small departures, so read it alongside the size of the
+discrepancies rather than as a pass/fail.
+
+## Technical Details
+
+### What each model estimates, and on what scale
+
+The three models are **not** three estimates of one quantity, and cannot
+be ranked against each other directly.
+
+| Model | Estimand | Scale | Inference available |
+|----|----|----|----|
+| 2-HT | Latent probabilities of detection, bias and guessing | Four probabilities in \[0, 1\] | Standard errors from the observed information matrix; goodness-of-fit chi-square |
+| EIG | Expected reduction in uncertainty about guilt | Bits, 0 to the prior entropy | None in this package |
+| Full ROC | Investigator discriminability | AUC in \[0.5, 1\] | None in this package; see the note on ordering bias below |
+
+### 2-HT estimation
+
+The model is a multinomial processing tree. Response probabilities are
+as given in the introduction, and the parameters are estimated by
+maximum likelihood over the six observed cell counts (three responses by
+two lineup types), so the model has four parameters for five free cells
+and one residual degree of freedom. Standard errors come from the
+numerically differentiated Hessian at the optimum, and the
+goodness-of-fit statistic is the usual multinomial chi-square.
+
+**Identifiability.** The detect-absence parameter `dA` is identified
+almost entirely by rejections. If very few witnesses reject, the
+likelihood is close to flat in `dA` and the optimiser fails.
+[`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
+checks for this and reports it as such, rather than failing with a
+message about non-finite differences.
+
+### EIG
+
+Expected information gain is computed over the observed response
+categories with the prior supplied by `prior_guilt`. Because it is an
+expectation over a set of categories estimated from the data, it
+inherits the binning issue discussed in
+[`vignette("calibration_decision_analysis")`](https://cgtza2.github.io/r4lineups/articles/calibration_decision_analysis.md),
+and it has no standard error here.
+
+### Full ROC
+
+Computed as described in
+[`vignette("fullroc_analysis")`](https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.md).
+The default ordering by sample diagnosticity ratio is **optimistically
+biased**, because the ordering is estimated from the same data used to
+compute the area; on data with no signal at all it returns AUC near 0.65
+at 100 lineups per arm.
+[`compare_models()`](https://cgtza2.github.io/r4lineups/reference/compare_models.md)
+uses the default ordering, so treat the AUC it reports as an upper bound
+rather than an estimate, and refit with `order = "apriori"` for anything
+inferential.
+
+### Assumptions common to all three
+
+1.  Each witness contributes one response, so the response categories
+    partition the sample.
+2.  Target-present and target-absent lineups are independent samples.
+3.  All lineup members other than the suspect are functioning foils.
+    Where a lineup contains members nobody ever chooses, the effective
+    lineup size is smaller than the nominal `lineup_size` passed here,
+    and all three models will be misspecified in the same direction.
 
 ## Summary
 
@@ -855,5 +1091,5 @@ identification performance. *Perspectives on Psychological Science,
   [`?compare_models`](https://cgtza2.github.io/r4lineups/reference/compare_models.md)
   for complete parameter documentation
 - See vignette(“simulation_power_analysis”) for data simulation
-- See vignette(“pauc_comparison”) for statistical comparison of
-  conditions
+- See vignette(“pauc_statistical_comparison”) for statistical comparison
+  of conditions

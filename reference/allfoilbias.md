@@ -6,12 +6,12 @@ suspect, from Malpass, 1981)
 ## Usage
 
 ``` r
-allfoilbias(lineup_table, target_pos, k)
+allfoilbias(lineup_tab, target_pos, k)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A table of lineup choices
 
@@ -34,6 +34,6 @@ identification lineups. *Law and Human Behavior, 5*(4), 299-309.
 
 ``` r
 lineup_vec <- round(runif(100, 1, 6))
-lineup_table <- table(lineup_vec)
-x <- allfoilbias(lineup_table, 5, 6)
+lineup_tab <- table(lineup_vec)
+x <- allfoilbias(lineup_tab, 5, 6)
 ```

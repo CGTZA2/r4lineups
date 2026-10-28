@@ -64,14 +64,15 @@ Expected information gain. *Psychological Review, 130*(3), 677–719.
 data(lineup_example)
 eig_data <- make_eig_data(lineup_example, confidence_bins = c(0, 60, 80, 100))
 eig_data$response_data
-#> # A tibble: 6 × 7
+#> # A tibble: 7 × 7
 #>   response         n_guilty n_innocent p_x_given_guilty p_x_given_innocent
 #>   <chr>               <dbl>      <dbl>            <dbl>              <dbl>
-#> 1 filler_(60,80]          1          7             0.01               0.07
-#> 2 filler_[0,60]          17         17             0.17               0.17
-#> 3 reject_[0,60]          22         61             0.22               0.61
-#> 4 suspect_(60,80]        17         10             0.17               0.1 
-#> 5 suspect_(80,100]       38          0             0.38               0   
-#> 6 suspect_[0,60]          5          5             0.05               0.05
+#> 1 filler_(60,80]         40         59           0.0571            0.0843 
+#> 2 filler_(80,100]        13         30           0.0186            0.0429 
+#> 3 filler_[0,60]         165        322           0.236             0.46   
+#> 4 reject_[0,60]          67        201           0.0957            0.287  
+#> 5 suspect_(60,80]        82         12           0.117             0.0171 
+#> 6 suspect_(80,100]      100          4           0.143             0.00571
+#> 7 suspect_[0,60]        233         72           0.333             0.103  
 #> # ℹ 2 more variables: identification <chr>, confidence_level <chr>
 ```

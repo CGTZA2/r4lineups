@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -78,7 +79,12 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A formatted table (character string or dataframe)</p>
+    <p>For <code>format = "console"</code>, the comparison dataframe. For
+  <code>"markdown"</code> and <code>"latex"</code>, a <code>knitr_kable</code> object, which
+  is a character vector with **one element per line**. Print it with
+  <code>cat(x, sep = "\n")</code> inside a chunk using <code>results = "asis"</code>;
+  plain <code>cat(x)</code> joins the lines with spaces and the table collapses
+  into a single paragraph.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -94,21 +100,22 @@
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting 2-HT model...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Computing EIG...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Computing Full ROC...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Model comparison complete!</span>
 <span class="r-in"><span><span class="fu">format_comparison_table</span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                            Model                   Measure     Value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     2-HT (Winter et al., 2022)            Log-likelihood -187.6900</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2-HT (Winter et al., 2022)                       AIC  383.3700</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     2-HT (Winter et al., 2022)                       BIC  396.5700</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dP    2-HT (Winter et al., 2022)   dP (detection presence)    0.4870</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dA    2-HT (Winter et al., 2022)    dA (detection absence)    0.3170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11     EIG (Starns et al., 2023) Expected Information Gain    0.3691</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12     EIG (Starns et al., 2023)    Information Efficiency   36.9000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13     EIG (Starns et al., 2023)             Prior Entropy    1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14 Full ROC (Smith &amp; Yang, 2020)                  Full AUC    0.8589</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15 Full ROC (Smith &amp; Yang, 2020)          Operating Points   15.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate    1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            Model                   Measure      Value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     2-HT (Winter et al., 2022)            Log-likelihood -1280.6300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2-HT (Winter et al., 2022)                       AIC  2569.2600</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     2-HT (Winter et al., 2022)                       BIC  2590.2400</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dP    2-HT (Winter et al., 2022)   dP (detection presence)     0.5260</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dA    2-HT (Winter et al., 2022)    dA (detection absence)     0.1070</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11     EIG (Starns et al., 2023) Expected Information Gain     0.2189</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12     EIG (Starns et al., 2023)    Information Efficiency    21.9000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13     EIG (Starns et al., 2023)             Prior Entropy     1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14 Full ROC (Smith &amp; Yang, 2020)                  Full AUC     0.7775</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 Full ROC (Smith &amp; Yang, 2020)          Operating Points    19.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16 Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate     1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Interpretation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1            Model fit quality</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2              Lower is better</span>

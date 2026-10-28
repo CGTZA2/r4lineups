@@ -57,14 +57,15 @@ A list of class "lineup_ppv_range" containing:
 data(lineup_example)
 # With confidence binning
 result <- make_ppv_range(lineup_example, confidence_bins = c(0, 60, 80, 100))
+#> Target-absent lineups contain a designated innocent suspect, so innocent-suspect IDs are counted directly and no lineup-size correction is applied. The nominal, effective and uncorrected estimates are therefore identical for these data. The three diverge only when no innocent suspect is designated and the number of innocent-suspect IDs has to be estimated from the filler IDs.
 
 # Access plots
 result$plot_ppv_range
 
 result$plot_effective_size
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
+#> Warning: Removed 3 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
+#> Warning: Removed 3 rows containing missing values or values outside the scale range
 #> (`geom_point()`).
 
 ```

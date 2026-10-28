@@ -5,12 +5,12 @@ Base function for generating bootstrapped Effective Size (Tredoux, 1998)
 ## Usage
 
 ``` r
-esize_T_boot(lineup_table, d)
+esize_T_boot(lineup_tab, d)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A vector of individual lineup choices. The historical argument name is
   retained for compatibility.
@@ -62,8 +62,8 @@ https://cran.r-project.org/web/packages/boot/boot.pdf
 ``` r
 # Choices from 50 mock witnesses to a 6-member lineup
 set.seed(1)
-lineup_table <- sample(1:6, 50, replace = TRUE)
+lineup_tab <- sample(1:6, 50, replace = TRUE)
 # E' for the observed data
-esize_T_boot(lineup_table, seq_along(lineup_table))
+esize_T_boot(lineup_tab, seq_along(lineup_tab))
 #> [1] 5.681818
 ```

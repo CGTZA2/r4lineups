@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul>
 </li>
@@ -71,10 +72,12 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Comparing Models for Eyewitness Identification Data</h1>
-                        <h4 data-toc-skip class="author">r4lineups
-package</h4>
+                        <h4 data-toc-skip class="author">Colin G.
+Tredoux</h4>
+                        <h4 data-toc-skip class="author">Tamsyn M.
+Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-08-12</h4>
+            <h4 data-toc-skip class="date">2026-10-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/model_comparison.Rmd" class="external-link"><code>vignettes/model_comparison.Rmd</code></a></small>
       <div class="d-none name"><code>model_comparison.Rmd</code></div>
@@ -82,6 +85,13 @@ package</h4>
 
     
     
+<blockquote>
+<p><strong>Acknowledgement.</strong> Large language models supplied by
+Anthropic and OpenAI were used in preparing this vignette, to assist
+with checking code, testing the veracity of the approaches described,
+and on occasion editing the text. Responsibility for the content rests
+with the authors.</p>
+</blockquote>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -161,72 +171,91 @@ performance measure</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CGTZA2/r4lineups" class="external-link">r4lineups</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Simulate example dataset with proper structure</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="va">lineup_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
-<span>  n_tp <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  n_ta <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  d_prime <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span><span class="va">lineup_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>  n_tp        <span class="op">=</span> <span class="fl">300</span>,</span>
+<span>  n_ta        <span class="op">=</span> <span class="fl">300</span>,</span>
+<span>  d_prime     <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span>  c_criterion <span class="op">=</span> <span class="fl">0.9</span>,   <span class="co"># see the note below: 0 would be far too liberal</span></span>
 <span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>  conf_levels <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span></span>
+<span>  conf_levels <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  foil_bias   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">1.0</span><span class="op">)</span>,</span>
+<span>  seed        <span class="op">=</span> <span class="fl">2024</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># View structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lineup_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; === Simulated Lineup Data ===</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Simulation Parameters:</span></span>
-<span><span class="co">#&gt;   Target-present lineups: 200 </span></span>
-<span><span class="co">#&gt;   Target-absent lineups: 200 </span></span>
-<span><span class="co">#&gt;   d': 1.5 </span></span>
-<span><span class="co">#&gt;   Criteria: 0, 0.5, 1, 1.5, 2 </span></span>
-<span><span class="co">#&gt;   Lineup size: 6 </span></span>
-<span><span class="co">#&gt;   Decision rule: max </span></span>
-<span><span class="co">#&gt;   Confidence levels: 5 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Data Summary:</span></span>
-<span><span class="co">#&gt;   Total trials: 6 </span></span>
-<span><span class="co">#&gt;   Target-present:</span></span>
-<span><span class="co">#&gt;     Suspect IDs: 1 </span></span>
-<span><span class="co">#&gt;     Filler IDs: 0 </span></span>
-<span><span class="co">#&gt;     Rejections: 0 </span></span>
-<span><span class="co">#&gt;   Target-absent:</span></span>
-<span><span class="co">#&gt;     Suspect IDs: 0 </span></span>
-<span><span class="co">#&gt;     Filler IDs: 5 </span></span>
-<span><span class="co">#&gt;     Rejections: 0 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   Suspect ID Accuracy: 0.545 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; First 10 rows:</span></span>
-<span><span class="co">#&gt;   participant_id target_present identification confidence</span></span>
-<span><span class="co">#&gt; 1            212          FALSE         filler          2</span></span>
-<span><span class="co">#&gt; 2            173           TRUE        suspect          4</span></span>
-<span><span class="co">#&gt; 3            388          FALSE         filler          2</span></span>
-<span><span class="co">#&gt; 4            280          FALSE         filler          3</span></span>
-<span><span class="co">#&gt; 5            277          FALSE         filler          2</span></span>
-<span><span class="co">#&gt; 6            350          FALSE         filler          3</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">lineup_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Classes 'simulated_lineup_data' and 'data.frame':    400 obs. of  4 variables:</span></span>
-<span><span class="co">#&gt;  $ participant_id: int  212 173 388 280 277 350 60 12 81 331 ...</span></span>
-<span><span class="co">#&gt;  $ target_present: logi  FALSE TRUE FALSE FALSE FALSE FALSE ...</span></span>
-<span><span class="co">#&gt;  $ identification: chr  "filler" "suspect" "filler" "filler" ...</span></span>
-<span><span class="co">#&gt;  $ confidence    : int  2 4 2 3 2 3 3 3 4 3 ...</span></span>
-<span><span class="co">#&gt;  - attr(*, "simulation_params")=List of 9</span></span>
-<span><span class="co">#&gt;   ..$ n_tp         : int 200</span></span>
-<span><span class="co">#&gt;   ..$ n_ta         : int 200</span></span>
-<span><span class="co">#&gt;   ..$ d_prime      : num 1.5</span></span>
-<span><span class="co">#&gt;   ..$ c_criterion  : num 0</span></span>
-<span><span class="co">#&gt;   ..$ criteria     : num [1:5] 0 0.5 1 1.5 2</span></span>
-<span><span class="co">#&gt;   ..$ lineup_size  : int 6</span></span>
-<span><span class="co">#&gt;   ..$ conf_levels  : int 5</span></span>
-<span><span class="co">#&gt;   ..$ decision_rule: chr "max"</span></span>
-<span><span class="co">#&gt;   ..$ seed         : NULL</span></span></code></pre></div>
+<span><span class="co">#&gt;   participant_id target_present lineup_member suspect_pos identification</span></span>
+<span><span class="co">#&gt; 1             64           TRUE             1           1        suspect</span></span>
+<span><span class="co">#&gt; 2             89           TRUE             1           1        suspect</span></span>
+<span><span class="co">#&gt; 3            573          FALSE             2           1         filler</span></span>
+<span><span class="co">#&gt; 4            393          FALSE             0           1         reject</span></span>
+<span><span class="co">#&gt; 5            188           TRUE             3           1         filler</span></span>
+<span><span class="co">#&gt; 6            526          FALSE             3           1         filler</span></span>
+<span><span class="co">#&gt;   confidence</span></span>
+<span><span class="co">#&gt; 1          5</span></span>
+<span><span class="co">#&gt; 2          3</span></span>
+<span><span class="co">#&gt; 3          5</span></span>
+<span><span class="co">#&gt; 4          1</span></span>
+<span><span class="co">#&gt; 5          2</span></span>
+<span><span class="co">#&gt; 6          5</span></span></code></pre></div>
+<p>The <code>c_criterion = 0.9</code> is not incidental, and it is worth
+explaining because getting it wrong makes one of the three models
+impossible to fit.</p>
+<p><code>c_criterion</code> is a threshold on the
+<strong>maximum</strong> of the lineup members’ memory strengths, not a
+textbook signal-detection criterion. The maximum of six draws from a
+standard normal averages about 1.27, so a criterion of 0 — the function
+default — is cleared by almost every lineup, and produces a rejection
+rate near zero:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">too_liberal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>  n_tp <span class="op">=</span> <span class="fl">300</span>, n_ta <span class="op">=</span> <span class="fl">300</span>, d_prime <span class="op">=</span> <span class="fl">1.5</span>, c_criterion <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>, conf_levels <span class="op">=</span> <span class="fl">5</span>, seed <span class="op">=</span> <span class="fl">2024</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    `c_criterion` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
+<span>    `Rejection rate (%)` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">too_liberal</span><span class="op">$</span><span class="va">identification</span> <span class="op">==</span> <span class="st">"reject"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">lineup_data</span><span class="op">$</span><span class="va">identification</span> <span class="op">==</span> <span class="st">"reject"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Rejection rate under two decision criteria, simulated data (300 target-present and 300 target-absent lineups)."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Rejection rate under two decision criteria, simulated data (300
+target-present and 300 target-absent lineups).</caption>
+<thead><tr class="header">
+<th align="right">c_criterion</th>
+<th align="right">Rejection rate (%)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0</td>
+<td align="right">0.2</td>
+</tr>
+<tr class="even">
+<td align="right">0.9</td>
+<td align="right">20.5</td>
+</tr>
+</tbody>
+</table>
+<p>The 2-HT model’s detect-absence parameter <code>dA</code> is
+identified almost entirely by rejections — it is the probability of
+correctly concluding the culprit is absent. With half a percent of
+witnesses rejecting, the likelihood is nearly flat in <code>dA</code>
+and the fit fails. <code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> now detects this and
+says so; earlier versions failed with an opaque message about non-finite
+differences, and <code><a href="../reference/compare_models.html">compare_models()</a></code> simply omitted the model
+from its results, so every downstream section that referred to it
+silently produced nothing.</p>
 </div>
 <div class="section level3">
 <h3 id="comparing-all-models">Comparing All Models<a class="anchor" aria-label="anchor" href="#comparing-all-models"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit all three models</span></span>
 <span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_data</span>,</span>
@@ -240,19 +269,29 @@ performance measure</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; === Lineup Model Comparison ===</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Models fit: eig, fullroc </span></span>
-<span><span class="co">#&gt; Sample size: 400 </span></span>
+<span><span class="co">#&gt; Models fit: 2ht, eig, fullroc </span></span>
+<span><span class="co">#&gt; Sample size: 600 </span></span>
 <span><span class="co">#&gt; Lineup size: 6 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Comparison Table:</span></span>
-<span><span class="co">#&gt;                          Model                   Measure   Value</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023) Expected Information Gain  0.2116</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023)    Information Efficiency 21.2000</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023)             Prior Entropy  1.0000</span></span>
-<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)                  Full AUC  0.7706</span></span>
-<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)          Operating Points 11.0000</span></span>
-<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate  1.0000</span></span>
+<span><span class="co">#&gt;                          Model                   Measure     Value</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)            Log-likelihood -557.8100</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)                       AIC 1123.6200</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)                       BIC 1141.2100</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)   dP (detection presence)    0.4850</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)    dA (detection absence)    0.0490</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023) Expected Information Gain    0.1869</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023)    Information Efficiency   18.7000</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023)             Prior Entropy    1.0000</span></span>
+<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)                  Full AUC    0.7471</span></span>
+<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)          Operating Points   11.0000</span></span>
+<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate    1.0000</span></span>
 <span><span class="co">#&gt;               Interpretation</span></span>
+<span><span class="co">#&gt;            Model fit quality</span></span>
+<span><span class="co">#&gt;              Lower is better</span></span>
+<span><span class="co">#&gt;              Lower is better</span></span>
+<span><span class="co">#&gt;                       0 to 1</span></span>
+<span><span class="co">#&gt;                       0 to 1</span></span>
 <span><span class="co">#&gt;      Higher is better (bits)</span></span>
 <span><span class="co">#&gt;          Percentage (0-100%)</span></span>
 <span><span class="co">#&gt;          Maximum possible IG</span></span>
@@ -263,33 +302,38 @@ performance measure</p>
 <span><span class="co">#&gt; Metrics describe different estimands and are not a single model-selection scale.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Access fitted models via: $fitted_models$&lt;model_name&gt;</span></span>
-<span><span class="co">#&gt; Available models: eig, fullroc</span></span></code></pre></div>
+<span><span class="co">#&gt; Available models: 2ht, eig, fullroc</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="detailed-summary">Detailed Summary<a class="anchor" aria-label="anchor" href="#detailed-summary"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># More detailed output</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; === Model Comparison Summary ===</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dataset:</span></span>
-<span><span class="co">#&gt;   Total observations: 400 </span></span>
-<span><span class="co">#&gt;   Target-present: 200 </span></span>
-<span><span class="co">#&gt;   Target-absent: 200 </span></span>
+<span><span class="co">#&gt;   Total observations: 600 </span></span>
+<span><span class="co">#&gt;   Target-present: 300 </span></span>
+<span><span class="co">#&gt;   Target-absent: 300 </span></span>
 <span><span class="co">#&gt;   Lineup size: 6 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Models fitted: 2 </span></span>
-<span><span class="co">#&gt;    eig, fullroc </span></span>
+<span><span class="co">#&gt; Models fitted: 3 </span></span>
+<span><span class="co">#&gt;    2ht, eig, fullroc </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; --- 2-HT Model Summary ---</span></span>
+<span><span class="co">#&gt;   Parameters: dP = 0.485 , dA = 0.049 , b = 0 , g = 0.754 </span></span>
+<span><span class="co">#&gt;   AIC: 1123.62 </span></span>
+<span><span class="co">#&gt;   BIC: 1141.21 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; --- EIG Summary ---</span></span>
-<span><span class="co">#&gt;   EIG: 0.2116 bits</span></span>
-<span><span class="co">#&gt;   Information efficiency: 21.2 %</span></span>
+<span><span class="co">#&gt;   EIG: 0.1869 bits</span></span>
+<span><span class="co">#&gt;   Information efficiency: 18.7 %</span></span>
 <span><span class="co">#&gt;   Number of response categories: 11 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; --- Full ROC Summary ---</span></span>
-<span><span class="co">#&gt;   Full AUC: 0.7706 </span></span>
+<span><span class="co">#&gt;   Full AUC: 0.7471 </span></span>
 <span><span class="co">#&gt;   Operating points: 11 </span></span>
 <span><span class="co">#&gt;   Ordering method: diagnosticity </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -304,7 +348,7 @@ performance measure</p>
 <div class="section level3">
 <h3 id="visualizing-model-comparisons">Visualizing Model Comparisons<a class="anchor" aria-label="anchor" href="#visualizing-model-comparisons"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Side-by-side plots</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">comparison</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="model_comparison_files/figure-html/visualize_models-1.png" class="r-plt" alt="" width="768"></p>
@@ -316,28 +360,54 @@ performance measure</p>
 <div class="section level3">
 <h3 id="ht-model-results">2-HT Model Results<a class="anchor" aria-label="anchor" href="#ht-model-results"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Access 2-HT model</span></span>
 <span><span class="va">model_2ht</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span></span>
 <span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">parameters</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># View parameters</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT Parameters:\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">parameters</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Standard errors</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nStandard Errors:\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">se</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Model fit</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nModel Fit:\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  AIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">aic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  BIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">bic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Log-likelihood:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">loglik</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT model fitting did not converge with this dataset.\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt; 2-HT model fitting did not converge with this dataset.</span></span></code></pre></div>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Parameter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">parameters</span><span class="op">)</span>,</span>
+<span>             Estimate  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">parameters</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             SE        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">se</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"2-HT parameter estimates with standard errors, simulated data."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>2-HT parameter estimates with standard errors, simulated
+data.</caption>
+<thead><tr class="header">
+<th align="left">Parameter</th>
+<th align="right">Estimate</th>
+<th align="right">SE</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">dP</td>
+<td align="right">0.485</td>
+<td align="right">0.035</td>
+</tr>
+<tr class="even">
+<td align="left">dA</td>
+<td align="right">0.049</td>
+<td align="right">0.057</td>
+</tr>
+<tr class="odd">
+<td align="left">b</td>
+<td align="right">0.000</td>
+<td align="right">0.024</td>
+</tr>
+<tr class="even">
+<td align="left">g</td>
+<td align="right">0.754</td>
+<td align="right">0.036</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"AIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">aic</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    <span class="st">" BIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">bic</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    <span class="st">" log-likelihood:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_2ht</span><span class="op">$</span><span class="va">loglik</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; AIC: 1123.62  BIC: 1141.21  log-likelihood: -557.81</span></span></code></pre></div>
 <p><strong>Interpreting 2-HT parameters (when available):</strong></p>
 <ul>
 <li>
@@ -353,16 +423,16 @@ performance measure</p>
 <div class="section level3">
 <h3 id="eig-results">EIG Results<a class="anchor" aria-label="anchor" href="#eig-results"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Access EIG model</span></span>
 <span><span class="va">model_eig</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span></span>
 <span></span>
 <span><span class="co"># View EIG value</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Expected Information Gain:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_eig</span><span class="op">$</span><span class="va">eig</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"bits\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Expected Information Gain: 0.2116 bits</span></span>
+<span><span class="co">#&gt; Expected Information Gain: 0.1869 bits</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Information Efficiency:"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_eig</span><span class="op">$</span><span class="va">eig</span> <span class="op">/</span> <span class="va">model_eig</span><span class="op">$</span><span class="va">prior_entropy</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Information Efficiency: 21.2 %</span></span>
+<span><span class="co">#&gt; Information Efficiency: 18.7 %</span></span>
 <span></span>
 <span><span class="co"># Most informative responses</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nTop 5 most informative response categories:\n"</span><span class="op">)</span></span>
@@ -373,15 +443,15 @@ performance measure</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   response  information_gain posterior_guilty</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> reject_1             1                0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> suspect_1            1                0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> suspect_4            0.670            0.939</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> suspect_5            0.441            0.870</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> filler_1             0.350            0.167</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> suspect_5            0.742            0.957</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> suspect_3            0.525            0.898</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> suspect_4            0.445            0.871</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> suspect_2            0.278            0.8  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> suspect_1            0.119            0.7</span></span></code></pre></div>
 <p><strong>Interpreting EIG:</strong></p>
 <ul>
-<li>Total information provided: 0.212 bits</li>
-<li>Efficiency: 21.2% of maximum possible</li>
+<li>Total information provided: 0.187 bits</li>
+<li>Efficiency: 18.7% of maximum possible</li>
 <li>Most informative responses push posterior beliefs strongly toward
 guilt or innocence</li>
 </ul>
@@ -389,13 +459,13 @@ guilt or innocence</li>
 <div class="section level3">
 <h3 id="full-roc-results">Full ROC Results<a class="anchor" aria-label="anchor" href="#full-roc-results"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Access Full ROC model</span></span>
 <span><span class="va">model_fullroc</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">fullroc</span></span>
 <span></span>
 <span><span class="co"># View AUC</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Full ROC AUC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">model_fullroc</span><span class="op">$</span><span class="va">auc</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Full ROC AUC: 0.7706</span></span>
+<span><span class="co">#&gt; Full ROC AUC: 0.7471</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Operating Points:"</span>, <span class="va">model_fullroc</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">n_operating_points</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Operating Points: 11</span></span>
 <span></span>
@@ -406,19 +476,19 @@ guilt or innocence</li>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">model_fullroc</span><span class="op">$</span><span class="va">diagnosticity_table</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"evidence_label"</span>,</span>
 <span>                                                  <span class="st">"diagnosticity_ratio"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    evidence_label diagnosticity_ratio</span></span>
-<span><span class="co">#&gt; 10      suspect_4          15.5000000</span></span>
-<span><span class="co">#&gt; 13      suspect_5           6.6666667</span></span>
-<span><span class="co">#&gt; 7       suspect_3           2.3750000</span></span>
-<span><span class="co">#&gt; 4       suspect_2           1.0000000</span></span>
-<span><span class="co">#&gt; 14       filler_5           0.6363636</span></span>
-<span><span class="co">#&gt; 11       filler_4           0.5675676</span></span>
-<span><span class="co">#&gt; 8        filler_3           0.5384615</span></span>
-<span><span class="co">#&gt; 5        filler_2           0.3673469</span></span>
-<span><span class="co">#&gt; 2        filler_1           0.2000000</span></span>
-<span><span class="co">#&gt; 1       suspect_1           0.0000000</span></span></code></pre></div>
+<span><span class="co">#&gt; 13      suspect_5          22.0000000</span></span>
+<span><span class="co">#&gt; 7       suspect_3           8.8000000</span></span>
+<span><span class="co">#&gt; 10      suspect_4           6.7500000</span></span>
+<span><span class="co">#&gt; 4       suspect_2           4.0000000</span></span>
+<span><span class="co">#&gt; 1       suspect_1           2.3333333</span></span>
+<span><span class="co">#&gt; 14       filler_5           1.3333333</span></span>
+<span><span class="co">#&gt; 11       filler_4           1.1111111</span></span>
+<span><span class="co">#&gt; 8        filler_3           0.5312500</span></span>
+<span><span class="co">#&gt; 5        filler_2           0.4920635</span></span>
+<span><span class="co">#&gt; 2        filler_1           0.4666667</span></span></code></pre></div>
 <p><strong>Interpreting Full ROC:</strong></p>
 <ul>
-<li>AUC = 0.771: Investigator’s ability to discriminate</li>
+<li>AUC = 0.747: Investigator’s ability to discriminate</li>
 <li>Values closer to 1.0 indicate better discriminability</li>
 <li>All witness responses contribute to overall discriminability</li>
 </ul>
@@ -452,13 +522,20 @@ than absolute. They can only be compared with alternative likelihood
 models fitted to the same observations and outcome representation; they
 cannot be compared with EIG or AUC. A single-condition 2-HT fit is
 saturated.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"2ht"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">comparison</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT Model Fit:\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  AIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">aic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  BIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">bic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nUse only for comparisons with compatible likelihood models\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT Model Fit:\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 2-HT Model Fit:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  AIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">aic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   AIC: 1123.62</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  BIC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">bic</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   BIC: 1141.21</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nAIC and BIC compare likelihood-based models fitted to the same data.\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; AIC and BIC compare likelihood-based models fitted to the same data.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EIG and full-ROC AUC are not likelihoods, so they cannot be ranked\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; EIG and full-ROC AUC are not likelihoods, so they cannot be ranked</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"against the 2-HT model by information criteria.\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; against the 2-HT model by information criteria.</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -467,7 +544,7 @@ saturated.</p>
 <div class="section level3">
 <h3 id="fitting-specific-models-only">Fitting Specific Models Only<a class="anchor" aria-label="anchor" href="#fitting-specific-models-only"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit only 2-HT and EIG (skip Full ROC)</span></span>
 <span><span class="va">comparison_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_data</span>,</span>
@@ -480,16 +557,26 @@ saturated.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; === Lineup Model Comparison ===</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Models fit: eig </span></span>
-<span><span class="co">#&gt; Sample size: 400 </span></span>
+<span><span class="co">#&gt; Models fit: 2ht, eig </span></span>
+<span><span class="co">#&gt; Sample size: 600 </span></span>
 <span><span class="co">#&gt; Lineup size: 6 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Comparison Table:</span></span>
-<span><span class="co">#&gt;                      Model                   Measure   Value</span></span>
-<span><span class="co">#&gt;  EIG (Starns et al., 2023) Expected Information Gain  0.2116</span></span>
-<span><span class="co">#&gt;  EIG (Starns et al., 2023)    Information Efficiency 21.2000</span></span>
-<span><span class="co">#&gt;  EIG (Starns et al., 2023)             Prior Entropy  1.0000</span></span>
+<span><span class="co">#&gt;                       Model                   Measure     Value</span></span>
+<span><span class="co">#&gt;  2-HT (Winter et al., 2022)            Log-likelihood -557.8100</span></span>
+<span><span class="co">#&gt;  2-HT (Winter et al., 2022)                       AIC 1123.6200</span></span>
+<span><span class="co">#&gt;  2-HT (Winter et al., 2022)                       BIC 1141.2100</span></span>
+<span><span class="co">#&gt;  2-HT (Winter et al., 2022)   dP (detection presence)    0.4850</span></span>
+<span><span class="co">#&gt;  2-HT (Winter et al., 2022)    dA (detection absence)    0.0490</span></span>
+<span><span class="co">#&gt;   EIG (Starns et al., 2023) Expected Information Gain    0.1869</span></span>
+<span><span class="co">#&gt;   EIG (Starns et al., 2023)    Information Efficiency   18.7000</span></span>
+<span><span class="co">#&gt;   EIG (Starns et al., 2023)             Prior Entropy    1.0000</span></span>
 <span><span class="co">#&gt;           Interpretation</span></span>
+<span><span class="co">#&gt;        Model fit quality</span></span>
+<span><span class="co">#&gt;          Lower is better</span></span>
+<span><span class="co">#&gt;          Lower is better</span></span>
+<span><span class="co">#&gt;                   0 to 1</span></span>
+<span><span class="co">#&gt;                   0 to 1</span></span>
 <span><span class="co">#&gt;  Higher is better (bits)</span></span>
 <span><span class="co">#&gt;      Percentage (0-100%)</span></span>
 <span><span class="co">#&gt;      Maximum possible IG</span></span>
@@ -497,12 +584,12 @@ saturated.</p>
 <span><span class="co">#&gt; Metrics describe different estimands and are not a single model-selection scale.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Access fitted models via: $fitted_models$&lt;model_name&gt;</span></span>
-<span><span class="co">#&gt; Available models: eig</span></span></code></pre></div>
+<span><span class="co">#&gt; Available models: 2ht, eig</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="using-confidence-bins">Using Confidence Bins<a class="anchor" aria-label="anchor" href="#using-confidence-bins"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Bin confidence for EIG and Full ROC</span></span>
 <span><span class="va">comparison_binned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_data</span>,</span>
@@ -518,15 +605,15 @@ saturated.</p>
 <span><span class="co">#&gt; === Lineup Model Comparison ===</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Models fit: eig, fullroc </span></span>
-<span><span class="co">#&gt; Sample size: 400 </span></span>
+<span><span class="co">#&gt; Sample size: 600 </span></span>
 <span><span class="co">#&gt; Lineup size: 6 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Comparison Table:</span></span>
 <span><span class="co">#&gt;                          Model                   Measure   Value</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023) Expected Information Gain  0.1659</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023)    Information Efficiency 16.6000</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023) Expected Information Gain  0.1693</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023)    Information Efficiency 16.9000</span></span>
 <span><span class="co">#&gt;      EIG (Starns et al., 2023)             Prior Entropy  1.0000</span></span>
-<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)                  Full AUC  0.7246</span></span>
+<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)                  Full AUC  0.7274</span></span>
 <span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)          Operating Points  3.0000</span></span>
 <span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate  1.0000</span></span>
 <span><span class="co">#&gt;               Interpretation</span></span>
@@ -545,7 +632,7 @@ saturated.</p>
 <div class="section level3">
 <h3 id="custom-prior-for-eig">Custom Prior for EIG<a class="anchor" aria-label="anchor" href="#custom-prior-for-eig"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use different prior probability for EIG</span></span>
 <span><span class="va">comparison_prior</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_data</span>,</span>
@@ -556,7 +643,7 @@ saturated.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EIG with prior = 0.3:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; EIG with prior = 0.3:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_prior</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">eig</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.1904357</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.1694035</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -565,18 +652,13 @@ saturated.</p>
 <div class="section level3">
 <h3 id="comparing-models-with-known-parameters">Comparing Models with Known Parameters<a class="anchor" aria-label="anchor" href="#comparing-models-with-known-parameters"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Simulate data with known d' = 1.5</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
-<span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
-<span>  n_tp <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  n_ta <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  d_prime <span class="op">=</span> <span class="fl">1.5</span>,</span>
-<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>  conf_levels <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>  n_tp <span class="op">=</span> <span class="fl">300</span>, n_ta <span class="op">=</span> <span class="fl">300</span>, d_prime <span class="op">=</span> <span class="fl">1.5</span>, c_criterion <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>, conf_levels <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  foil_bias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">1.0</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">2026</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Fit all models</span></span>
 <span><span class="va">sim_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">sim_data</span>,</span>
 <span>  models <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2ht"</span>, <span class="st">"eig"</span>, <span class="st">"fullroc"</span><span class="op">)</span>,</span>
@@ -587,19 +669,29 @@ saturated.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; === Lineup Model Comparison ===</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Models fit: eig, fullroc </span></span>
-<span><span class="co">#&gt; Sample size: 400 </span></span>
+<span><span class="co">#&gt; Models fit: 2ht, eig, fullroc </span></span>
+<span><span class="co">#&gt; Sample size: 600 </span></span>
 <span><span class="co">#&gt; Lineup size: 6 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Comparison Table:</span></span>
-<span><span class="co">#&gt;                          Model                   Measure   Value</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023) Expected Information Gain  0.2393</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023)    Information Efficiency 23.9000</span></span>
-<span><span class="co">#&gt;      EIG (Starns et al., 2023)             Prior Entropy  1.0000</span></span>
-<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)                  Full AUC  0.8038</span></span>
-<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)          Operating Points 11.0000</span></span>
-<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate  1.0000</span></span>
+<span><span class="co">#&gt;                          Model                   Measure     Value</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)            Log-likelihood -559.1500</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)                       AIC 1126.3000</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)                       BIC 1143.8900</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)   dP (detection presence)    0.4950</span></span>
+<span><span class="co">#&gt;     2-HT (Winter et al., 2022)    dA (detection absence)    0.0260</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023) Expected Information Gain    0.2264</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023)    Information Efficiency   22.6000</span></span>
+<span><span class="co">#&gt;      EIG (Starns et al., 2023)             Prior Entropy    1.0000</span></span>
+<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)                  Full AUC    0.7858</span></span>
+<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)          Operating Points   11.0000</span></span>
+<span><span class="co">#&gt;  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate    1.0000</span></span>
 <span><span class="co">#&gt;               Interpretation</span></span>
+<span><span class="co">#&gt;            Model fit quality</span></span>
+<span><span class="co">#&gt;              Lower is better</span></span>
+<span><span class="co">#&gt;              Lower is better</span></span>
+<span><span class="co">#&gt;                       0 to 1</span></span>
+<span><span class="co">#&gt;                       0 to 1</span></span>
 <span><span class="co">#&gt;      Higher is better (bits)</span></span>
 <span><span class="co">#&gt;          Percentage (0-100%)</span></span>
 <span><span class="co">#&gt;          Maximum possible IG</span></span>
@@ -610,18 +702,75 @@ saturated.</p>
 <span><span class="co">#&gt; Metrics describe different estimands and are not a single model-selection scale.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Access fitted models via: $fitted_models$&lt;model_name&gt;</span></span>
-<span><span class="co">#&gt; Available models: eig, fullroc</span></span></code></pre></div>
+<span><span class="co">#&gt; Available models: 2ht, eig, fullroc</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="parameter-recovery-check">Parameter Recovery Check<a class="anchor" aria-label="anchor" href="#parameter-recovery-check"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Check if 2-HT model recovers reasonable parameters</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="st">"2ht"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">sim_comparison</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Known d' = 1.5 (moderate discriminability)\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Recovered dP ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">sim_comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span><span class="st">"dP"</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Expected: Moderate dP for moderate d'\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<p>A single fit tells you little. The useful check is whether the
+recovered parameters <em>move</em> as the generating parameter
+moves:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">recovery</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">2.5</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">dp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>    n_tp <span class="op">=</span> <span class="fl">400</span>, n_ta <span class="op">=</span> <span class="fl">400</span>, d_prime <span class="op">=</span> <span class="va">dp</span>, c_criterion <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>    lineup_size <span class="op">=</span> <span class="fl">6</span>, conf_levels <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    foil_bias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">1.0</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">500</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">10</span> <span class="op">*</span> <span class="va">dp</span><span class="op">)</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_winter_2ht.html">fit_winter_2ht</a></span><span class="op">(</span><span class="va">d</span>, lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>                        target_present <span class="op">=</span> <span class="st">"target_present"</span>,</span>
+<span>                        identification <span class="op">=</span> <span class="st">"identification"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>`True d'` <span class="op">=</span> <span class="va">dp</span>,</span>
+<span>             `Recovered dP` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             `Recovered dA` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dA"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">recovery</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"2-HT detection parameters recovered from data simulated at known d', 400 lineups per arm."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>2-HT detection parameters recovered from data simulated at
+known d’, 400 lineups per arm.</caption>
+<thead><tr class="header">
+<th align="right">True d’</th>
+<th align="right">Recovered dP</th>
+<th align="right">Recovered dA</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.5</td>
+<td align="right">0.113</td>
+<td align="right">0.038</td>
+</tr>
+<tr class="even">
+<td align="right">1.0</td>
+<td align="right">0.313</td>
+<td align="right">0.140</td>
+</tr>
+<tr class="odd">
+<td align="right">1.5</td>
+<td align="right">0.522</td>
+<td align="right">0.169</td>
+</tr>
+<tr class="even">
+<td align="right">2.0</td>
+<td align="right">0.677</td>
+<td align="right">0.124</td>
+</tr>
+<tr class="odd">
+<td align="right">2.5</td>
+<td align="right">0.806</td>
+<td align="right">0.214</td>
+</tr>
+</tbody>
+</table>
+<p><code>dP</code> increases monotonically with the generating d′, which
+is the result the check is looking for. It is not on the same scale as
+d′ and should not be expected to equal it: the two models parameterise
+memory differently, and what validates the analysis is that the ordering
+is recovered.</p>
 </div>
 </div>
 <div class="section level2">
@@ -632,7 +781,7 @@ saturated.</p>
 </h3>
 <p>Research question: How well does this lineup procedure discriminate
 between guilty and innocent suspects?</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit all models to assess procedure</span></span>
 <span><span class="va">procedure_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_data</span>,</span>
@@ -643,11 +792,12 @@ between guilty and innocent suspects?</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Procedure Evaluation:\n\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Procedure Evaluation:</span></span>
 <span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="st">"2ht"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">procedure_eval</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT: dP ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span><span class="st">"dP"</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>      <span class="st">"\n  → Detection ability is"</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span><span class="st">"dP"</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0.5</span>, <span class="st">"good"</span>, <span class="st">"moderate"</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT: dP ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    <span class="st">"\n  → Detection ability is"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0.5</span>,</span>
+<span>           <span class="st">"good"</span>, <span class="st">"moderate"</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 2-HT: dP = 0.49 </span></span>
+<span><span class="co">#&gt;   → Detection ability is moderate</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="st">"eig"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">procedure_eval</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EIG ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">eig</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"bits\n"</span><span class="op">)</span></span>
@@ -656,55 +806,104 @@ between guilty and innocent suspects?</p>
 <span>              <span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">prior_entropy</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>      <span class="st">"% of maximum information\n\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; EIG = 0.212 bits</span></span>
-<span><span class="co">#&gt;   → Provides 21 % of maximum information</span></span>
+<span><span class="co">#&gt; EIG = 0.187 bits</span></span>
+<span><span class="co">#&gt;   → Provides 19 % of maximum information</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="st">"fullroc"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">procedure_eval</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Full ROC AUC ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">fullroc</span><span class="op">$</span><span class="va">auc</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  → Discriminability is"</span>,</span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">fullroc</span><span class="op">$</span><span class="va">auc</span> <span class="op">&gt;</span> <span class="fl">0.75</span>, <span class="st">"good"</span>, <span class="st">"moderate"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; Full ROC AUC = 0.771 </span></span>
-<span><span class="co">#&gt;   → Discriminability is good</span></span></code></pre></div>
+<span><span class="co">#&gt; Full ROC AUC = 0.747 </span></span>
+<span><span class="co">#&gt;   → Discriminability is moderate</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="example-2-identifying-sources-of-bias">Example 2: Identifying Sources of Bias<a class="anchor" aria-label="anchor" href="#example-2-identifying-sources-of-bias"></a>
 </h3>
 <p>Use 2-HT model to check for bias:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"2ht"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">comparison</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">bias_param</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span><span class="st">"b"</span><span class="op">]</span></span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span></span>
 <span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Bias Parameter (b) ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">bias_param</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
+<span><span class="va">bias_param</span> <span class="op">&lt;-</span> <span class="va">params</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">bias_reading</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">bias_param</span> <span class="op">&lt;</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="st">"Low: the suspect does not appear to stand out unfairly"</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">bias_param</span> <span class="op">&gt;</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="st">"High: the suspect may stand out. Check lineup construction"</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="st">"Moderate"</span></span>
+<span><span class="op">}</span></span>
 <span></span>
-<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">bias_param</span> <span class="op">&lt;</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Interpretation: Low bias - suspect does not stand out unfairly\n"</span><span class="op">)</span></span>
-<span>  <span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">bias_param</span> <span class="op">&gt;</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Interpretation: High bias - suspect may stand out unfairly\n"</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Consider: Lineup construction, suspect appearance\n"</span><span class="op">)</span></span>
-<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Interpretation: Moderate bias level\n"</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Parameter <span class="op">=</span> <span class="st">"b (biased suspect selection)"</span>,</span>
+<span>             Estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">bias_param</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             Reading <span class="op">=</span> <span class="va">bias_reading</span><span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"2-HT bias parameter, simulated data (300 target-present and 300 target-absent lineups)."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>2-HT bias parameter, simulated data (300 target-present and 300
+target-absent lineups).</caption>
+<colgroup>
+<col width="31%">
+<col width="9%">
+<col width="59%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Parameter</th>
+<th align="right">Estimate</th>
+<th align="left">Reading</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="left">b (biased suspect selection)</td>
+<td align="right">0</td>
+<td align="left">Low: the suspect does not appear to stand out
+unfairly</td>
+</tr></tbody>
+</table>
 </div>
 <div class="section level3">
 <h3 id="example-3-comparing-detection-vs--guessing">Example 3: Comparing Detection vs. Guessing<a class="anchor" aria-label="anchor" href="#example-3-comparing-detection-vs--guessing"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"2ht"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">comparison</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">dP</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span><span class="st">"dP"</span><span class="op">]</span></span>
-<span>  <span class="va">g</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span><span class="st">"g"</span><span class="op">]</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Detection (dP) ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dP</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Guessing (g) ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">g</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Interpretation:\n"</span><span class="op">)</span></span>
-<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">dP</span> <span class="op">&gt;</span> <span class="va">g</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Memory-based identification dominates\n"</span><span class="op">)</span></span>
-<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Guessing plays a significant role\n"</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Parameter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dP (detect culprit present)"</span>,</span>
+<span>                  <span class="st">"dA (detect culprit absent)"</span>,</span>
+<span>                  <span class="st">"g (guessing-based selection)"</span><span class="op">)</span>,</span>
+<span>    Estimate  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">params</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span>, <span class="va">params</span><span class="op">[[</span><span class="st">"dA"</span><span class="op">]</span><span class="op">]</span>, <span class="va">params</span><span class="op">[[</span><span class="st">"g"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"2-HT detection and guessing parameters, simulated data."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>2-HT detection and guessing parameters, simulated
+data.</caption>
+<thead><tr class="header">
+<th align="left">Parameter</th>
+<th align="right">Estimate</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">dP (detect culprit present)</td>
+<td align="right">0.485</td>
+</tr>
+<tr class="even">
+<td align="left">dA (detect culprit absent)</td>
+<td align="right">0.049</td>
+</tr>
+<tr class="odd">
+<td align="left">g (guessing-based selection)</td>
+<td align="right">0.754</td>
+</tr>
+</tbody>
+</table>
+<p>Detection and guessing are separately identified here, which is the
+point of the model: an identification rate on its own cannot tell you
+whether witnesses recognised the culprit or simply picked someone
+plausible. Note that <code>dP</code> and <code>g</code> are
+probabilities of different events and are not in competition — a
+procedure can have both high detection and a high tendency to choose
+when detection fails.</p>
 </div>
 </div>
 <div class="section level2">
@@ -713,43 +912,126 @@ between guilty and innocent suspects?</p>
 <div class="section level3">
 <h3 id="console-format">Console Format<a class="anchor" aria-label="anchor" href="#console-format"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Console-friendly table</span></span>
 <span><span class="va">table_console</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/format_comparison_table.html">format_comparison_table</a></span><span class="op">(</span><span class="va">comparison</span>, format <span class="op">=</span> <span class="st">"console"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">table_console</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                           Model                   Measure   Value</span></span>
-<span><span class="co">#&gt; 1     EIG (Starns et al., 2023) Expected Information Gain  0.2116</span></span>
-<span><span class="co">#&gt; 2     EIG (Starns et al., 2023)    Information Efficiency 21.2000</span></span>
-<span><span class="co">#&gt; 3     EIG (Starns et al., 2023)             Prior Entropy  1.0000</span></span>
-<span><span class="co">#&gt; 4 Full ROC (Smith &amp; Yang, 2020)                  Full AUC  0.7706</span></span>
-<span><span class="co">#&gt; 5 Full ROC (Smith &amp; Yang, 2020)          Operating Points 11.0000</span></span>
-<span><span class="co">#&gt; 6 Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate  1.0000</span></span>
-<span><span class="co">#&gt;                Interpretation</span></span>
-<span><span class="co">#&gt; 1     Higher is better (bits)</span></span>
-<span><span class="co">#&gt; 2         Percentage (0-100%)</span></span>
-<span><span class="co">#&gt; 3         Maximum possible IG</span></span>
-<span><span class="co">#&gt; 4      Higher is better (0-1)</span></span>
-<span><span class="co">#&gt; 5 Number of decision criteria</span></span>
-<span><span class="co">#&gt; 6            Cumulative (0-1)</span></span></code></pre></div>
+<span><span class="co">#&gt;                            Model                   Measure     Value</span></span>
+<span><span class="co">#&gt; 1     2-HT (Winter et al., 2022)            Log-likelihood -557.8100</span></span>
+<span><span class="co">#&gt; 2     2-HT (Winter et al., 2022)                       AIC 1123.6200</span></span>
+<span><span class="co">#&gt; 3     2-HT (Winter et al., 2022)                       BIC 1141.2100</span></span>
+<span><span class="co">#&gt; dP    2-HT (Winter et al., 2022)   dP (detection presence)    0.4850</span></span>
+<span><span class="co">#&gt; dA    2-HT (Winter et al., 2022)    dA (detection absence)    0.0490</span></span>
+<span><span class="co">#&gt; 11     EIG (Starns et al., 2023) Expected Information Gain    0.1869</span></span>
+<span><span class="co">#&gt; 12     EIG (Starns et al., 2023)    Information Efficiency   18.7000</span></span>
+<span><span class="co">#&gt; 13     EIG (Starns et al., 2023)             Prior Entropy    1.0000</span></span>
+<span><span class="co">#&gt; 14 Full ROC (Smith &amp; Yang, 2020)                  Full AUC    0.7471</span></span>
+<span><span class="co">#&gt; 15 Full ROC (Smith &amp; Yang, 2020)          Operating Points   11.0000</span></span>
+<span><span class="co">#&gt; 16 Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate    1.0000</span></span>
+<span><span class="co">#&gt;                 Interpretation</span></span>
+<span><span class="co">#&gt; 1            Model fit quality</span></span>
+<span><span class="co">#&gt; 2              Lower is better</span></span>
+<span><span class="co">#&gt; 3              Lower is better</span></span>
+<span><span class="co">#&gt; dP                      0 to 1</span></span>
+<span><span class="co">#&gt; dA                      0 to 1</span></span>
+<span><span class="co">#&gt; 11     Higher is better (bits)</span></span>
+<span><span class="co">#&gt; 12         Percentage (0-100%)</span></span>
+<span><span class="co">#&gt; 13         Maximum possible IG</span></span>
+<span><span class="co">#&gt; 14      Higher is better (0-1)</span></span>
+<span><span class="co">#&gt; 15 Number of decision criteria</span></span>
+<span><span class="co">#&gt; 16            Cumulative (0-1)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="markdown-format">Markdown Format<a class="anchor" aria-label="anchor" href="#markdown-format"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Markdown format for reports</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"knitr"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">table_md</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/format_comparison_table.html">format_comparison_table</a></span><span class="op">(</span><span class="va">comparison</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">table_md</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-<p>|Model |Measure | Value|Interpretation |
-|:—————————–|:————————-|——-:|:—————————| |EIG (Starns et al., 2023)
-|Expected Information Gain | 0.2116|Higher is better (bits) | |EIG
-(Starns et al., 2023) |Information Efficiency | 21.2000|Percentage
-(0-100%) | |EIG (Starns et al., 2023) |Prior Entropy | 1.0000|Maximum
-possible IG | |Full ROC (Smith &amp; Yang, 2020) |Full AUC |
-0.7706|Higher is better (0-1) | |Full ROC (Smith &amp; Yang, 2020)
-|Operating Points | 11.0000|Number of decision criteria | |Full ROC
-(Smith &amp; Yang, 2020) |Max Hit Rate | 1.0000|Cumulative (0-1) |</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">table_md</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/format_comparison_table.html">format_comparison_table</a></span><span class="op">(</span><span class="va">comparison</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># One element per line, so sep = "\n" is required. Plain cat(table_md) joins</span></span>
+<span><span class="co"># the lines with spaces and the table collapses into a single paragraph.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">table_md</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="31%">
+<col width="27%">
+<col width="10%">
+<col width="29%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Model</th>
+<th align="left">Measure</th>
+<th align="right">Value</th>
+<th align="left">Interpretation</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">2-HT (Winter et al., 2022)</td>
+<td align="left">Log-likelihood</td>
+<td align="right">-557.8100</td>
+<td align="left">Model fit quality</td>
+</tr>
+<tr class="even">
+<td align="left">2-HT (Winter et al., 2022)</td>
+<td align="left">AIC</td>
+<td align="right">1123.6200</td>
+<td align="left">Lower is better</td>
+</tr>
+<tr class="odd">
+<td align="left">2-HT (Winter et al., 2022)</td>
+<td align="left">BIC</td>
+<td align="right">1141.2100</td>
+<td align="left">Lower is better</td>
+</tr>
+<tr class="even">
+<td align="left">2-HT (Winter et al., 2022)</td>
+<td align="left">dP (detection presence)</td>
+<td align="right">0.4850</td>
+<td align="left">0 to 1</td>
+</tr>
+<tr class="odd">
+<td align="left">2-HT (Winter et al., 2022)</td>
+<td align="left">dA (detection absence)</td>
+<td align="right">0.0490</td>
+<td align="left">0 to 1</td>
+</tr>
+<tr class="even">
+<td align="left">EIG (Starns et al., 2023)</td>
+<td align="left">Expected Information Gain</td>
+<td align="right">0.1869</td>
+<td align="left">Higher is better (bits)</td>
+</tr>
+<tr class="odd">
+<td align="left">EIG (Starns et al., 2023)</td>
+<td align="left">Information Efficiency</td>
+<td align="right">18.7000</td>
+<td align="left">Percentage (0-100%)</td>
+</tr>
+<tr class="even">
+<td align="left">EIG (Starns et al., 2023)</td>
+<td align="left">Prior Entropy</td>
+<td align="right">1.0000</td>
+<td align="left">Maximum possible IG</td>
+</tr>
+<tr class="odd">
+<td align="left">Full ROC (Smith &amp; Yang, 2020)</td>
+<td align="left">Full AUC</td>
+<td align="right">0.7471</td>
+<td align="left">Higher is better (0-1)</td>
+</tr>
+<tr class="even">
+<td align="left">Full ROC (Smith &amp; Yang, 2020)</td>
+<td align="left">Operating Points</td>
+<td align="right">11.0000</td>
+<td align="left">Number of decision criteria</td>
+</tr>
+<tr class="odd">
+<td align="left">Full ROC (Smith &amp; Yang, 2020)</td>
+<td align="left">Max Hit Rate</td>
+<td align="right">1.0000</td>
+<td align="left">Cumulative (0-1)</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section level2">
@@ -810,7 +1092,7 @@ rejection) - 0.3-0.7: Moderate - 0.7-1.0: Liberal (prefer selection)</p>
 <div class="section level3">
 <h3 id="insufficient-sample-size">1. Insufficient Sample Size<a class="anchor" aria-label="anchor" href="#insufficient-sample-size"></a>
 </h3>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Small sample may lead to unreliable estimates</span></span>
 <span><span class="va">small_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span>n_tp <span class="op">=</span> <span class="fl">30</span>, n_ta <span class="op">=</span> <span class="fl">30</span>, d_prime <span class="op">=</span> <span class="fl">1.5</span>, conf_levels <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
@@ -835,7 +1117,7 @@ sample size - Consider data preprocessing</p>
 <div class="section level3">
 <h3 id="comparing-non-comparable-measures">3. Comparing Non-Comparable Measures<a class="anchor" aria-label="anchor" href="#comparing-non-comparable-measures"></a>
 </h3>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Important: Don't directly compare across models!\n\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Important: Don't directly compare across models!</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"✗ Wrong: 'dP = 0.6 is better than EIG = 0.4'\n"</span><span class="op">)</span></span>
@@ -856,8 +1138,8 @@ sample size - Consider data preprocessing</p>
 <div class="section level3">
 <h3 id="fit-multiple-models">1. Fit Multiple Models<a class="anchor" aria-label="anchor" href="#fit-multiple-models"></a>
 </h3>
-<p>Don’t rely on a single model—each provides unique insights:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<p>Don’t rely on a single model, as each provides unique insights:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Always fit at least 2-3 models</span></span>
 <span><span class="va">comprehensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_data</span>,</span>
@@ -876,8 +1158,9 @@ sample size - Consider data preprocessing</p>
 <div class="section level3">
 <h3 id="report-all-model-results">2. Report All Model Results<a class="anchor" aria-label="anchor" href="#report-all-model-results"></a>
 </h3>
-<p>When publishing, report results from all fitted models:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<p>When publishing, consider reporting results from all fitted
+models:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"In your paper, report:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; In your paper, report:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  • 2-HT: Parameters with SE, AIC/BIC, convergence\n"</span><span class="op">)</span></span>
@@ -892,15 +1175,153 @@ sample size - Consider data preprocessing</p>
 <div class="section level3">
 <h3 id="check-model-assumptions">3. Check Model Assumptions<a class="anchor" aria-label="anchor" href="#check-model-assumptions"></a>
 </h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"2ht"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">comparison</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Check goodness of fit</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT Goodness of Fit:\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nIf χ² p-value &lt; 0.05: Model may not fit well\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Consider: Data quality, model assumptions\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Winter et al. (2022) Two-High Threshold MPT Model</span></span>
+<span><span class="co">#&gt; ==================================================</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sample size:</span></span>
+<span><span class="co">#&gt;   Target-present: 300</span></span>
+<span><span class="co">#&gt;   Target-absent:  300</span></span>
+<span><span class="co">#&gt;   Total:          600</span></span>
+<span><span class="co">#&gt;   Lineup size:    6</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Parameter Estimates:</span></span>
+<span><span class="co">#&gt;                       Estimate     SE Lower_95 Upper_95</span></span>
+<span><span class="co">#&gt; dP (culprit presence)   0.4853 0.0353   0.4162   0.5545</span></span>
+<span><span class="co">#&gt; dA (culprit absence)    0.0494 0.0572  -0.0627   0.1614</span></span>
+<span><span class="co">#&gt; b  (biased selection)   0.0000 0.0239  -0.0468   0.0468</span></span>
+<span><span class="co">#&gt; g  (guessing)           0.7539 0.0355   0.6843   0.8235</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model Fit:</span></span>
+<span><span class="co">#&gt;   Log-likelihood: -557.81</span></span>
+<span><span class="co">#&gt;   AIC: 1123.62</span></span>
+<span><span class="co">#&gt;   BIC: 1141.21</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Observed vs. Expected Counts:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Target-Present Lineups:</span></span>
+<span><span class="co">#&gt;            Observed Expected      Residual</span></span>
+<span><span class="co">#&gt; Suspect ID      165      165  1.841166e-03</span></span>
+<span><span class="co">#&gt; Filler ID        97       97 -1.909498e-03</span></span>
+<span><span class="co">#&gt; Reject           38       38  6.833132e-05</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Target-Absent Lineups:</span></span>
+<span><span class="co">#&gt;            Observed Expected     Residual</span></span>
+<span><span class="co">#&gt; Suspect ID       33     35.8 -2.833685981</span></span>
+<span><span class="co">#&gt; Filler ID       182    179.2  2.831570094</span></span>
+<span><span class="co">#&gt; Reject           85     85.0  0.002115887</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model identification:</span></span>
+<span><span class="co">#&gt;   Saturated (just-identified): 4 parameters, 4 data df, 0 residual df.</span></span>
+<span><span class="co">#&gt;   Absolute fit is not testable from a single condition (the model reproduces the</span></span>
+<span><span class="co">#&gt;   data by construction); use multiple conditions or constraints to test fit.</span></span>
+<span><span class="co">#&gt;   Residual obs-vs-expected discrepancy = 0.2688 (~= 0 confirms convergence).</span></span></code></pre></div>
+<p>A chi-square p-value below 0.05 indicates that the model does not
+reproduce the observed response frequencies well. With large samples the
+test will detect small departures, so read it alongside the size of the
+discrepancies rather than as a pass/fail.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
+</h2>
+<div class="section level3">
+<h3 id="what-each-model-estimates-and-on-what-scale">What each model estimates, and on what scale<a class="anchor" aria-label="anchor" href="#what-each-model-estimates-and-on-what-scale"></a>
+</h3>
+<p>The three models are <strong>not</strong> three estimates of one
+quantity, and cannot be ranked against each other directly.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Model</th>
+<th>Estimand</th>
+<th>Scale</th>
+<th>Inference available</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>2-HT</td>
+<td>Latent probabilities of detection, bias and guessing</td>
+<td>Four probabilities in [0, 1]</td>
+<td>Standard errors from the observed information matrix;
+goodness-of-fit chi-square</td>
+</tr>
+<tr class="even">
+<td>EIG</td>
+<td>Expected reduction in uncertainty about guilt</td>
+<td>Bits, 0 to the prior entropy</td>
+<td>None in this package</td>
+</tr>
+<tr class="odd">
+<td>Full ROC</td>
+<td>Investigator discriminability</td>
+<td>AUC in [0.5, 1]</td>
+<td>None in this package; see the note on ordering bias below</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="ht-estimation">2-HT estimation<a class="anchor" aria-label="anchor" href="#ht-estimation"></a>
+</h3>
+<p>The model is a multinomial processing tree. Response probabilities
+are as given in the introduction, and the parameters are estimated by
+maximum likelihood over the six observed cell counts (three responses by
+two lineup types), so the model has four parameters for five free cells
+and one residual degree of freedom. Standard errors come from the
+numerically differentiated Hessian at the optimum, and the
+goodness-of-fit statistic is the usual multinomial chi-square.</p>
+<p><strong>Identifiability.</strong> The detect-absence parameter
+<code>dA</code> is identified almost entirely by rejections. If very few
+witnesses reject, the likelihood is close to flat in <code>dA</code> and
+the optimiser fails. <code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> checks for this and
+reports it as such, rather than failing with a message about non-finite
+differences.</p>
+</div>
+<div class="section level3">
+<h3 id="eig">EIG<a class="anchor" aria-label="anchor" href="#eig"></a>
+</h3>
+<p>Expected information gain is computed over the observed response
+categories with the prior supplied by <code>prior_guilt</code>. Because
+it is an expectation over a set of categories estimated from the data,
+it inherits the binning issue discussed in
+<code><a href="../articles/calibration_decision_analysis.html">vignette("calibration_decision_analysis")</a></code>, and it has no
+standard error here.</p>
+</div>
+<div class="section level3">
+<h3 id="full-roc">Full ROC<a class="anchor" aria-label="anchor" href="#full-roc"></a>
+</h3>
+<p>Computed as described in <code><a href="../articles/fullroc_analysis.html">vignette("fullroc_analysis")</a></code>.
+The default ordering by sample diagnosticity ratio is
+<strong>optimistically biased</strong>, because the ordering is
+estimated from the same data used to compute the area; on data with no
+signal at all it returns AUC near 0.65 at 100 lineups per arm.
+<code><a href="../reference/compare_models.html">compare_models()</a></code> uses the default ordering, so treat the
+AUC it reports as an upper bound rather than an estimate, and refit with
+<code>order = "apriori"</code> for anything inferential.</p>
+</div>
+<div class="section level3">
+<h3 id="assumptions-common-to-all-three">Assumptions common to all three<a class="anchor" aria-label="anchor" href="#assumptions-common-to-all-three"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>Each witness contributes one response, so the response categories
+partition the sample.</li>
+<li>Target-present and target-absent lineups are independent
+samples.</li>
+<li>All lineup members other than the suspect are functioning foils.
+Where a lineup contains members nobody ever chooses, the effective
+lineup size is smaller than the nominal <code>lineup_size</code> passed
+here, and all three models will be misspecified in the same
+direction.</li>
+</ol>
 </div>
 </div>
 <div class="section level2">
@@ -944,8 +1365,8 @@ Science, 15</em>(3), 589-607.</p>
 <li>See <code><a href="../reference/compare_models.html">?compare_models</a></code> for complete parameter
 documentation</li>
 <li>See vignette(“simulation_power_analysis”) for data simulation</li>
-<li>See vignette(“pauc_comparison”) for statistical comparison of
-conditions</li>
+<li>See vignette(“pauc_statistical_comparison”) for statistical
+comparison of conditions</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

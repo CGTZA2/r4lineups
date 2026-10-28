@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul>
 </li>
@@ -71,10 +72,12 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Full ROC Analysis for Eyewitness Lineups</h1>
-                        <h4 data-toc-skip class="author">r4lineups
-Package</h4>
+                        <h4 data-toc-skip class="author">Colin G.
+Tredoux</h4>
+                        <h4 data-toc-skip class="author">Tamsyn M.
+Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-08-12</h4>
+            <h4 data-toc-skip class="date">2026-10-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/fullroc_analysis.Rmd" class="external-link"><code>vignettes/fullroc_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>fullroc_analysis.Rmd</code></div>
@@ -82,441 +85,760 @@ Package</h4>
 
     
     
+<blockquote>
+<p><strong>Acknowledgement.</strong> Large language models supplied by
+Anthropic and OpenAI were used in preparing this vignette, to assist
+with checking code, testing the veracity of the approaches described,
+and on occasion editing the text. Responsibility for the content rests
+with the authors.</p>
+</blockquote>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CGTZA2/r4lineups" class="external-link">r4lineups</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>This vignette demonstrates the use of <strong>full ROC (Receiver
-Operating Characteristic) curves</strong> for analyzing eyewitness
-lineup data, following the method developed by Smith, Yang, and Wells
+<p>This vignette demonstrates <strong>full ROC curves</strong> for
+eyewitness lineup data, following the method of Smith, Yang and Wells
 (2020).</p>
+<p><strong>Attribution.</strong> The method is theirs, and a reference
+implementation exists as the R package <strong>fullROC</strong> (Yang
+&amp; Smith). The implementation here was written from the published
+description and adapted into this package’s data conventions; it is not
+a fork of that package.</p>
 <div class="section level3">
-<h3 id="why-full-roc">Why Full ROC?<a class="anchor" aria-label="anchor" href="#why-full-roc"></a>
+<h3 id="every-response-not-just-suspect-identifications">Every response, not just suspect identifications<a class="anchor" aria-label="anchor" href="#every-response-not-just-suspect-identifications"></a>
 </h3>
-<p>Traditional (partial) ROC analysis of lineup data only uses
-<strong>suspect identifications</strong>, ignoring filler
-identifications and lineup rejections. This creates several
-problems:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Incomplete evidence</strong>: Filler IDs and rejections also
-provide diagnostic information about suspect guilt</li>
-<li>
-<strong>Biased comparisons</strong>: Partial AUC (pAUC)
-systematically favors more conservative procedures</li>
-<li>
-<strong>Limited range</strong>: Partial ROC curves don’t span the
-full [0,1] range</li>
-<li>
-<strong>Confounded with bias</strong>: Cannot separate
-discriminability from response bias</li>
-</ol>
-<p>The <strong>full ROC method</strong> addresses these issues by using
-ALL eyewitness responses.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="the-key-insight-two-signal-detection-tasks">The Key Insight: Two Signal Detection Tasks<a class="anchor" aria-label="anchor" href="#the-key-insight-two-signal-detection-tasks"></a>
-</h2>
-<p>Smith et al. (2020) recognized that lineup procedures involve
-<strong>two simultaneous signal detection tasks</strong>:</p>
-<div class="section level3">
-<h3 id="eyewitness-task-3-2">1. Eyewitness Task (3 × 2)<a class="anchor" aria-label="anchor" href="#eyewitness-task-3-2"></a>
-</h3>
-<ul>
-<li>Determine if culprit is present AND identify them</li>
-<li>Three responses: suspect ID, filler ID, or reject</li>
-<li>Two states: culprit present or absent</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="investigator-task-2-2">2. Investigator Task (2 × 2)<a class="anchor" aria-label="anchor" href="#investigator-task-2-2"></a>
-</h3>
-<ul>
-<li>Determine if suspect is guilty</li>
-<li>Two decisions: arrest or release</li>
-<li>Two states: guilty or innocent suspect</li>
-<li>
-<strong>Key point</strong>: Investigator knows which lineup members
-are fillers</li>
-</ul>
-<p>The investigator uses the witness’s decision (and confidence) as
-evidence to decide about the suspect. The <strong>full ROC measures
-investigator discriminability</strong>, not just eyewitness memory.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
-</h2>
-<div class="section level3">
-<h3 id="data-structure">Data Structure<a class="anchor" aria-label="anchor" href="#data-structure"></a>
-</h3>
-<p>Your data needs three columns:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CGTZA2/r4lineups" class="external-link">r4lineups</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  target_present <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span>,  <span class="co"># Logical</span></span>
-<span>  identification <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"suspect"</span>, <span class="st">"filler"</span>, <span class="st">"reject"</span>, <span class="va">...</span><span class="op">)</span>,  <span class="co"># Character</span></span>
-<span>  confidence <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">90</span>, <span class="fl">70</span>, <span class="fl">80</span>, <span class="fl">50</span>, <span class="va">...</span><span class="op">)</span>  <span class="co"># Numeric</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="compute-full-roc">Compute Full ROC<a class="anchor" aria-label="anchor" href="#compute-full-roc"></a>
-</h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Main function</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span></span>
-<span>  <span class="va">data</span>,</span>
-<span>  conf_bins <span class="op">=</span> <span class="cn">NULL</span>,           <span class="co"># Optional: bin confidence</span></span>
-<span>  order <span class="op">=</span> <span class="st">"diagnosticity"</span>,    <span class="co"># or "apriori"</span></span>
-<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>  show_plot <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Access plot</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="example-1-strong-vs--weak-memory">Example 1: Strong vs. Weak Memory<a class="anchor" aria-label="anchor" href="#example-1-strong-vs--weak-memory"></a>
-</h2>
-<p>Let’s simulate data for two viewing conditions:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Strong memory (clear viewing)</span></span>
-<span><span class="va">strong_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  target_present <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="fl">100</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  identification <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="co"># Target-present: high suspect ID rate</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"suspect"</span>, <span class="st">"filler"</span>, <span class="st">"reject"</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>           prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.70</span>, <span class="fl">0.15</span>, <span class="fl">0.15</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    <span class="co"># Target-absent: low false ID rate</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"suspect"</span>, <span class="st">"filler"</span>, <span class="st">"reject"</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>           prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.30</span>, <span class="fl">0.60</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  confidence <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span>, <span class="fl">200</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Weak memory (degraded viewing)</span></span>
-<span><span class="va">weak_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  target_present <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="fl">100</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  identification <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="co"># Target-present: lower suspect ID rate</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"suspect"</span>, <span class="st">"filler"</span>, <span class="st">"reject"</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>           prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.35</span>, <span class="fl">0.35</span>, <span class="fl">0.30</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    <span class="co"># Target-absent: higher false ID rate</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"suspect"</span>, <span class="st">"filler"</span>, <span class="st">"reject"</span><span class="op">)</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>           prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.40</span>, <span class="fl">0.35</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  confidence <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span>, <span class="fl">200</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Compute full ROCs</span></span>
-<span><span class="va">strong_roc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">strong_data</span><span class="op">)</span></span>
-<span><span class="va">weak_roc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">weak_data</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Compare</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Strong memory AUC:"</span>, <span class="va">strong_roc</span><span class="op">$</span><span class="va">auc</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Weak memory AUC:"</span>, <span class="va">weak_roc</span><span class="op">$</span><span class="va">auc</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<p>Expected result: Strong memory condition should have substantially
-higher AUC (e.g., 0.85 vs. 0.65).</p>
-</div>
-<div class="section level2">
-<h2 id="example-2-custom-confidence-bins">Example 2: Custom Confidence Bins<a class="anchor" aria-label="anchor" href="#example-2-custom-confidence-bins"></a>
-</h2>
-<p>Instead of using every unique confidence value, you can create
-bins:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create Low (0-60), Medium (60-80), High (80-100) bins</span></span>
-<span><span class="va">result_binned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span></span>
-<span>  <span class="va">data</span>,</span>
-<span>  conf_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>  order <span class="op">=</span> <span class="st">"diagnosticity"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># This creates cleaner ROC curves with fewer operating points</span></span>
-<span><span class="co"># Useful when you have many confidence levels</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="ordering-methods">Ordering Methods<a class="anchor" aria-label="anchor" href="#ordering-methods"></a>
-</h2>
-<div class="section level3">
-<h3 id="diagnosticity-ordering-default">Diagnosticity Ordering (Default)<a class="anchor" aria-label="anchor" href="#diagnosticity-ordering-default"></a>
-</h3>
-<p>Orders response categories by their empirical diagnosticity ratio (DR
-= Hit Rate / False Alarm Rate):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">data</span>, order <span class="op">=</span> <span class="st">"diagnosticity"</span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>High DR (e.g., 10.0): Strong evidence of guilt (e.g.,
-high-confidence suspect ID)</li>
-<li>DR ≈ 1.0: Neutral evidence</li>
-<li>Low DR (e.g., 0.1): Strong evidence of innocence (e.g.,
-high-confidence rejection)</li>
-</ul>
-<p><strong>Caution — optimistic bias.</strong> Because the ordering is
-chosen from the <em>sample</em> diagnosticity ratios, the curve is bowed
-upward by noise alone: even identical target-present and target-absent
-response distributions produce an AUC slightly above 0.5. The bias grows
-with the number of decision × confidence cells and shrinks with sample
-size. Diagnosticity ordering is useful for exploration, but for
-inference or comparisons across conditions prefer a-priori ordering
-(below) or benchmark against a permutation baseline.</p>
-</div>
-<div class="section level3">
-<h3 id="a-priori-ordering">A-priori Ordering<a class="anchor" aria-label="anchor" href="#a-priori-ordering"></a>
-</h3>
-<p>Uses theoretical ordering:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">data</span>, order <span class="op">=</span> <span class="st">"apriori"</span><span class="op">)</span></span></code></pre></div>
-<p>Order (from evidence of guilt → evidence of innocence): 1. Suspect
-IDs: high confidence → low confidence 2. Filler IDs: low confidence →
-high confidence 3. Rejections: low confidence → high confidence</p>
-<p>Rationale: - High-confidence suspect IDs are strong evidence of guilt
-- Low-confidence filler IDs/rejections are strong evidence of innocence
-(rare when guilty, common when innocent)</p>
-<p>Because the ordering is fixed in advance rather than estimated from
-the data, a-priori ordering does not suffer from the optimistic bias
-described above and is the safer choice for hypothesis tests and
-between-condition comparisons (this is why Smith &amp; Yang, 2020, offer
-it).</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="understanding-the-output">Understanding the Output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
-</h2>
-<div class="section level3">
-<h3 id="the-diagnosticity-table">The Diagnosticity Table<a class="anchor" aria-label="anchor" href="#the-diagnosticity-table"></a>
-</h3>
-<p>This shows non-cumulative rates for each decision × confidence
-category:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">diagnosticity_table</span><span class="op">)</span></span></code></pre></div>
-<p>Columns: - <code>decision</code>: suspect, filler, or reject -
-<code>conf_bin</code>: confidence level - <code>hit_rate</code>: P(this
-response | target present) - <code>false_alarm_rate</code>: P(this
-response | target absent) - <code>diagnosticity_ratio</code>: hit_rate /
-false_alarm_rate - <code>cumulative_*</code>: Running sum (for ROC
-curve)</p>
-</div>
-<div class="section level3">
-<h3 id="the-roc-data">The ROC Data<a class="anchor" aria-label="anchor" href="#the-roc-data"></a>
-</h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">roc_data</span><span class="op">)</span></span></code></pre></div>
-<p>Each row is an operating point (decision criterion) on the ROC curve:
-- <code>cumulative_hit_rate</code>: Y-axis (correct IDs of guilty
-suspects) - <code>cumulative_false_alarm_rate</code>: X-axis (false IDs
-of innocent suspects)</p>
-</div>
-<div class="section level3">
-<h3 id="the-auc">The AUC<a class="anchor" aria-label="anchor" href="#the-auc"></a>
-</h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">auc</span></span></code></pre></div>
-<ul>
-<li>
-<strong>0.50</strong>: Chance performance</li>
-<li>
-<strong>0.60-0.70</strong>: Weak discriminability</li>
-<li>
-<strong>0.70-0.80</strong>: Moderate discriminability</li>
-<li>
-<strong>0.80-0.90</strong>: Good discriminability</li>
-<li>
-<strong>0.90-1.00</strong>: Excellent discriminability</li>
-</ul>
-</div>
-</div>
-<div class="section level2">
-<h2 id="comparing-procedures">Comparing Procedures<a class="anchor" aria-label="anchor" href="#comparing-procedures"></a>
-</h2>
-<div class="section level3">
-<h3 id="when-one-roc-dominates">When One ROC Dominates<a class="anchor" aria-label="anchor" href="#when-one-roc-dominates"></a>
-</h3>
-<p>If Procedure A’s ROC is above Procedure B’s across the
-<strong>entire</strong> range:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Procedure A dominates if its ROC curve is always above Procedure B's</span></span>
-<span><span class="co"># This means A is unambiguously superior regardless of:</span></span>
-<span><span class="co">#   - Base rate assumptions</span></span>
-<span><span class="co">#   - Cost/utility functions</span></span>
-<span><span class="co">#   - Operating points chosen</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="when-roc-curves-cross">When ROC Curves Cross<a class="anchor" aria-label="anchor" href="#when-roc-curves-cross"></a>
-</h3>
-<p>When curves cross, there’s no clear winner without additional
-assumptions. You need:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Base rate</strong>: How often is the suspect actually
-guilty?</li>
-<li>
-<strong>Costs</strong>: Relative cost of missed ID vs. false ID</li>
-<li>
-<strong>Utility analysis</strong>: Use expected utility framework
-(see Lampinen et al., 2019)</li>
-</ol>
-</div>
-</div>
-<div class="section level2">
-<h2 id="full-roc-vs--partial-roc">Full ROC vs. Partial ROC<a class="anchor" aria-label="anchor" href="#full-roc-vs--partial-roc"></a>
-</h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Traditional partial ROC</span></span>
-<span><span class="va">partial</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_roc.html">make_roc</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">partial</span><span class="op">$</span><span class="va">pauc</span><span class="op">)</span>  <span class="co"># Partial AUC</span></span>
-<span></span>
-<span><span class="co"># Full ROC</span></span>
-<span><span class="va">full</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">full</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span>  <span class="co"># Full AUC</span></span>
-<span></span>
-<span><span class="co"># These are NOT comparable!</span></span>
-<span><span class="co"># pAUC only uses suspect IDs</span></span>
-<span><span class="co"># Full AUC uses ALL evidence</span></span></code></pre></div>
-<p>Key differences:</p>
+<p>Conventional ROC analysis of lineup data uses <strong>only suspect
+identifications</strong>. A witness who picks a foil, and a witness who
+rejects the lineup entirely, contribute nothing to either axis.</p>
+<p>Spelling out what actually happens when a witness views a lineup
+makes the omission clear. There are six possible outcomes:</p>
 <table class="table">
 <colgroup>
-<col width="28%">
-<col width="40%">
-<col width="31%">
+<col width="33%">
+<col width="33%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
-<th>Feature</th>
-<th>Partial ROC</th>
-<th>Full ROC</th>
+<th>Witness response</th>
+<th>Target-present lineup</th>
+<th>Target-absent lineup</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Responses</td>
-<td>Suspect IDs only</td>
-<td>ALL responses</td>
+<td>Picks the suspect</td>
+<td>
+<strong>Correct identification</strong> — used by both methods</td>
+<td>
+<strong>False identification</strong> — used by both methods</td>
 </tr>
 <tr class="even">
-<td>Range</td>
-<td>Limited (often 0-0.30)</td>
-<td>Full (0-1.0)</td>
+<td>Picks a foil</td>
+<td>Filler identification — an error, <em>discarded</em> by partial
+ROC</td>
+<td>Filler identification — a protected outcome, <em>discarded</em> by
+partial ROC</td>
 </tr>
 <tr class="odd">
-<td>Measure</td>
-<td>pAUC</td>
-<td>AUC</td>
+<td>Picks nobody</td>
+<td>Incorrect rejection — a miss, <em>discarded</em> by partial ROC</td>
+<td>
+<strong>Correct rejection</strong> — <em>discarded</em> by partial
+ROC</td>
+</tr>
+</tbody>
+</table>
+<p>Four of the six outcomes are set aside. Yet they carry information. A
+witness who picks a foil has demonstrably failed to recognise the
+culprit, and in a target-absent lineup has done the innocent suspect a
+service. A confident rejection is evidence <em>against</em> the
+suspect’s guilt, and an investigator would certainly treat it as
+such.</p>
+<p>The full ROC method uses all six.</p>
+</div>
+<div class="section level3">
+<h3 id="why-the-partial-roc-curve-does-not-span-the-full-range">Why the partial ROC curve does not span the full range<a class="anchor" aria-label="anchor" href="#why-the-partial-roc-curve-does-not-span-the-full-range"></a>
+</h3>
+<p>This is worth being concrete about, because it is the practical
+reason full ROC was proposed.</p>
+<p>An ROC curve is traced by progressively relaxing the criterion for
+accepting evidence. In conventional lineup ROC analysis, the only lever
+is confidence among suspect identifications: start with the
+highest-confidence suspect IDs and work down. When every suspect
+identification has been included, the curve stops.</p>
+<p>It stops at the point given by the overall suspect identification
+rates in the two arms — typically well under 0.3 on the x-axis, because
+most witnesses in a target-absent lineup do <em>not</em> pick the
+innocent suspect; they pick a foil or reject. There is no way to
+continue the curve, because there are no further suspect identifications
+to admit.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">partial</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_roc.html">make_roc</a></span><span class="op">(</span><span class="va">lineup_example</span>, lineup_size <span class="op">=</span> <span class="fl">6</span>, show_plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">full</span>    <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">lineup_example</span>, lineup_size <span class="op">=</span> <span class="fl">6</span>, show_plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Partial ROC (suspect IDs only)"</span>, <span class="st">"Full ROC (all responses)"</span><span class="op">)</span>,</span>
+<span>    `False-ID axis spans` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"0 to %.3f"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">partial</span><span class="op">$</span><span class="va">roc_data</span><span class="op">$</span><span class="va">false_id_rate</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"0 to %.3f"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">full</span><span class="op">$</span><span class="va">roc_data</span><span class="op">$</span><span class="va">cumulative_false_alarm_rate</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    `Area reported` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"pAUC = %.4f"</span>, <span class="va">partial</span><span class="op">$</span><span class="va">pauc</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"AUC = %.4f"</span>, <span class="va">full</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Range covered by the two methods, lineup_example (700 target-present and 700 target-absent lineups of size 6)."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Range covered by the two methods, lineup_example (700
+target-present and 700 target-absent lineups of size 6).</caption>
+<thead><tr class="header">
+<th align="left">Method</th>
+<th align="left">False-ID axis spans</th>
+<th align="left">Area reported</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Partial ROC (suspect IDs only)</td>
+<td align="left">0 to 0.126</td>
+<td align="left">pAUC = 0.0533</td>
 </tr>
 <tr class="even">
-<td>Bias</td>
-<td>Favors conservative procedures</td>
-<td>Ordering-dependent; sample-DR ordering is an upper bound</td>
+<td align="left">Full ROC (all responses)</td>
+<td align="left">0 to 1.000</td>
+<td align="left">AUC = 0.7775</td>
+</tr>
+</tbody>
+</table>
+<p>The full ROC reaches 1.0 because once foil identifications and
+rejections are admitted as evidence, every witness eventually
+contributes, and the cumulative rates must reach 1 in both arms.</p>
+<p><strong>The two areas are not comparable.</strong> A pAUC of 0.06 and
+an AUC of 0.78 are not in competition; they are computed over different
+ranges from different subsets of the data. Never report one as though it
+were the other.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="the-key-insight-two-signal-detection-tasks">The key insight: two signal detection tasks<a class="anchor" aria-label="anchor" href="#the-key-insight-two-signal-detection-tasks"></a>
+</h2>
+<p>Smith et al. (2020) argue that a lineup involves <strong>two</strong>
+signal detection problems, and that the conventional analysis conflates
+them.</p>
+<p><strong>The eyewitness task.</strong> The witness must decide whether
+the culprit is present and, if so, which member they are. Three
+responses, two states of the world. This is a question about
+<em>memory</em>.</p>
+<p><strong>The investigator task.</strong> The investigator must decide
+whether to proceed against the suspect. Two decisions, two states.
+Crucially, the investigator <strong>knows which lineup members are
+foils</strong> — so a foil identification is not an ambiguous outcome to
+them, it is informative evidence that the witness could not recognise
+the culprit.</p>
+<p>The full ROC measures <strong>investigator discriminability</strong>:
+how well someone using the witness’s response as evidence can separate
+guilty from innocent suspects. That is a different quantity from
+eyewitness discriminability, and it is arguably the one that matters for
+policy, since it is the investigator who acts.</p>
+<p>This is also the source of the main objection to the method — that an
+AUC near 0.8 may describe the investigator’s inferential position rather
+than the witness’s memory, and readers may conflate the two. Keeping the
+label “investigator discriminability” attached to the number is the
+simplest guard.</p>
+</div>
+<div class="section level2">
+<h2 id="basic-usage">Basic usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+</h2>
+<div class="section level3">
+<h3 id="data-structure">Data structure<a class="anchor" aria-label="anchor" href="#data-structure"></a>
+</h3>
+<p>Three columns are required: <code>target_present</code>,
+<code>identification</code> and <code>confidence</code>.
+<code>lineup_example</code> has them, along with the member-level
+columns this package records.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 'data.frame':    1400 obs. of  5 variables:</span></span>
+<span><span class="co">#&gt;  $ target_present: logi  FALSE FALSE TRUE TRUE TRUE FALSE ...</span></span>
+<span><span class="co">#&gt;  $ lineup_member : int  2 3 2 1 1 0 1 1 1 4 ...</span></span>
+<span><span class="co">#&gt;  $ suspect_pos   : int  1 1 1 1 1 1 1 1 1 1 ...</span></span>
+<span><span class="co">#&gt;  $ identification: chr  "filler" "filler" "filler" "suspect" ...</span></span>
+<span><span class="co">#&gt;  $ confidence    : num  40 50 40 80 60 20 60 70 20 50 ...</span></span></code></pre></div>
+<p>As elsewhere in this package, the data are simulated at the level of
+<strong>individual foils</strong> — each foil has its own mean memory
+strength, so the foils are not interchangeable — and
+<code>identification</code> is derived from <code>lineup_member</code>
+rather than stored in its place. See <code><a href="../reference/simulate_lineup_data.html">?simulate_lineup_data</a></code>
+and its <code>foil_bias</code> argument.</p>
+</div>
+<div class="section level3">
+<h3 id="compute-a-full-roc">Compute a full ROC<a class="anchor" aria-label="anchor" href="#compute-a-full-roc"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span></span>
+<span>  <span class="va">lineup_example</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  order       <span class="op">=</span> <span class="st">"apriori"</span>,</span>
+<span>  show_plot   <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; === Full Lineup ROC Analysis (Smith &amp; Yang, 2020) ===</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Full AUC: 0.76 </span></span>
+<span><span class="co">#&gt; Target-present trials (N): 700 </span></span>
+<span><span class="co">#&gt; Target-absent trials (N): 700 </span></span>
+<span><span class="co">#&gt; Lineup size: 6 </span></span>
+<span><span class="co">#&gt; Ordering method: apriori </span></span>
+<span><span class="co">#&gt; Operating points: 19 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ROC Data (first 10 points):</span></span>
+<span><span class="co">#&gt;    cumulative_hit_rate cumulative_false_alarm_rate evidence_label</span></span>
+<span><span class="co">#&gt; 1           0.00000000                 0.000000000         origin</span></span>
+<span><span class="co">#&gt; 2           0.09714286                 0.000000000    suspect_100</span></span>
+<span><span class="co">#&gt; 3           0.14285714                 0.005714286     suspect_90</span></span>
+<span><span class="co">#&gt; 4           0.18857143                 0.014285714     suspect_80</span></span>
+<span><span class="co">#&gt; 5           0.26000000                 0.022857143     suspect_70</span></span>
+<span><span class="co">#&gt; 6           0.35142857                 0.030000000     suspect_60</span></span>
+<span><span class="co">#&gt; 7           0.43571429                 0.054285714     suspect_50</span></span>
+<span><span class="co">#&gt; 8           0.50714286                 0.077142857     suspect_40</span></span>
+<span><span class="co">#&gt; 9           0.55571429                 0.102857143     suspect_30</span></span>
+<span><span class="co">#&gt; 10          0.59285714                 0.125714286     suspect_20</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Diagnosticity Table (ordered by evidence strength):</span></span>
+<span><span class="co">#&gt;  evidence_label    hit_rate false_alarm_rate diagnosticity_ratio</span></span>
+<span><span class="co">#&gt;     suspect_100 0.097142857      0.000000000          97.1428571</span></span>
+<span><span class="co">#&gt;      suspect_90 0.045714286      0.005714286           8.0000000</span></span>
+<span><span class="co">#&gt;      suspect_80 0.045714286      0.008571429           5.3333333</span></span>
+<span><span class="co">#&gt;      suspect_70 0.071428571      0.008571429           8.3333333</span></span>
+<span><span class="co">#&gt;      suspect_60 0.091428571      0.007142857          12.8000000</span></span>
+<span><span class="co">#&gt;      suspect_50 0.084285714      0.024285714           3.4705882</span></span>
+<span><span class="co">#&gt;      suspect_40 0.071428571      0.022857143           3.1250000</span></span>
+<span><span class="co">#&gt;      suspect_30 0.048571429      0.025714286           1.8888889</span></span>
+<span><span class="co">#&gt;      suspect_20 0.037142857      0.022857143           1.6250000</span></span>
+<span><span class="co">#&gt;       filler_20 0.047142857      0.108571429           0.4342105</span></span>
+<span><span class="co">#&gt;       filler_30 0.047142857      0.110000000           0.4285714</span></span>
+<span><span class="co">#&gt;       filler_40 0.054285714      0.098571429           0.5507246</span></span>
+<span><span class="co">#&gt;       filler_50 0.054285714      0.090000000           0.6031746</span></span>
+<span><span class="co">#&gt;       filler_60 0.032857143      0.052857143           0.6216216</span></span>
+<span><span class="co">#&gt;       filler_70 0.037142857      0.062857143           0.5909091</span></span>
+<span><span class="co">#&gt;       filler_80 0.020000000      0.021428571           0.9333333</span></span>
+<span><span class="co">#&gt;       filler_90 0.008571429      0.014285714           0.6000000</span></span>
+<span><span class="co">#&gt;      filler_100 0.010000000      0.028571429           0.3500000</span></span>
+<span><span class="co">#&gt;       reject_20 0.095714286      0.287142857           0.3333333</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Plot: use plot(x), or save the object and extract x$plot</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">plot</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code></pre></div>
+<p><img src="fullroc_analysis_files/figure-html/fullroc_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p>The curve runs corner to corner, and each point is one operating
+point: a threshold on the ordered evidence categories.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="ordering-methods-and-a-warning-about-the-default">Ordering methods, and a warning about the default<a class="anchor" aria-label="anchor" href="#ordering-methods-and-a-warning-about-the-default"></a>
+</h2>
+<p>Building the curve requires the response categories — every
+combination of decision and confidence level — to be placed in order
+from “strongest evidence of guilt” to “strongest evidence of innocence”.
+The two available orderings differ in where that order comes from, and
+the difference matters a great deal more than it might appear.</p>
+<div class="section level3">
+<h3 id="a-priori-ordering">A-priori ordering<a class="anchor" aria-label="anchor" href="#a-priori-ordering"></a>
+</h3>
+<p><code>order = "apriori"</code> fixes the order in advance on
+theoretical grounds:</p>
+<ol style="list-style-type: decimal">
+<li>Suspect identifications, from high confidence down to low</li>
+<li>Filler identifications, from low confidence up to high</li>
+<li>Rejections, from low confidence up to high</li>
+</ol>
+<p>The reasoning is that a confident suspect identification is the
+strongest evidence of guilt, while a confident rejection or a confident
+filler identification is the strongest evidence of innocence.</p>
+</div>
+<div class="section level3">
+<h3 id="diagnosticity-ordering">Diagnosticity ordering<a class="anchor" aria-label="anchor" href="#diagnosticity-ordering"></a>
+</h3>
+<p><code>order = "diagnosticity"</code> instead sorts the categories by
+their <strong>observed</strong> diagnosticity ratio,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>R</mi><mo>=</mo><mi>H</mi><mi>R</mi><mi>/</mi><mi>F</mi><mi>A</mi><mi>R</mi></mrow><annotation encoding="application/x-tex">DR = HR / FAR</annotation></semantics></math>,
+computed from the data at hand.</p>
+<p>That sounds more principled — why assume an order when you can
+measure it? — but it uses the same data twice: once to choose the
+ordering that makes the curve bow as far upward as possible, and again
+to compute the area under it. The result is optimistically biased.</p>
+</div>
+<div class="section level3">
+<h3 id="how-large-is-the-bias">How large is the bias?<a class="anchor" aria-label="anchor" href="#how-large-is-the-bias"></a>
+</h3>
+<p>Large enough to matter. The following simulates data with <strong>no
+signal whatsoever</strong> — the response distribution is identical in
+target-present and target-absent lineups, so the true AUC is exactly 0.5
+— and computes the AUC both ways.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">null_auc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n_per_arm</span>, <span class="va">n_reps</span> <span class="op">=</span> <span class="fl">15</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">7</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span>
+<span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_reps</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>      target_present <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">n_per_arm</span><span class="op">)</span>,</span>
+<span>      identification <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"suspect"</span>, <span class="st">"filler"</span>, <span class="st">"reject"</span><span class="op">)</span>,</span>
+<span>                              <span class="fl">2</span> <span class="op">*</span> <span class="va">n_per_arm</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                              prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      confidence     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">100</span>, <span class="fl">20</span><span class="op">)</span>, <span class="fl">2</span> <span class="op">*</span> <span class="va">n_per_arm</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>diagnosticity <span class="op">=</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">d</span>, lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>                                   show_plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">auc</span>,</span>
+<span>      apriori       <span class="op">=</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">d</span>, lineup_size <span class="op">=</span> <span class="fl">6</span>, order <span class="op">=</span> <span class="st">"apriori"</span>,</span>
+<span>                                   show_plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">bias_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">500</span>, <span class="fl">1000</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">null_auc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>`Lineups per arm` <span class="op">=</span> <span class="va">n</span>,</span>
+<span>             `Diagnosticity ordering` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">a</span><span class="op">[[</span><span class="st">"diagnosticity"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             `A-priori ordering` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">a</span><span class="op">[[</span><span class="st">"apriori"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">bias_table</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Mean AUC from data containing NO signal at all, so the true AUC is 0.500. Simulated, 15 replications per row, 15 decision-by-confidence categories."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Mean AUC from data containing NO signal at all, so the true AUC
+is 0.500. Simulated, 15 replications per row, 15 decision-by-confidence
+categories.</caption>
+<thead><tr class="header">
+<th align="right">Lineups per arm</th>
+<th align="right">Diagnosticity ordering</th>
+<th align="right">A-priori ordering</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">100</td>
+<td align="right">0.655</td>
+<td align="right">0.482</td>
+</tr>
+<tr class="even">
+<td align="right">200</td>
+<td align="right">0.601</td>
+<td align="right">0.490</td>
 </tr>
 <tr class="odd">
-<td>Evidence</td>
-<td>Inculpatory only</td>
-<td>Inculpatory + exculpatory</td>
+<td align="right">500</td>
+<td align="right">0.568</td>
+<td align="right">0.494</td>
+</tr>
+<tr class="even">
+<td align="right">1000</td>
+<td align="right">0.544</td>
+<td align="right">0.496</td>
+</tr>
+</tbody>
+</table>
+<p>With 100 lineups per arm — an entirely ordinary study size — pure
+noise returns an AUC around 0.65 under diagnosticity ordering. On the
+interpretive scale often quoted for AUC, that is “weak to moderate
+discriminability”. It is nothing of the kind: there is no signal in
+these data at all.</p>
+<p>A-priori ordering sits at 0.5 throughout, as it should.</p>
+<p>The bias shrinks as the sample grows, roughly with the square root,
+but it is still around 0.05 at 1000 lineups per arm. It also grows with
+the number of decision-by-confidence categories, so binning confidence
+reduces it.</p>
+<p><strong>Recommendation.</strong> Use <code>order = "apriori"</code>
+for anything inferential: hypothesis tests, comparisons between
+conditions, published estimates. Diagnosticity ordering is defensible
+only as an exploratory upper bound, and should be labelled as such.
+<code><a href="../reference/make_fullroc.html">make_fullroc()</a></code> emits a message when diagnosticity ordering
+is used on a modest sample, for this reason.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="binning-confidence">Binning confidence<a class="anchor" aria-label="anchor" href="#binning-confidence"></a>
+</h2>
+<p>Binning reduces the number of operating points, which produces a
+cleaner curve and — as noted above — a smaller optimism bias when
+diagnosticity ordering is used.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">binned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span></span>
+<span>  <span class="va">lineup_example</span>,</span>
+<span>  conf_bins   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span>,</span>
+<span>  order       <span class="op">=</span> <span class="st">"apriori"</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  show_plot   <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"All confidence levels"</span>, <span class="st">"Three bins (0-60, 60-80, 80-100)"</span><span class="op">)</span>,</span>
+<span>    `Operating points` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">roc_data</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">binned</span><span class="op">$</span><span class="va">roc_data</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    AUC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">auc</span>, <span class="va">binned</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Effect of binning confidence, lineup_example, a-priori ordering."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Effect of binning confidence, lineup_example, a-priori
+ordering.</caption>
+<thead><tr class="header">
+<th align="left">Version</th>
+<th align="right">Operating points</th>
+<th align="right">AUC</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">All confidence levels</td>
+<td align="right">20</td>
+<td align="right">0.7596</td>
+</tr>
+<tr class="even">
+<td align="left">Three bins (0-60, 60-80, 80-100)</td>
+<td align="right">8</td>
+<td align="right">0.7599</td>
+</tr>
+</tbody>
+</table>
+<p>The AUCs are close, which is the reassuring case. A large discrepancy
+would suggest the curve is being driven by sparse categories.</p>
+</div>
+<div class="section level2">
+<h2 id="understanding-the-output">Understanding the output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
+</h2>
+<div class="section level3">
+<h3 id="the-diagnosticity-table">The diagnosticity table<a class="anchor" aria-label="anchor" href="#the-diagnosticity-table"></a>
+</h3>
+<p>Non-cumulative rates for each decision-by-confidence category:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">diagnosticity_table</span><span class="op">)</span><span class="op">[</span></span>
+<span>    , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"decision"</span>, <span class="st">"conf_bin"</span>, <span class="st">"hit_rate"</span>, <span class="st">"false_alarm_rate"</span>,</span>
+<span>        <span class="st">"diagnosticity_ratio"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">8</span><span class="op">)</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Non-cumulative response rates and diagnosticity ratios, lineup_example (first 8 categories under a-priori ordering)."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Non-cumulative response rates and diagnosticity ratios,
+lineup_example (first 8 categories under a-priori ordering).</caption>
+<thead><tr class="header">
+<th align="left">decision</th>
+<th align="left">conf_bin</th>
+<th align="right">hit_rate</th>
+<th align="right">false_alarm_rate</th>
+<th align="right">diagnosticity_ratio</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">suspect</td>
+<td align="left">100</td>
+<td align="right">0.0971</td>
+<td align="right">0.0000</td>
+<td align="right">97.1429</td>
+</tr>
+<tr class="even">
+<td align="left">suspect</td>
+<td align="left">90</td>
+<td align="right">0.0457</td>
+<td align="right">0.0057</td>
+<td align="right">8.0000</td>
+</tr>
+<tr class="odd">
+<td align="left">suspect</td>
+<td align="left">80</td>
+<td align="right">0.0457</td>
+<td align="right">0.0086</td>
+<td align="right">5.3333</td>
+</tr>
+<tr class="even">
+<td align="left">suspect</td>
+<td align="left">70</td>
+<td align="right">0.0714</td>
+<td align="right">0.0086</td>
+<td align="right">8.3333</td>
+</tr>
+<tr class="odd">
+<td align="left">suspect</td>
+<td align="left">60</td>
+<td align="right">0.0914</td>
+<td align="right">0.0071</td>
+<td align="right">12.8000</td>
+</tr>
+<tr class="even">
+<td align="left">suspect</td>
+<td align="left">50</td>
+<td align="right">0.0843</td>
+<td align="right">0.0243</td>
+<td align="right">3.4706</td>
+</tr>
+<tr class="odd">
+<td align="left">suspect</td>
+<td align="left">40</td>
+<td align="right">0.0714</td>
+<td align="right">0.0229</td>
+<td align="right">3.1250</td>
+</tr>
+<tr class="even">
+<td align="left">suspect</td>
+<td align="left">30</td>
+<td align="right">0.0486</td>
+<td align="right">0.0257</td>
+<td align="right">1.8889</td>
+</tr>
+</tbody>
+</table>
+<p>A ratio well above 1 means the response is more common when the
+suspect is guilty; well below 1, more common when innocent; near 1,
+uninformative.</p>
+</div>
+<div class="section level3">
+<h3 id="the-roc-data">The ROC data<a class="anchor" aria-label="anchor" href="#the-roc-data"></a>
+</h3>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">roc_data</span><span class="op">)</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Cumulative rates defining the ROC operating points, lineup_example."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Cumulative rates defining the ROC operating points,
+lineup_example.</caption>
+<thead><tr class="header">
+<th align="right">cumulative_hit_rate</th>
+<th align="right">cumulative_false_alarm_rate</th>
+<th align="left">evidence_label</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0000</td>
+<td align="right">0.0000</td>
+<td align="left">origin</td>
+</tr>
+<tr class="even">
+<td align="right">0.0971</td>
+<td align="right">0.0000</td>
+<td align="left">suspect_100</td>
+</tr>
+<tr class="odd">
+<td align="right">0.1429</td>
+<td align="right">0.0057</td>
+<td align="left">suspect_90</td>
+</tr>
+<tr class="even">
+<td align="right">0.1886</td>
+<td align="right">0.0143</td>
+<td align="left">suspect_80</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2600</td>
+<td align="right">0.0229</td>
+<td align="left">suspect_70</td>
+</tr>
+<tr class="even">
+<td align="right">0.3514</td>
+<td align="right">0.0300</td>
+<td align="left">suspect_60</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="practical-recommendations">Practical Recommendations<a class="anchor" aria-label="anchor" href="#practical-recommendations"></a>
-</h2>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Use full ROC when the inferential target is total
-evidentiary value</strong>
-<ul>
-<li>Uses inculpatory and exculpatory responses</li>
-<li>Uses all available evidence</li>
-<li>Aligns with real investigator decisions</li>
-</ul>
-</li>
-<li>
-<strong>Pre-specify ordering for confirmatory comparisons</strong>
-<ul>
-<li>
-<code>order = "apriori"</code> avoids choosing the order from the
-same sample</li>
-<li>Diagnosticity ordering is useful as an exploratory upper-bound
-estimate, but its AUC is optimistically biased and can be unstable
-across samples</li>
-</ul>
-</li>
-<li>
-<strong>Bin confidence if needed</strong>
-<ul>
-<li>Creates cleaner ROC curves</li>
-<li>Reduces noise from sparse confidence levels</li>
-<li>Example: <code>conf_bins = c(0, 60, 80, 100)</code>
-</li>
-</ul>
-</li>
-<li>
-<strong>Check for curve dominance</strong>
-<ul>
-<li>If one curve dominates → clear winner</li>
-<li>If curves cross → need utility analysis</li>
-</ul>
-</li>
-<li>
-<strong>Report full results</strong>
-<ul>
-<li>AUC value</li>
-<li>Sample sizes (target-present, target-absent)</li>
-<li>Number of operating points</li>
-<li>Ordering method used</li>
-</ul>
-</li>
-</ol>
+<div class="section level3">
+<h3 id="interpreting-the-auc">Interpreting the AUC<a class="anchor" aria-label="anchor" href="#interpreting-the-auc"></a>
+</h3>
+<p>The AUC has a direct probabilistic reading: it is the probability
+that a randomly chosen guilty suspect receives stronger evidence than a
+randomly chosen innocent one. 0.5 is chance.</p>
+<p>Descriptive labels — “0.7 is moderate”, “0.8 is good” — circulate
+widely, but they should be resisted here for two reasons. The bias
+demonstrated above means a number in the 0.6s may reflect no signal at
+all; and the quantity is <em>investigator</em> discriminability, which
+has no established interpretive convention in this literature. Report
+the value, the ordering method, the sample sizes, and let the comparison
+do the work.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="mathematical-details">Mathematical Details<a class="anchor" aria-label="anchor" href="#mathematical-details"></a>
+<h2 id="comparing-procedures">Comparing procedures<a class="anchor" aria-label="anchor" href="#comparing-procedures"></a>
+</h2>
+<p>The most defensible comparison is <strong>curve dominance</strong>:
+if one procedure’s ROC lies above another’s across the whole range, it
+is superior at every operating point, whatever base rate or cost
+structure is assumed.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">strong</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>  n_tp <span class="op">=</span> <span class="fl">500</span>, n_ta <span class="op">=</span> <span class="fl">500</span>, d_prime <span class="op">=</span> <span class="fl">2.0</span>, c_criterion <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>, conf_levels <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  foil_bias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">1.0</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">11</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">weak</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>  n_tp <span class="op">=</span> <span class="fl">500</span>, n_ta <span class="op">=</span> <span class="fl">500</span>, d_prime <span class="op">=</span> <span class="fl">1.2</span>, c_criterion <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>, conf_levels <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  foil_bias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">1.0</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">12</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">strong_roc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">strong</span>, lineup_size <span class="op">=</span> <span class="fl">6</span>, order <span class="op">=</span> <span class="st">"apriori"</span>,</span>
+<span>                           show_plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">weak_roc</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_fullroc.html">make_fullroc</a></span><span class="op">(</span><span class="va">weak</span>,   lineup_size <span class="op">=</span> <span class="fl">6</span>, order <span class="op">=</span> <span class="st">"apriori"</span>,</span>
+<span>                           show_plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Strong memory (d' = 2.0)"</span>, <span class="st">"Weak memory (d' = 1.2)"</span><span class="op">)</span>,</span>
+<span>    AUC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">strong_roc</span><span class="op">$</span><span class="va">auc</span>, <span class="va">weak_roc</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Full ROC AUC by viewing condition, simulated data (500 target-present and 500 target-absent lineups per condition, a-priori ordering)."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Full ROC AUC by viewing condition, simulated data (500
+target-present and 500 target-absent lineups per condition, a-priori
+ordering).</caption>
+<thead><tr class="header">
+<th align="left">Condition</th>
+<th align="right">AUC</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Strong memory (d’ = 2.0)</td>
+<td align="right">0.8443</td>
+</tr>
+<tr class="even">
+<td align="left">Weak memory (d’ = 1.2)</td>
+<td align="right">0.6835</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">curves</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">strong_roc</span><span class="op">$</span><span class="va">roc_data</span><span class="op">)</span>, Condition <span class="op">=</span> <span class="st">"Strong (d' = 2.0)"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">weak_roc</span><span class="op">$</span><span class="va">roc_data</span><span class="op">)</span>,   Condition <span class="op">=</span> <span class="st">"Weak (d' = 1.2)"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">curves</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cumulative_false_alarm_rate</span>, y <span class="op">=</span> <span class="va">cumulative_hit_rate</span>,</span>
+<span>                   colour <span class="op">=</span> <span class="va">Condition</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">1</span>, intercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, colour <span class="op">=</span> <span class="st">"grey60"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_equal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Cumulative false alarm rate"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Cumulative hit rate"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Full ROC curves for two viewing conditions"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Simulated data, 500 target-present and 500 target-absent lineups per condition"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="fullroc_analysis_files/figure-html/comparison_plot-1.png" class="r-plt" alt="" width="672"></p>
+<p>Here the stronger condition dominates: its curve is above the weaker
+one throughout, so no assumption about base rates or costs could reverse
+the conclusion.</p>
+<p><strong>When curves cross</strong>, there is no procedure-level
+winner, and the choice depends on where you intend to operate. That
+requires a base rate and a cost structure — which is expected utility
+analysis, covered in
+<code><a href="../articles/calibration_decision_analysis.html">vignette("calibration_decision_analysis")</a></code>.</p>
+<p>Note that this package provides no significance test for a difference
+between two full-ROC AUCs. The comparison above is descriptive.</p>
+</div>
+<div class="section level2">
+<h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
 </h2>
 <div class="section level3">
-<h3 id="algorithm">Algorithm<a class="anchor" aria-label="anchor" href="#algorithm"></a>
+<h3 id="how-the-curve-is-built">How the curve is built<a class="anchor" aria-label="anchor" href="#how-the-curve-is-built"></a>
 </h3>
-<p>For each decision × confidence category:</p>
-<ol style="list-style-type: decimal">
-<li><p>Compute non-cumulative rates:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mtext mathvariant="normal">count</mtext><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mi>e</mi><mi>s</mi><mi>p</mi><mi>o</mi><mi>n</mi><mi>s</mi><msub><mi>e</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo><mi>t</mi><mi>a</mi><mi>r</mi><mi>g</mi><mi>e</mi><mi>t</mi><mi>_</mi><mi>p</mi><mi>r</mi><mi>e</mi><mi>s</mi><mi>e</mi><mi>n</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><msub><mi>N</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mi>s</mi><mi>e</mi><mi>n</mi><mi>t</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">HR_i = \frac{\text{count}(response_i | target\_present)}{N_{present}}</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mtext mathvariant="normal">count</mtext><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mi>e</mi><mi>s</mi><mi>p</mi><mi>o</mi><mi>n</mi><mi>s</mi><msub><mi>e</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo><mi>t</mi><mi>a</mi><mi>r</mi><mi>g</mi><mi>e</mi><mi>t</mi><mi>_</mi><mi>a</mi><mi>b</mi><mi>s</mi><mi>e</mi><mi>n</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><msub><mi>N</mi><mrow><mi>a</mi><mi>b</mi><mi>s</mi><mi>e</mi><mi>n</mi><mi>t</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">FAR_i = \frac{\text{count}(response_i | target\_absent)}{N_{absent}}</annotation></semantics></math></p></li>
-<li><p>Compute diagnosticity ratio:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub></mrow><mrow><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">DR_i = \frac{HR_i}{FAR_i}</annotation></semantics></math></p></li>
-<li><p>Order categories by
+<p>For each decision-by-confidence category
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+(three decisions times the number of confidence levels), the
+non-cumulative rates are</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mi>n</mi><mo stretchy="false" form="prefix">(</mo><msub><mtext mathvariant="normal">response</mtext><mi>i</mi></msub><mo>∣</mo><mtext mathvariant="normal">target present</mtext><mo stretchy="false" form="postfix">)</mo></mrow><msub><mi>N</mi><mtext mathvariant="normal">present</mtext></msub></mfrac><mo>,</mo><mspace width="2.0em"></mspace><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mi>n</mi><mo stretchy="false" form="prefix">(</mo><msub><mtext mathvariant="normal">response</mtext><mi>i</mi></msub><mo>∣</mo><mtext mathvariant="normal">target absent</mtext><mo stretchy="false" form="postfix">)</mo></mrow><msub><mi>N</mi><mtext mathvariant="normal">absent</mtext></msub></mfrac></mrow><annotation encoding="application/x-tex">HR_i = \frac{n(\text{response}_i \mid \text{target present})}{N_{\text{present}}}, \qquad
+FAR_i = \frac{n(\text{response}_i \mid \text{target absent})}{N_{\text{absent}}}</annotation></semantics></math></p>
+<p>and the diagnosticity ratio is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mi>/</mi><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">DR_i = HR_i / FAR_i</annotation></semantics></math>.</p>
+<p>Categories are then placed in order — by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><msub><mi>R</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">DR_i</annotation></semantics></math>
-(descending)</p></li>
-<li><p>Compute cumulative rates:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>H</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">CHR_k = \sum_{i=1}^{k} HR_i</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">CFAR_k = \sum_{i=1}^{k} FAR_i</annotation></semantics></math></p></li>
-<li><p>Calculate AUC (trapezoidal rule):
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>U</mi><mi>C</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mi>n</mi></munderover><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mi>C</mi><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>−</mo><mi>C</mi><mi>F</mi><mi>A</mi><msub><mi>R</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>×</mo><mo stretchy="false" form="prefix">(</mo><mi>C</mi><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mo>+</mo><mi>C</mi><mi>H</mi><msub><mi>R</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">AUC = \sum_{i=2}^{n} \frac{(CFAR_i - CFAR_{i-1}) \times (CHR_i + CHR_{i-1})}{2}</annotation></semantics></math></p></li>
-</ol>
+descending, or by the a-priori scheme — and accumulated:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>H</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mo>,</mo><mspace width="2.0em"></mspace><mi>C</mi><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>k</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">CHR_k = \sum_{i=1}^{k} HR_i, \qquad CFAR_k = \sum_{i=1}^{k} FAR_i</annotation></semantics></math></p>
+<p>Because every response falls in exactly one category, both cumulative
+sums reach 1 when all categories are included, which is why the curve
+spans the full range. The area follows by the trapezoidal rule:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>U</mi><mi>C</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mi>n</mi></munderover><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>C</mi><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>−</mo><mi>C</mi><mi>F</mi><mi>A</mi><msub><mi>R</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo>⋅</mo><mfrac><mrow><mi>C</mi><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mo>+</mo><mi>C</mi><mi>H</mi><msub><mi>R</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">AUC = \sum_{i=2}^{n} \bigl(CFAR_i - CFAR_{i-1}\bigr)\cdot\frac{CHR_i + CHR_{i-1}}{2}</annotation></semantics></math></p>
 </div>
 <div class="section level3">
-<h3 id="edge-cases">Edge Cases<a class="anchor" aria-label="anchor" href="#edge-cases"></a>
+<h3 id="edge-cases">Edge cases<a class="anchor" aria-label="anchor" href="#edge-cases"></a>
 </h3>
 <ul>
 <li>
-<strong>FAR = 0</strong>: Use small epsilon (default 0.001) to
-compute DR</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">FAR_i = 0</annotation></semantics></math>:
+the ratio is undefined, so a small constant (<code>epsilon</code>,
+default 0.001) is substituted. The affected category sorts to the top
+under diagnosticity ordering, which is one route by which that ordering
+becomes optimistic.</li>
 <li>
-<strong>HR = FAR = 0</strong>: Set DR = 1.0 (neutral evidence),
-remove from ROC</li>
-<li>
-<strong>Empty bins</strong>: Automatically removed</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">HR_i = FAR_i = 0</annotation></semantics></math>:
+the category is empty and is removed.</li>
+<li>Empty bins after <code>conf_bins</code> are applied are
+removed.</li>
 </ul>
 </div>
+<div class="section level3">
+<h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>Target-present and target-absent lineups are independent
+samples.</li>
+<li>Every witness contributes exactly one response, so the categories
+partition the sample. If witnesses saw multiple lineups this is
+violated.</li>
+<li>Under diagnosticity ordering, the AUC is <strong>not</strong> an
+unbiased estimate; see the demonstration above.</li>
+<li>The quantity estimated is investigator discriminability, not
+eyewitness discriminability.</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="no-standard-errors">No standard errors<a class="anchor" aria-label="anchor" href="#no-standard-errors"></a>
+</h3>
+<p><code><a href="../reference/make_fullroc.html">make_fullroc()</a></code> returns a point estimate only. There is
+no bootstrap interval for the full-ROC AUC in this package, and the
+optimism of diagnosticity ordering would not be repaired by one — a
+naive bootstrap that re-selects the ordering within each resample
+reproduces the bias rather than revealing it. For interval estimates,
+use a-priori ordering and bootstrap the AUC with the ordering held
+fixed.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
+</h2>
+<ol style="list-style-type: decimal">
+<li>Partial ROC uses one of six possible witness outcomes on each side;
+full ROC uses all of them, which is why it spans the entire range.</li>
+<li>pAUC and full AUC are not comparable numbers.</li>
+<li>Full ROC measures <strong>investigator</strong> discriminability,
+not eyewitness memory.</li>
+<li>
+<code>order = "diagnosticity"</code> is optimistically biased —
+around +0.15 at 100 lineups per arm, and still +0.05 at 1000. Use
+<code>order = "apriori"</code> for anything inferential.</li>
+<li>Prefer curve dominance to a difference in AUC when comparing
+procedures.</li>
+</ol>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<p>Smith, A. M., Yang, Y., &amp; Wells, G. L. (2020). Distinguishing
-between investigator discriminability and eyewitness discriminability: A
-method for creating full receiver operating characteristic curves of
-lineup identification performance. <em>Perspectives on Psychological
-Science, 15</em>(3), 589-607. <a href="https://doi.org/10.1177/1745691620902426" class="external-link uri">https://doi.org/10.1177/1745691620902426</a></p>
 <p>Lampinen, J. M., Smith, A. M., &amp; Wells, G. L. (2019). Four
 utilities in eyewitness identification practice: Dissociations between
 receiver operating characteristic (ROC) analysis and expected utility
@@ -524,10 +846,29 @@ analysis. <em>Law and Human Behavior, 43</em>(1), 26-44.</p>
 <p>National Research Council. (2014). <em>Identifying the culprit:
 Assessing eyewitness identification</em>. Washington, DC: The National
 Academies Press.</p>
+<p>Smith, A. M., Yang, Y., &amp; Wells, G. L. (2020). Distinguishing
+between investigator discriminability and eyewitness discriminability: A
+method for creating full receiver operating characteristic curves of
+lineup identification performance. <em>Perspectives on Psychological
+Science, 15</em>(3), 589-607. </p>
 <p>Wells, G. L., Yang, Y., &amp; Smalarz, L. (2015). Eyewitness
 identification: Bayesian information gain, base-rate effect equivalency
 curves, and reasonable suspicion. <em>Law and Human Behavior,
 39</em>(1), 99-122.</p>
+</div>
+<div class="section level2">
+<h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../reference/make_fullroc.html">?make_fullroc</a></code> for complete parameter documentation</li>
+<li>
+<code><a href="../articles/pauc_statistical_comparison.html">vignette("pauc_statistical_comparison")</a></code> for the
+partial-ROC approach and its own difficulties</li>
+<li>
+<code><a href="../articles/calibration_decision_analysis.html">vignette("calibration_decision_analysis")</a></code> for DPP and
+expected utility</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

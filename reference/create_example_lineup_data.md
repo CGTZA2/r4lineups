@@ -79,4 +79,5 @@ print(example_data)
 
 # Use in analysis
 roc <- make_roc(example_data, lineup_size = 6)
+
 ```

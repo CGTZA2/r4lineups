@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -63,7 +64,8 @@
 <span>  <span class="va">k</span>,</span>
 <span>  R <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  pos_list <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -98,16 +100,29 @@ suspect positions from observed choices, which cannot be done validly.</p></dd>
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional integer seed for reproducible resampling.</p></dd>
 
+
+<dt id="arg-conf-level">conf.level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
+<dd><p>Confidence level for the percentile intervals and the
+per-pair intervals, and the complement of the level at which
+heterogeneity is declared. Defaults to 0.95.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Invisibly returns a list containing the observed mean diagnosticity,
- chi-square statistic, percentile intervals, bootstrap draws, and <code>R</code>.</p>
+ chi-square statistic with degrees of freedom and asymptotic p-value,
+ percentile intervals, a <code>heterogeneous</code> flag, a <code>parameters</code> data
+ frame of per-pair ratios and intervals, the bootstrap draws, and <code>R</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Computes bootstrapped diagnosticity ratio with chi-squared estimate,
-        significance level and confidence intervals for k lineup pairs</p>
+        significance level and confidence intervals for k lineup pairs.</p>
+<p>The interval on the pooled ratio and the chi-square answer different
+        questions, and can disagree. See <code><a href="homog_diag.html">homog_diag</a></code> for the
+        distinction; as there, a note is printed whenever the k ratios are
+        heterogeneous and the pooled estimate should not be reported on its
+        own.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -146,10 +161,21 @@ suspect positions from observed choices, which cannot be done validly.</p></dd>
 <span class="r-in"><span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">homog_diag_boot</span><span class="op">(</span><span class="va">lineup_pres_list</span>, <span class="va">lineup_abs_list</span>, <span class="va">k</span>, R <span class="op">=</span> <span class="fl">20</span>,</span></span>
 <span class="r-in"><span>               pos_list <span class="op">=</span> <span class="va">pos_list</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Diagnosticity ratio for each lineup pair:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pair     d       95% CI</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1 1.000 [0.54, 1.84]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2 1.000 [0.52, 1.94]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     3 1.000 [0.34, 2.93]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Mean diagnosticity ratio is 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence intervals (percentile) 0.757 1.395 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Chi-squared estimate is 0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence intervals (percentile): 0.333 4.967 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sig (asymptotic, df = 2):  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Note: no evidence of heterogeneity (p &gt;= 0.05), so the ratios are</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> consistent with a common value and the pooled mean is a reasonable summary.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -38,7 +38,12 @@ lineup_bias_boot_dist(
 
 ## Value
 
-A numeric vector of bootstrap estimates.
+A numeric vector of bootstrap estimates, carrying an `"n"` attribute
+equal to the number of lineup choices resampled. Because each estimate
+is a count divided by `n`, the estimates fall on a discrete lattice with
+spacing `1/n`;
+[`plot_lineup_bias_distribution`](https://cgtza2.github.io/r4lineups/reference/plot_lineup_bias_distribution.md)
+uses the attribute to bin at that resolution.
 
 ## Examples
 

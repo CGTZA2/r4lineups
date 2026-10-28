@@ -10,6 +10,7 @@ articles:
   lineup_memory_models: lineup_memory_models.html
   model_comparison: model_comparison.html
   msdt_model: msdt_model.html
+  multid_model: multid_model.html
   pauc_statistical_comparison: pauc_statistical_comparison.html
   rac_analysis: rac_analysis.html
   sdt_glm_analysis: sdt_glm_analysis.html
@@ -17,7 +18,7 @@ articles:
   simulation_power_analysis: simulation_power_analysis.html
   Vignette: Vignette.html
   winter_2ht_model: winter_2ht_model.html
-last_built: 2026-08-12T15:32Z
+last_built: 2026-10-28T17:00Z
 urls:
   reference: https://cgtza2.github.io/r4lineups/reference
   article: https://cgtza2.github.io/r4lineups/articles

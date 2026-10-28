@@ -80,10 +80,10 @@ data <- create_example_lineup_data(n_trials = 200,
 rac <- make_racdata(data, time_bins = c(0, 4000, 8000, 12000, 20000))
 rac$rac_data
 #> # A tibble: 4 × 7
-#>   response_time   mean_time n_correct n_incorrect n_total accuracy      se
-#>   <chr>               <dbl>     <int>       <int>   <int>    <dbl>   <dbl>
-#> 1 [0,4e+03]           2671.        24           4      28    0.857  0.0661
-#> 2 (4e+03,8e+03]       5924.        35           7      42    0.833  0.0575
-#> 3 (8e+03,1.2e+04]     8758.         3           1       4    0.75   0.217 
-#> 4 (1.2e+04,2e+04]      NaN          0           0       0   NA     NA     
+#>   response_time mean_time n_correct n_incorrect n_total accuracy      se
+#>   <chr>             <dbl>     <int>       <int>   <int>    <dbl>   <dbl>
+#> 1 [0,4000]          2671.        24           4      28    0.857  0.0661
+#> 2 (4000,8000]       5924.        35           7      42    0.833  0.0575
+#> 3 (8000,12000]      8758.         3           1       4    0.75   0.217 
+#> 4 (12000,20000]      NaN          0           0       0   NA     NA     
 ```

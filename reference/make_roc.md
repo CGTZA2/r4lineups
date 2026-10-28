@@ -38,7 +38,8 @@ make_roc(data, lineup_size = 6, show_plot = TRUE, ...)
 
 A list containing:
 
-- plot: ggplot2 object (if show_plot = TRUE)
+- plot: ggplot2 object. Always returned, whatever show_plot is set to;
+  show_plot controls only whether it is displayed immediately
 
 - roc_data: Dataframe with ROC curve points
 
@@ -74,6 +75,7 @@ variables and estimator variables that affect eyewitness memory.
 ``` r
 data(lineup_example)
 roc_result <- make_roc(lineup_example)
+
 print(roc_result$pauc)
-#> [1] 0.07615
+#> [1] 0.05333776
 ```

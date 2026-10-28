@@ -6,12 +6,12 @@ of raw lineup data
 ## Usage
 
 ``` r
-gen_linevec(lineup_table, k)
+gen_linevec(lineup_tab, k)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A table of lineup choices
 
@@ -29,8 +29,8 @@ Returns a vector of lineup choices
 ``` r
 #Data:
 lineup_vec <- round(runif(100, 1, 6))
-lineup_table <- table(lineup_vec)
+lineup_tab <- table(lineup_vec)
 
 #Call:
-lineup_vec <- gen_linevec(lineup_table, 3)
+lineup_vec <- gen_linevec(lineup_tab, 3)
 ```

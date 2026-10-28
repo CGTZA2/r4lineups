@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul>
 </li>
@@ -71,7 +72,12 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Bayesian Inference for Lineup Measures</h1>
+                        <h4 data-toc-skip class="author">Colin G.
+Tredoux</h4>
+                        <h4 data-toc-skip class="author">Tamsyn M.
+Naylor</h4>
             
+            <h4 data-toc-skip class="date">2026-10-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/bayesian_inference.Rmd" class="external-link"><code>vignettes/bayesian_inference.Rmd</code></a></small>
       <div class="d-none name"><code>bayesian_inference.Rmd</code></div>
@@ -79,6 +85,13 @@
 
     
     
+<blockquote>
+<p><strong>Acknowledgement.</strong> Large language models supplied by
+Anthropic and OpenAI were used in preparing this vignette, to assist
+with checking code, testing the veracity of the approaches described,
+and on occasion editing the text. Responsibility for the content rests
+with the authors.</p>
+</blockquote>
 <div class="section level2">
 <h2 id="purpose">Purpose<a class="anchor" aria-label="anchor" href="#purpose"></a>
 </h2>
@@ -94,8 +107,76 @@ or
 The examples use small posterior samples so that the vignette runs
 quickly during package checks; increase <code>S</code> for final
 analyses.</p>
+<div class="section level3">
+<h3 id="if-you-have-only-used-frequentist-methods">If you have only used frequentist methods<a class="anchor" aria-label="anchor" href="#if-you-have-only-used-frequentist-methods"></a>
+</h3>
+<p>Most readers of this package will have been trained in the
+frequentist tradition, so it is worth setting out plainly what is
+different here. Nothing in what follows requires accepting a
+philosophical position; it is mainly about what question the interval
+answers.</p>
+<p><strong>The question you probably want to ask.</strong> Having
+measured a six-person lineup and obtained an effective size of 4.8, the
+natural question is: <em>what is the probability that this lineup’s
+effective size is below 6?</em> A frequentist confidence interval cannot
+answer that. It is a statement about the procedure — that intervals
+constructed this way contain the true value 95% of the time — not about
+this lineup. The true effective size either is or is not below 6, and
+frequentist probability does not attach to it.</p>
+<p>A Bayesian <strong>credible interval</strong> does answer it. “There
+is a 95% probability that E′ lies between 4.1 and 5.6, given these data”
+is a statement about the quantity, and it is the statement most people
+believe they are making when they report a confidence interval.</p>
+<p><strong>How that is achieved.</strong> By treating the unknown
+quantity as having a distribution. Three steps:</p>
+<ol style="list-style-type: decimal">
+<li>A <strong>prior</strong> describes what is believed before seeing
+the data. Here the priors are deliberately weak —
+<code>alpha = 0.5</code> is the Jeffreys prior for proportions, which is
+close to saying “no lineup member is favoured, and I am not confident
+about that either”.</li>
+<li>The <strong>data</strong> update it through the likelihood.</li>
+<li>The result is the <strong>posterior</strong>, a full distribution
+for the quantity, from which any summary can be read: a median, an
+interval, or a direct probability such as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>E</mi><mo>′</mo></msup><mo>&lt;</mo><mn>6</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(E' &lt; 6)</annotation></semantics></math>.</li>
+</ol>
+<p><strong>Why the functions return draws rather than formulas.</strong>
+Effective size is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mo>∑</mo><msubsup><mi>p</mi><mi>i</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">1/\sum p_i^2</annotation></semantics></math>
+— a nonlinear function of the choice probabilities. There is no tidy
+closed form for its posterior. Instead the functions sample
+<code>S</code> draws from the posterior of the probabilities and
+transform each draw. The resulting collection of <code>S</code> values
+<em>is</em> the posterior of E′, and any summary is computed from it.
+This is why <code>S</code> matters: too few draws and the summaries are
+noisy. Note that these are independent Monte Carlo draws, not MCMC, so
+there is no chain to check for convergence.</p>
+<p><strong>What you gain in practice</strong>, beyond the
+interpretation:</p>
+<ul>
+<li>
+<strong>Bounded quantities behave properly.</strong> E′ cannot
+exceed lineup size and a proportion cannot be negative. Normal-theory
+intervals can and do run outside those bounds at small samples; a
+posterior on the natural scale cannot.</li>
+<li>
+<strong>Direct probabilities.</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mi>R</mi><mo>&gt;</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(DR &gt; 1)</annotation></semantics></math>
+is often exactly what a report needs, and is awkward to extract from a
+p-value.</li>
+<li>
+<strong>Small samples degrade gracefully.</strong> With few mock
+witnesses the posterior becomes wide, which is the honest result, rather
+than producing a narrow interval resting on an asymptotic approximation
+that does not hold.</li>
+</ul>
+<p><strong>What it does not give you.</strong> It is not a way of
+getting a decisive answer from thin data. A weak prior and a small
+sample give a wide posterior, and that width is the finding.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CGTZA2/r4lineups" class="external-link">r4lineups</a></span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="data-shapes">Data Shapes<a class="anchor" aria-label="anchor" href="#data-shapes"></a>
@@ -114,7 +195,7 @@ comparison uses summary counts: hits, misses, false alarms, and correct
 rejections for two conditions.</p>
 </div>
 <div class="section level2">
-<h2 id="tredoux-effective-size">Tredoux Effective Size<a class="anchor" aria-label="anchor" href="#tredoux-effective-size"></a>
+<h2 id="effective-size">Effective Size<a class="anchor" aria-label="anchor" href="#effective-size"></a>
 </h2>
 <p><code><a href="../reference/esize_T_bayes.html">esize_T_bayes()</a></code> fits a Dirichlet-multinomial model to
 the lineup choice counts and transforms each posterior draw of the
@@ -125,18 +206,18 @@ choice-probability vector to Tredoux’s effective size
 <span></span>
 <span><span class="va">lineup_vec</span> <span class="op">&lt;-</span> <span class="va">nortje2012</span><span class="op">$</span><span class="va">lineup_1</span></span>
 <span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">lineup_vec</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">lineup_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">lineup_vec</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">lineup_tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">lineup_vec</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">esize_post</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/esize_T_bayes.html">esize_T_bayes</a></span><span class="op">(</span></span>
-<span>  <span class="va">lineup_table</span>,</span>
+<span>  <span class="va">lineup_tab</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  S <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="va">k</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">esize_post</span></span>
-<span><span class="co">#&gt; Bayesian Posterior: Tredoux Effective Size (E')</span></span>
+<span><span class="co">#&gt; Bayesian Posterior: Effective Size E' (Tredoux, 1998)</span></span>
 <span><span class="co">#&gt; ------------------------------------------------</span></span>
 <span><span class="co">#&gt;   k (positions): 8    N (choices): 133    S (draws): 1000</span></span>
 <span><span class="co">#&gt;   Prior: Dirichlet(alpha = 0.50)</span></span>
@@ -147,7 +228,7 @@ choice-probability vector to Tredoux’s effective size
 <span><span class="co">#&gt;   P(E' &gt; 8.00 | data): 0.000</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">esize_post</span><span class="op">)</span></span></code></pre></div>
-<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="672"></p>
 <p>The threshold argument makes the posterior useful for fairness
 benchmarks. For example, with a six-person lineup one might inspect
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>E</mi><mo>′</mo></msup><mo>&lt;</mo><mn>6</mn><mo>∣</mo><mi>d</mi><mi>a</mi><mi>t</mi><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(E' &lt; 6 \mid data)</annotation></semantics></math>
@@ -181,7 +262,7 @@ size.</p>
 <span><span class="co">#&gt;   P(F &gt; 8.000 | data): 0.2520</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">func_post</span><span class="op">)</span></span></code></pre></div>
-<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="diagnosticity-ratio">Diagnosticity Ratio<a class="anchor" aria-label="anchor" href="#diagnosticity-ratio"></a>
@@ -218,7 +299,7 @@ posteriors and returns the posterior of the diagnosticity ratio.</p>
 <span><span class="co">#&gt;   P(DR &gt; 1.000 | data): 0.9990</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">diag_post</span><span class="op">)</span></span></code></pre></div>
-<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="672"></p>
 <p>The threshold <code>1</code> is useful because
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>R</mi><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">DR &gt; 1</annotation></semantics></math>
 indicates that suspect identifications are more common in the
@@ -247,17 +328,17 @@ and normalized resolution
 <span></span>
 <span><span class="va">cal_post</span></span>
 <span><span class="co">#&gt; Bayesian Calibration Analysis - Beta-Binomial model</span></span>
-<span><span class="co">#&gt;   n = 75; 3 confidence bins; prior alpha = 0.50</span></span>
-<span><span class="co">#&gt;   C (calibration):      mean = 0.0138, median = 0.0107, 95% CI [0.0015, 0.0416]</span></span>
-<span><span class="co">#&gt;   O/U (over/underconf): mean = 0.0351, median = 0.0348, 95% CI [-0.0384, 0.1094]</span></span>
-<span><span class="co">#&gt;   NRI (resolution):     mean = 0.2697, median = 0.2690, 95% CI [0.1344, 0.4067]</span></span>
-<span><span class="co">#&gt;   (Frequentist: C = 0.0081, O/U = 0.0267, NRI = 0.2670)</span></span></code></pre></div>
+<span><span class="co">#&gt;   n = 503; 3 confidence bins; prior alpha = 0.50</span></span>
+<span><span class="co">#&gt;   C (calibration):      mean = 0.0729, median = 0.0727, 95% CI [0.0545, 0.0913]</span></span>
+<span><span class="co">#&gt;   O/U (over/underconf): mean = -0.2268, median = -0.2266, 95% CI [-0.2564, -0.1931]</span></span>
+<span><span class="co">#&gt;   NRI (resolution):     mean = 0.0450, median = 0.0447, 95% CI [0.0216, 0.0721]</span></span>
+<span><span class="co">#&gt;   (Frequentist: C = 0.0727, O/U = -0.2290, NRI = 0.0453)</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cal_post</span>, metric <span class="op">=</span> <span class="st">"C"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cal_post</span>, metric <span class="op">=</span> <span class="st">"NRI"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" alt="" width="700"></p>
+<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="sdt-d-comparison">SDT d’ Comparison<a class="anchor" aria-label="anchor" href="#sdt-d-comparison"></a>
@@ -292,7 +373,7 @@ and reports the posterior for
 <span><span class="co">#&gt;   (Frequentist z-test: z = 0.254, p = 0.7994)</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sdt_post</span><span class="op">)</span></span></code></pre></div>
-<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="bayesian_inference_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="workflow-position">Workflow Position<a class="anchor" aria-label="anchor" href="#workflow-position"></a>
@@ -310,6 +391,175 @@ probabilities are the clearest way to express uncertainty.</li>
 <p>For substantive reports, run enough posterior draws for stable
 summaries and check sensitivity to the prior concentration, for example
 <code>alpha = 0.1</code>, <code>0.5</code>, and <code>1</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sensitivity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></span>
+<span>  <span class="va">post</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/esize_T_bayes.html">esize_T_bayes</a></span><span class="op">(</span><span class="va">lineup_tab</span>, alpha <span class="op">=</span> <span class="va">a</span>, S <span class="op">=</span> <span class="fl">2000</span>, threshold <span class="op">=</span> <span class="va">k</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    `Prior alpha`      <span class="op">=</span> <span class="va">a</span>,</span>
+<span>    `Posterior median` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">post</span><span class="op">$</span><span class="va">posterior_median</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    `Lower`            <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">post</span><span class="op">$</span><span class="va">credible_interval</span><span class="op">[[</span><span class="st">"lower"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    `Upper`            <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">post</span><span class="op">$</span><span class="va">credible_interval</span><span class="op">[[</span><span class="st">"upper"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">sensitivity</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Sensitivity of the E' posterior to prior concentration, nortje2012 lineup 1 (nominal size 8)."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Sensitivity of the E’ posterior to prior concentration,
+nortje2012 lineup 1 (nominal size 8).</caption>
+<thead><tr class="header">
+<th align="right">Prior alpha</th>
+<th align="right">Posterior median</th>
+<th align="right">Lower</th>
+<th align="right">Upper</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.1</td>
+<td align="right">5.530</td>
+<td align="right">4.702</td>
+<td align="right">6.255</td>
+</tr>
+<tr class="even">
+<td align="right">0.5</td>
+<td align="right">5.622</td>
+<td align="right">4.785</td>
+<td align="right">6.346</td>
+</tr>
+<tr class="odd">
+<td align="right">1.0</td>
+<td align="right">5.706</td>
+<td align="right">4.861</td>
+<td align="right">6.485</td>
+</tr>
+</tbody>
+</table>
+<p>If the three rows agree closely, as they generally will once there
+are a few dozen choices, the prior is doing little and the result is
+driven by the data. Disagreement is a signal that the sample is too
+small for the data to dominate, and should be reported rather than
+resolved by picking a prior.</p>
+<div class="section level3">
+<h3 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
+</h3>
+<div class="section level4">
+<h4 id="what-is-being-sampled">What is being sampled<a class="anchor" aria-label="anchor" href="#what-is-being-sampled"></a>
+</h4>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Model</th>
+<th>Transformation applied to each draw</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/esize_T_bayes.html">esize_T_bayes()</a></code></td>
+<td>Dirichlet-multinomial on the k choice counts</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>E</mi><mo>′</mo></msup><mo>=</mo><mn>1</mn><mi>/</mi><msub><mo>∑</mo><mi>i</mi></msub><msubsup><mi>p</mi><mi>i</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">E' = 1/\sum_i p_i^2</annotation></semantics></math></td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/func_size_bayes.html">func_size_bayes()</a></code></td>
+<td>Beta-binomial on suspect selections</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mn>1</mn><mi>/</mi><msub><mi>p</mi><mtext mathvariant="normal">suspect</mtext></msub></mrow><annotation encoding="application/x-tex">F = 1/p_{\text{suspect}}</annotation></semantics></math></td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/diag_ratio_T_bayes.html">diag_ratio_T_bayes()</a></code></td>
+<td>Independent beta-binomials for the two lineups</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>R</mi><mo>=</mo><msub><mi>p</mi><mtext mathvariant="normal">TP</mtext></msub><mi>/</mi><msub><mi>p</mi><mtext mathvariant="normal">TA</mtext></msub></mrow><annotation encoding="application/x-tex">DR = p_{\text{TP}} / p_{\text{TA}}</annotation></semantics></math></td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/calibration_bayes.html">calibration_bayes()</a></code></td>
+<td>Beta posterior on accuracy within each confidence bin</td>
+<td>C, O/U and NRI</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/sdt_compare.html">sdt_compare()</a></code></td>
+<td>Beta posteriors on hit and false-alarm rates</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><msup><mi>d</mi><mo>′</mo></msup><mo>=</mo><msubsup><mi>d</mi><mi>A</mi><mo>′</mo></msubsup><mo>−</mo><msubsup><mi>d</mi><mi>B</mi><mo>′</mo></msubsup></mrow><annotation encoding="application/x-tex">\Delta d' = d'_A - d'_B</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+<p>In each case the posterior of the <em>transformed</em> quantity is
+obtained by transforming draws, not by approximating the transformation.
+This matters for quantities like
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>R</mi></mrow><annotation encoding="application/x-tex">DR</annotation></semantics></math>,
+a ratio whose sampling distribution is markedly skewed: the posterior
+inherits that skew correctly, where a symmetric normal-theory interval
+would not.</p>
+</div>
+<div class="section level4">
+<h4 id="the-prior">The prior<a class="anchor" aria-label="anchor" href="#the-prior"></a>
+</h4>
+<p><code>alpha</code> is the concentration parameter of the Dirichlet or
+beta prior, applied symmetrically. <code>alpha = 0.5</code> is the
+Jeffreys prior, <code>alpha = 1</code> is uniform, and smaller values
+place more weight near the boundaries. All are weak; with more than a
+few dozen observations the likelihood dominates, which the sensitivity
+check above is there to confirm.</p>
+</div>
+<div class="section level4">
+<h4 id="monte-carlo-error">Monte Carlo error<a class="anchor" aria-label="anchor" href="#monte-carlo-error"></a>
+</h4>
+<p>Summaries are computed from <code>S</code> independent draws, so they
+carry Monte Carlo error of order
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><msqrt><mi>S</mi></msqrt></mrow><annotation encoding="application/x-tex">1/\sqrt{S}</annotation></semantics></math>.
+These are not Markov chains, so autocorrelation and convergence
+diagnostics do not apply. <code>S = 1000</code> is adequate for a
+median, but tail probabilities and interval endpoints need more — use
+10,000 or more where a reported number depends on them.</p>
+</div>
+<div class="section level4">
+<h4 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
+</h4>
+<ol style="list-style-type: decimal">
+<li>Choices are independent across witnesses, and each witness
+contributes one.</li>
+<li>The Dirichlet-multinomial treats members as exchangeable <em>a
+priori</em>. That is a statement about prior ignorance, not a claim that
+foils are interchangeable in fact; the data are what distinguish
+them.</li>
+<li>
+<code><a href="../reference/diag_ratio_T_bayes.html">diag_ratio_T_bayes()</a></code> treats the two lineups as
+independent samples.</li>
+<li>
+<code><a href="../reference/sdt_compare.html">sdt_compare()</a></code> assumes equal-variance signal detection,
+as the classical
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>d</mi><mo>′</mo></msup><annotation encoding="application/x-tex">d'</annotation></semantics></math>
+does.</li>
+</ol>
+</div>
+</div>
+<div class="section level3">
+<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h3>
+<p>Agresti, A., &amp; Agresti, B. F. (1978). Statistical analysis of
+qualitative variation. <em>Sociological Methodology, 9</em>,
+204-237.</p>
+<p>Tredoux, C. G. (1998). Statistical inference on measures of lineup
+fairness. <em>Law and Human Behavior, 22</em>(2), 217-237.</p>
+</div>
+<div class="section level3">
+<h3 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
+</h3>
+<ul>
+<li>
+<code><a href="../reference/esize_T_bayes.html">?esize_T_bayes</a></code>, <code><a href="../reference/func_size_bayes.html">?func_size_bayes</a></code>,
+<code><a href="../reference/diag_ratio_T_bayes.html">?diag_ratio_T_bayes</a></code>, <code><a href="../reference/calibration_bayes.html">?calibration_bayes</a></code>,
+<code><a href="../reference/sdt_compare.html">?sdt_compare</a></code>
+</li>
+<li>The main vignette for the frequentist and bootstrap counterparts,
+and for the small-sample bias of the plug-in E′ estimator</li>
+</ul>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

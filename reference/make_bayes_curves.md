@@ -105,7 +105,7 @@ bayes$likelihoods
 #> # A tibble: 3 × 5
 #>   response p_x_given_guilty p_x_given_innocent n_guilty n_innocent
 #>   <chr>               <dbl>              <dbl>    <int>      <dbl>
-#> 1 filler               0.18               0.24       18         24
-#> 2 reject               0.22               0.61       22         61
-#> 3 suspect              0.6                0.15       60         15
+#> 1 filler             0.311               0.587      218        411
+#> 2 reject             0.0957              0.287       67        201
+#> 3 suspect            0.593               0.126      415         88
 ```

@@ -141,7 +141,13 @@ An object of class `"max_sdt_fit"` containing:
 
 - boot_params:
 
-  Full bootstrap parameter matrix (if nboot \> 0).
+  Full bootstrap parameter matrix (if nboot \> 0). Rows for replicates
+  that failed to converge are `NA`, so summarise with `na.rm = TRUE`.
+
+- boot_n_used, boot_n_failed:
+
+  Number of bootstrap replicates that converged and that did not (if
+  nboot \> 0).
 
 ## Details
 
@@ -174,12 +180,51 @@ lineups, and the Ensemble and Integration decision variables are outside
 the scope of this function.
 
 Parametric bootstrap CIs are obtained by simulating data from the fitted
-model and re-fitting.
+model and re-fitting. Replicates that fail to converge are dropped and
+counted in `boot_n_failed`.
+
+## Provenance
+
+The implementation follows R scripts written by Andrew M. Smith (Iowa
+State University) for the analyses in Reisberg and Pezdek (2024), which
+fit what he describes as “the MAX SDT model (sometimes called the
+compound-decision model)”. The default example counts are the
+Profile-lineup condition from that work. The constrained fits
+(`constrain_d`, `constrain_c`) and the nested chi-square comparison in
+[`compare_max_sdt`](https://cgtza2.github.io/r4lineups/reference/compare_max_sdt.md)
+follow the procedure described there.
+
+## Relation to Smith's scripts
+
+Estimates from this function will **not** match those scripts exactly,
+and the reason is the set of cells entering the discrepancy function.
+
+Smith's scripts fit culprit identifications, *total* target-present
+choices and *total* target-absent choices, together with the rejection
+counts. Culprit identifications therefore enter twice — once on their
+own and again inside total target-present choices — so the cells do not
+partition the sample, and the filler count is never fitted directly.
+
+This function uses five mutually exclusive cells per condition: correct
+identification, filler identification, target-present rejection,
+target-absent choice, target-absent rejection. A Pearson chi-square is
+defined for a partition, so this form keeps the statistic and its
+degrees of freedom interpretable, and it fits the observed counts better
+on that criterion.
+
+On the Profile-lineup counts used in the examples below, the two give d'
+= 1.94 (this function) against d' = 1.78 (Smith's script) for the first
+condition. Neither is a coding error; they minimise different
+discrepancies.
 
 ## References
 
 Duncan, M. (2006). *A signal detection model of compound decision
 tasks*. DRDC Toronto TR 2006-256.
+
+Reisberg, D., & Pezdek, K. (2024). Data analysed with the MAX SDT model
+in scripts supplied by A. M. Smith (personal communication, 4 April
+2024).
 
 Kaesler, M., Dunn, J. C., Ransom, K., & Semmler, C. (2020). Do
 sequential lineups impair underlying discriminability? *Cognitive

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,12 +26,13 @@
     <li><a class="dropdown-item" href="articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -76,7 +77,8 @@
 <li><label><input type="checkbox" checked>Require the official JOSS/Open Journals job to produce a clean <code>paper.pdf</code>.</label></li>
 <li><label><input type="checkbox" checked>Insert verified CI results in <code>cran-comments.md</code> and the audit report.</label></li>
 <li><label><input type="checkbox" checked>Confirm that the repository candidate tarball still matches the size and SHA-256 above; if package inputs changed, rebuild and repeat every check.</label></li>
-<li><label><input type="checkbox">Submit that exact archive to CRAN. Do not submit either stale historical archive.</label></li>
+<li><label><input type="checkbox" checked>27 October 2026: rebuilt from the unchanged 2.1.0 sources to clear the stale build-time-stamp NOTE; R code, documentation, tests and NAMESPACE are byte-identical. The new candidate is <code>cran_submission_2026-10-27/r4lineups_2.1.0.tar.gz</code>, 1,494,050 bytes, SHA-256 <code>910a58c38c23eccbcb8a29e8491c6776fd2d1cdb6ea21dde15435f0004efa7d5</code>. <code>R CMD check --as-cran --no-manual</code> gives 0/0/0 with CRAN purrr 1.2.2 and with development purrr 1.2.2.9000 (prompted by the purrr <code>rerun()</code> defunct notice). The August archive above is superseded.</label></li>
+<li><label><input type="checkbox">Submit the 27 October archive to CRAN. Do not submit either stale historical archive or the August 2.1.0 build.</label></li>
 <li><label><input type="checkbox">After CRAN accepts the unchanged source, tag the matching commit <code>v2.1.0</code> and create the GitHub release.</label></li>
 <li><label><input type="checkbox">Submit the synchronized JOSS paper.</label></li>
 <li><label><input type="checkbox">At successful JOSS review, archive the accepted release, add the archive DOI to JOSS metadata, and verify that author lists agree.</label></li>

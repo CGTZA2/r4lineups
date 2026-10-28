@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul>
 </li>
@@ -71,7 +72,12 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>SDT Summary-Level Comparisons</h1>
+                        <h4 data-toc-skip class="author">Colin G.
+Tredoux</h4>
+                        <h4 data-toc-skip class="author">Tamsyn M.
+Naylor</h4>
             
+            <h4 data-toc-skip class="date">2026-10-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/sdt_summary_comparisons.Rmd" class="external-link"><code>vignettes/sdt_summary_comparisons.Rmd</code></a></small>
       <div class="d-none name"><code>sdt_summary_comparisons.Rmd</code></div>
@@ -79,18 +85,59 @@
 
     
     
+<blockquote>
+<p><strong>Acknowledgement.</strong> Large language models supplied by
+Anthropic and OpenAI were used in preparing this vignette, to assist
+with checking code, testing the veracity of the approaches described,
+and on occasion editing the text. Responsibility for the content rests
+with the authors.</p>
+</blockquote>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p>This vignette shows how to compare <strong>conditions using only
 summary SDT counts</strong> (hits, false alarms, misses, correct
-rejections). The methods follow Gourevitch &amp; Galanter (1967), Miller
-(1996), and Suero et al. (2017), with an optional bootstrap variance
-approach based on the Tredoux et al. supplemental materials in
-<code>notes/11292_2020_9432_MOESM1_ESM.docx</code>.</p>
-<p>Use these tools when <strong>trial‑level data are
-unavailable</strong> and you only have summary counts for each
-condition.</p>
+rejections).</p>
+<p>Use these tools when <strong>trial-level data are
+unavailable</strong> and you have only summary counts per condition —
+the usual situation when working from published tables, or when
+synthesising results across studies for a meta-analysis.</p>
+<div class="section level3">
+<h3 id="where-the-methods-come-from">Where the methods come from<a class="anchor" aria-label="anchor" href="#where-the-methods-come-from"></a>
+</h3>
+<p>The variance estimators follow Gourevitch and Galanter (1967), Miller
+(1996), and Suero, Privado and Botella (2017). The bootstrap option
+follows the procedure used in the meta-analysis of Tredoux, Sporer,
+Vredeveldt, Kempen and Nortje (2021), where summary counts extracted
+from published studies had to be compared without access to the
+underlying trial data — which is exactly the problem these functions
+address.</p>
+</div>
+<div class="section level3">
+<h3 id="a-caution-about-what-d-means-for-a-lineup">A caution about what d′ means for a lineup<a class="anchor" aria-label="anchor" href="#a-caution-about-what-d-means-for-a-lineup"></a>
+</h3>
+<p>These functions treat the data as a standard <strong>yes/no
+detection</strong> problem: hits, misses, false alarms and correct
+rejections, from which d′ follows as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">hit rate</mtext><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">false-alarm rate</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">z(\text{hit rate}) - z(\text{false-alarm rate})</annotation></semantics></math>.</p>
+<p>A lineup is not that. A witness viewing a lineup performs a
+<strong>compound</strong> task — deciding whether the culprit is present
+at all, <em>and</em> which member it is. Duncan (2006) set this out
+formally as a compound signal-detection model, in which the lineup is a
+1-of-<em>m</em> detection task combined with an <em>m</em>-alternative
+forced-choice identification task, with a single set of latent memory
+parameters driving both. Estimating d′ from collapsed 2 × 2 counts
+ignores that structure, and in particular it discards which lineup
+member was chosen.</p>
+<p>That does not make the summary-level comparison useless — it is often
+the only thing available, and it is what published tables report — but
+the d′ it yields is a yes/no analogue and should be labelled as such
+rather than presented as the lineup’s discriminability. Where
+trial-level data exist, prefer the lineup models in
+<code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code> or
+<code><a href="../articles/model_comparison.html">vignette("model_comparison")</a></code>, which respect the compound
+structure.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="summary-metrics-from-counts">Summary metrics from counts<a class="anchor" aria-label="anchor" href="#summary-metrics-from-counts"></a>
@@ -330,7 +377,365 @@ approximate:</p>
 <li>Extreme rates (0 or 1) are corrected by default (loglinear).</li>
 <li>If only <strong>published d′ or β</strong> are available, you need a
 reported <strong>SE/variance</strong> to compare conditions. Without
-counts or SEs, z‑tests are not identifiable.</li>
+counts or SEs, z-tests are not identifiable.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="the-compound-model-alternative">The compound-model alternative<a class="anchor" aria-label="anchor" href="#the-compound-model-alternative"></a>
+</h2>
+<p>The caution above is only useful if it names an alternative, so here
+it is. <code><a href="../reference/fit_max_sdt.html">fit_max_sdt()</a></code> fits the compound (MAX SDT) model of
+Duncan (2006) directly to lineup counts, estimating d’ and a criterion
+together, and gives the sampling distribution by parametric bootstrap.
+It is the lineup-appropriate counterpart to everything above.</p>
+<div class="section level3">
+<h3 id="what-it-needs-and-why-you-may-not-have-it">What it needs, and why you may not have it<a class="anchor" aria-label="anchor" href="#what-it-needs-and-why-you-may-not-have-it"></a>
+</h3>
+<p>The yes/no functions need four numbers per condition. The compound
+model needs <strong>five</strong>, because it distinguishes outcomes the
+2 x 2 framing merges:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th>Yes/no summary</th>
+<th>Compound model</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Target-present</td>
+<td>hits, misses</td>
+<td>correct IDs, <strong>filler IDs</strong>, rejections</td>
+</tr>
+<tr class="even">
+<td>Target-absent</td>
+<td>false alarms, correct rejections</td>
+<td>suspect/filler choices, rejections</td>
+</tr>
+</tbody>
+</table>
+<p>The extra cell is the filler identification, and this is the
+practical constraint: <strong>you cannot convert 2 x 2 counts into
+compound-model input</strong>, because collapsing to “miss” has already
+merged filler identifications with rejections. If a published table
+reports only hits and false alarms, the yes/no route above is the only
+one available. If the suspect/filler/rejection breakdown survives,
+prefer the compound model.</p>
+</div>
+<div class="section level3">
+<h3 id="a-worked-example">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example"></a>
+</h3>
+<p>These are the Profile-lineup counts from Reisberg and Pezdek (2024),
+the data on which the reference implementation of this model was
+written: two conditions, each with 96 target-present and 96 or 106
+target-absent lineups of size 6.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_free</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_max_sdt.html">fit_max_sdt</a></span><span class="op">(</span></span>
+<span>  n_hit <span class="op">=</span> <span class="fl">69</span>, n_tp_choose <span class="op">=</span> <span class="fl">82</span>, n_fa <span class="op">=</span> <span class="fl">64</span>, N_tp <span class="op">=</span> <span class="fl">96</span>, N_ta <span class="op">=</span> <span class="fl">106</span>,</span>
+<span>  n_hit_2 <span class="op">=</span> <span class="fl">68</span>, n_tp_choose_2 <span class="op">=</span> <span class="fl">78</span>, n_fa_2 <span class="op">=</span> <span class="fl">42</span>, N_tp_2 <span class="op">=</span> <span class="fl">96</span>, N_ta_2 <span class="op">=</span> <span class="fl">96</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">6</span>, nboot <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">11</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Condition 1"</span>, <span class="st">"Condition 2"</span><span class="op">)</span>,</span>
+<span>    `d'`      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_free</span><span class="op">$</span><span class="va">dprime_1</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">dprime_2</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    `95% CI`  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_ci</span><span class="op">[</span><span class="st">"lower"</span>, <span class="st">"d1"</span><span class="op">]</span>,</span>
+<span>                                          <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_ci</span><span class="op">[</span><span class="st">"upper"</span>, <span class="st">"d1"</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>                  <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_ci</span><span class="op">[</span><span class="st">"lower"</span>, <span class="st">"d2"</span><span class="op">]</span>,</span>
+<span>                                          <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_ci</span><span class="op">[</span><span class="st">"upper"</span>, <span class="st">"d2"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    `Criterion` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_free</span><span class="op">$</span><span class="va">lambda_1</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">lambda_2</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Compound (MAX SDT) model fitted to the Reisberg &amp; Pezdek Profile-lineup counts, with parametric bootstrap intervals from 300 replicates."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Compound (MAX SDT) model fitted to the Reisberg &amp; Pezdek
+Profile-lineup counts, with parametric bootstrap intervals from 300
+replicates.</caption>
+<thead><tr class="header">
+<th align="left">Condition</th>
+<th align="right">d’</th>
+<th align="left">95% CI</th>
+<th align="right">Criterion</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Condition 1</td>
+<td align="right">1.944</td>
+<td align="left">[1.63, 2.21]</td>
+<td align="right">1.146</td>
+</tr>
+<tr class="even">
+<td align="left">Condition 2</td>
+<td align="right">2.083</td>
+<td align="left">[1.80, 2.41]</td>
+<td align="right">1.393</td>
+</tr>
+</tbody>
+</table>
+<p>The bootstrap intervals <strong>are</strong> the sampling
+distribution: replicates are simulated from the fitted model and
+refitted, so the spread reflects the estimator’s behaviour rather than
+an asymptotic approximation.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Goodness of fit: chi-square ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_free</span><span class="op">$</span><span class="va">chisq</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    <span class="st">"on"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">df</span>, <span class="st">"df, p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_free</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"</span></span>
+<span><span class="st">"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Goodness of fit: chi-square = 6.619 on 2 df, p = 0.0365</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Bootstrap replicates used:"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_n_used</span>,</span>
+<span>    <span class="st">" failed:"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_n_failed</span>, <span class="st">"</span></span>
+<span><span class="st">"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Bootstrap replicates used: 299  failed: 1</span></span></code></pre></div>
+<p>Unlike the exactly-identified summary estimators, this model has
+residual degrees of freedom, so it <strong>can</strong> be found to fit
+badly — which is informative in itself.</p>
+</div>
+<div class="section level3">
+<h3 id="comparing-conditions">Comparing conditions<a class="anchor" aria-label="anchor" href="#comparing-conditions"></a>
+</h3>
+<p>The comparison is a nested test rather than a Wald test on a
+difference: fit the model with d’ free across conditions, refit with d’
+constrained equal, and compare the chi-square change.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_equal_d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_max_sdt.html">fit_max_sdt</a></span><span class="op">(</span></span>
+<span>  n_hit <span class="op">=</span> <span class="fl">69</span>, n_tp_choose <span class="op">=</span> <span class="fl">82</span>, n_fa <span class="op">=</span> <span class="fl">64</span>, N_tp <span class="op">=</span> <span class="fl">96</span>, N_ta <span class="op">=</span> <span class="fl">106</span>,</span>
+<span>  n_hit_2 <span class="op">=</span> <span class="fl">68</span>, n_tp_choose_2 <span class="op">=</span> <span class="fl">78</span>, n_fa_2 <span class="op">=</span> <span class="fl">42</span>, N_tp_2 <span class="op">=</span> <span class="fl">96</span>, N_ta_2 <span class="op">=</span> <span class="fl">96</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">6</span>, constrain_d <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/compare_max_sdt.html">compare_max_sdt</a></span><span class="op">(</span><span class="va">fit_free</span>, <span class="va">fit_equal_d</span><span class="op">)</span></span>
+<span><span class="co">#&gt; MAX SDT Model Comparison (chi-squared difference test)</span></span>
+<span><span class="co">#&gt;   Free model:       chi-sq = 6.619 (4 free params)</span></span>
+<span><span class="co">#&gt;   Constrained model: chi-sq = 7.039 (3 free params)</span></span>
+<span><span class="co">#&gt;   Constraint: d' equal</span></span>
+<span><span class="co">#&gt;   Delta chi-sq(1) = 0.420, p = 0.5170</span></span>
+<span><span class="co">#&gt;   Interpretation: constraint does not significantly worsen fit.</span></span></code></pre></div>
+<p>Constraining d’ to be equal costs 0.42 in chi-square for one degree
+of freedom, which is nothing: these two conditions do not differ
+detectably in discriminability. <code>constrain_c = TRUE</code> tests
+the criterion in the same way.</p>
+</div>
+<div class="section level3">
+<h3 id="which-to-use">Which to use<a class="anchor" aria-label="anchor" href="#which-to-use"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Situation</th>
+<th>Use</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Only hits and false alarms survive, e.g. from a published table</td>
+<td>The yes/no summary functions above, stating that d’ is a yes/no
+analogue</td>
+</tr>
+<tr class="even">
+<td>Full suspect/filler/rejection breakdown available</td>
+<td>
+<code><a href="../reference/fit_max_sdt.html">fit_max_sdt()</a></code> — it respects the compound structure and
+gives a goodness-of-fit test</td>
+</tr>
+<tr class="odd">
+<td>Trial-level data with confidence</td>
+<td>The lineup models in <code><a href="../articles/model_comparison.html">vignette("model_comparison")</a></code> and
+<code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code>
+</td>
+</tr>
+</tbody>
+</table>
+<p>A note for anyone reproducing published analyses:
+<code><a href="../reference/fit_max_sdt.html">fit_max_sdt()</a></code> uses mutually exclusive response cells,
+whereas some reference scripts for this model fit total target-present
+choices alongside culprit identifications, which counts the latter
+twice. Estimates therefore differ — see the “Relation to Smith’s
+scripts” section of <code><a href="../reference/fit_max_sdt.html">?fit_max_sdt</a></code>.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
+</h2>
+<div class="section level3">
+<h3 id="the-estimators">The estimators<a class="anchor" aria-label="anchor" href="#the-estimators"></a>
+</h3>
+<p>From hits
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math>,
+false alarms
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>F</mi><annotation encoding="application/x-tex">F</annotation></semantics></math>,
+signal trials
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mi>s</mi></msub><annotation encoding="application/x-tex">N_s</annotation></semantics></math>
+and noise trials
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mi>n</mi></msub><annotation encoding="application/x-tex">N_n</annotation></semantics></math>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>d</mi><mo>′</mo></msup><mo>=</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>p</mi><mi>H</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>p</mi><mi>F</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mi>c</mi><mo>=</mo><mi>−</mi><mstyle displaystyle="false"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>p</mi><mi>H</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>p</mi><mi>F</mi></msub><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mo>,</mo><mspace width="2.0em"></mspace><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mi>β</mi><mo>=</mo><msup><mi>d</mi><mo>′</mo></msup><mi>c</mi></mrow><annotation encoding="application/x-tex">
+d' = z(p_H) - z(p_F), \qquad
+c = -\tfrac{1}{2}\bigl[z(p_H) + z(p_F)\bigr], \qquad
+\ln\beta = d'c
+</annotation></semantics></math></p>
+<p>with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>H</mi></msub><mo>=</mo><mi>H</mi><mi>/</mi><msub><mi>N</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">p_H = H/N_s</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>F</mi></msub><mo>=</mo><mi>F</mi><mi>/</mi><msub><mi>N</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">p_F = F/N_n</annotation></semantics></math>.
+The
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mi>β</mi><mo>=</mo><msup><mi>d</mi><mo>′</mo></msup><mi>c</mi></mrow><annotation encoding="application/x-tex">\ln\beta = d'c</annotation></semantics></math>
+identity holds under equal variance only.</p>
+</div>
+<div class="section level3">
+<h3 id="variance-and-why-there-are-three-methods">Variance, and why there are three methods<a class="anchor" aria-label="anchor" href="#variance-and-why-there-are-three-methods"></a>
+</h3>
+<p>Comparing two conditions needs a variance for the difference. The
+three options differ in what they assume:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Method</th>
+<th>Basis</th>
+<th>When to prefer it</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>"gourevitch"</code></td>
+<td>Delta-method approximation (Gourevitch &amp; Galanter, 1967)</td>
+<td>Quick, and adequate with large counts away from the extremes</td>
+</tr>
+<tr class="even">
+<td><code>"miller"</code></td>
+<td>Exact binomial treatment (Miller, 1996)</td>
+<td>The default recommendation; better coverage at small counts and
+extreme rates</td>
+</tr>
+<tr class="odd">
+<td><code>"bootstrap"</code></td>
+<td>Resampling the binomial counts</td>
+<td>No distributional assumption about the transformed statistic; useful
+when rates are near 0 or 1, and the approach used in the meta-analysis
+cited above</td>
+</tr>
+</tbody>
+</table>
+<p>The comparison is a Wald test, with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi mathvariant="normal">Δ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mi>A</mi></msub><mo>+</mo><msub><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mi>B</mi></msub></mrow><annotation encoding="application/x-tex">\mathrm{Var}(\Delta) = \mathrm{Var}_A + \mathrm{Var}_B</annotation></semantics></math>,
+valid because the two conditions are independent samples. It would be
+wrong for a within-subjects design, where the two estimates are
+correlated; the package provides no within-subjects version.</p>
+</div>
+<div class="section level3">
+<h3 id="the-extreme-rate-correction">The extreme-rate correction<a class="anchor" aria-label="anchor" href="#the-extreme-rate-correction"></a>
+</h3>
+<p>A hit rate of exactly 1 or a false-alarm rate of exactly 0 gives an
+infinite
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>,
+so a correction is unavoidable. Three are available via
+<code>correction</code>:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Option</th>
+<th>Rate computed as</th>
+<th>Applied</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>"loglinear"</code> (default)</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>0.5</mn><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(x + 0.5)/(n + 1)</annotation></semantics></math></td>
+<td>To every case, extreme or not</td>
+</tr>
+<tr class="even">
+<td><code>"half"</code></td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.5</mn><mi>/</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">0.5/n</annotation></semantics></math>
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo>−</mo><mn>0.5</mn><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">(n - 0.5)/n</annotation></semantics></math>
+</td>
+<td>Only when the count is 0 or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+</td>
+</tr>
+<tr class="odd">
+<td><code>"none"</code></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mi>/</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">x/n</annotation></semantics></math></td>
+<td>Never (rates are clamped away from 0 and 1 to keep
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>
+finite)</td>
+</tr>
+</tbody>
+</table>
+<p>The default applies unconditionally rather than only to offending
+cells, which is the form that behaves better in simulation. The choice
+is recorded in the returned object rather than being applied silently,
+and it should be stated in any writeup: with small counts it moves d′
+appreciably.</p>
+</div>
+<div class="section level3">
+<h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>Equal-variance signal detection. Unequal variance requires the full
+ROC, not a single point; see <code><a href="../reference/fit_sdt_roc.html">fit_sdt_roc()</a></code>.</li>
+<li>The two conditions are independent samples.</li>
+<li>Every trial contributes one binary response, so the four counts
+partition the sample.</li>
+<li>The task is treated as yes/no detection. See the caution above on
+compound decision tasks (Duncan, 2006) for what this costs when the data
+are lineups.</li>
+</ol>
+</div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Duncan, M. (2006). <em>A signal detection model of compound decision
+tasks</em> (Technical Note DRDC TR 2006-256). Defence R&amp;D Canada,
+Toronto.</p>
+<p>Reisberg, D., &amp; Pezdek, K. (2024). Data analysed with the MAX SDT
+model in scripts supplied by A. M. Smith (personal communication, 4
+April 2024).</p>
+<p>Gourevitch, V., &amp; Galanter, E. (1967). A significance test for
+one parameter isosensitivity functions. <em>Psychometrika, 32</em>(1),
+25-33.</p>
+<p>Miller, J. (1996). The sampling distribution of d’. <em>Perception
+&amp; Psychophysics, 58</em>(1), 65-72.</p>
+<p>Suero, M., Privado, J., &amp; Botella, J. (2017). Estimating the
+variances and covariance of the parameters of signal detection theory.
+<em>Psicothema, 29</em>(3), 432-437.</p>
+<p>Tredoux, C. G., Sporer, S. L., Vredeveldt, A., Kempen, K., &amp;
+Nortje, A. (2021). Does constructing a facial composite affect
+eyewitness memory? A research synthesis and meta-analysis. <em>Journal
+of Experimental Criminology, 17</em>(4), 713-741. </p>
+</div>
+<div class="section level2">
+<h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../reference/sdt_summary_from_counts.html">?sdt_summary_from_counts</a></code>,
+<code><a href="../reference/sdt_summary_variance.html">?sdt_summary_variance</a></code>,
+<code><a href="../reference/compare_sdt_summary.html">?compare_sdt_summary</a></code>
+</li>
+<li>
+<code><a href="../articles/sdt_glm_analysis.html">vignette("sdt_glm_analysis")</a></code> for trial-level SDT with
+covariates and random effects</li>
+<li>
+<code><a href="../articles/model_comparison.html">vignette("model_comparison")</a></code> and
+<code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code> for models that respect
+the compound structure of a lineup decision</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

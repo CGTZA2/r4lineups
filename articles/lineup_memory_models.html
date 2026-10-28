@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,13 @@
     <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
+    <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/pauc_statistical_comparison.html">Statistical Comparison of ROC Curves (pAUC Analysis)</a></li>
     <li><a class="dropdown-item" href="../articles/rac_analysis.html">RAC Analysis: Response Time-Accuracy Characteristics</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_glm_analysis.html">SDT via GLM/GLMM</a></li>
     <li><a class="dropdown-item" href="../articles/sdt_summary_comparisons.html">SDT Summary-Level Comparisons</a></li>
     <li><a class="dropdown-item" href="../articles/simulation_power_analysis.html">Data Simulation and Power Analysis for Lineup Studies</a></li>
-    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups: Statistical Inference on Lineup Fairness</a></li>
+    <li><a class="dropdown-item" href="../articles/Vignette.html">r4lineups MAIN vignette: Statistical Inference on Lineup Fairness</a></li>
     <li><a class="dropdown-item" href="../articles/winter_2ht_model.html">Winter 2-HT Model</a></li>
   </ul>
 </li>
@@ -71,10 +72,12 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Fitting Wixted Lineup-Memory Models</h1>
-                        <h4 data-toc-skip class="author">Colin
+                        <h4 data-toc-skip class="author">Colin G.
 Tredoux</h4>
+                        <h4 data-toc-skip class="author">Tamsyn M.
+Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-08-12</h4>
+            <h4 data-toc-skip class="date">2026-10-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/lineup_memory_models.Rmd" class="external-link"><code>vignettes/lineup_memory_models.Rmd</code></a></small>
       <div class="d-none name"><code>lineup_memory_models.Rmd</code></div>
@@ -82,124 +85,430 @@ Tredoux</h4>
 
     
     
+<blockquote>
+<p><strong>Acknowledgement.</strong> Large language models supplied by
+Anthropic and OpenAI were used in preparing this vignette, to assist
+with checking code, testing the veracity of the approaches described,
+and on occasion editing the text. Responsibility for the content rests
+with the authors.</p>
+</blockquote>
 <div class="section level2">
-<h2 id="scope">Scope<a class="anchor" aria-label="anchor" href="#scope"></a>
+<h2 id="what-these-models-are">What these models are<a class="anchor" aria-label="anchor" href="#what-these-models-are"></a>
 </h2>
-<p><code><a href="../reference/fit_lineup_models.html">fit_lineup_models()</a></code> fits the fair simultaneous-lineup
-models considered by Wixted et al. (2018): Independent Observations,
-Ensemble, and Integration. BEST-Rest is available for exact replication
-work, but it is a linear rescaling of Ensemble and does not constitute
-independent model-selection evidence.</p>
-<p>The initial interface requires trial-level data with
-<code>target_present</code>, <code>identification</code>, and ordered
-numeric <code>confidence</code>. Fit one procedure or experimental
-condition per call. Designated-suspect distributions, unfair lineups,
-sequential lineups, reaction-time models, and hierarchical
-participant/item effects are outside this interface.</p>
+<p>A witness viewing a simultaneous lineup sees several faces at once
+and must somehow reduce several impressions to one decision. Signal
+detection theory says each lineup member generates a <strong>memory
+strength</strong> — culprits tend to generate more than innocent
+members, but the distributions overlap. What it does <em>not</em> say is
+how the several strengths are combined into a single choice. That is an
+open theoretical question, and the models fitted here are three answers
+to it (Wixted, Vul, Mickes &amp; Wilson, 2018).</p>
+<p><strong>Independent Observations.</strong> The witness attends to the
+strongest-feeling face and identifies it if that feeling passes a
+criterion. Each member is evaluated on its own, so the decision depends
+on the maximum strength and nothing else. This is the model most people
+have in mind when they picture a witness scanning a lineup.</p>
+<p><strong>Ensemble.</strong> The witness judges the best face
+<em>relative to the lineup as a whole</em> — a face must stand out from
+its neighbours, not merely feel familiar. Formally the decision variable
+is the maximum strength minus the lineup mean. This predicts something
+the first model does not: putting a suspect among high-quality foils
+should make identification harder, because the comparison standard
+rises.</p>
+<p><strong>Integration.</strong> The witness pools evidence across the
+whole lineup, summing strengths rather than picking out a maximum. It is
+included as a historically important comparator rather than a
+recommended default; Wixted et al. found it generally inferior.</p>
+<p><strong>BEST-Rest</strong> is available for exact replication work,
+but it is a linear rescaling of Ensemble rather than a distinct account.
+For a lineup of size
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><msub><mi>V</mi><mtext mathvariant="normal">Ensemble</mtext></msub><mo>=</mo><mfrac><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow><mi>k</mi></mfrac><mspace width="0.167em"></mspace><mi>D</mi><msub><mi>V</mi><mtext mathvariant="normal">BEST-Rest</mtext></msub></mrow><annotation encoding="application/x-tex">
+DV_{\text{Ensemble}} = \frac{k-1}{k}\, DV_{\text{BEST-Rest}}
+</annotation></semantics></math></p>
+<p>and the criteria rescale by the same factor, so the two produce
+identical fits. Reporting both as though they were separate
+model-selection evidence would be double counting.</p>
+<div class="section level3">
+<h3 id="why-it-matters-which-one-is-right">Why it matters which one is right<a class="anchor" aria-label="anchor" href="#why-it-matters-which-one-is-right"></a>
+</h3>
+<p>These are not interchangeable descriptions. They disagree about what
+makes a lineup fair. Under Independent Observations, foil quality
+affects how often foils are chosen but not the evidential value of
+choosing the suspect. Under Ensemble, foil quality changes the standard
+of comparison and therefore changes what a suspect identification
+<em>means</em>. Recommendations about lineup construction depend on
+which account holds.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="install-the-audited-engine">Install the audited engine<a class="anchor" aria-label="anchor" href="#install-the-audited-engine"></a>
+<h2 id="what-this-interface-does-and-does-not-cover">What this interface does and does not cover<a class="anchor" aria-label="anchor" href="#what-this-interface-does-and-does-not-cover"></a>
 </h2>
-<p>pyWitness is optional and remains in an isolated virtual environment.
-Neither package loading nor CRAN checks install Python software.</p>
+<p><code><a href="../reference/fit_lineup_models.html">fit_lineup_models()</a></code> fits the fair simultaneous-lineup
+case: one procedure or condition per call, with trial-level
+<code>target_present</code>, <code>identification</code> and ordered
+numeric <code>confidence</code>.</p>
+<p>Not covered, and what each would require:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Not supported</th>
+<th>What it would need</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Designated-suspect target-absent distributions</td>
+<td>Target-absent suspect choices are currently pooled with
+target-absent filler choices. Separating them needs the upstream
+processor to accept a designated innocent suspect, which the audited
+revision does not expose</td>
+</tr>
+<tr class="even">
+<td>Unfair lineups</td>
+<td>The models assume every foil is a functioning alternative. An unfair
+lineup has a smaller effective than nominal size, so
+<code>lineup_size</code> is misspecified. Fitting with effective rather
+than nominal size is a workaround, not a solution</td>
+</tr>
+<tr class="odd">
+<td>Sequential lineups</td>
+<td>The decision variable is defined over simultaneously available
+members. Sequential viewing needs a different model, not a different
+parameterisation</td>
+</tr>
+<tr class="even">
+<td>Reaction-time models</td>
+<td>Would require a decision process with a time dimension, e.g. a
+drift-diffusion account</td>
+</tr>
+<tr class="odd">
+<td>Hierarchical participant/item effects</td>
+<td>Fitting is by minimum Pearson chi-square on aggregate cell counts,
+which discards the participant and item structure entirely. Random
+effects would need a trial-level likelihood</td>
+</tr>
+</tbody>
+</table>
+<p>The first two are the ones most likely to bite in practice, since
+real lineups are rarely perfectly fair. If your lineup has null foils —
+members nobody ever chooses — see <code><a href="../reference/lineup_table.html">lineup_table()</a></code> and the
+effective-size measures in the main vignette before fitting anything
+here.</p>
+</div>
+<div class="section level2">
+<h2 id="installing-the-engine">Installing the engine<a class="anchor" aria-label="anchor" href="#installing-the-engine"></a>
+</h2>
+<p>pyWitness is optional and lives in an isolated virtual environment.
+Neither loading the package nor running its checks installs any Python
+software. Run this once, interactively — it is slow, and it is
+deliberately not executed when this vignette is built:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CGTZA2/r4lineups" class="external-link">r4lineups</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/install_pywitness.html">install_pywitness</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/check_pywitness_deps.html">check_pywitness_deps</a></span><span class="op">(</span>initialize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>The installer pins the audited upstream commit, and every fitted
-result records that full revision and the imported engine version. The
-bridge refuses an environment whose version does not match the audited
-revision.</p>
-</div>
-<div class="section level2">
-<h2 id="prepare-one-condition">Prepare one condition<a class="anchor" aria-label="anchor" href="#prepare-one-condition"></a>
-</h2>
+<p>The installer pins an audited upstream commit, and every fitted
+result records that revision along with the imported engine version. The
+bridge refuses to run against an environment whose version does not
+match.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">condition_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">my_lineup_data</span>, <span class="va">condition</span> <span class="op">==</span> <span class="st">"A"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">condition_a</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"target_present"</span>, <span class="st">"identification"</span>, <span class="st">"confidence"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<p><code>target_present</code> must be logical (or 0/1),
-<code>identification</code> must be <code>"suspect"</code>,
-<code>"filler"</code>, or <code>"reject"</code>, and confidence must be
-finite numeric data whose larger values mean greater confidence. Under
-the supported fair-lineup design, target-absent suspect choices are
-pooled with target-absent filler choices. The upstream processor
-requires at least one observation in every aggregate TP/TA response
-category, although cells within individual confidence bins may be
-zero.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_pywitness_deps.html">check_pywitness_deps</a></span><span class="op">(</span>initialize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; pyWitness environment: r4lineups-pywitness </span></span>
+<span><span class="co">#&gt; Environment exists: FALSE </span></span>
+<span><span class="co">#&gt; Python initialized: FALSE </span></span>
+<span><span class="co">#&gt; pyWitness available: FALSE </span></span>
+<span><span class="co">#&gt; Audited revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba </span></span>
+<span><span class="co">#&gt; No Python process was initialized. Use initialize = TRUE to import the isolated engine.</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note.</strong> The pyWitness engine is not available in the
+environment where this vignette was built, so the fitting output below
+is not shown. The code is exactly what would run. Install the engine as
+above to reproduce it.</p>
+</blockquote>
 </div>
 <div class="section level2">
-<h2 id="fit-the-models">Fit the models<a class="anchor" aria-label="anchor" href="#fit-the-models"></a>
+<h2 id="preparing-data">Preparing data<a class="anchor" aria-label="anchor" href="#preparing-data"></a>
 </h2>
+<p>Data are simulated here at the level of individual foils.
+<code>foil_bias</code> gives each foil its own mean memory strength, so
+the foils are not interchangeable — some are plausible alternatives to
+the suspect and one is chosen only rarely.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">condition_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>  n_tp        <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  n_ta        <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  d_prime     <span class="op">=</span> <span class="fl">1.6</span>,</span>
+<span>  c_criterion <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  conf_levels <span class="op">=</span> <span class="fl">9</span>,</span>
+<span>  foil_bias   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">1.0</span><span class="op">)</span>,</span>
+<span>  seed        <span class="op">=</span> <span class="fl">404</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Put confidence on the 0-100 scale used elsewhere in the package</span></span>
+<span><span class="va">condition_a</span><span class="op">$</span><span class="va">confidence</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">100</span>, length.out <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">condition_a</span><span class="op">$</span><span class="va">confidence</span><span class="op">]</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">condition_a</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"target_present"</span>, <span class="st">"identification"</span>, <span class="st">"confidence"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 'data.frame':    1000 obs. of  3 variables:</span></span>
+<span><span class="co">#&gt;  $ target_present: logi  FALSE FALSE TRUE FALSE FALSE FALSE ...</span></span>
+<span><span class="co">#&gt;  $ identification: chr  "suspect" "filler" "suspect" "suspect" ...</span></span>
+<span><span class="co">#&gt;  $ confidence    : num  50 30 50 20 20 40 20 20 40 20 ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">condition_a</span><span class="op">$</span><span class="va">target_present</span>,</span>
+<span>                             <span class="va">condition_a</span><span class="op">$</span><span class="va">identification</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Response counts by lineup type, simulated data (500 target-present and 500 target-absent lineups of size 6). Rows: FALSE = target-absent, TRUE = target-present."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Response counts by lineup type, simulated data (500
+target-present and 500 target-absent lineups of size 6). Rows: FALSE =
+target-absent, TRUE = target-present.</caption>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">filler</th>
+<th align="right">reject</th>
+<th align="right">suspect</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">FALSE</td>
+<td align="right">268</td>
+<td align="right">165</td>
+<td align="right">67</td>
+</tr>
+<tr class="even">
+<td align="left">TRUE</td>
+<td align="right">152</td>
+<td align="right">46</td>
+<td align="right">302</td>
+</tr>
+</tbody>
+</table>
+<p>Requirements: <code>target_present</code> logical or 0/1;
+<code>identification</code> one of <code>"suspect"</code>,
+<code>"filler"</code>, <code>"reject"</code>; <code>confidence</code>
+finite numeric with larger values meaning greater confidence. Under the
+supported fair-lineup design, target-absent suspect choices are pooled
+with target-absent filler choices. The upstream processor needs at least
+one observation in every aggregate TP/TA response category, though cells
+within individual confidence bins may be zero.</p>
+</div>
+<div class="section level2">
+<h2 id="fitting">Fitting<a class="anchor" aria-label="anchor" href="#fitting"></a>
+</h2>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_lineup_models.html">fit_lineup_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">condition_a</span>,</span>
-<span>  models <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"ensemble"</span>, <span class="st">"integration"</span><span class="op">)</span>,</span>
-<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  models          <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"ensemble"</span>, <span class="st">"integration"</span><span class="op">)</span>,</span>
+<span>  lineup_size     <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  confidence_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>  variance <span class="op">=</span> <span class="st">"equal"</span>,</span>
+<span>  variance        <span class="op">=</span> <span class="st">"equal"</span>,</span>
 <span>  shared_variance <span class="op">=</span> <span class="st">"estimated"</span>,</span>
-<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter <span class="op">=</span> <span class="fl">5000L</span>, method <span class="op">=</span> <span class="st">"Nelder-Mead"</span><span class="op">)</span></span>
+<span>  control         <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter <span class="op">=</span> <span class="fl">5000L</span>, method <span class="op">=</span> <span class="st">"Nelder-Mead"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fits</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fits</span><span class="op">)</span></span></code></pre></div>
-<p>For an Independent-Observations model with zero shared variance, use
-<code>shared_variance = "zero"</code>; the bridge selects pyWitness’s
-dedicated simple class for this exact limit. Shared variance cancels
-from Ensemble and BEST-Rest and is fixed at zero for those models.
-Unequal signal variance is requested with
-<code>variance = "unequal"</code>.</p>
-<p>Model-specific starting values can be supplied as a named list:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fits</span><span class="op">$</span><span class="va">comparison</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"converged"</span>, <span class="st">"n_parameters"</span>,</span>
+<span>                                     <span class="st">"pearson_chisq"</span>, <span class="st">"df"</span>, <span class="st">"p_value"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Model fits, simulated data generated by the MAX (Independent Observations) rule."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>For an Independent-Observations model with zero shared variance use
+<code>shared_variance = "zero"</code>, which selects pyWitness’s
+dedicated class for that exact limit. Shared variance cancels from
+Ensemble and BEST-Rest and is fixed at zero for them. Unequal signal
+variance is requested with <code>variance = "unequal"</code>.</p>
+<p>Starting values can be supplied per model:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_started</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_lineup_models.html">fit_lineup_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">condition_a</span>,</span>
 <span>  models <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"ensemble"</span><span class="op">)</span>,</span>
+<span>  confidence_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span>,</span>
 <span>  starts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    independent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>targetMean <span class="op">=</span> <span class="fl">1.5</span>, c1 <span class="op">=</span> <span class="fl">0.8</span>, c2 <span class="op">=</span> <span class="fl">1.4</span>, c3 <span class="op">=</span> <span class="fl">2.0</span><span class="op">)</span>,</span>
-<span>    ensemble <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>targetMean <span class="op">=</span> <span class="fl">1.5</span>, c1 <span class="op">=</span> <span class="fl">0.7</span>, c2 <span class="op">=</span> <span class="fl">1.2</span>, c3 <span class="op">=</span> <span class="fl">1.7</span><span class="op">)</span></span>
+<span>    ensemble    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>targetMean <span class="op">=</span> <span class="fl">1.5</span>, c1 <span class="op">=</span> <span class="fl">0.7</span>, c2 <span class="op">=</span> <span class="fl">1.2</span>, c3 <span class="op">=</span> <span class="fl">1.7</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_started</span><span class="op">$</span><span class="va">comparison</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="interpret-the-result">Interpret the result<a class="anchor" aria-label="anchor" href="#interpret-the-result"></a>
+<h2 id="does-the-fit-recover-the-generating-model">Does the fit recover the generating model?<a class="anchor" aria-label="anchor" href="#does-the-fit-recover-the-generating-model"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fits</span><span class="op">$</span><span class="va">comparison</span></span>
-<span><span class="va">fits</span><span class="op">$</span><span class="va">parameters</span></span>
-<span><span class="va">fits</span><span class="op">$</span><span class="va">observed</span></span>
-<span><span class="va">fits</span><span class="op">$</span><span class="va">expected</span></span>
-<span><span class="va">fits</span><span class="op">$</span><span class="va">diagnostics</span></span>
-<span><span class="va">fits</span><span class="op">$</span><span class="va">engine</span></span>
+<p>The most informative check is whether fitting recovers the rule that
+generated the data. <code><a href="../reference/simulate_lineup_data.html">simulate_lineup_data()</a></code> implements the
+same three decision rules, so this can be tested directly.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">simulate_under</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">rule</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">404</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
+<span>    n_tp <span class="op">=</span> <span class="fl">500</span>, n_ta <span class="op">=</span> <span class="fl">500</span>, d_prime <span class="op">=</span> <span class="fl">1.6</span>, c_criterion <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>    lineup_size <span class="op">=</span> <span class="fl">6</span>, conf_levels <span class="op">=</span> <span class="fl">9</span>, decision_rule <span class="op">=</span> <span class="va">rule</span>,</span>
+<span>    foil_bias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.2</span>, <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.4</span>, <span class="op">-</span><span class="fl">1.0</span><span class="op">)</span>, seed <span class="op">=</span> <span class="va">seed</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">d</span><span class="op">$</span><span class="va">confidence</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">100</span>, length.out <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="va">d</span><span class="op">$</span><span class="va">confidence</span><span class="op">]</span></span>
+<span>  <span class="va">d</span></span>
+<span><span class="op">}</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fits</span>, type <span class="op">=</span> <span class="st">"comparison"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fits</span>, type <span class="op">=</span> <span class="st">"fit"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fits</span>, type <span class="op">=</span> <span class="st">"roc"</span><span class="op">)</span></span></code></pre></div>
-<p>The audited pyWitness engine estimates parameters by minimizing
-Pearson chi-squared. <code>loglik_at_estimate</code> is the multinomial
-log likelihood evaluated at that minimum-Pearson estimate, not a
-maximized likelihood. Consequently AIC and BIC are <code>NA</code>;
-calculating them from this estimate would be invalid. Inspect
-convergence and expected cells before interpreting model
-differences.</p>
-<p>For lineup size (k), the decision variables obey</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><msub><mi>V</mi><mrow><mi>E</mi><mi>n</mi><mi>s</mi><mi>e</mi><mi>m</mi><mi>b</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>=</mo><mfrac><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow><mi>k</mi></mfrac><mi>D</mi><msub><mi>V</mi><mrow><mi>B</mi><mi>E</mi><mi>S</mi><mi>T</mi><mo>−</mo><mi>R</mi><mi>e</mi><mi>s</mi><mi>t</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
-DV_{Ensemble} = \frac{k-1}{k} DV_{BEST-Rest}.
-</annotation></semantics></math></p>
-<p>Their criteria rescale by the same factor and their fits are
-identical. Integration is included as a historically important
-comparator, not as a recommended default. Wixted et al. (2018) found it
-generally inferior, whereas Independent Observations and Ensemble both
-remained plausible, with an overall advantage for Ensemble.</p>
+<span><span class="va">recovery</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"max"</span>, <span class="st">"ensemble"</span>, <span class="st">"integration"</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">rule</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_lineup_models.html">fit_lineup_models</a></span><span class="op">(</span><span class="fu">simulate_under</span><span class="op">(</span><span class="va">rule</span><span class="op">)</span>,</span>
+<span>                         models <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"ensemble"</span>, <span class="st">"integration"</span><span class="op">)</span>,</span>
+<span>                         lineup_size <span class="op">=</span> <span class="fl">6</span>, confidence_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">f</span><span class="op">$</span><span class="va">comparison</span><span class="op">)</span></span>
+<span>  <span class="va">get</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">m</span>, <span class="va">col</span><span class="op">)</span> <span class="va">cc</span><span class="op">[[</span><span class="va">col</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="va">cc</span><span class="op">$</span><span class="va">model</span> <span class="op">==</span> <span class="va">m</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    `Generated by`     <span class="op">=</span> <span class="va">rule</span>,</span>
+<span>    `Independent chi2` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"pearson_chisq"</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    `Independent p`    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">signif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"p_value"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    `Ensemble chi2`    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="st">"ensemble"</span>, <span class="st">"pearson_chisq"</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    `Ensemble p`       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">signif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="st">"ensemble"</span>, <span class="st">"p_value"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    `Integration chi2` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="st">"integration"</span>, <span class="st">"pearson_chisq"</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    `Integration p`    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">signif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="st">"integration"</span>, <span class="st">"p_value"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">recovery</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Pearson chi-square and its p-value by fitted model, for data generated under each decision rule. Simulated, 500 target-present and 500 target-absent lineups per row."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><strong>Read the p-values, not the chi-squares.</strong> The models
+do not have the same degrees of freedom — Independent Observations
+estimates five parameters against Ensemble’s four, leaving it one fewer
+residual degree of freedom — so the model with more parameters is
+favoured by a raw chi-square comparison purely by being more flexible.
+Ranking the models by chi-square alone is not a comparison the statistic
+licenses.</p>
+<p>With that in mind, two things emerge.</p>
+<p>The MAX and Integration rows recover their generating model
+decisively: the generating model fits well and the others are rejected
+outright.</p>
+<p>The Ensemble row does not. Independent Observations and Ensemble
+return essentially <strong>identical</strong> p-values, and neither can
+be rejected. This is not a case of the wrong model winning; it is a case
+of the two models being <strong>indistinguishable</strong> on these
+data.</p>
+<p>That is the substantive finding rather than a defect in the fitting.
+Independent Observations and Ensemble make very similar predictions for
+a <em>fair</em> lineup. Separating them requires either much larger
+samples or a design built to separate them — most obviously one that
+manipulates foil quality, since it is precisely there that the two
+accounts disagree: Ensemble makes the comparison standard depend on the
+other lineup members and Independent Observations does not.
+<code><a href="../reference/simulate_lineup_data.html">simulate_lineup_data()</a></code> can vary foil quality through
+<code>foil_bias</code>, so the question is directly explorable.</p>
+<p>Wixted et al. reached a similar conclusion, finding both models
+plausible with a modest overall advantage for Ensemble. Treat a small
+chi-square difference between these two as uninformative, and note that
+a single dataset per rule — as here — is an illustration rather than a
+recovery study. A proper one would simulate many datasets per generating
+model and report how often each is selected.</p>
+</div>
+<div class="section level2">
+<h2 id="interpreting-the-output">Interpreting the output<a class="anchor" aria-label="anchor" href="#interpreting-the-output"></a>
+</h2>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fits</span><span class="op">$</span><span class="va">parameters</span><span class="op">)</span>, digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Parameter estimates, simulated data."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fits</span><span class="op">$</span><span class="va">diagnostics</span></span>
+<span><span class="va">fits</span><span class="op">$</span><span class="va">engine</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fits</span>, type <span class="op">=</span> <span class="st">"comparison"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fits</span>, type <span class="op">=</span> <span class="st">"fit"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fits</span>, type <span class="op">=</span> <span class="st">"roc"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
+</h2>
+<div class="section level3">
+<h3 id="how-the-models-are-estimated">How the models are estimated<a class="anchor" aria-label="anchor" href="#how-the-models-are-estimated"></a>
+</h3>
+<p>The audited pyWitness engine estimates parameters by
+<strong>minimising Pearson chi-square</strong> between observed and
+expected cell counts:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>χ</mi><mn>2</mn></msup><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>O</mi><mi>i</mi></msub><mo>−</mo><msub><mi>E</mi><mi>i</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><msub><mi>E</mi><mi>i</mi></msub></mfrac></mrow><annotation encoding="application/x-tex">\chi^2 = \sum_{i} \frac{(O_i - E_i)^2}{E_i}</annotation></semantics></math></p>
+<p>where the cells are decision-by-confidence-bin categories, separately
+for target-present and target-absent lineups. Parameters are the target
+distribution mean (<code>targetMean</code>), the confidence criteria
+(<code>c1</code>, <code>c2</code>, …), and, where applicable, a
+shared-variance term.</p>
+</div>
+<div class="section level3">
+<h3 id="why-aic-and-bic-are-na">Why AIC and BIC are NA<a class="anchor" aria-label="anchor" href="#why-aic-and-bic-are-na"></a>
+</h3>
+<p>This is the point most likely to cause trouble, so it is worth being
+explicit. <code>loglik_at_estimate</code> is the multinomial log
+likelihood <strong>evaluated at the minimum-Pearson estimate</strong>.
+It is not a maximised likelihood. AIC and BIC are defined in terms of
+the maximum of the likelihood, so computing them from this quantity
+would be invalid, and the package returns <code>NA</code> rather than a
+number that would look usable and be wrong.</p>
+<p>Model comparison here therefore rests on the Pearson chi-square and
+its degrees of freedom, not on information criteria. Comparing models
+with different numbers of parameters requires attention to
+<code>df</code>, which the comparison table reports.</p>
+</div>
+<div class="section level3">
+<h3 id="what-to-check-before-interpreting">What to check before interpreting<a class="anchor" aria-label="anchor" href="#what-to-check-before-interpreting"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>
+<code>converged</code> is <code>TRUE</code> for every model. A
+non-converged fit’s chi-square is meaningless.</li>
+<li>Expected cell counts are not tiny. The chi-square reference
+distribution is an approximation that degrades when expected counts fall
+below about 5; inspect <code>fits$expected</code>.</li>
+<li>The engine revision matches the audited one — recorded in
+<code>fits$engine</code>.</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>The lineup is <strong>fair</strong>: every foil is a functioning
+alternative to the suspect. Null foils violate this and make
+<code>lineup_size</code> misspecified.</li>
+<li>Members are viewed simultaneously.</li>
+<li>Signal variance is equal across target and lure distributions unless
+<code>variance = "unequal"</code> is requested.</li>
+<li>Witnesses are independent, and each contributes one trial.
+Aggregation to cell counts discards any participant or item
+structure.</li>
+</ol>
+</div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S.
 (2024). pyWitness 1.0: A Python eyewitness identification analysis
-toolkit. <em>Behavior Research Methods, 56</em>, 1533–1550.</p>
+toolkit. <em>Behavior Research Methods, 56</em>, 1533-1550.</p>
 <p>Wixted, J. T., Vul, E., Mickes, L., &amp; Wilson, B. M. (2018).
-Models of lineup memory. <em>Cognitive Psychology, 105</em>, 81–114. <a href="https://doi.org/10.1016/j.cogpsych.2018.06.001" class="external-link uri">https://doi.org/10.1016/j.cogpsych.2018.06.001</a></p>
+Models of lineup memory. <em>Cognitive Psychology, 105</em>, 81-114.
+</p>
+</div>
+<div class="section level2">
+<h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../reference/fit_lineup_models.html">?fit_lineup_models</a></code> and
+<code><a href="../reference/install_pywitness.html">?install_pywitness</a></code>
+</li>
+<li>
+<code><a href="../articles/model_comparison.html">vignette("model_comparison")</a></code> for the 2-HT, EIG and
+full-ROC models, which run without any Python engine</li>
+<li>
+<code><a href="../articles/simulation_power_analysis.html">vignette("simulation_power_analysis")</a></code> for the simulator
+and its decision rules</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

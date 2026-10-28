@@ -1,17 +1,34 @@
-# r4lineups: Statistical Inference on Lineup Fairness
+# r4lineups MAIN vignette: Statistical Inference on Lineup Fairness
+
+> **Acknowledgement.** Large language models supplied by Anthropic and
+> OpenAI were used in preparing this vignette, to assist with checking
+> code, testing the veracity of the approaches described, and on
+> occasion editing the text. Responsibility for the content rests with
+> the authors.
+
+``` r
+
+library(r4lineups)
+```
+
+This is the **main vignette** for **r4lineups**. It covers the classical
+measures of lineup fairness: lineup proportion, functional size,
+effective size, and the diagnosticity ratio, together with ROC analysis
+of confidence and accuracy. The package contains a good deal more than
+this, and the other vignettes are listed at the [end of this
+document](#other-vignettes).
 
 This package contains functions to compute various properties of
-laboratory or police lineups.  
-Since the early 1970s eyewitness testimony researchers have recognised
-the importance of estimating properties such as lineup bias (is the
-lineup biased against the suspect, leading to a rate of choosing higher
-than one would expect by chance?), and lineup size (how many reasonable
-choices are in fact available to the witness? A lineup is supposed to
-consist of a suspect and a number of additional members, or foils, whom
-a poor quality witness might mistake for the perpetrator). Lineup
-measures are descriptive, in the first instance, but since the earliest
-articles in the literature researchers have recognised the importance of
-reasoning inferentially about them.
+laboratory or police lineups. Since the early 1970s eyewitness testimony
+researchers have recognised the importance of estimating properties such
+as lineup bias (is the lineup biased against the suspect, leading to a
+rate of choosing higher than one would expect by chance?), and lineup
+size (how many reasonable choices are in fact available to the witness?
+A lineup is supposed to consist of a suspect and a number of additional
+members, or foils, whom a poor quality witness might mistake for the
+perpetrator). Lineup measures are descriptive, in the first instance,
+but since the earliest articles in the literature researchers have
+recognised the importance of reasoning inferentially about them.
 
 The measures described below were originally proposed by Doob &
 Kirshenbaum (1973), Wells, Leippe & Ostrom (1979), Malpass (1981),
@@ -20,10 +37,10 @@ Most of the measures assume that a sample of mock witnesses has been
 given a description of the perpetrator, and a lineup, and asked to
 choose someone from the lineup (either as the best match to the
 description, or the best match to the lineup member the police likely
-have in mind; see Malpass et al., 2007)
+have in mind; see Malpass et al., 2007).
 
 Much of the justification for what follows can be found in Tredoux
-(1998), and Malpass et al. (2007)
+(1998), and Malpass et al. (2007).
 
 ## Data Format
 
@@ -41,12 +58,20 @@ For instance, if we have 10 mock witnesses, and each views a lineup with
 the elements represent the position of the lineup member chosen by each
 witness:
 
-`lineup_vec <- c(3, 2, 5, 6, 1, 3, 3, 5, 6, 4)`
+``` r
+
+lineup_vec_demo <- c(3, 2, 5, 6, 1, 3, 3, 5, 6, 4)
+```
 
 However, it is also possible to represent this set of choices as a
 one-dimensional table:
 
-`lineup_tbl <- table(lineup_vec)`
+``` r
+table(lineup_vec_demo)
+lineup_vec_demo
+1 2 3 4 5 6 
+1 1 3 1 2 2 
+```
 
 If we had our lineup choices recorded in a data frame, which is what we
 might end up with if we import the data from a spreadsheet program, then
@@ -56,38 +81,104 @@ dataframe into a vector.
 For instance, if the lineup choices shown above for 10 mock witnesses
 were part of a larger dataset, and we had recorded the ages and
 participant number of each participant, then the dataframe might appear
-as shown below (we create the dataframe below with simulated data here,
-though)
+as shown below (we create the dataframe with simulated data here,
+though):
 
-`participant_num <- paste("Partic_",1:10, sep = "")`
-`age <- round(runif(10, 18, 80), 2)`
-`line_df <- data.frame(participant_num, age, lineup_vec)`
-
-Show the dataframe:
-
-`line_df`
+``` r
+participant_num <- paste("Partic_", 1:10, sep = "")
+age             <- round(runif(10, 18, 80), 2)
+line_df         <- data.frame(participant_num, age,
+                              lineup_vec = lineup_vec_demo)
+line_df
+   participant_num   age lineup_vec
+1         Partic_1 61.32          3
+2         Partic_2 52.50          2
+3         Partic_3 26.69          5
+4         Partic_4 35.71          6
+5         Partic_5 52.43          1
+6         Partic_6 19.56          3
+7         Partic_7 46.91          3
+8         Partic_8 71.38          5
+9         Partic_9 33.66          6
+10       Partic_10 54.01          4
+```
 
 Extract the lineup choices, per participant, to a vector:
-`a_lineup_vec <- line_df$linep_vec`
-
-Or make a table directly from the variable of choices:
-`a_lineup_table <- table(line_df$lineup_vec)`
-
-One **important** issue is that there is no way of the functions in this
-package knowing if some of the members of a lineup received no choices.
-In other words, if there were in fact 7 lineup members in our running
-example, but member 7 was not chosen by any witnesses, then this would
-not be evident from the lineup vector, since it records the choice made
-by each witness, but not the number of lineup members. To deal with this
-problem, generally the functions in the package require nominal lineup
-size (the number of physical members of the lineup) to be passed as an
-argument.
-
-Let’s look at a slightly larger data set:
 
 ``` r
 
-library(r4lineups)
+a_lineup_vec <- line_df$lineup_vec
+```
+
+Or make a table directly from the variable of choices:
+
+``` r
+
+a_lineup_table <- table(line_df$lineup_vec)
+```
+
+### Null foils, and why `table()` can mislead
+
+One **important** issue is that a lineup vector records the choice each
+witness made, but not the number of lineup members. If there were in
+fact 7 members in our running example, but member 7 was chosen by
+nobody, that would not be evident from the vector at all. Such an
+unchosen member is called a **null foil**.
+
+[`table()`](https://rdrr.io/r/base/table.html) makes this worse, because
+it tabulates only the positions that were actually chosen and silently
+omits the rest:
+
+``` r
+null_foil_vec <- rep(c(5, 3, 2, 1, 8, 6, 7), each = 4)
+
+# Position 4 was never chosen, so this table has 7 entries, not 8
+table(null_foil_vec)
+null_foil_vec
+1 2 3 5 6 7 8 
+4 4 4 4 4 4 4 
+```
+
+Null foils matter, because they are exactly the members that make a
+lineup unfair: a foil nobody ever picks is not a functioning alternative
+to the suspect. Use
+[`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+instead, which tabulates over all `k` positions, keeps unchosen members
+as explicit zeroes, and says so:
+
+``` r
+lineup_table(null_foil_vec, k = 8, suspect_pos = 3)
+Lineup choices (k = 8, N = 28)
+
+ pos: 1  2  3*  4  5  6  7  8
+ cnt: 4  4   4  0  4  4  4  4
+
+ * = nominated suspect
+
+ Note: 1 null foil (position 4) received no choices.
+ Unchosen members reduce effective size; see ?esize_m.
+```
+
+The result inherits from `table`, so it can be passed to
+[`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md),
+[`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
+and the other table-taking functions in the package exactly as an
+ordinary table would be. The measures in this package already handle
+null foils correctly given a complete table; what
+[`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+adds is visibility.
+
+For the remaining functions, which take a vector rather than a table,
+nominal lineup size must be passed explicitly as an argument for the
+same reason.
+
+### A larger dataset
+
+Let’s look at a slightly larger data set. Only the first three rows are
+shown here; `nortje2012` has 133 rows in total.
+
+``` r
+
 data(nortje2012)
 ```
 
@@ -97,16 +188,26 @@ data(nortje2012)
 |    5     |    1     |    3     |
 |    2     |    2     |    3     |
 
-nortje2012 data {.table style="width:46%;"}
+nortje2012 data (first 3 rows of 133) {.table style="width:46%;"}
 
 - For functions that require data for only one lineup or one lineup
   pair, you can convert the data from a given lineup to a vector by
-  calling for e.g. `lineup_vec <- nortje2012$lineup_1` or alternatively
+  calling for e.g. `lineup_vec <- nortje2012$lineup_1` or alternatively
   `lineup_vec <- nortje2012[[1]]`
 
 - For functions that require several lineups or several lineup pairs,
-  you can convert the data to a list, e.g.,
-  `lineup_list <- as.list(nortje2012)`
+  you can convert the data to a list,
+  e.g. `lineup_list <- as.list(nortje2012)`
+
+``` r
+
+lineup_vec   <- nortje2012$lineup_1
+lineup_list  <- as.list(nortje2012)
+lineup_tab   <- lineup_table(lineup_vec, k = 8)
+```
+
+`lineup_vec` and `lineup_tab` are used throughout the rest of this
+vignette.
 
 - **Nominal Size**
 
@@ -126,17 +227,20 @@ This package contains several sample datasets, listed below:
 
 1.  `nortje2012`: A dataframe of lineup choices for 3 independent
     lineups, from a study conducted by Nortje & Tredoux (2012)
-2.  `line73` : Lineup data from Doob & Kirshenbaum (1973)
+2.  `line73`: Lineup data from Doob & Kirshenbaum (1973)
 3.  `mockdata`: Lineup data from a study conducted by Nortje & Tredoux
     (2012)
-4.  `mickwick` : Confidence and accuracy data for lineup choices. Sample
-    data to be passed to ROC function
+4.  `mickwick`: Confidence and accuracy data for lineup choices
+5.  `lineup_example`: Target-present/target-absent identification data,
+    to be passed to the ROC and CAC functions such as
     [`make_roc()`](https://cgtza2.github.io/r4lineups/reference/make_roc.md)
-5.  Foil images (used to demonstrate `face_sim`) can be found at
+6.  Foil images (used in the face similarity work) can be found at
     <https://github.com/tmnaylor/malpass_foils>
 
-All sample datasets can be loaded by calling `data(sample_data)`.
-Further details can be found in the documentation for each dataset.
+Each dataset is loaded by name, e.g. `data(nortje2012)` or
+`data(lineup_example)`. Further details can be found in the
+documentation for each dataset,
+e.g. [`?nortje2012`](https://cgtza2.github.io/r4lineups/reference/nortje2012.md).
 
 ------------------------------------------------------------------------
 
@@ -154,84 +258,142 @@ is essentially a measure of lineup bias (see Malpass, 1981; Tredoux,
 1998), especially when one tests whether it exceeds the proportion
 expected by chance guessing alone (1/nominal_size).
 
-### Calculating proportion for a single target/lineup member:
+The measures in this vignette all rest on mock witnesses, who have not
+seen the perpetrator, so they can be used to vet a lineup before it is
+shown to a real witness. Bias can also be estimated from the responses
+of real witnesses to target-present and target-absent lineups; such
+measures are *resultant*, in that they can only be computed after an
+experiment or case. Lee and Penrod (2019) proposed d’(IFa), the
+difference between the z-transformed rates at which innocent suspects
+and fillers are chosen from target-absent lineups, as such an index of
+lineup bias. Because their filler rate pools all the fillers, a
+perfectly fair lineup does not give d’(IFa) = 0, and
+[`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md)
+reports the value a fair lineup would give alongside the observed one.
+Lee, Mansour and Penrod (2024) found that resultant measures, including
+d’(IFa), predicted eyewitness performance better than mock-witness
+measures did. The model, its bias indices and the relevant references
+are described in
+[`vignette("multid_model")`](https://cgtza2.github.io/r4lineups/articles/multid_model.md).
+
+### Calculating proportion for a single target/lineup member
 
 ``` r
-library(r4lineups)
-
 lineup_prop_vec(lineup_vec, target_pos = 3, k = 8)
 [1] 0.1428571
 ```
 
-This function requires three arguments: a vector of lineup data, the
-position of the target in the lineup (target_pos), and nominal size (k).
-The example use of the function here returns the proportion of mock
-witnesses choosing the target/linuep member occupying position 3 in the
-lineup, and is 0.14% of the witnesses.
+This function requires three arguments: a vector of lineup data (here
+`lineup_vec`, the choices for `nortje2012$lineup_1` that we extracted
+above), the position of the target in the lineup (`target_pos`), and
+nominal size (`k`). The example returns the proportion of mock witnesses
+choosing the lineup member occupying position 3, which is 0.14 — that
+is, about 14% of the witnesses. Chance expectation for an 8-person
+lineup is 1/8 = 0.125, so this member was chosen at close to the chance
+rate.
 
-- *Compute bootstrapped estimates:* The original work on lineup bias
-  suggested testing whether the computed proportion = 1/nominal_size
-  using a z test of proportions, or a binomial probability (see Tredoux,
-  1998), or a confidence interval around the proportion (see Tredoux,
-  1998), but very few studies actually use enough mock witnesses to
-  strongly warrant this approach, since it assumes approximation to a
-  normal distribution, and the size of the lineup places hard limits
-  that are often not observed by computed confidence intervals. We
-  therefore recommend computing bootstrapped estimates of all lineup
-  measures, and especially the sampling variability around estimates. To
-  calculate a bootstrapped lineup proportion for a single lineup member,
-  we pass the
-  [`lineup_prop_boot()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_boot.md)
-  function as an argument to the `boot()` function supplied by the
-  package ‘boot’. We do not work directly with the lineup_prop_boot
-  function, all we need to know to bootstrap is the lineup vector, the
-  position of the target (target_pos), and the number of bootstrap
-  resamples we desire (R).
+#### Compute bootstrapped estimates
 
-  ``` r
-  bootobject <- boot::boot(lineup_vec, lineup_prop_boot, target_pos = 3, R = 100)
-  bootobject
+The original work on lineup bias suggested testing whether the computed
+proportion = 1/nominal_size using a z test of proportions, or a binomial
+probability (see Tredoux, 1998), or a confidence interval around the
+proportion (see Tredoux, 1998), but very few studies actually use enough
+mock witnesses to strongly warrant this approach, since it assumes
+approximation to a normal distribution, and the size of the lineup
+places hard limits that are often not observed by computed confidence
+intervals.
 
-  ORDINARY NONPARAMETRIC BOOTSTRAP
+We therefore recommend computing bootstrapped estimates of all lineup
+measures, and especially the sampling variability around estimates.
+
+To calculate a bootstrapped lineup proportion for a single lineup
+member, we pass the
+[`lineup_prop_boot()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_boot.md)
+function as an argument to the `boot()` function supplied by the package
+**boot**. We do not work directly with the `lineup_prop_boot` function;
+all we need to know to bootstrap is the lineup vector, the position of
+the target (`target_pos`), and the number of bootstrap resamples we
+desire (`R`).
+
+``` r
+bootobject <- boot::boot(lineup_vec, lineup_prop_boot, target_pos = 3, R = 1000)
+bootobject
+
+ORDINARY NONPARAMETRIC BOOTSTRAP
 
 
-  Call:
-  boot::boot(data = lineup_vec, statistic = lineup_prop_boot, R = 100, 
-      target_pos = 3)
+Call:
+boot::boot(data = lineup_vec, statistic = lineup_prop_boot, R = 1000, 
+    target_pos = 3)
 
 
-  Bootstrap Statistics :
-       original      bias    std. error
-  t1* 0.1428571 0.003533835  0.02736007
-  ```
+Bootstrap Statistics :
+     original        bias    std. error
+t1* 0.1428571 -0.0004586466   0.0289372
+```
 
-  - *We then compute confidence intervals:*
+We then compute confidence intervals:
 
-  ``` r
-  cis <- boot::boot.ci(bootobject, conf = 0.95, type = "bca", target_pos = 3)
-  cis
-  BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
-  Based on 100 bootstrap replicates
+``` r
+cis <- boot::boot.ci(bootobject, conf = 0.95, type = "bca", target_pos = 3)
+cis
+BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
+Based on 1000 bootstrap replicates
 
-  CALL : 
-  boot::boot.ci(boot.out = bootobject, conf = 0.95, type = "bca", 
-      target_pos = 3)
+CALL : 
+boot::boot.ci(boot.out = bootobject, conf = 0.95, type = "bca", 
+    target_pos = 3)
 
-  Intervals : 
-  Level       BCa          
-  95%   ( 0.0752,  0.1880 )  
-  Calculations and Intervals on Original Scale
-  Warning : BCa Intervals used Extreme Quantiles
-  Some BCa intervals may be unstable
-  ```
+Intervals : 
+Level       BCa          
+95%   ( 0.0902,  0.1955 )  
+Calculations and Intervals on Original Scale
+```
 
-If you are not familiar with how the boot or the boot.ci functions work,
-you could consult the documentation for the boot package. However, by
-using the functions as shown here you will be able to bootstrap without
-needing to understand them in detail. Briefly, the argument ‘conf’
-allows you to specify the significance level, alpha, and ‘type’
-specifies the type of confidence interval to be returned. If type =
-“bca”, the function will return bias-corrected confidence intervals.
+If you are not familiar with how the `boot` or the `boot.ci` functions
+work, you could consult the documentation for the **boot** package.
+However, by using the functions as shown here you will be able to
+bootstrap without needing to understand them in detail. Briefly, the
+argument `conf` sets the confidence level, and `type` specifies the type
+of confidence interval to be returned. With `type = "bca"` the function
+returns the bias-corrected and accelerated interval, which is generally
+the best-behaved of the options for a statistic like this one. Other
+choices include `"perc"` (percentile), `"norm"` (normal approximation)
+and `"basic"`; `boot.ci` will compute several at once if you pass a
+vector of types.
+
+#### Comparing against a normal-theory interval
+
+It is worth seeing how the bootstrap interval compares with the
+classical interval, which is what the earlier literature used. There is
+no r4lineups function for this, because base R already provides it: a
+lineup proportion is just a binomial proportion, so
+[`stats::binom.test()`](https://rdrr.io/r/stats/binom.test.html) (exact)
+and [`stats::prop.test()`](https://rdrr.io/r/stats/prop.test.html)
+(normal approximation with continuity correction) apply directly.
+
+``` r
+n_chose_3 <- sum(lineup_vec == 3)
+n_total   <- length(lineup_vec)
+
+# Exact (Clopper-Pearson) interval
+binom.test(n_chose_3, n_total)$conf.int
+[1] 0.08825399 0.21406762
+attr(,"conf.level")
+[1] 0.95
+
+# Normal-theory interval
+prop.test(n_chose_3, n_total)$conf.int
+[1] 0.09037086 0.21662699
+attr(,"conf.level")
+[1] 0.95
+```
+
+Compare these with the BCa interval above. For a proportion near the
+middle of its range and a reasonable sample size the three tend to agree
+closely; they diverge when the proportion is near 0 or 1, or when the
+sample of mock witnesses is small, which is precisely the situation the
+bootstrap handles better.
 
 ### Calculating proportion for each lineup member
 
@@ -242,7 +404,7 @@ function can be called. This might be the case when there is no
 pre-specified suspect in the lineup, as some researchers do in
 laboratory experiments. Instead of manually specifying the target
 position, a vector indexing all target positions is automatically
-generated from the argument ‘k’, within the function itself.
+generated from the argument `k`, within the function itself.
 
 ``` r
 allprop(lineup_vec, k = 8)
@@ -257,38 +419,81 @@ allprop(lineup_vec, k = 8)
 8 0.03007519
 ```
 
-The function then returns proportion of mock witnesses selecting each
-lineup member.
+The function then returns the proportion of mock witnesses selecting
+each lineup member.
 
-- *Compute bootstrapped estimates:*
+#### Compute bootstrapped estimates
 
-  We can generate bootstrap estimates for all the computed proportions,
-  too, with
-  [`lineup_boot_allprop()`](https://cgtza2.github.io/r4lineups/reference/lineup_boot_allprop.md).
+We can generate bootstrap estimates for all the computed proportions,
+too, with
+[`lineup_boot_allprop()`](https://cgtza2.github.io/r4lineups/reference/lineup_boot_allprop.md).
+This function takes a vector of lineup data and the nominal lineup size.
 
-  This function takes a vector of lineup data and the nominal lineup
-  size.
+``` r
+lineuprops_ci <- lineup_boot_allprop(lineup_vec, k = 8, R = 1000)
+lineuprops_ci
+       ci_low    ci_high
+1 0.082706767 0.19548872
+2 0.075187970 0.18796992
+3 0.075187970 0.19548872
+4 0.015037594 0.08270677
+5 0.210526316 0.36842105
+6 0.015037594 0.08663526
+7 0.105263158 0.24060150
+8 0.007518797 0.06015038
+```
 
-  ``` r
-  lineuprops.ci <- lineup_boot_allprop(lineup_vec, k = 8, R = 100)
-  lineuprops.ci
-         ci_low    ci_high
-  1 0.075187970 0.21052632
-  2 0.082706767 0.19273026
-  3 0.081329716 0.21596589
-  4 0.015844571 0.09022556
-  5 0.162925698 0.36781632
-  6 0.015037594 0.08270677
-  7 0.081673031 0.22556391
-  8 0.007518797 0.06766917
-  ```
+The object `lineuprops_ci` is a dataframe of 2 columns and `k` rows, in
+which `ci_low` and `ci_high` contain the lower and upper confidence
+limits respectively, and the number of rows equals nominal size.
 
-  The object `lineuprops.ci` is a dataframe of 2 columns and k rows, in
-  which columns 1 and 2 contain lower and upper confidence intervals,
-  respectively, and the number of rows = nominal size.
+*Note:* *k* = nominal size, and must always be explicitly declared (for
+more info, see the **Data Format** section, above).
 
-  *Note*: *k* = nominal size, and must always be explicitly declared
-(for more info, see the **Data Format** section, above).
+**A caution about inspecting all `k` intervals at once.** Each of these
+intervals is computed at the nominal 95% level individually. No
+correction is applied for the fact that you are looking at `k` of them
+together, so the chance that *at least one* excludes 1/k by accident is
+appreciably higher than 5%. If you want a statement about the lineup as
+a whole rather than about one nominated member, raise the level for each
+interval, e.g. a Bonferroni-style `conf = 1 - 0.05 / k`:
+
+``` r
+lineup_boot_allprop(lineup_vec, k = 8, conf = 1 - 0.05 / 8, R = 1000)
+       ci_low    ci_high
+1 0.067669173 0.23308271
+2 0.052631579 0.22628626
+3 0.063938000 0.23292968
+4 0.007518797 0.10239777
+5 0.178355546 0.39849624
+6 0.007518797 0.11874538
+7 0.097744361 0.26771452
+8 0.000000000 0.09022556
+```
+
+### Visualising the bootstrap distribution
+
+It is often more informative to look at the whole bootstrap distribution
+than at its endpoints.
+[`lineup_bias_boot_dist()`](https://cgtza2.github.io/r4lineups/reference/lineup_bias_boot_dist.md)
+returns the replicates and
+[`plot_lineup_bias_distribution()`](https://cgtza2.github.io/r4lineups/reference/plot_lineup_bias_distribution.md)
+draws them:
+
+``` r
+
+bias_dist <- lineup_bias_boot_dist(lineup_vec, target_pos = 3, k = 8, R = 1000)
+plot_lineup_bias_distribution(bias_dist, target_pos = 3)
+```
+
+![](Vignette_files/figure-html/unnamed-chunk-19-1.png)
+
+Note that a bootstrapped proportion is a count divided by the number of
+witnesses, so the replicates can only take values that are multiples of
+1/N. The plot bins at exactly that resolution, giving one bar per
+attainable proportion. If you override this with `bins` or `binwidth`,
+you may see spurious gaps and uneven bar heights, because some bins will
+contain no attainable value at all.
 
 ------------------------------------------------------------------------
 
@@ -302,27 +507,47 @@ notion of ‘functional size’ as a measure of the number of plausible
 lineup members, and defined it as the inverse of the proportion of mock
 witnesses choosing the suspect.
 
-Functional size = $`\frac{D}{N}`$
+Functional size = $`\frac{N}{D}`$
+
+where $`N`$ is the number of mock witnesses and $`D`$ the number of them
+who chose the suspect.
 
 You can compute functional size by inverting the result of the
 [`lineup_prop_vec()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_vec.md)
-function, or by calling `func_size`, but we suggest you use the function
+function, or by calling
+[`func_size()`](https://cgtza2.github.io/r4lineups/reference/func_size.md),
+but we suggest you use the function
 [`func_size_report()`](https://cgtza2.github.io/r4lineups/reference/func_size_report.md)
 which provides more detail, including bootstrapped confidence intervals.
 
-- To compute functional size with confidence intervals, call
-  [`func_size_report()`](https://cgtza2.github.io/r4lineups/reference/func_size_report.md),
-  and pass a vector of lineup data, as well as one scalar indicating
-  target position, and another indicating nominal size:
+To compute functional size with confidence intervals, call
+[`func_size_report()`](https://cgtza2.github.io/r4lineups/reference/func_size_report.md),
+and pass a vector of lineup data, as well as one scalar indicating
+target position, and another indicating nominal size:
 
-  ``` r
-  func_size_report(lineup_vec, target_pos = 3, k = 8, R = 100)
-  Functional size of lineup is 7
-  Confidence intervals [95%]
-  Normal Theory 2.885 10.312 
-  Bootstrap: percentile (R = 100) 4.85 12.091 
-  Bootstrap: bias-corrected (R = 100) 4.586 10.231 
-  ```
+``` r
+func_size_report(lineup_vec, target_pos = 3, k = 8, R = 1000)
+Functional size of lineup is 7
+Confidence intervals [95%]
+Normal Theory 3.003 10.127 
+Bootstrap: percentile (R = 1000) 4.926 12.065 
+Bootstrap: bias-corrected (R = 1000) 4.586 10.231 
+```
+
+**Functional size can exceed nominal size.** This surprises people, but
+it follows directly from the definition: if fewer than 1/k of the mock
+witnesses choose the suspect, the inverse of that proportion is larger
+than k. You can see it in the output above — the point estimate is below
+the nominal size of 8, but the upper confidence limits run well past it.
+
+It is not an error, and it does not mean the lineup contains more
+members than it does. It means the suspect was chosen at below-chance
+rates, which is informative in itself, but it also shows why functional
+size is awkward as a measure of “how many usable members are in this
+lineup”: the measure is unbounded above, while the quantity it is meant
+to describe is bounded by k. Malpass (1981) and Tredoux (1998) both
+discuss this, and it is a large part of the motivation for the effective
+size measures that follow.
 
 ------------------------------------------------------------------------
 
@@ -340,181 +565,350 @@ $`k_{a}-\sum_{i=1}^{k_{a}}\frac{|o_{i}-e_{a}|}{2e_{a}}`$
 where $`o_{i}`$ is the (observed) number of mock witnesses who choose
 lineup member i; $`e_{a}`$ is the adjusted nominal chance expectation
 \[N(l/$`k_{a}`$)\], and $`k_{a}`$ is the adjusted nominal number of
-alternatives in the lineup (original number-number of null foils)
+alternatives in the lineup (original number − number of null foils).
 
 Malpass’ measure of effective size poses problems for statistical
 inference based on distribution theory, though, as argued by Tredoux
-(1998). He instead proposed an alternate measure of effective size,
+(1998). Tredoux instead proposed an alternate measure of effective size,
 known as E’, derived from earlier work by Agresti and Agresti (1978).
 
 This package allows you to calculate effective size in several different
 ways.
 
-1.  **Malpass’s original (1981) & adjusted effective size (see: Tredoux,
-    1998)**
+### 1. Malpass’s original (1981) and adjusted effective size (see: Tredoux, 1998)
 
-    Malpass’ original formula for effective size proposed a denominator
-    computed by entering the number of foils that attracted non-zero
-    choice frequencies. Tredoux (1998) argued against this practice,
-    pointing out that zero frequencies could arise from random guessing
-    with appreciable frequency. He suggested a minor amendment of
-    Malpass’ original formula, as follows.
+Malpass’ original formula for effective size proposed a denominator
+computed by entering the number of foils that attracted non-zero choice
+frequencies. Tredoux (1998) argued against this practice, pointing out
+that zero frequencies could arise from random guessing with appreciable
+frequency. He suggested a minor amendment of Malpass’ original formula,
+as follows.
 
-    Malpass’ Effective size B = $`k-\sum_{i=1}^{k}\frac{|o_{i}-e|}{2e}`$
+Malpass’ Effective size B = $`k-\sum_{i=1}^{k}\frac{|o_{i}-e|}{2e}`$
 
-    Both Malpass measures can be displayed by calling
-    [`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md)
-    and passing lineup choices (or a table) plus nominal size. The
-    function always returns the Tredoux-adjusted estimate; `both = TRUE`
-    additionally prints the original Malpass estimate for comparison.
+Both Malpass measures can be displayed by calling
+[`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md)
+and passing lineup choices (or a table) plus nominal size. The function
+always returns the Tredoux-adjusted estimate; `both = TRUE` additionally
+prints the original Malpass estimate for comparison.
 
 ``` r
-esize_m(table(lineup_vec), k = 8, both = TRUE)
+esize_m(lineup_tab, k = 8, both = TRUE)
 Effective size (Malpass, 1981) =  5.962406 
 Effective size (Malpass, 1981, 
              adj Tredoux, 1998) =  5.962406 
 [1] 5.962406
 ```
 
-- *Compute bootstrapped estimates (Malpass’s adjusted):*
+Every member of `lineup_1` was chosen at least once, so here the two
+formulations coincide. They come apart as soon as there is a null foil,
+which is where the distinction between $`k`$ and $`k_a`$ bites:
 
-  Tredoux (1998) argued that it is better to use the alternate measure
-  of E’, but this was in a time when bootstrapping methods for
-  statistical inference were not widely known, and we therefore include
-  a function that allows you to compute bootstrap estimates of the
-  measures, with confidence intervals.
+``` r
+# Position 4 was never chosen
+esize_m(lineup_table(null_foil_vec, k = 8), k = 8, both = TRUE)
+Effective size (Malpass, 1981) =  7 
+Effective size (Malpass, 1981, 
+             adj Tredoux, 1998) =  7 
+[1] 7
+```
 
-  To do this, one must first generate a bootstrap sample using the
-  [`gen_boot_samples()`](https://cgtza2.github.io/r4lineups/reference/gen_boot_samples.md)
-  function, the `gen_esize_m function()`, and the
-  [`gen_esize_m_ci()`](https://cgtza2.github.io/r4lineups/reference/gen_esize_m_ci.md)
-  function. Their usage is shown below.
+The adjusted estimate deducts the unchosen member. Note that both
+figures happen to be 7 in this particular example, but for different
+reasons: the adjusted formula starts from k = 8 and deducts the null
+foil, while the original formula starts from $`k_a`$ = 7 chosen members
+and finds them perfectly uniform. Using
+[`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+rather than [`table()`](https://rdrr.io/r/base/table.html) is what makes
+the null foil visible in the first place.
 
-  ``` r
-  #Create a dataframe of bootstrapped lineup data
-  bootdata <- gen_boot_samples(lineup_vec, 1000)
+#### Compute bootstrapped estimates (Malpass’s adjusted)
 
-  #Calculate effective size for each lineup in bootdata
-  #Pass bootstrap df to function
-  #Nominal size is again declared by user
-  lineupsizes <- gen_esize_m(bootdata, k = 8)
+Tredoux (1998) argued that it is better to use the alternate measure of
+E’, but this was in a time when bootstrapping methods for statistical
+inference were not widely known, and we therefore include a function
+that allows you to compute bootstrap estimates of the measures, with
+confidence intervals.
 
-  #Pass vector of bootstrapped effective sizes to gen_esize_m_ci
-  #to calculate lower and upper CIs with desired level of alpha
-  gen_esize_m_ci(lineupsizes, perc = .025)
-      2.5% 
-  5.323308 
-  gen_esize_m_ci(lineupsizes, perc = .975)
-     97.5% 
-  6.285714 
-  ```
+To do this, one must first generate a bootstrap sample using the
+[`gen_boot_samples()`](https://cgtza2.github.io/r4lineups/reference/gen_boot_samples.md)
+function, then
+[`gen_esize_m()`](https://cgtza2.github.io/r4lineups/reference/gen_esize_m.md),
+and then
+[`gen_esize_m_ci()`](https://cgtza2.github.io/r4lineups/reference/gen_esize_m_ci.md).
+Their usage is shown below.
 
-- *Compute bootstrap descriptive statistics (Malpass’s adjusted
-  effective size):*
+``` r
+# Create a dataframe of bootstrapped lineup data
+bootdata <- gen_boot_samples(lineup_vec, 1000)
 
-  This function allows you to calculate descriptive statistics for a
-  bootstrapped vector/df of effective sizes (see object `lineupsizes`,
-  above). We pass this to
-  [`gen_boot_propmean_se()`](https://cgtza2.github.io/r4lineups/reference/gen_boot_propmean_se.md).
-  Descriptive statistics are reported in some detail.
+# Calculate effective size for each lineup in bootdata.
+# Nominal size is again declared by the user.
+lineupsizes <- gen_esize_m(bootdata, k = 8)
 
-  ``` r
-  gen_boot_propmean_se(lineupsizes)
-  Boot prop. (mean)   =  5.813556 
-  Boot prop. (median) =  5.804511 
-  SD of boot prop     =  0.2431211 
-  SE of boot prop     =  0.243 
-  2.5% boot CI lvl    =  5.323308 
-  97.5% boot CI lvl   =  6.285714 
-  ```
+# Pass the vector of bootstrapped effective sizes to gen_esize_m_ci
+# to calculate lower and upper CIs with the desired level of alpha
+gen_esize_m_ci(lineupsizes, perc = .025)
+    2.5% 
+5.323308 
+gen_esize_m_ci(lineupsizes, perc = .975)
+   97.5% 
+6.263158 
+```
 
-2.  **Tredoux’s measure of Effective Size, E’**
+#### Compute bootstrap descriptive statistics
+
+This function allows you to calculate descriptive statistics for a
+bootstrapped vector/df of effective sizes (see the object `lineupsizes`,
+above). We pass this to
+[`gen_boot_propmean_se()`](https://cgtza2.github.io/r4lineups/reference/gen_boot_propmean_se.md).
+Descriptive statistics are reported in some detail.
+
+``` r
+gen_boot_propmean_se(lineupsizes)
+Boot prop. (mean)   =  5.815564 
+Boot prop. (median) =  5.804511 
+SD of boot prop     =  0.2473418 
+SE of boot prop     =  0.247 
+2.5% boot CI lvl    =  5.323308 
+97.5% boot CI lvl   =  6.263158 
+```
+
+### 2. Tredoux’s measure of Effective Size, E’
 
 Tredoux (1998) proposed a measure of effective size that is amenable to
 statistical inference using distribution theory.
 
-E’=$`\frac{1}{1-I}`$, where I=$`1-\sum_{1=1}^k(\frac{O_i}{N})^2`$
+E’ = $`\frac{1}{1-I}`$, where I = $`1-\sum_{i=1}^k(\frac{O_i}{N})^2`$
 
-and where k, N, and 0_i\_ are all as defined earlier.
+and where k, N, and $`O_i`$ are all as defined earlier.
 
 To compute Tredoux’s measure of effective size, E’, use the function
-esize_T. We can compute confidence intervals around the measure of E’
-using normal distribution theory, and using bootstrap intervals, with
-the functions
+[`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md).
+We can compute confidence intervals around the measure of E’ using
+normal distribution theory, and using bootstrap intervals, with the
+function
 [`esize_T_boot()`](https://cgtza2.github.io/r4lineups/reference/esize_T_boot.md)
-from **r4lineups**, as well as`boot()` & `boot.ci()` from the **boot**
-package. Usage is shown below.
+from **r4lineups**, as well as `boot()` and `boot.ci()` from the
+**boot** package. Usage is shown below. Recall that `lineup_tab` was
+created near the start of this vignette with
+`lineup_table(lineup_vec, k = 8)`.
 
 ``` r
-#Compute effective size from a single vector of lineup choices
-esize_T(lineup_table)
+# Compute effective size from a lineup table
+esize_T(lineup_tab)
 [1] 5.693273
 
-#Compute bootstrapped effective size
-esize_boot <- boot::boot(lineup_vec, esize_T_boot, R = 100)
-
-#View boot object
+# Compute bootstrapped effective size
+esize_boot <- boot::boot(lineup_vec, esize_T_boot, R = 1000)
 esize_boot
 
 ORDINARY NONPARAMETRIC BOOTSTRAP
 
 
 Call:
-boot::boot(data = lineup_vec, statistic = esize_T_boot, R = 100)
+boot::boot(data = lineup_vec, statistic = esize_T_boot, R = 1000)
 
 
 Bootstrap Statistics :
     original     bias    std. error
-t1* 5.693273 -0.1922552   0.4433237
+t1* 5.693273 -0.1680123   0.4080961
+```
 
-#Get confidence intervals
-esize_boot.ci <- boot::boot.ci(esize_boot)
-Warning in boot::boot.ci(esize_boot): bootstrap variances needed for
-studentized intervals
-Warning in norm.inter(t, adj.alpha): extreme order statistics used as endpoints
-esize_boot.ci
+When requesting confidence intervals, name the types you actually want:
+
+``` r
+esize_boot_ci <- boot::boot.ci(esize_boot, type = c("perc", "bca"))
+esize_boot_ci
 BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
-Based on 100 bootstrap replicates
+Based on 1000 bootstrap replicates
 
 CALL : 
-boot::boot.ci(boot.out = esize_boot)
+boot::boot.ci(boot.out = esize_boot, type = c("perc", "bca"))
 
 Intervals : 
-Level      Normal              Basic         
-95%   ( 5.017,  6.754 )   ( 5.020,  6.826 )  
-
 Level     Percentile            BCa          
-95%   ( 4.560,  6.367 )   ( 4.999,  6.578 )  
+95%   ( 4.691,  6.306 )   ( 5.070,  6.649 )  
 Calculations and Intervals on Original Scale
-Some basic intervals may be unstable
-Some percentile intervals may be unstable
-Warning : BCa Intervals used Extreme Quantiles
 Some BCa intervals may be unstable
 ```
 
-3.  **Effective Size Per Foils**
+Calling `boot.ci()` without a `type` argument asks for *all* interval
+types, and produces two warnings that are worth understanding rather
+than ignoring:
 
-    Malpass (1981) proposed an additional method for computing effective
-    size, based on the number of foils who are chosen at a rate nearly
-    equal to chance expectation. We propose that ‘nearly equal’ could
-    mean that chance expectation falls within a confidence interval
-    constructed around the proportion of mock witnesses choosing the
-    lineup member.
+- *“bootstrap variances needed for studentized intervals”*. The
+  studentized (bootstrap-t) interval needs an estimate of the variance
+  of the statistic at each bootstrap replicate, which
+  [`esize_T_boot()`](https://cgtza2.github.io/r4lineups/reference/esize_T_boot.md)
+  does not return. That interval simply cannot be computed here, and
+  asking for it is what triggers the warning.
+- *“extreme order statistics used as endpoints”*. The requested
+  percentile falls in the extreme tail of the available replicates, so
+  the endpoint is being read off the very smallest or largest values,
+  where it is unstable. The remedy is more replicates (a larger `R`),
+  not a different interval type.
 
-    To calculate effective size by counting the number of foils who fall
-    within the CI for chance guessing, we pass a vector of lineup data,
-    a vector of target positions and nominal size. This function returns
-    effective size from a set of bootstrapped data. Default alpha is
-    0.05, but this can be adjusted as desired.
+Neither the studentized nor the normal-approximation interval is of much
+interest for a statistic like E’, so requesting `"perc"` and `"bca"`
+explicitly, as above, both avoids the warnings and reflects what you
+actually want.
+
+You can also look at the whole bootstrap distribution:
+
+``` r
+
+esize_dist <- esize_boot_dist(lineup_vec, k = 8, metric = "tredoux", R = 1000)
+plot_esize_distribution(esize_dist, metric = "E' (Tredoux, 1998)")
+```
+
+![](Vignette_files/figure-html/unnamed-chunk-27-1.png)
+
+#### E’ is biased downward in small samples
+
+The estimator above is a **plug-in**: sample proportions are substituted
+for the unknown choice probabilities. Plug-in estimators of
+$`\sum p_i^2`$ are biased upward, so E’ — its reciprocal — is biased
+**downward**. For $`N`$ choices spread evenly over $`k`$ members the
+bias is approximately
+
+``` math
+E[\hat{E}'] \approx \frac{Nk}{N + k - 1}, \qquad
+\text{bias} = -\frac{k(k-1)}{N + k - 1}
+```
+
+which is not negligible at the sample sizes mock-witness studies
+typically use. A perfectly fair six-person lineup returns about 5.47
+rather than 6 with 50 choices, and about 4.87 with 20:
+
+``` r
+
+set.seed(4242)
+k <- 6L
+
+bias_demo <- do.call(rbind, lapply(c(20, 50, 100, 500), function(N) {
+  est <- replicate(2000, {
+    counts <- tabulate(sample.int(k, N, replace = TRUE), nbins = k)
+    c(plug_in = esize_T(counts), corrected = esize_T(counts, unbiased = TRUE))
+  })
+  data.frame(
+    `N choices`  = N,
+    `Plug-in E'` = round(mean(est["plug_in", ]), 3),
+    `Predicted`  = round(N * k / (N + k - 1), 3),
+    `Corrected`  = round(mean(est["corrected", ]), 3),
+    check.names  = FALSE
+  )
+}))
+
+knitr::kable(
+  bias_demo, row.names = FALSE,
+  caption = "Mean E' from simulated fair six-person lineups, where the true effective size is exactly 6. Simulated data, 2000 replications per row."
+)
+```
+
+| N choices | Plug-in E’ | Predicted | Corrected |
+|----------:|-----------:|----------:|----------:|
+|        20 |      4.884 |     4.800 |     6.168 |
+|        50 |      5.470 |     5.455 |     6.022 |
+|       100 |      5.718 |     5.714 |     6.004 |
+|       500 |      5.941 |     5.941 |     6.000 |
+
+Mean E’ from simulated fair six-person lineups, where the true effective
+size is exactly 6. Simulated data, 2000 replications per row. {.table}
+
+[`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
+accepts `unbiased = TRUE`, which substitutes the unbiased estimator of
+$`\sum p_i^2`$, namely $`N(N-1)/\sum O_i(O_i-1)`$. The default is
+unchanged, so nothing previously computed moves; the correction is
+available when wanted:
+
+``` r
+c(plug_in = esize_T(lineup_tab),
+  corrected = esize_T(lineup_tab, unbiased = TRUE))
+  plug_in corrected 
+ 5.693273  5.903161 
+```
+
+Which to report depends on the question. For **describing** the choice
+distribution actually observed, the plug-in value is the quantity of
+interest. For **inference** about the lineup that produced those choices
+— which is the framing of Tredoux (1998) — the corrected form is the
+better estimator. Either way, state which was used.
+
+#### Getting the choice distribution without mock witnesses
+
+E’ needs a distribution of choices across lineup members, which normally
+means running a mock-witness study. There is an alternative worth
+knowing about: **target-absent lineups from an identification experiment
+supply the same thing**. A witness viewing a target-absent lineup has no
+culprit to recognise, so their choice reflects how the members compare
+to their memory and to the description — functionally what a mock
+witness provides.
+
+If your data record which member was chosen, E’ follows directly:
+
+``` r
+data(lineup_example)
+
+ta <- lineup_example[!lineup_example$target_present, ]
+chosen <- ta$lineup_member[ta$lineup_member > 0]
+
+c(plug_in   = esize_T(table(factor(chosen, levels = 1:6))),
+  corrected = esize_T(table(factor(chosen, levels = 1:6)), unbiased = TRUE))
+  plug_in corrected 
+ 4.225584  4.253132 
+```
+
+This is the reason the package records `lineup_member` rather than only
+the collapsed `identification` label: a dataset that stores just
+suspect/filler/reject cannot support this calculation, because it no
+longer knows *which* filler was chosen. Note that the bias above applies
+here too, and target-absent choosers are often fewer than mock witnesses
+would be, so the correction matters more rather than less. \### 3.
+Effective Size Per Foils
+
+Malpass (1981) proposed an additional method for computing effective
+size, based on the number of foils who are chosen at a rate nearly equal
+to chance expectation. We propose that ‘nearly equal’ could mean that
+chance expectation falls within a confidence interval constructed around
+the proportion of mock witnesses choosing the lineup member.
+
+To calculate effective size by counting the number of foils who fall
+within the CI for chance guessing, we pass a vector of lineup data, a
+vector of target positions and nominal size.
 
 ``` r
 eff_size_per_foils(lineup_vec, target_pos = seq_len(8), k = 8,
-                   conf = 0.95, R = 100)
+                   conf = 0.95, R = 1000)
 [1] 4
 ```
 
 Applying this function to our data, we see that effective size for this
-lineup is 4.
+lineup is 4: four of the eight members were chosen at a rate not
+distinguishable from chance.
+
+Note that the value returned is a **count of members**, not a continuous
+quantity, so it moves only in whole steps as `conf` is varied, and it
+stays flat across any range of `conf` in which no member’s interval
+crosses 1/k. Widening the interval can only ever increase the count.
+
+``` r
+
+for (conf in c(0.5, 0.7, 0.95, 0.99)) {
+  cat("conf =", conf, "->",
+      eff_size_per_foils(lineup_vec, target_pos = seq_len(8), k = 8,
+                         conf = conf, R = 1000), "\n")
+}
+conf = 0.5 -> 3 
+conf = 0.7 -> 3 
+conf = 0.95 -> 4 
+conf = 0.99 -> 4 
+```
+
+As with
+[`lineup_boot_allprop()`](https://cgtza2.github.io/r4lineups/reference/lineup_boot_allprop.md),
+on which this function is built, the intervals are not corrected for the
+fact that `k` of them are examined at once.
 
 ### Comparing two effective sizes
 
@@ -528,18 +922,18 @@ Here, we create a new dataframe containing two independent lineups from
 `nortje2012`.
 
 ``` r
-#Get data
+# Get data
 linedf <- nortje2012[1:2]
 
-#Compare effective size
+# Compare effective size
 effsize_compare(linedf)
 
 The two Effective sizes are  5.693273   4.967425
 If the interval includes 0, ns at p = .05
 Confidence intervals of difference [95%]
-Normal Theory -0.201 1.742
-Bootstrap: percentile (R = 1000) -0.299 1.66
-Bootstrap: bias-corrected (R = 1000) -0.237 1.708
+Normal Theory -0.231 1.788
+Bootstrap: percentile (R = 1000) -0.389 1.702
+Bootstrap: bias-corrected (R = 1000) -0.325 1.743
 ```
 
 The effective size for lineup_1 is therefore not significantly different
@@ -550,49 +944,53 @@ from the effective size for lineup_2.
 ## Diagnosticity Ratio
 
 Wells and Lindsay (1980) proposed the use of a ‘diagnosticity ratio’
-(essentially a risk ratio) computed from witness choices in target
-present lineup and target absent lineup (i.e. the ratio of those). Such
-a ratio could tell us the trade off between hits and false positives,
-and be used to evaluate modifications to lineup procedures, for
-instance.
+computed from witness choices in a target present lineup and a target
+absent lineup (i.e. the ratio of those). Such a ratio could tell us the
+trade off between hits and false positives, and be used to evaluate
+modifications to lineup procedures, for instance.
 
-We can calculate diagnosticity ratio for a set of identification parades
-using either
+The ratio is P(suspect ID \| target present) / P(suspect ID \| target
+absent), which makes it a **likelihood ratio** in the diagnostic-testing
+sense; because the two proportions come from independent groups of
+witnesses it can also be read as a risk ratio.
+
+We can calculate the diagnosticity ratio for a set of identification
+parades using either
 [`diag_ratio_W()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_W.md)
-for Wells & Lindsay’s (1980) diagnosticity ratio formula, or
+for Wells & Lindsay’s (1980) formula, or
 [`diag_ratio_T()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T.md)
 for Wells’ adjusted diagnosticity ratio (see: Tredoux, 1998).
 
-- Both functions require the same set of arguments: a vector of lineup
-  choices in which the target was present (TP), a vector of lineup
-  choices in which the target was absent (TA), as well as target
-  positions and nominal size for TP and TA lineups, respectively. These
-  last arguments are specified explicitly.
+Both functions require the same set of arguments: a vector of lineup
+choices in which the target was present (TP), a vector of lineup choices
+in which the target was absent (TA), as well as target positions and
+nominal size for TP and TA lineups, respectively. These last arguments
+are specified explicitly.
 
-  ``` r
-  #Target present & target absent lineup data for 1 lineup pair 
-  TP_lineup <- nortje2012$lineup_1
-  TA_lineup <- nortje2012$lineup_3
+``` r
+# Target present & target absent lineup data for 1 lineup pair
+TP_lineup <- nortje2012$lineup_1
+TA_lineup <- nortje2012$lineup_3
 
-  #Compute diagnosticity ratio
-  diag_ratio_W(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 =8, k2 = 8)
-  [1] 6.333333
-  diag_ratio_T(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 =8, k2 = 8)
-  [1] 5.571429
-  ```
+# Compute diagnosticity ratio
+diag_ratio_W(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 = 8, k2 = 8)
+[1] 6.333333
+diag_ratio_T(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 = 8, k2 = 8)
+[1] 5.571429
+```
 
-- We can also calculate the variance of the diagnosticity ratio, which
-  is useful for applying some inferential methods:
+We can also calculate the variance of the diagnosticity ratio, which is
+useful for applying some inferential methods:
 
-  ``` r
-  var_diag_ratio(TP_lineup, TA_lineup, 3, 7, 8, 8)
-  [1] 0.3709273
-  ```
+``` r
+var_diag_ratio(TP_lineup, TA_lineup, 3, 7, 8, 8)
+[1] 0.3709273
+```
 
-  *Note:*
-  [`var_diag_ratio()`](https://cgtza2.github.io/r4lineups/reference/var_diag_ratio.md)
-  relies on Wells & Lindsay’s original formula for computing
-  diagnosticity ratio. See Tredoux 1998 for further details.
+*Note:*
+[`var_diag_ratio()`](https://cgtza2.github.io/r4lineups/reference/var_diag_ratio.md)
+relies on Wells & Lindsay’s original formula for computing diagnosticity
+ratio. See Tredoux (1998) for further details.
 
 ### Differences between Independent Diagnosticity Ratios
 
@@ -600,61 +998,76 @@ We can compare diagnosticity ratios to other diagnosticity ratios, as
 detailed in Tredoux (1998). He showed a method for computing the
 equivalence of k diagnosticity ratios, in particular.
 
-The functions included in this package are based on an approach to
-calculating homogeneity for k independent diagnosticity ratios, as
-detailed in Tredoux (1998).
+#### Homogeneity using normal theory estimates
 
-#### Calculate homogeneity for *k* independent diagnosticity ratios, using normal theory estimates
+The homogeneity function requires the specific parameters used in the
+estimation of diagnosticity ratio homogeneity. For each lineup pair (TP
+and TA), we need the natural log of the diagnosticity ratio (referred to
+here as lnd), its variance (var_lnd), and a weight for each ratio equal
+to the inverse of its variance (wi). This is used to calculate a pooled
+estimator (i.e., the mean of the set of diagnosticity ratios). From
+this, we compute a chi-square deviate with *k*−1 degrees of freedom, and
+calculate its significance.
 
-The homogeneity function requires a dataframe containing the specific
-parameters used in the estimation of diagnosticity ratio homogeneity.
-For each lineup pair (TP and TA), we need to calculate the natural log
-of the diagnosticity ratio (referred to here as lnd), its variance
-(var_lnd), and a weight for each ratio that is equal to the inverse of
-its variance (wi). This is used to calculate a pooled estimator (i.e.,
-the mean of the set of diagnosticity ratios). From this, we compute a
-chi-square deviate with *k*-1 degrees of freedom, and calculate its
-significance.
-
-All these calculations are built into the homog_diag function, and so do
-not need to be calculated separately. You will need to pass a dataframe
-of lnd, var_lnd and wi to homog_diag, and all subsequent calculations
-are performed on this dataframe.
-
-To get the dataframe required by
+All these calculations are built into
 [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md),
-we follow the following steps:
+and so do not need to be calculated separately.
+
+**Two different questions.** Before running anything it is worth being
+explicit about what this test does and does not tell you, because its
+output is easy to misread. The chi-square is Cochran’s *Q*,
+
+``` math
+Q = \sum_{i=1}^{k} w_i \left( \ln d_i - \ln \bar{d} \right)^2 ,
+```
+
+which measures how far the *k* ratios lie **from each other** (strictly,
+from their pooled value $`\bar{d}`$). That is a separate question from
+whether the pooled ratio differs from 1, which is what a confidence
+interval on $`\bar{d}`$ addresses:
+
+| Question | Answered by |
+|----|----|
+| Do these *k* lineup pairs share a common diagnosticity ratio? | chi-square (*Q*) and its *p* value |
+| Is the average ratio different from 1, i.e. is there diagnosticity at all? | confidence interval on the pooled ratio |
+
+These can, and often do, disagree — we show a case below where *Q* is
+enormous while the interval on the pooled ratio comfortably covers 1.
+When *Q* is significant, the pooled ratio is an average of quantities
+that are not estimating the same thing, and should not be reported as a
+single summary.
+[`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md)
+now prints the per-pair ratios and a note to this effect, so the two
+questions do not get conflated.
 
 1.  For each lineup pair, load data for TP and TA lineups into separate
     vectors. Then, make a list containing all vectors for TP lineups,
     and another containing the TA lineups. The positions of each lineup
-    pair should correspond in each list.
-
-    - For example, if the first element of the TP lineup list is TP
-      lineup data for lineup pair 1, then the first element of the TA
-      lineup list should be the TA lineup data for lineup pair 1.
+    pair should correspond in each list. For example, if the first
+    element of the TP lineup list is TP lineup data for lineup pair 1,
+    then the first element of the TA lineup list should be the TA lineup
+    data for lineup pair 1.
 
 ``` r
 
-#Target present data:
-TP_lineup1 <-       rep(1:6, length.out = 100)
-TP_lineup2 <-       rep(1:5, length.out = 70)
-TP_lineup3 <-       rep(1:4, length.out = 20)
+# Target present data:
+TP_lineup1 <- rep(1:6, length.out = 100)
+TP_lineup2 <- rep(1:5, length.out = 70)
+TP_lineup3 <- rep(1:4, length.out = 20)
 lineup_pres_list <- list(TP_lineup1, TP_lineup2, TP_lineup3)
 
-#Target absent data:
-TA_lineup1 <-       rep(6:1, length.out = 100)
-TA_lineup2 <-       rep(5:1, length.out = 70)
-TA_lineup3 <-       rep(4:1, length.out = 20)
-lineup_abs_list <-  list(TA_lineup1, TA_lineup2, TA_lineup3)
+# Target absent data:
+TA_lineup1 <- rep(6:1, length.out = 100)
+TA_lineup2 <- rep(5:1, length.out = 70)
+TA_lineup3 <- rep(4:1, length.out = 20)
+lineup_abs_list <- list(TA_lineup1, TA_lineup2, TA_lineup3)
 ```
 
 2.  Next, the function requires the suspect position for each lineup
     pair. If the TP and TA suspect positions differ, supply a
-    two-element vector in TP, TA order for that pair.
-
-    - A single position can be supplied for each pair when it is shared
-      by the TP and TA lineups.
+    two-element vector in TP, TA order for that pair. A single position
+    can be supplied for each pair when it is shared by the TP and TA
+    lineups.
 
 ``` r
 
@@ -662,43 +1075,223 @@ pos_list <- c(3, 2, 1)
 ```
 
 3.  To ensure the data have been coded accurately, we then specify
-    nominal size for each lineup pair. The order in which nominal size
-    for each lineup pair is listed must also correspond with the
-    positions of each respective lineup in the lineup lists (i.e., if
-    lineup 1 has *k* = 6, then the first element of vector ‘k’ = 6).
-    Following the example above, we create our nominal size vector k by
-    calling `k <- c(6, 5, 4)`
+    nominal size for each lineup pair. The order must correspond with
+    the positions of each respective lineup in the lineup lists (i.e.,
+    if lineup 1 has *k* = 6, then the first element of vector `k` = 6).
 
-4.  Finally, we pass the above arguments/data to
+``` r
+
+k <- c(6, 5, 4)
+```
+
+4.  Finally, we pass the above arguments to
     [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md),
     which assesses the homogeneity of k independent diagnosticity
     ratios.
 
 ``` r
 homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
+Diagnosticity ratio for each lineup pair:
+ pair     d       95% CI
+    1 1.000 [0.54, 1.84]
+    2 1.000 [0.52, 1.94]
+    3 1.000 [0.34, 2.93]
+
 Mean diagnosticity ratio: 1
 Chi-square estimate (q): 0
 Sig: 1
+
+Note: no evidence of heterogeneity (p >= 0.05), so the ratios are
+consistent with a common value and the pooled mean is a reasonable summary.
 ```
 
-#### Calculate homogeneity for *k* independent diagnosticity ratios, with bootstrapped confidence intervals
+These three lineups were built with
+[`rep()`](https://rdrr.io/r/base/rep.html) and are close to uniform by
+construction. Every pair has the suspect chosen equally often whether
+the target was present or absent, so each *d* = 1 exactly: the ratios
+are homogeneous (they agree with one another) *and* non-diagnostic (they
+agree on the value 1). Both questions get the same answer here, which is
+why this example cannot show you the difference between them.
 
-This function returns bootstrapped estimates of the homogeneity of k
-diagnosticity ratios, and therefore takes the same arguments as
+Now a set of ratios that genuinely differ. Each of these three lineup
+pairs is diagnostic — the suspect is chosen more often when the target
+is present — but they differ substantially in **how** diagnostic they
+are:
+
+``` r
+# A helper: n1 witnesses choose position 1, the rest spread over positions 2-6
+choose_pos1 <- function(n1) c(rep(1, n1), rep(2:6, length.out = 100 - n1))
+
+# Suspect ID rate falls from .60 to .32 across the three TP lineups,
+# and rises from .10 to .20 across the three TA lineups
+het_pres <- list(choose_pos1(60), choose_pos1(45), choose_pos1(32))
+het_abs  <- list(choose_pos1(10), choose_pos1(15), choose_pos1(20))
+
+homog_diag(het_pres, het_abs, pos_list = c(1, 1, 1), k = c(6, 6, 6))
+Diagnosticity ratio for each lineup pair:
+ pair     d        95% CI
+    1 6.000 [3.26, 11.04]
+    2 3.000  [1.79, 5.02]
+    3 1.600  [0.99, 2.60]
+
+Mean diagnosticity ratio: 2.782997
+Chi-square estimate (q): 11.18942
+Sig: 0.003717485
+
+Note: the ratios are heterogeneous (p < 0.05), so they do not share a
+common diagnosticity ratio. Q measures how far the ratios lie from their
+pooled value, which is a different question from whether the pooled ratio
+differs from 1. The mean above averages ratios that genuinely differ and
+should not be reported as a single summary for these lineups; interpret the
+pairs separately.
+```
+
+The per-pair table makes the result readable: the ratios are 6.0, 3.0
+and 1.6, all pointing the same way but far enough apart that *Q* = 11.19
+on 2 *df* rejects homogeneity (*p* = .004). The first two intervals
+exclude 1 decisively; the third, \[0.99, 2.60\], only just covers it, so
+pair 3 is the weakest of the set on its own evidence. The substantive
+conclusion is that these lineups are not equally diagnostic — the first
+discriminates guilty from innocent suspects close to four times as
+sharply as the third — and that is a claim about the *pairs*, which is
+only available because we did not stop at the pooled number.
+
+##### A cautionary case: why you must not pool when *Q* is significant
+
+Heterogeneity is not always as tidy as that. Consider three pairs whose
+ratios differ in **direction** rather than just in degree — one lineup
+strongly incriminating, one uninformative, and one that points the wrong
+way (the suspect is chosen *more* often when the target is absent, which
+is what a badly biased lineup looks like):
+
+``` r
+mixed_pres <- list(choose_pos1(60), choose_pos1(30), choose_pos1(20))
+mixed_abs  <- list(choose_pos1(10), choose_pos1(30), choose_pos1(45))
+
+homog_diag(mixed_pres, mixed_abs, pos_list = c(1, 1, 1), k = c(6, 6, 6))
+Diagnosticity ratio for each lineup pair:
+ pair     d        95% CI
+    1 6.000 [3.26, 11.04]
+    2 1.000  [0.65, 1.53]
+    3 0.444  [0.28, 0.70]
+
+Mean diagnosticity ratio: 1.060829
+Chi-square estimate (q): 45.62598
+Sig: 1.237212e-10
+
+Note: the ratios are heterogeneous (p < 0.05), so they do not share a
+common diagnosticity ratio. Q measures how far the ratios lie from their
+pooled value, which is a different question from whether the pooled ratio
+differs from 1. The mean above averages ratios that genuinely differ and
+should not be reported as a single summary for these lineups; interpret the
+pairs separately.
+```
+
+Here *d* = 6.00, 1.00 and 0.44. The chi-square is enormous (*Q* = 45.6,
+*p* \< .0001), and yet the pooled ratio is 1.06 — barely distinguishable
+from no diagnosticity at all. Nothing has gone wrong: because
+$`\bar{d}`$ is a precision-weighted mean on the log scale, averaging
+$`\ln 6 = +1.79`$, $`\ln 1 = 0`$ and $`\ln 0.44 = -0.81`$ lands very
+close to zero. The ratios cancel.
+
+This is precisely the situation the note in the output is warning about.
+The pooled figure of 1.06 is not a finding about these lineups; it is an
+artefact of averaging three quantities that are not estimating a common
+parameter. Reporting it — or worse, concluding from it that the lineups
+showed no diagnosticity — would be a serious misreading. Read the
+per-pair rows instead, which say something quite specific and quite
+important: pair 1 is strongly diagnostic, pair 2 is uninformative, and
+pair 3 is diagnostic in the wrong direction.
+
+The order of operations is therefore: look at *Q* first, and only
+interpret the pooled ratio if *Q* gives you no reason to reject a common
+value.
+
+#### Homogeneity with bootstrapped confidence intervals
+
+[`homog_diag_boot()`](https://cgtza2.github.io/r4lineups/reference/homog_diag_boot.md)
+returns bootstrapped estimates of the homogeneity of k diagnosticity
+ratios, and takes the same arguments as
 [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md)
-(which provides normal theory estimates).
+(which provides normal theory estimates), plus `R` for the number of
+bootstrap replications. It also requires suspect positions: they cannot
+be inferred from the observed choices.
 
-This function also requires suspect positions: they cannot be inferred
-from the observed choices. Pass them with `pos_list` as above.
+The percentile interval it reports for the mean is an interval on the
+**pooled** ratio, so the same caution applies: it is only worth
+interpreting when the chi-square has not rejected homogeneity.
 
-Thus, we follow steps 1 and 3, outlined above, before calling
-[`homog_diag_boot()`](https://cgtza2.github.io/r4lineups/reference/homog_diag_boot.md):
+``` r
+homog_diag_boot(lineup_pres_list = het_pres,
+                lineup_abs_list = het_abs,
+                pos_list = c(1, 1, 1),
+                k = c(6, 6, 6),
+                R = 200,
+                seed = 1)
+Diagnosticity ratio for each lineup pair:
+ pair     d        95% CI
+    1 6.000 [3.26, 11.04]
+    2 3.000  [1.79, 5.02]
+    3 1.600  [0.99, 2.60]
 
-![](homog.png)*Note:* R = number of bootstrap replications
+Mean diagnosticity ratio is 2.783 
+Confidence intervals (percentile) 2.059 3.7 
+Chi-squared estimate is 11.189 
+Confidence intervals (percentile): 2.601 24.833 
+Sig (asymptotic, df = 2):  0.003717 
+
+Note: the ratios are heterogeneous (p < 0.05), so they do not share a
+common diagnosticity ratio. Q measures how far the ratios lie from their
+pooled value, which is a different question from whether the pooled ratio
+differs from 1. The mean above averages ratios that genuinely differ and
+should not be reported as a single summary for these lineups; interpret the
+pairs separately.
+```
+
+Both routes agree, as they should. Note that the bootstrap interval on
+the mean, \[2.06, 3.70\], excludes 1 — the set of lineups is diagnostic
+on average — while the chi-square still says the three ratios are not
+interchangeable.
+
+Running the same call on the cautionary data makes the trap concrete:
+
+``` r
+homog_diag_boot(lineup_pres_list = mixed_pres,
+                lineup_abs_list = mixed_abs,
+                pos_list = c(1, 1, 1),
+                k = c(6, 6, 6),
+                R = 200,
+                seed = 1)
+Diagnosticity ratio for each lineup pair:
+ pair     d        95% CI
+    1 6.000 [3.26, 11.04]
+    2 1.000  [0.65, 1.53]
+    3 0.444  [0.28, 0.70]
+
+Mean diagnosticity ratio is 1.061 
+Confidence intervals (percentile) 0.827 1.327 
+Chi-squared estimate is 45.626 
+Confidence intervals (percentile): 32.879 59.368 
+Sig (asymptotic, df = 2):  1.237e-10 
+
+Note: the ratios are heterogeneous (p < 0.05), so they do not share a
+common diagnosticity ratio. Q measures how far the ratios lie from their
+pooled value, which is a different question from whether the pooled ratio
+differs from 1. The mean above averages ratios that genuinely differ and
+should not be reported as a single summary for these lineups; interpret the
+pairs separately.
+```
+
+The interval on the pooled ratio is \[0.83, 1.33\] and covers 1, while
+the chi-square is 45.6 with *p* \< .0001. Read on its own, the interval
+says “no diagnosticity”; that reading is wrong, and pair 1 (*d* = 6.0,
+CI \[3.26, 11.04\]) shows why. The two statistics are not in conflict,
+because they are not answering the same question — which is the whole
+point of checking *Q* before you look at the pooled interval.
 
 ------------------------------------------------------------------------
 
-## ROC Curve (Confidence ~ Accuracy)
+## ROC Analysis (Confidence ~ Accuracy)
 
 The
 [`make_roc()`](https://cgtza2.github.io/r4lineups/reference/make_roc.md)
@@ -707,32 +1300,105 @@ eyewitness experiment, where accuracy is recorded for target present and
 target absent lineups. We follow the ideas suggested by Mickes, Wixted,
 and others (see references).
 
-This function requires a dataframe with three columns: `target_present`
-(logical), `identification` (character: “suspect”, “filler”, or
-“reject”), and `confidence` (numeric).
+### Data format for ROC analysis
 
-| target_present | identification | confidence |
-|:--------------:|:--------------:|:----------:|
-|      TRUE      |    suspect     |     90     |
-|      TRUE      |     reject     |     50     |
-|      TRUE      |    suspect     |     90     |
-|      TRUE      |     filler     |     50     |
-|      TRUE      |     filler     |     50     |
-|      TRUE      |    suspect     |     90     |
-|      TRUE      |    suspect     |     70     |
-|      TRUE      |     filler     |     40     |
+The ROC functions require a dataframe with three columns:
+`target_present` (logical), `identification` (character: “suspect”,
+“filler”, or “reject”), and `confidence` (numeric).
 
-Lineup identification data {.table style="width:65%;"}
+An important point about study design: the raw data you collect should
+record **which lineup member each witness chose**, exactly as in the
+earlier sections of this vignette. The suspect/filler/reject
+classification is derived from that choice together with the known
+position of the suspect — it is not something to record instead of the
+choice. Keeping the original position lets you compute every measure in
+this vignette from the same dataset, and lets you re-derive the
+classification if the suspect position is later corrected.
+
+The derivation is straightforward:
 
 ``` r
-#Call roc function
-make_roc(lineup_example)
+# Raw data as it should be collected: the member chosen (0 = rejected the lineup)
+raw <- data.frame(
+  target_present = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE),
+  chosen_member  = c(3, 5, 0, 3, 2, 0),
+  confidence     = c(90, 70, 40, 80, 60, 50)
+)
+
+# The suspect occupies position 3 in both the TP and TA lineups
+suspect_pos <- 3
+
+raw$identification <- ifelse(raw$chosen_member == 0, "reject",
+                      ifelse(raw$chosen_member == suspect_pos, "suspect",
+                             "filler"))
+raw
+  target_present chosen_member confidence identification
+1           TRUE             3         90        suspect
+2           TRUE             5         70         filler
+3           TRUE             0         40         reject
+4          FALSE             3         80        suspect
+5          FALSE             2         60         filler
+6          FALSE             0         50         reject
+```
+
+The bundled `lineup_example` dataset is already in the derived form.
+Only the first 8 rows are shown:
+
+| target_present | lineup_member | suspect_pos | identification | confidence |
+|:--------------:|:-------------:|:-----------:|:--------------:|:----------:|
+|     FALSE      |       2       |      1      |     filler     |     40     |
+|     FALSE      |       3       |      1      |     filler     |     50     |
+|      TRUE      |       2       |      1      |     filler     |     40     |
+|      TRUE      |       1       |      1      |    suspect     |     80     |
+|      TRUE      |       1       |      1      |    suspect     |     60     |
+|     FALSE      |       0       |      1      |     reject     |     20     |
+|      TRUE      |       1       |      1      |    suspect     |     60     |
+|      TRUE      |       1       |      1      |    suspect     |     70     |
+
+lineup_example (first 8 rows of 1400) {.table}
+
+### Computing and plotting the ROC
+
+Each ROC and CAC analysis comes in two forms, and it is worth being
+clear about the difference:
+
+- [`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md),
+  [`make_cacdata()`](https://cgtza2.github.io/r4lineups/reference/make_cacdata.md)
+  and
+  [`make_fullroc_data()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc_data.md)
+  compute and return the **data only**.
+- [`make_roc()`](https://cgtza2.github.io/r4lineups/reference/make_roc.md),
+  [`make_cac()`](https://cgtza2.github.io/r4lineups/reference/make_cac.md)
+  and
+  [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+  wrap those, additionally build the plot, and return a classed object
+  with the plot stored in `$plot`.
+
+Either form can be passed to
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html):
+
+``` r
+
+roc1 <- make_rocdata(lineup_example, lineup_size = 6)
+plot(roc1)
+```
+
+![ROC Curve for Confidence ~
+Accuracy](Vignette_files/figure-html/unnamed-chunk-43-1.png)
+
+ROC Curve for Confidence ~ Accuracy
+
+Printing the wrapper object gives the numerical summary:
+
+``` r
+roc_result <- make_roc(lineup_example, lineup_size = 6, show_plot = FALSE)
+roc_result
 
 === Lineup ROC Analysis ===
 
-Partial AUC: 0.076 
-Target-present lineups: 100 
-Target-absent lineups: 100 
+Partial AUC: 0.053 
+Target-present trials (N): 700 
+Target-absent trials (N): 700 
 Lineup size: 6 
 Confidence levels: 9 
 
@@ -740,65 +1406,189 @@ ROC Data:
  [38;5;246m# A tibble: 10 × 5 [39m
    confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
          [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m         19            0             0                0           0
- [38;5;250m 2 [39m        100            0.17          0               17           0
- [38;5;250m 3 [39m         90            0.38          0               38           0
- [38;5;250m 4 [39m         80            0.48          0.06            48           6
- [38;5;250m 5 [39m         70            0.55          0.1             55          10
- [38;5;250m 6 [39m         60            0.6           0.11            60          11
- [38;5;250m 7 [39m         50            0.6           0.15            60          15
- [38;5;250m 8 [39m         40            0.6           0.15            60          15
- [38;5;250m 9 [39m         30            0.6           0.15            60          15
- [38;5;250m10 [39m         20            0.6           0.15            60          15
+ [38;5;250m 1 [39m         19          0            0                   0           0
+ [38;5;250m 2 [39m        100          0.097 [4m1 [24m       0                  68           0
+ [38;5;250m 3 [39m         90          0.143        0.005 [4m7 [24m [4m1 [24m           100           4
+ [38;5;250m 4 [39m         80          0.189        0.014 [4m3 [24m            132          10
+ [38;5;250m 5 [39m         70          0.26         0.022 [4m9 [24m            182          16
+ [38;5;250m 6 [39m         60          0.351        0.03              246          21
+ [38;5;250m 7 [39m         50          0.436        0.054 [4m3 [24m            305          38
+ [38;5;250m 8 [39m         40          0.507        0.077 [4m1 [24m            355          54
+ [38;5;250m 9 [39m         30          0.556        0.103             389          72
+ [38;5;250m10 [39m         20          0.593        0.126             415          88
 
-Plot available in $plot
+Plot: use plot(x), or save the object and extract x$plot
 ```
+
+The value returned by
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) is an ordinary
+**ggplot2** object, so you can adjust it with the usual `+` syntax
+rather than being limited to the arguments of the plotting function:
+
+``` r
+
+plot(roc1) +
+  ggplot2::theme_minimal(base_size = 12) +
+  ggplot2::labs(title = "Partial ROC, Nortje & Tredoux mock-witness data")
+```
+
+![](Vignette_files/figure-html/unnamed-chunk-45-1.png)
+
+### Full ROC curves
+
+[`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+implements the Smith, Yang & Wells (2020) full ROC, which uses all
+responses — suspect IDs, filler IDs and rejections — rather than suspect
+IDs alone. The ordering method is shown in the plot subtitle, since it
+materially affects the result:
+
+``` r
+full_roc1 <- make_fullroc(lineup_example, lineup_size = 6, show_plot = FALSE)
+Ordering categories by their sample diagnosticity ratios is optimistically biased: the ordering is estimated from the same data used to compute the AUC. With roughly 700 lineups per arm the bias can be substantial. Use order = "apriori" for inference or between-condition comparisons; see vignette("fullroc_analysis").
+plot(full_roc1)
+```
+
+![](Vignette_files/figure-html/unnamed-chunk-46-1.png)
+
+See the [Full ROC
+analysis](https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.md)
+vignette for the details, including why `order = "apriori"` is
+preferable for inference.
 
 ------------------------------------------------------------------------
 
 ## Similarity of Faces in a Lineup
 
-Following some ideas suggested by Tredoux (2002), this function computes
-the degree to which each face in a set of faces loads onto a common
-factor computed from numeric representations of the faces.
+The face similarity approach included in version 1 of **r4lineups** —
+the interactive `face_sim()` function, which prompted for image files
+and reported factor loadings — is **no longer supported**.
 
-The images used in this example can be found at
-<https://github.com/tmnaylor/malpass_foils>. To keep package checks
-reproducible and network-free, the download step is shown but not
-executed:
+It has been superseded by an approach based on modern face embeddings,
+which is both more accurate and reproducible from a script rather than a
+dialog box. See the [Face
+similarity](https://cgtza2.github.io/r4lineups/articles/face_similarity.md)
+vignette for the current methods, and note that these require the Python
+dependencies installed by
+[`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md).
 
-``` r
+------------------------------------------------------------------------
 
-foil1 <- magick::image_read("https://raw.githubusercontent.com/tmnaylor/malpass_foils/master/malp1.jpg")
-```
+## Technical Details
 
-``` r
+### The measures, and what each assumes
 
-print(foil1)
-```
+| Measure | Function | Estimand | Key assumption |
+|----|----|----|----|
+| Lineup proportion | [`lineup_prop_vec()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_vec.md) | Share of witnesses choosing one member | Binomial; chance value is $`1/k`$ |
+| Functional size | [`func_size()`](https://cgtza2.github.io/r4lineups/reference/func_size.md) | $`N / (\text{choices of the suspect})`$ | Undefined when nobody chooses the suspect |
+| Effective size (Malpass) | [`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md) | Number of plausible alternatives, absolute-deviation form | Adjusted version counts all $`k`$; original counts only chosen members |
+| Effective size E’ | [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md) | $`1/\sum p_i^2`$, the inverse-Simpson index | Plug-in form biased downward at small $`N`$; see above |
+| Diagnosticity ratio | [`diag_ratio_T()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T.md) | Ratio of suspect-choice rates, target-present against target-absent | The two lineups are independent samples |
 
-Without passing any arguments, call `face_sim()`:
+### Nominal, adjusted and effective size
 
-- A dialog box will appear, through which you may access your OS’s file
-  explorer. Navigate to the folder in which the images are stored,
-  select all, and open.
+Three different counts appear throughout and are easily confused.
 
-  *Note:* Each image should be of one face only. Each face should be
-  standardised to have the same pupil locations in xy space (this will
-  mean repositioning and resizing each face image).
+**Nominal size** $`k`$ is how many people stand in the lineup.
+**Adjusted nominal size** $`k_a`$ is $`k`$ less the null foils — members
+nobody chose. **Effective size** is an estimate of how many members
+function as genuine alternatives, and is generally not a whole number.
 
-![](lineupimage1.png)
+The distinction matters because most functions here take $`k`$ as an
+argument and will not detect that it is wrong.
+[`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+exists to make null foils visible before that happens:
+[`table()`](https://rdrr.io/r/base/table.html) silently omits members
+with zero counts, so a lineup of eight with one null foil produces a
+seven-entry table and nothing in the output says a member is missing.
 
-- The function will now process the selected images, printing the lineup
-  array to the viewer pane in RStudio, and reporting the loading of each
-  face on the first common factor in a factor analysis:
+### Inference
 
-![Set of faces is printed to viewer pane](lineupimage2.png)
+Three routes are available, and they answer slightly different
+questions:
 
-Set of faces is printed to viewer pane
+- **Normal-theory intervals**
+  ([`esize_T_ci_n()`](https://cgtza2.github.io/r4lineups/reference/esize_T_ci_n.md),
+  [`prop.test()`](https://rdrr.io/r/stats/prop.test.html)) are quick and
+  adequate when counts are large and the estimate is away from a
+  boundary.
+- **Bootstrap intervals**
+  ([`esize_T_boot()`](https://cgtza2.github.io/r4lineups/reference/esize_T_boot.md)
+  with [`boot::boot.ci()`](https://rdrr.io/pkg/boot/man/boot.ci.html),
+  [`lineup_prop_boot()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_boot.md))
+  make no distributional assumption about the transformed statistic.
+  Prefer them when a proportion is near 0 or 1, or when the sample is
+  small — which for these measures is usual.
+- **Bayesian posteriors**
+  ([`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md),
+  [`func_size_bayes()`](https://cgtza2.github.io/r4lineups/reference/func_size_bayes.md))
+  give credible intervals and direct probability statements such as
+  $`P(E' < 6 \mid \text{data})`$. See
+  [`vignette("bayesian_inference")`](https://cgtza2.github.io/r4lineups/articles/bayesian_inference.md).
 
-![Returns factor loading for each face](lineupimage3.png)
+Bounded quantities are the recurring difficulty: E’ cannot exceed $`k`$
+and a proportion cannot leave $`[0, 1]`$, but a normal-theory interval
+can and does cross those limits in small samples. That is the main
+reason to prefer the bootstrap or the posterior here.
 
-Returns factor loading for each face
+### Assumptions common to the fairness measures
+
+1.  Each mock witness contributes one choice, so the counts partition
+    the sample.
+2.  Choices are independent across witnesses.
+3.  The nominal size passed to the function is the true number of lineup
+    members. Where null foils are present, effective size is the
+    quantity of interest and nominal size overstates the alternatives
+    available.
+4.  Mock-witness measures describe the lineup **relative to a
+    description**. A different description can give a different answer
+    for the same lineup; see
+    [`vignette("face_similarity")`](https://cgtza2.github.io/r4lineups/articles/face_similarity.md)
+    on what follows from that.
+
+## Other vignettes
+
+This vignette covers the classical fairness measures. The package
+includes a number of others:
+
+- [Bayesian
+  inference](https://cgtza2.github.io/r4lineups/articles/bayesian_inference.md)
+  — Bayesian estimation of lineup fairness measures
+- [Calibration and decision
+  analysis](https://cgtza2.github.io/r4lineups/articles/calibration_decision_analysis.md)
+- [Face
+  similarity](https://cgtza2.github.io/r4lineups/articles/face_similarity.md)
+  — the current, embedding-based approach
+- [Full ROC
+  analysis](https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.md)
+  — Smith, Yang & Wells (2020) full ROC curves
+- [Information and error rate
+  analysis](https://cgtza2.github.io/r4lineups/articles/information_error_rate_analysis.md)
+- [Lineup memory
+  models](https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.md)
+  — pyWitness model fitting
+- [Model
+  comparison](https://cgtza2.github.io/r4lineups/articles/model_comparison.md)
+- [Multiple-source signal detection
+  model](https://cgtza2.github.io/r4lineups/articles/msdt_model.md)
+- [Multi-d’
+  model](https://cgtza2.github.io/r4lineups/articles/multid_model.md) —
+  Lee & Penrod (2019) signal detection indices, including d’(IFa) as a
+  resultant measure of lineup bias
+- [pAUC statistical
+  comparison](https://cgtza2.github.io/r4lineups/articles/pauc_statistical_comparison.md)
+- [RAC
+  analysis](https://cgtza2.github.io/r4lineups/articles/rac_analysis.md)
+- [SDT GLM
+  analysis](https://cgtza2.github.io/r4lineups/articles/sdt_glm_analysis.md)
+- [SDT summary
+  comparisons](https://cgtza2.github.io/r4lineups/articles/sdt_summary_comparisons.md)
+- [Simulation and power
+  analysis](https://cgtza2.github.io/r4lineups/articles/simulation_power_analysis.md)
+- [Winter 2HT
+  model](https://cgtza2.github.io/r4lineups/articles/winter_2ht_model.md)
+
+You can also list them from the console with
+`browseVignettes("r4lineups")`.
 
 ------------------------------------------------------------------------

@@ -335,6 +335,18 @@ area), and composite workflows that combine multiple functions.
 - [`plot_msdt_joint()`](https://cgtza2.github.io/r4lineups/reference/plot_msdt_joint.md)
   — joint density contour plot (suspect vs max filler).
 
+### Multi‑d′ model (Lee & Penrod, 2019)
+
+- [`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md)
+  — d′(GI), d′(GFp), d′(IFa), d′(FaFp), d′(RaRp) + TP/TA lineup‑bias
+  indices from TP/TA data or counts; bootstrap CIs; cumulative by
+  confidence; fair‑lineup reference for d′(IFa).
+- [`compare_multid()`](https://cgtza2.github.io/r4lineups/reference/compare_multid.md)
+  — differences between two conditions on every index (bootstrap
+  SE/CI/p).
+- [`plot.multid()`](https://cgtza2.github.io/r4lineups/reference/plot.multid.md)
+  — decomposition waterfall, index dot plot, or indices by confidence.
+
 ### Simulation & power
 
 - [`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
@@ -409,6 +421,11 @@ These wrappers combine data creation, analysis, and plotting:
 - **SDT GLM/GLMM**:
   [`fit_sdt_glm()`](https://cgtza2.github.io/r4lineups/reference/fit_sdt_glm.md)/[`fit_sdt_glmm()`](https://cgtza2.github.io/r4lineups/reference/fit_sdt_glmm.md) +
   [`extract_sdt_metrics()`](https://cgtza2.github.io/r4lineups/reference/extract_sdt_metrics.md)
+- **Multi‑d′**:
+  [`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md) +
+  [`plot.multid()`](https://cgtza2.github.io/r4lineups/reference/plot.multid.md);
+  [`compare_multid()`](https://cgtza2.github.io/r4lineups/reference/compare_multid.md)
+  for two conditions
 
 ## Vignettes (current)
 
@@ -423,6 +440,7 @@ These wrappers combine data creation, analysis, and plotting:
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from
   counts
 - `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions
+- `multid_model.Rmd` — Lee & Penrod Multi‑d′ model
 
 ## Current status and TODO (high‑level)
 
@@ -452,3 +470,11 @@ validation for recent additions.
 - For face similarity, ensure Python deps are installed
   ([`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md)),
   and set `MPLCONFIGDIR` if matplotlib cache issues appear.
+- The Shiny app (`inst/shiny/r4lineups_app`) is a thin `app.R` plus one
+  module per tab in its `R/` folder (`mod_*.R`, helpers in `utils.R`).
+  Modules call only exported package functions.
+  `tests/testthat/test-shiny-app.R` checks each module against direct
+  package calls with
+  [`shiny::testServer()`](https://rdrr.io/pkg/shiny/man/testServer.html);
+  `test-shiny-app-browser.R` is an opt-in headless-Chrome smoke test
+  (install the package, then set `R4LINEUPS_TEST_APP=true`).

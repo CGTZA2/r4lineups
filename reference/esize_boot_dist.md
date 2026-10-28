@@ -39,7 +39,8 @@ esize_boot_dist(
 
 ## Value
 
-A numeric vector of bootstrap estimates.
+A numeric vector of bootstrap estimates, carrying an `"n"` attribute
+equal to the number of lineup choices resampled.
 
 ## Examples
 

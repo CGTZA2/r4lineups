@@ -15,6 +15,7 @@ simulate_lineup_data(
   lineup_size = 6,
   conf_levels = 5,
   decision_rule = c("max", "best_rest", "ensemble", "integration"),
+  foil_bias = NULL,
   include_response_time = FALSE,
   seed = NULL
 )
@@ -66,6 +67,16 @@ simulate_lineup_data(
 
   - "integration" - Sum memory strengths across all members
 
+- foil_bias:
+
+  Numeric vector of length `lineup_size - 1`, giving the mean memory
+  strength of each foil. Defaults to `NULL`, which places every foil at
+  `N(0, 1)`. Supplying a vector makes the foils differ in how plausible
+  they are, so that they are no longer interchangeable. Values are means
+  on the same scale as `d_prime`: a foil at `0.5` is chosen more often
+  than one at `-0.5`, and a strongly negative value produces a foil that
+  is rarely or never chosen — a null foil.
+
 - include_response_time:
 
   Logical. Whether to simulate response times correlated with memory
@@ -83,7 +94,17 @@ A dataframe with columns:
 
 - target_present: Logical. TRUE if target in lineup
 
-- identification: Character. "suspect", "filler", or "reject"
+- lineup_member: Integer. Position of the lineup member actually chosen,
+  or 0 for a rejection. Each foil is simulated separately and retains
+  its own identity; foils are not treated as interchangeable
+
+- suspect_pos: Integer. Position occupied by the suspect (1 by
+  construction; the target in target-present lineups, the designated
+  innocent suspect in target-absent lineups)
+
+- identification: Character. "suspect", "filler", or "reject", derived
+  from lineup_member and suspect_pos. See
+  [`classify_lineup_choices`](https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.md)
 
 - confidence: Numeric (if conf_levels specified). Confidence rating
 
@@ -137,6 +158,17 @@ reaction-time or drift-diffusion model:
 
 - A bounded noisy function of decision strength
 
+## Foil identity
+
+Memory strengths are drawn independently for every lineup member, so the
+foils are distinguishable and are not exchangeable. `lineup_member`
+preserves which member was chosen; `identification` is a derived summary
+of it. Analyses that need member-level information (for example the
+effective-size correction in
+[`make_ppv_range`](https://cgtza2.github.io/r4lineups/reference/make_ppv_range.md))
+can therefore use `lineup_member` directly rather than working from the
+collapsed labels.
+
 ## References
 
 Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
@@ -178,7 +210,9 @@ integration_data <- simulate_lineup_data(
 
 # Compare ROC curves across decision rules
 roc_max <- make_roc(strong_memory, lineup_size = 6)
+
 roc_ensemble <- make_roc(ensemble_data, lineup_size = 6)
+
 
 # \donttest{
 # Power analysis: vary sample size
@@ -187,7 +221,7 @@ power_results <- simulate_power_analysis(
   d_prime = 1.5,
   n_simulations = 100
 )
-#> Simulating sample size: 50 
-#> Simulating sample size: 100 
+#> Simulating sample size 50 (100 studies)
+#> Simulating sample size 100 (100 studies)
 # }
 ```

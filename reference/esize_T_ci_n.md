@@ -1,17 +1,18 @@
 # Effective Size with Confidence Intervals from Normal Theory (Tredoux, 1998)
 
-Computes Tredoux's effective size E' together with a confidence interval
-derived from the normal-theory variance formula in Tredoux (1998).
+Computes effective size E' (Tredoux, 1998) together with a confidence
+interval derived from the normal-theory variance formula in Tredoux
+(1998).
 
 ## Usage
 
 ``` r
-esize_T_ci_n(lineup_table, alpha)
+esize_T_ci_n(lineup_tab, alpha)
 ```
 
 ## Arguments
 
-- lineup_table:
+- lineup_tab:
 
   A table of lineup choices.
 
@@ -31,6 +32,12 @@ or skewed distributions, bootstrap methods
 or the Bayesian posterior
 ([`esize_T_bayes`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md))
 may be preferred.
+
+Note that this concerns the *interval*. The point estimate itself is
+also biased downward at small samples, since \\E'\\ is a plug-in
+estimator; see the “Small-sample bias” section of
+[`esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md).
+This function uses the plug-in form.
 
 ## References
 
@@ -59,8 +66,8 @@ empirically assessing the fairness of a lineup. *Law and Human Behavior,
 ``` r
 #Data:
 lineup_vec <- round(runif(100, 1, 6))
-lineup_table <- table(lineup_vec)
+lineup_tab <- table(lineup_vec)
 
 #Call:
-e_ci <- esize_T_ci_n(lineup_table, .95)
+e_ci <- esize_T_ci_n(lineup_tab, .95)
 ```

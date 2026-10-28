@@ -91,29 +91,30 @@ print(eig_result)
 #> 
 #> === Expected Information Gain (EIG) Analysis ===
 #> 
-#> EIG: 0.2836 bits
+#> EIG: 0.2012 bits
 #> Prior probability of guilt: 0.5 
 #> Prior entropy: 1 bits
-#> Information efficiency: 28.4 %
+#> Information efficiency: 20.1 %
 #> 
 #> Sample sizes:
-#>   Target-present (guilty): 100 
-#>   Target-absent (innocent): 100 
+#>   Target-present (guilty): 700 
+#>   Target-absent (innocent): 700 
 #> 
 #> Confidence bins: 0, 60, 80, 100 
 #> 
 #> Top response categories by information gain:
-#> (Showing up to 10 of 6 total)
+#> (Showing up to 10 of 7 total)
 #> 
-#> # A tibble: 6 × 6
+#> # A tibble: 7 × 6
 #>   response         identification confidence_level p_response posterior_guilty
 #>   <chr>            <chr>          <chr>            <chr>      <chr>           
-#> 1 suspect_(80,100] suspect        (80,100]         0.190      1.000           
-#> 2 filler_(60,80]   filler         (60,80]          0.040      0.125           
-#> 3 reject_[0,60]    reject         [0,60]           0.415      0.265           
-#> 4 suspect_(60,80]  suspect        (60,80]          0.135      0.630           
-#> 5 filler_[0,60]    filler         [0,60]           0.170      0.500           
-#> 6 suspect_[0,60]   suspect        [0,60]           0.050      0.500           
+#> 1 suspect_(80,100] suspect        (80,100]         0.074      0.962           
+#> 2 suspect_(60,80]  suspect        (60,80]          0.067      0.872           
+#> 3 suspect_[0,60]   suspect        [0,60]           0.218      0.764           
+#> 4 reject_[0,60]    reject         [0,60]           0.191      0.250           
+#> 5 filler_(80,100]  filler         (80,100]         0.031      0.302           
+#> 6 filler_[0,60]    filler         [0,60]           0.348      0.339           
+#> 7 filler_(60,80]   filler         (60,80]          0.071      0.404           
 #> # ℹ 1 more variable: information_gain <chr>
 #> 
 #> Full response data available in $response_data

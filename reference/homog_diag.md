@@ -6,7 +6,7 @@ ratio of k lineup pairs.
 ## Usage
 
 ``` r
-homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
+homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k, conf.level = 0.95)
 ```
 
 ## Arguments
@@ -31,15 +31,34 @@ homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
   A vector indexing number of members in each lineup pair (nominal
   size). Must be specified by user (scalar).
 
+- conf.level:
+
+  Confidence level for the per-pair intervals, and the complement of the
+  level at which heterogeneity is declared. Defaults to 0.95.
+
 ## Value
 
-Computes diagnosticity ratio with chi-squared estimate and significance
-level for k lineup pairs
+Invisibly, a list with the pooled (precision-weighted) diagnosticity
+ratio, the chi-square statistic and its degrees of freedom and p-value,
+a `heterogeneous` flag, and a `parameters` data frame giving the cell
+counts plus \\d\\, \\\ln d\\, its variance, its weight and a confidence
+interval for each lineup pair. The same information is printed.
 
 ## Details
 
 Master function for assessing homogeneity of diagnosticity ratio for k
 independent lineups.
+
+The chi-square is Cochran's Q, \\\sum w_i (\ln d_i - \ln \bar{d})^2\\,
+so it measures the *spread* of the k ratios around their pooled value.
+It answers a different question from a confidence interval on the pooled
+ratio, which asks whether the average ratio differs from 1. The two can
+disagree: ratios that differ in direction (say 6, 1 and 0.44) give a
+very large Q while averaging to roughly 1. When Q is significant the
+ratios do not share a common value, the pooled estimate should not be
+reported as a single summary, and the pairs should be interpreted
+separately. This function prints a note to that effect and records it in
+the `heterogeneous` element.
 
 ## References
 
@@ -88,7 +107,16 @@ k <- c(6, 5, 4)
 
 #Call:
 homog_diag(lineup_pres_list, lineup_abs_list, pos_list, k)
+#> Diagnosticity ratio for each lineup pair:
+#>  pair     d       95% CI
+#>     1 1.000 [0.54, 1.84]
+#>     2 1.000 [0.52, 1.94]
+#>     3 1.000 [0.34, 2.93]
+#> 
 #> Mean diagnosticity ratio: 1
 #> Chi-square estimate (q): 0
 #> Sig: 1
+#> 
+#> Note: no evidence of heterogeneity (p >= 0.05), so the ratios are
+#> consistent with a common value and the pooled mean is a reasonable summary.
 ```
