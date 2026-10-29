@@ -45,6 +45,8 @@ A standardized data frame with class "lineup_data" containing:
     \item participant_id: Original or generated (if present)
     \item response_time: Numeric (if present)
   }
+  followed by every other column of \code{data} unchanged, including
+  \code{suspect_pos} and \code{lineup_member}, which some analyses use.
 }
 \description{
 Converts lineup data from various formats into the standardized r4lineups

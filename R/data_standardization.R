@@ -279,6 +279,8 @@ validate_lineup_data <- function(data,
 #'     \item participant_id: Original or generated (if present)
 #'     \item response_time: Numeric (if present)
 #'   }
+#'   followed by every other column of \code{data} unchanged, including
+#'   \code{suspect_pos} and \code{lineup_member}, which some analyses use.
 #'
 #' @details
 #' This function:
@@ -368,6 +370,7 @@ standardize_lineup_data <- function(data,
   }
 
   result_list$identification <- as.character(data[[identification_col]])
+  used <- c(target_present_col, identification_col)
 
   # Apply recoding if provided
   if (!is.null(recode_identification)) {
@@ -400,12 +403,14 @@ standardize_lineup_data <- function(data,
   # --- Process confidence (optional) ---
   if (confidence_col %in% names(data)) {
     result_list$confidence <- as.numeric(data[[confidence_col]])
+    used <- c(used, confidence_col)
   } else {
     # Try common alternatives
     alternatives <- c("conf", "certainty", "cert", "rating")
     found <- alternatives[alternatives %in% names(data)]
     if (length(found) > 0) {
       result_list$confidence <- as.numeric(data[[found[1]]])
+      used <- c(used, found[1])
       message("Using '", found[1], "' as confidence column")
     }
   }
@@ -413,12 +418,14 @@ standardize_lineup_data <- function(data,
   # --- Process participant_id (optional) ---
   if (!is.null(participant_id_col) && participant_id_col %in% names(data)) {
     result_list$participant_id <- data[[participant_id_col]]
+    used <- c(used, participant_id_col)
   } else {
     # Try common alternatives
     alternatives <- c("participant_id", "participant", "id", "subject_id", "subj")
     found <- alternatives[alternatives %in% names(data)]
     if (length(found) > 0) {
       result_list$participant_id <- data[[found[1]]]
+      used <- c(used, found[1])
     } else {
       # Generate sequential IDs
       result_list$participant_id <- seq_len(nrow(data))
@@ -428,17 +435,26 @@ standardize_lineup_data <- function(data,
   # --- Process response_time (optional) ---
   if (!is.null(response_time_col) && response_time_col %in% names(data)) {
     result_list$response_time <- as.numeric(data[[response_time_col]])
+    used <- c(used, response_time_col)
   } else {
     # Try common alternatives
     alternatives <- c("response_time", "rt", "time", "latency")
     found <- alternatives[alternatives %in% names(data)]
     if (length(found) > 0) {
       result_list$response_time <- as.numeric(data[[found[1]]])
+      used <- c(used, found[1])
     }
   }
 
   # Convert list to data frame
   result <- as.data.frame(result_list, stringsAsFactors = FALSE)
+
+  # Carry every other column through unchanged: suspect_pos and lineup_member
+  # decide the innocent-suspect design and the effective-size corrections.
+  extra <- setdiff(names(data), c(used, names(result)))
+  for (col in extra) {
+    result[[col]] <- data[[col]]
+  }
 
   # Add class
   class(result) <- c("lineup_data", "data.frame")

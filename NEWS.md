@@ -41,6 +41,13 @@
 
 ## Bug fixes
 
+* `standardize_lineup_data()` kept only the columns it maps, so it dropped
+  `suspect_pos` and `lineup_member`. A designated suspect who was never chosen
+  then fell back to the filler estimate after standardization (false-ID rate
+  .10 instead of 0), and effective-size-corrected PPV lost its member choices
+  (.833 instead of .50 when target-absent choices fall on one member). Every
+  column it does not map is now carried through unchanged.
+
 * `compare_multid()` differenced the two bootstrap matrices row by row. The
   conditions are independent samples, but fits made with the same seed have
   correlated draws, so the standard error collapsed. Comparing counts
