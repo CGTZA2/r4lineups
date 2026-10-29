@@ -41,6 +41,13 @@
 
 ## Bug fixes
 
+* Target presence coded 0/1, which the validator accepts, broke the
+  bootstraps in `compare_pauc()` (an error) and `fit_sdt_roc()`, where every
+  replicate failed silently and the intervals were `NA` with
+  `n_successful = 0`. Both now resample 0/1 and logical coding identically.
+  `fit_sdt_roc()` also warns when bootstrap samples fail, giving the number
+  and the first error.
+
 * `func_size_report()` bootstrapped functional size, 1/p, and `boot.ci()`
   silently dropped the resamples with no target choices, where it is
   infinite. With one target choice among 30 mock witnesses, 353 of 1,000

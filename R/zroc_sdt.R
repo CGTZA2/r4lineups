@@ -290,11 +290,13 @@ fit_sdt_roc <- function(data,
 
   boot_dprime <- numeric(n_bootstrap)
   boot_variance_ratio <- numeric(n_bootstrap)
+  first_error <- NULL
+  is_tp <- as.logical(raw_data$target_present)
 
   for (i in 1:n_bootstrap) {
     tryCatch({
-      tp <- which(raw_data$target_present)
-      ta <- which(!raw_data$target_present)
+      tp <- which(is_tp)
+      ta <- which(!is_tp)
       boot_data <- raw_data[c(sample(tp, length(tp), replace = TRUE),
                               sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
       boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size,
@@ -310,12 +312,24 @@ fit_sdt_roc <- function(data,
     }, error = function(e) {
       boot_dprime[i] <<- NA
       boot_variance_ratio[i] <<- NA
+      if (is.null(first_error)) first_error <<- conditionMessage(e)
     })
   }
 
-  # Remove failed bootstraps
+  # Remove failed bootstraps, and say so
   boot_dprime <- boot_dprime[!is.na(boot_dprime)]
   boot_variance_ratio <- boot_variance_ratio[!is.na(boot_variance_ratio)]
+  n_failed <- n_bootstrap - length(boot_dprime)
+  if (n_failed == n_bootstrap) {
+    warning("All ", n_bootstrap, " bootstrap samples failed, so the bootstrap ",
+            "intervals are NA",
+            if (!is.null(first_error)) paste0(". First error: ", first_error),
+            ".", call. = FALSE)
+  } else if (n_failed > 0) {
+    warning(n_failed, " of ", n_bootstrap, " bootstrap samples failed and were ",
+            "dropped", if (!is.null(first_error)) paste0(" (first error: ", first_error, ")"),
+            ".", call. = FALSE)
+  }
 
   # Compute confidence intervals
   alpha <- 1 - conf_level

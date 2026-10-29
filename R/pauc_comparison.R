@@ -249,8 +249,8 @@ compare_pauc <- function(data1,
   for (b in 1:n_bootstrap) {
     # Stratify by target presence so every resample preserves both trial types.
     resample_condition <- function(dat) {
-      tp <- which(dat$target_present)
-      ta <- which(!dat$target_present)
+      tp <- which(as.logical(dat$target_present))
+      ta <- which(!as.logical(dat$target_present))
       dat[c(sample(tp, length(tp), replace = TRUE),
             sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
     }
