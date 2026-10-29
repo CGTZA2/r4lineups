@@ -165,11 +165,14 @@ roc_max <- make_roc(strong_memory, lineup_size = 6)
 roc_ensemble <- make_roc(ensemble_data, lineup_size = 6)
 
 \donttest{
-# Power analysis: vary sample size
+# Power analysis: vary sample size (few simulations, to keep this quick;
+# use hundreds in practice)
 power_results <- simulate_power_analysis(
   sample_sizes = c(50, 100),
   d_prime = 1.5,
-  n_simulations = 100
+  n_simulations = 5,
+  n_bootstrap = 50,
+  seed = 1
 )
 }
 

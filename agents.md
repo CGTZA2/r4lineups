@@ -123,11 +123,11 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `compare_utility()` — wrapper for comparison output.
 
 ### DPP (Deviation from Perfect Performance)
-- `make_dpp()` — compute DPP from data or ROC object.
+- `make_dpp()` — Smith et al. (2019) DPP: mean of 1 − HR + FAR over ROC operating points (Eq. 2), or the α/β-weighted Eq. 3.
 - `compute_dpp()` — DPP analysis + plot wrapper.
-- `compare_dpp()` — compare DPP across procedures.
-- `plot_dpp()` — DPP plot.
-- `plot_dpp_comparison()` — DPP comparison plot.
+- `compare_dpp()` — difference in average DPP with a stratified bootstrap SE and percentile CI.
+- `plot_dpp()` — DPP at each operating point, with the average.
+- `plot_dpp_comparison()` — two procedures overlaid.
 
 ### Winter 2‑HT model
 - `fit_winter_2ht()` — fit 2‑HT model from counts/data.
@@ -152,7 +152,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `plot_embedding_space()` — embedding projection plot.
 - `display_lineup()` — grid display of lineup faces.
 - `detect_faces()` — detect faces in an image.
-- `get_face_landmarks()` — 468‑point landmark extraction.
+- `get_face_landmarks()` — 478‑point MediaPipe face mesh (legacy `solutions` or Tasks `FaceLandmarker`).
 - `get_key_landmarks()` — 5‑point landmark extraction.
 - `has_valid_face()` — quick face‑detection check.
 - `rot_vector()` — helper for landmark rotation.
@@ -239,6 +239,7 @@ These wrappers combine data creation, analysis, and plotting:
 ## Notes for agents
 
 - Most analyses expect either a **lineup vector** (mock‑witness choices) or a **data frame** with `target_present`, `identification`, and `confidence` for confidence‑based methods.
+- Every analysis that uses target‑absent lineups takes `innocent_suspect = c("auto", "designated", "estimated")`. `"auto"` treats the lineups as designated when a TA row is a suspect ID or a non‑missing `suspect_pos` column exists; bootstraps resolve it once on the full data via `.resolve_innocent_suspect()` (`R/utils.R`).
 - `make_*()` functions typically return structured S3 objects with `print()`, `summary()`, and `plot()` methods.
 - For face similarity, ensure Python deps are installed (`install_r4lineups_python()`), and set `MPLCONFIGDIR` if matplotlib cache issues appear.
 - The Shiny app (`inst/shiny/r4lineups_app`) is a thin `app.R` plus one module per tab in its `R/` folder (`mod_*.R`, helpers in `utils.R`). Modules call only exported package functions. `tests/testthat/test-shiny-app.R` checks each module against direct package calls with `shiny::testServer()`; `test-shiny-app-browser.R` is an opt-in headless-Chrome smoke test (install the package, then set `R4LINEUPS_TEST_APP=true`).

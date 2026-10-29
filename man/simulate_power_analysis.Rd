@@ -84,8 +84,8 @@ not a power analysis, because no hypothesis is being tested.
 power_res <- simulate_power_analysis(
   sample_sizes = c(50, 100),
   d_prime = 1.5,
-  n_simulations = 20,
-  n_bootstrap = 100,
+  n_simulations = 8,
+  n_bootstrap = 50,
   conf_levels = 5,
   seed = 123
 )
