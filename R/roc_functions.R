@@ -117,16 +117,8 @@ make_rocdata <- function(data, lineup_size = 6) {
     n_false_ids = 0
   ), roc_results)
 
-  # Calculate partial AUC (using trapezoidal rule)
-  # Sort by false_id_rate for integration
-  roc_sorted <- roc_results[order(roc_results$false_id_rate), ]
-
-  pauc <- 0
-  for (i in 2:nrow(roc_sorted)) {
-    width <- roc_sorted$false_id_rate[i] - roc_sorted$false_id_rate[i-1]
-    height <- (roc_sorted$correct_id_rate[i] + roc_sorted$correct_id_rate[i-1]) / 2
-    pauc <- pauc + (width * height)
-  }
+  # Partial AUC over the observed false-ID range (trapezoidal rule)
+  pauc <- .roc_area(roc_results$false_id_rate, roc_results$correct_id_rate)
 
   out <- list(
     roc_data = roc_results,
@@ -226,4 +218,29 @@ make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE,
   }
 
   p
+}
+
+
+# Area under a cumulative ROC path by the trapezoidal rule, up to max_far.
+# Points are ordered by false-ID rate and then by correct-ID rate, so a vertical
+# segment keeps both of its endpoints and the next sloping segment starts from
+# the right height. The segment that crosses max_far is interpolated linearly.
+.roc_area <- function(far, hr, max_far = Inf) {
+  ord <- order(far, hr)
+  far <- far[ord]
+  hr <- hr[ord]
+  area <- 0
+  for (i in seq_along(far)[-1]) {
+    x0 <- far[i - 1]
+    if (x0 >= max_far) break
+    x1 <- far[i]
+    y0 <- hr[i - 1]
+    y1 <- hr[i]
+    if (x1 > max_far) {
+      y1 <- y0 + (y1 - y0) * (max_far - x0) / (x1 - x0)
+      x1 <- max_far
+    }
+    area <- area + (x1 - x0) * (y0 + y1) / 2
+  }
+  area
 }

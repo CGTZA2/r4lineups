@@ -215,58 +215,8 @@ compare_pauc <- function(data1,
       is.na(max_false_id_rate) || max_false_id_rate < 0) {
     stop("max_false_id_rate must be a non-negative numeric scalar.", call. = FALSE)
   }
-  roc_data <- roc_data[order(roc_data$false_id_rate, roc_data$correct_id_rate), ]
-  roc_data <- roc_data[!duplicated(roc_data$false_id_rate, fromLast = TRUE), ]
-
-  # Filter to points at or below cutoff
-  roc_filtered <- roc_data[roc_data$false_id_rate <= max_false_id_rate, ]
-
-  # If no points at cutoff, interpolate
-  if (nrow(roc_filtered) == 0 || max(roc_filtered$false_id_rate) < max_false_id_rate) {
-    # Find points immediately below and above cutoff
-    below_idx <- which(roc_data$false_id_rate <= max_false_id_rate)
-    above_idx <- which(roc_data$false_id_rate > max_false_id_rate)
-
-    if (length(below_idx) > 0 && length(above_idx) > 0) {
-      # Get nearest points
-      below_pt <- roc_data[below_idx[which.max(roc_data$false_id_rate[below_idx])], ]
-      above_pt <- roc_data[above_idx[which.min(roc_data$false_id_rate[above_idx])], ]
-
-      # Linear interpolation
-      slope <- (above_pt$correct_id_rate - below_pt$correct_id_rate) /
-               (above_pt$false_id_rate - below_pt$false_id_rate)
-      interpolated_correct_rate <- below_pt$correct_id_rate +
-        slope * (max_false_id_rate - below_pt$false_id_rate)
-
-      # Add interpolated point
-      interp_pt <- data.frame(
-        confidence = NA,
-        correct_id_rate = interpolated_correct_rate,
-        false_id_rate = max_false_id_rate,
-        n_correct_ids = NA,
-        n_false_ids = NA
-      )
-
-      roc_filtered <- rbind(roc_filtered, interp_pt)
-    }
-  }
-
-  # Sort by false ID rate
-  roc_filtered <- roc_filtered[order(roc_filtered$false_id_rate), ]
-
-  # Compute AUC using trapezoidal rule
-  if (nrow(roc_filtered) < 2) {
-    return(0)
-  }
-
-  pauc <- 0
-  for (i in 2:nrow(roc_filtered)) {
-    width <- roc_filtered$false_id_rate[i] - roc_filtered$false_id_rate[i-1]
-    height <- (roc_filtered$correct_id_rate[i] + roc_filtered$correct_id_rate[i-1]) / 2
-    pauc <- pauc + (width * height)
-  }
-
-  return(pauc)
+  .roc_area(roc_data$false_id_rate, roc_data$correct_id_rate,
+            max_far = max_false_id_rate)
 }
 
 

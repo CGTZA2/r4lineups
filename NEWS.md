@@ -1,3 +1,17 @@
+# r4lineups 2.3.0 (development)
+
+## Bug fixes
+
+* `compare_pauc()` overstated partial AUC whenever the ROC had a vertical
+  segment, that is, when a confidence level added correct IDs but no false IDs.
+  Its integrator kept only the upper endpoint of each such segment, so the next
+  sloping segment started from too high a correct-ID rate. A curve through
+  (0, 0), (0, .5), (.1, .5) and (.1, 1) has area .05; `compare_pauc()` reported
+  .075 while `make_rocdata()` reported .05. Both now use one internal
+  integrator that keeps every endpoint and interpolates within the segment that
+  crosses the cutoff, and their results agree. The `compare_pauc()` bootstrap
+  and `simulate_power_analysis()` use the same integrator.
+
 # r4lineups 2.2.0 (2026-10-28)
 
 ## Breaking changes
