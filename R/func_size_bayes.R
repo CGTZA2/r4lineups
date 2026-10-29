@@ -16,7 +16,8 @@
 #' @return An object of class \code{"func_size_bayes"} containing:
 #' \describe{
 #'   \item{F_draws}{Numeric vector of length \code{S}: posterior draws of functional size.}
-#'   \item{posterior_mean, posterior_median}{Posterior point estimates.}
+#'   \item{posterior_mean, posterior_median}{Posterior point estimates. The
+#'     mean is exact, and is \code{Inf} when it does not exist (see Details).}
 #'   \item{credible_interval}{Named two-element vector (lower, upper).}
 #'   \item{prior_alpha, n, n_suspect, S, credible_mass}{Input metadata.}
 #'   \item{threshold, threshold_probs}{Threshold and probabilities (or NULL).}
@@ -30,6 +31,13 @@
 #' The default Jeffreys prior (\eqn{\alpha = 0.5}) is recommended. The posterior
 #' gives direct probability statements such as \eqn{P(F < k \mid \mathbf{n})},
 #' where \eqn{k} is the nominal lineup size.
+#'
+#' The posterior mean of a reciprocal is computed exactly, not from the draws:
+#' with \eqn{a = n_s + \alpha} and \eqn{b = N - n_s + \alpha},
+#' \eqn{E[F \mid \mathbf{n}] = (a + b - 1)/(a - 1)} when \eqn{a > 1}. When
+#' \eqn{a \le 1} (for example, no suspect choices under the Jeffreys prior) the
+#' mean is infinite, and the Monte Carlo average of the draws would not settle
+#' on any value as \code{S} grew. Report the median and interval instead.
 #'
 #' @references
 #' Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness.
@@ -88,7 +96,7 @@ func_size_bayes <- function(lineup_vec, target_pos,
   structure(
     list(
       F_draws          = F_draws,
-      posterior_mean   = mean(F_draws),
+      posterior_mean   = .beta_reciprocal_mean(n_s + alpha_val, N - n_s + alpha_val),
       posterior_median = median(F_draws),
       credible_interval = ci,
       prior_alpha      = alpha_val,
@@ -110,7 +118,7 @@ print.func_size_bayes <- function(x, digits = 3, ...) {
   cat(sprintf("  Prior: Jeffreys-type Beta(%.2f, %.2f)\n", x$prior_alpha, x$prior_alpha))
   cat(sprintf("  n = %d, suspect IDs = %d (rate = %.3f)\n",
               x$n, x$n_suspect, x$n_suspect / x$n))
-  cat(sprintf("  Posterior mean F:   %.3f\n", x$posterior_mean))
+  cat(.format_posterior_mean("  Posterior mean F:   ", x$posterior_mean))
   cat(sprintf("  Posterior median F: %.3f\n", x$posterior_median))
   cat(sprintf("  %d%% credible interval: [%.3f, %.3f]\n",
               pct, x$credible_interval["lower"], x$credible_interval["upper"]))
@@ -147,3 +155,22 @@ plot.func_size_bayes <- function(x, ...) {
 }
 
 utils::globalVariables("F_size")
+
+# E[1/p] for p ~ Beta(a, b): finite only when a > 1
+.beta_reciprocal_mean <- function(a, b) {
+  if (a > 1) (a + b - 1) / (a - 1) else Inf
+}
+
+# Difference of two posterior means; undefined when both are infinite
+.difference_of_means <- function(m_a, m_b) {
+  if (is.infinite(m_a) && is.infinite(m_b)) NA_real_ else m_a - m_b
+}
+
+.format_posterior_mean <- function(label, value) {
+  if (is.finite(value)) {
+    sprintf("%s%.3f\n", label, value)
+  } else {
+    sprintf("%sdoes not exist (%s); report the median and interval\n", label,
+            if (is.na(value)) "both means are infinite" else "infinite")
+  }
+}

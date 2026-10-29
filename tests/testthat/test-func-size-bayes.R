@@ -110,3 +110,16 @@ test_that("n and n_suspect are stored correctly", {
   expect_equal(res$n, 100)
   expect_equal(res$n_suspect, 17)
 })
+
+test_that("the posterior mean of F is exact and infinite when it does not exist", {
+  set.seed(1)
+  vec <- c(rep(1, 30), rep(2:6, 14))
+  res <- func_size_bayes(vec, target_pos = 1, S = 1e5)
+  a <- 30.5
+  b <- 70.5
+  expect_equal(res$posterior_mean, (a + b - 1) / (a - 1))
+  expect_equal(res$posterior_mean, mean(res$F_draws), tolerance = 0.01)
+  none <- suppressWarnings(func_size_bayes(rep(2:6, 20), target_pos = 1, S = 1000))
+  expect_equal(none$posterior_mean, Inf)
+  expect_output(print(none), "does not exist")
+})

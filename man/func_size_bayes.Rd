@@ -33,7 +33,8 @@ Named shortcuts: \code{"jeffreys"} (0.5, default), \code{"uniform"} (1),
 An object of class \code{"func_size_bayes"} containing:
 \describe{
   \item{F_draws}{Numeric vector of length \code{S}: posterior draws of functional size.}
-  \item{posterior_mean, posterior_median}{Posterior point estimates.}
+  \item{posterior_mean, posterior_median}{Posterior point estimates. The
+    mean is exact, and is \code{Inf} when it does not exist (see Details).}
   \item{credible_interval}{Named two-element vector (lower, upper).}
   \item{prior_alpha, n, n_suspect, S, credible_mass}{Input metadata.}
   \item{threshold, threshold_probs}{Threshold and probabilities (or NULL).}
@@ -51,6 +52,13 @@ Posterior draws of \eqn{p^{(s)}} are transformed via \eqn{F^{(s)} = 1/p^{(s)}}.
 The default Jeffreys prior (\eqn{\alpha = 0.5}) is recommended. The posterior
 gives direct probability statements such as \eqn{P(F < k \mid \mathbf{n})},
 where \eqn{k} is the nominal lineup size.
+
+The posterior mean of a reciprocal is computed exactly, not from the draws:
+with \eqn{a = n_s + \alpha} and \eqn{b = N - n_s + \alpha},
+\eqn{E[F \mid \mathbf{n}] = (a + b - 1)/(a - 1)} when \eqn{a > 1}. When
+\eqn{a \le 1} (for example, no suspect choices under the Jeffreys prior) the
+mean is infinite, and the Monte Carlo average of the draws would not settle
+on any value as \code{S} grew. Report the median and interval instead.
 }
 \examples{
 set.seed(1)

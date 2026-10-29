@@ -61,6 +61,16 @@
   handles ties and stays finite, and both methods return a parameters x
   (Lower, Upper) matrix.
 
+* The posterior means reported by `func_size_bayes()`, `diag_ratio_T_bayes()`
+  and `diag_ratio_T_bayes_compare()` were averages of reciprocal draws. When
+  the relevant Beta posterior has shape a <= 1 (for example, no suspect
+  choices under the Jeffreys prior), the true mean is infinite and the average
+  never settled: it was about 11 million, 3 million and 36 million for 10^3,
+  10^4 and 10^5 draws of the same functional size. The means are now computed
+  exactly, `(a + b - 1) / (a - 1)` for `1/p`, and are `Inf` when they do not
+  exist. Print methods say so; a difference of two infinite means is `NA`.
+  Medians, intervals and threshold probabilities are unchanged.
+
 * `compare_pauc()` overstated partial AUC whenever the ROC had a vertical
   segment, that is, when a confidence level added correct IDs but no false IDs.
   Its integrator kept only the upper endpoint of each such segment, so the next
