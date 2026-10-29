@@ -10,7 +10,8 @@ make_dpp(
   use_roc_obj = FALSE,
   alpha = NULL,
   beta = NULL,
-  innocent_suspect = "auto"
+  innocent_suspect = "auto",
+  thresholds = NULL
 )
 }
 \arguments{
@@ -45,6 +46,11 @@ innocent-suspect count is estimated as filler IDs divided by
 \code{"designated"} when any target-absent row is a suspect ID or the data
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
+
+\item{thresholds}{Optional numeric vector of confidence criteria at which
+to evaluate the ROC. The default uses the confidence levels of the
+responses that can move an operating point; see Details. Supplying the
+criteria of a full sample keeps them fixed across bootstrap resamples.}
 }
 \value{
 A list containing:
@@ -59,6 +65,7 @@ A list containing:
     \item alpha, beta: The weights used (\code{NULL} for Equation 2)
     \item n_target_present, n_target_absent: Sample sizes
     \item innocent_suspect_method: How innocent-suspect IDs were obtained
+    \item thresholds: The confidence criteria of the operating points
   }
 }
 \description{
@@ -82,8 +89,11 @@ the costs of the two errors are equal, DPP(c) = 1 - U(c), where
 \eqn{U(c) = Culprit(c) - Innocent(c)} is the expected utility.
 
 The reported \code{dpp} is the mean of DPP(c) over the operating points,
-one for each observed confidence level, from the highest threshold to the
-lowest (which includes every identification). Lower values are better.
+one for each confidence criterion of the ROC, from the highest to the
+lowest (which includes every identification). Lower values are better. The
+criteria are the confidence levels of the responses that enter the ROC
+(see \code{\link{make_rocdata}}), so the confidence given to rejections
+does not add points or change the average.
 
 Equation 3 weights the two errors:
 

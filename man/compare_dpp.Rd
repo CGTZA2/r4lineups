@@ -65,8 +65,9 @@ Lower DPP indicates better performance, so a negative difference means
 procedure A is better. Each bootstrap replicate resamples target-present
 and target-absent trials separately within each procedure, so every
 replicate keeps the original design, and the two procedures are treated as
-independent samples. The innocent-suspect design is determined once on each
-full dataset and reused in every replicate.
+independent samples. The innocent-suspect design and the confidence
+criteria are determined once on each full dataset and reused in every
+replicate, so every replicate averages over the same criteria.
 }
 \examples{
 data(lineup_example)

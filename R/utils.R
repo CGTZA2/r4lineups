@@ -159,6 +159,30 @@ utils::globalVariables(c(
   invisible(NULL)
 }
 
+# Confidence criteria for a suspect-ID ROC, highest first. Only responses that
+# can move an operating point define a criterion: target-present suspect IDs,
+# plus target-absent suspect IDs (designated) or filler IDs (estimated). The
+# confidence of rejections and target-present filler IDs would only add
+# duplicate points, which reweight averages over points such as DPP. With no
+# such responses the single highest confidence gives one (0, 0) point.
+.roc_thresholds <- function(tp_data, ta_data, method, thresholds = NULL) {
+  if (!is.null(thresholds)) {
+    if (!is.numeric(thresholds) || length(thresholds) == 0L ||
+        anyNA(thresholds)) {
+      stop("thresholds must be a non-empty numeric vector.", call. = FALSE)
+    }
+    return(sort(unique(thresholds), decreasing = TRUE))
+  }
+  ta_type <- if (method == "designated") "suspect" else "filler"
+  conf <- c(tp_data$confidence[tp_data$identification == "suspect"],
+            ta_data$confidence[ta_data$identification == ta_type])
+  conf <- conf[!is.na(conf)]
+  if (length(conf) == 0L) {
+    conf <- max(c(tp_data$confidence, ta_data$confidence), na.rm = TRUE)
+  }
+  sort(unique(conf), decreasing = TRUE)
+}
+
 .innocent_suspect_count <- function(ta_data, include, lineup_size,
                                     method = .innocent_suspect_method(ta_data)) {
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||

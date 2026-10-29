@@ -71,7 +71,9 @@ test_that("ROC-family estimators do not double count fillers with a designated s
   )
   roc <- make_rocdata(dat, lineup_size = 3)
   expect_equal(roc$innocent_suspect_method, "designated")
-  expect_equal(roc$roc_data$false_id_rate[roc$roc_data$confidence == 80], 1 / 3)
+  # Confidence 80 belongs only to filler IDs, which cannot move this ROC.
+  expect_equal(roc$thresholds, 90)
+  expect_equal(utils::tail(roc$roc_data$false_id_rate, 1), 1 / 3)
   expect_equal(roc$roc_data[1, c("correct_id_rate", "false_id_rate")],
                tibble::tibble(correct_id_rate = 0, false_id_rate = 0))
 

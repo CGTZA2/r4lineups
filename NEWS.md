@@ -41,6 +41,24 @@
 
 ## Bug fixes
 
+* `make_rocdata()` and `make_utility_curves()` took a confidence criterion
+  from every response, rejections included. The extra criteria only
+  duplicated existing operating points, so the ROC path and partial AUC were
+  unaffected, but averages over points were reweighted by how rejection
+  confidence happened to be coded. Changing only the rejection confidences
+  (from 0 to values between 51 and 99) moved average DPP from .417 to .647
+  and equal-variance z-ROC d' from 1.879 to 1.398. The criteria are now the
+  confidence levels of the responses that can move an operating point:
+  target-present suspect IDs, plus target-absent suspect IDs with a
+  designated suspect or filler IDs without one. Both codings now give DPP
+  .475 and d' 1.757. Results change for data in which rejections or filler
+  IDs carry confidence levels that no counted ID uses; `lineup_example` is
+  unaffected. `make_rocdata()`, `make_dpp()` and `make_utility_curves()` gain
+  `thresholds` to set the criteria, and `make_rocdata()` and `make_dpp()`
+  return the criteria used. `compare_dpp()` and the `fit_sdt_roc()`
+  bootstrap reuse the full-sample criteria in every replicate, so that all
+  replicates estimate the same average.
+
 * Target presence coded 0/1, which the validator accepts, broke the
   bootstraps in `compare_pauc()` (an error) and `fit_sdt_roc()`, where every
   replicate failed silently and the intervals were `NA` with

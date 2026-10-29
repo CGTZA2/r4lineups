@@ -37,6 +37,7 @@
 #'     \item alpha, beta: The weights used (\code{NULL} for Equation 2)
 #'     \item n_target_present, n_target_absent: Sample sizes
 #'     \item innocent_suspect_method: How innocent-suspect IDs were obtained
+#'     \item thresholds: The confidence criteria of the operating points
 #'   }
 #'
 #' @details
@@ -53,8 +54,11 @@
 #' \eqn{U(c) = Culprit(c) - Innocent(c)} is the expected utility.
 #'
 #' The reported \code{dpp} is the mean of DPP(c) over the operating points,
-#' one for each observed confidence level, from the highest threshold to the
-#' lowest (which includes every identification). Lower values are better.
+#' one for each confidence criterion of the ROC, from the highest to the
+#' lowest (which includes every identification). Lower values are better. The
+#' criteria are the confidence levels of the responses that enter the ROC
+#' (see \code{\link{make_rocdata}}), so the confidence given to rejections
+#' does not add points or change the average.
 #'
 #' Equation 3 weights the two errors:
 #'
@@ -82,7 +86,8 @@
 #' @export
 #' @import tibble
 make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE,
-                     alpha = NULL, beta = NULL, innocent_suspect = "auto") {
+                     alpha = NULL, beta = NULL, innocent_suspect = "auto",
+                     thresholds = NULL) {
   weights <- .dpp_weights(alpha, beta)
 
   if (use_roc_obj) {
@@ -100,7 +105,8 @@ make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE,
       stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
     }
     roc_obj <- make_rocdata(data, lineup_size = lineup_size,
-                            innocent_suspect = innocent_suspect)
+                            innocent_suspect = innocent_suspect,
+                            thresholds = thresholds)
   }
   roc_data <- roc_obj$roc_data
 
@@ -126,7 +132,8 @@ make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE,
     beta = beta,
     n_target_present = roc_obj$n_target_present,
     n_target_absent = roc_obj$n_target_absent,
-    innocent_suspect_method = roc_obj$innocent_suspect_method
+    innocent_suspect_method = roc_obj$innocent_suspect_method,
+    thresholds = roc_obj$thresholds
   )
 }
 
@@ -190,8 +197,9 @@ make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE,
 #' procedure A is better. Each bootstrap replicate resamples target-present
 #' and target-absent trials separately within each procedure, so every
 #' replicate keeps the original design, and the two procedures are treated as
-#' independent samples. The innocent-suspect design is determined once on each
-#' full dataset and reused in every replicate.
+#' independent samples. The innocent-suspect design and the confidence
+#' criteria are determined once on each full dataset and reused in every
+#' replicate, so every replicate averages over the same criteria.
 #'
 #' @references
 #' Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova,
@@ -242,13 +250,13 @@ compare_dpp <- function(data_proc_a, data_proc_b, lineup_size = 6,
             ta[sample.int(length(ta), length(ta), replace = TRUE)]), ,
           drop = FALSE]
     }
-    boot_dpp <- function(dat, method) {
+    boot_dpp <- function(dat, fit) {
       make_dpp(resample(dat), lineup_size = lineup_size, alpha = alpha,
-               beta = beta, innocent_suspect = method)$dpp
+               beta = beta, innocent_suspect = fit$innocent_suspect_method,
+               thresholds = fit$thresholds)$dpp
     }
     boot_diff <- vapply(seq_len(n_bootstrap), function(b) {
-      boot_dpp(data_proc_a, dpp_a$innocent_suspect_method) -
-        boot_dpp(data_proc_b, dpp_b$innocent_suspect_method)
+      boot_dpp(data_proc_a, dpp_a) - boot_dpp(data_proc_b, dpp_b)
     }, numeric(1))
     se <- stats::sd(boot_diff)
     tail <- (1 - conf_level) / 2

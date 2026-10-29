@@ -10,7 +10,8 @@
   model,
   n_bootstrap,
   conf_level,
-  innocent_suspect = "auto"
+  innocent_suspect = "auto",
+  thresholds = NULL
 )
 }
 \description{

@@ -10,7 +10,8 @@ make_utility_curves(
   utility_matrix = c(tp = 1, fn = -0.5, fp = -2, tn = 0.5),
   lineup_size = 6,
   criteria = c("confidence", "all"),
-  innocent_suspect = "auto"
+  innocent_suspect = "auto",
+  thresholds = NULL
 )
 }
 \arguments{
@@ -53,6 +54,12 @@ innocent-suspect count is estimated as filler IDs divided by
 \code{"designated"} when any target-absent row is a suspect ID or the data
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
+
+\item{thresholds}{Optional numeric vector of confidence criteria. The
+default uses the confidence levels of the responses that can change the
+hit or false-alarm rate, as in \code{\link{make_rocdata}}, so the
+confidence given to rejections does not add criteria or change the
+average utility.}
 }
 \value{
 A list containing:

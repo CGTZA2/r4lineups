@@ -147,7 +147,8 @@ fit_sdt_roc <- function(data,
     } else {
       params$bootstrap_ci <- .bootstrap_sdt_fit(
         raw_data, roc_obj$lineup_size, model, n_bootstrap, conf_level,
-        innocent_suspect = roc_obj$innocent_suspect_method
+        innocent_suspect = roc_obj$innocent_suspect_method,
+        thresholds = roc_obj$thresholds
       )
     }
   }
@@ -285,7 +286,7 @@ fit_sdt_roc <- function(data,
 #' Bootstrap SDT Parameter Estimates
 #' @keywords internal
 .bootstrap_sdt_fit <- function(raw_data, lineup_size, model, n_bootstrap, conf_level,
-                               innocent_suspect = "auto") {
+                               innocent_suspect = "auto", thresholds = NULL) {
   # Stratified trial-level resampling and complete ROC reconstruction.
 
   boot_dprime <- numeric(n_bootstrap)
@@ -300,7 +301,8 @@ fit_sdt_roc <- function(data,
       boot_data <- raw_data[c(sample(tp, length(tp), replace = TRUE),
                               sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
       boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size,
-                               innocent_suspect = innocent_suspect)
+                               innocent_suspect = innocent_suspect,
+                               thresholds = thresholds)
       zroc_boot <- .compute_zroc(
         boot_obj$roc_data, boot_obj$n_target_present, boot_obj$n_target_absent
       )

@@ -21,6 +21,10 @@
 #'   \code{"designated"} when any target-absent row is a suspect ID or the data
 #'   have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 #'   otherwise, with a message.
+#' @param thresholds Optional numeric vector of confidence criteria at which
+#'   to evaluate the ROC. The default uses the confidence levels of the
+#'   responses that can move an operating point; see Details. Supplying the
+#'   criteria of a full sample keeps them fixed across bootstrap resamples.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -28,15 +32,24 @@
 #'     \item pauc: Partial area under the curve
 #'     \item n_target_present: Number of target-present lineups
 #'     \item n_target_absent: Number of target-absent lineups
+#'     \item thresholds: The confidence criteria used, highest first
 #'   }
 #'
 #' @details
 #' This function computes ROC curves following Wixted & Mickes (2012) and
-#' Mickes (2015). For each confidence level:
+#' Mickes (2015). For each confidence criterion:
 #' \itemize{
 #'   \item Correct ID rate = proportion of target-present lineups where suspect identified
 #'   \item False ID rate = proportion of target-absent lineups where suspect identified
 #' }
+#'
+#' The criteria are the confidence levels of the responses that enter the
+#' ROC: target-present suspect IDs, and target-absent suspect IDs (designated
+#' suspect) or filler IDs (estimated). The confidence given to rejections, or
+#' to filler IDs in target-present lineups, does not define a criterion,
+#' because it cannot move an operating point. Each criterion therefore gives a
+#' distinct point, and averages over points (DPP, z-ROC d') do not depend on
+#' how rejection confidence was coded.
 #'
 #' With a designated innocent suspect, target-absent \code{"suspect"}
 #' responses are used directly. Without one, filler IDs are divided by lineup
@@ -65,7 +78,8 @@
 #'
 #' @export
 #' @import tibble
-make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto") {
+make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto",
+                         thresholds = NULL) {
   .validate_lineup_analysis(data)
 
   # Validate required columns
@@ -88,8 +102,8 @@ make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto") {
 
   method <- .innocent_suspect_method(ta_data, innocent_suspect)
 
-  # Get unique confidence levels (sorted from high to low)
-  conf_levels <- sort(unique(data$confidence), decreasing = TRUE)
+  # Confidence criteria, from high to low
+  conf_levels <- .roc_thresholds(tp_data, ta_data, method, thresholds)
 
   # Initialize results
   roc_results <- tibble::tibble(
@@ -139,6 +153,7 @@ make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto") {
     n_target_absent = n_ta,
     lineup_size = lineup_size,
     innocent_suspect_method = method,
+    thresholds = conf_levels,
     raw_data = data
   )
   class(out) <- c("lineup_roc_data", "list")

@@ -28,6 +28,11 @@
 #'     \item "all": Include all identifications regardless of confidence
 #'   }
 #'   Default = "confidence".
+#' @param thresholds Optional numeric vector of confidence criteria. The
+#'   default uses the confidence levels of the responses that can change the
+#'   hit or false-alarm rate, as in \code{\link{make_rocdata}}, so the
+#'   confidence given to rejections does not add criteria or change the
+#'   average utility.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -89,7 +94,8 @@ make_utility_curves <- function(data,
                                 utility_matrix = c(tp = 1, fn = -0.5, fp = -2, tn = 0.5),
                                 lineup_size = 6,
                                 criteria = c("confidence", "all"),
-                                innocent_suspect = "auto") {
+                                innocent_suspect = "auto",
+                                thresholds = NULL) {
   .validate_lineup_analysis(data)
 
   # Validate inputs
@@ -122,9 +128,10 @@ make_utility_curves <- function(data,
     stop("Data must include both target-present and target-absent lineups")
   }
 
-  # Get confidence levels (sorted from high to low for cumulative criteria)
-  conf_levels <- sort(unique(data$confidence), decreasing = TRUE)
+  # Confidence criteria (high to low), as for the ROC: only responses that can
+  # change a hit or false-alarm rate define one.
   innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
+  conf_levels <- .roc_thresholds(tp_data, ta_data, innocent_method, thresholds)
 
   # Initialize results
   utility_results <- tibble::tibble(
@@ -187,11 +194,11 @@ make_utility_curves <- function(data,
     false_alarm_rate = utility_results$false_alarm_rate[max_idx]
   )
 
-  # Compute average utility across criteria (excluding reject-all)
-  avg_utility <- mean(utility_results$expected_utility[utility_results$criterion != min(conf_levels) - 1])
+  # Compute average utility across the confidence criteria (excluding reject-all)
+  confidence_rows <- seq_along(conf_levels)
+  avg_utility <- mean(utility_results$expected_utility[confidence_rows])
 
   # Utility if all IDs are accepted uses the lowest confidence threshold.
-  confidence_rows <- seq_along(conf_levels)
   utility_all_ids <- utility_results$expected_utility[utils::tail(confidence_rows, 1)]
 
   if (criteria == "all") {

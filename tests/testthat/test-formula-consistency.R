@@ -45,7 +45,8 @@ testthat::test_that("make_dpp implements Smith et al. (2019) Equation 2", {
     confidence = rep(c(90, 70, 50, 50, rep(30, 6)), 2)
   )
   dpp_chance <- make_dpp(chance)
-  testthat::expect_equal(dpp_chance$dpp_by_point$dpp, rep(1, 4))
+  # Confidence 30 belongs only to rejections, so it is not a criterion.
+  testthat::expect_equal(dpp_chance$dpp_by_point$dpp, rep(1, 3))
 })
 
 # Smith et al. (2019), Table 4: operating points from 100% to 0% confidence

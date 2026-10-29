@@ -4,7 +4,12 @@
 \alias{make_rocdata}
 \title{Compute ROC Data for Lineup Identification}
 \usage{
-make_rocdata(data, lineup_size = 6, innocent_suspect = "auto")
+make_rocdata(
+  data,
+  lineup_size = 6,
+  innocent_suspect = "auto",
+  thresholds = NULL
+)
 }
 \arguments{
 \item{data}{A dataframe with the following columns:
@@ -27,6 +32,11 @@ innocent-suspect count is estimated as filler IDs divided by
 \code{"designated"} when any target-absent row is a suspect ID or the data
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
+
+\item{thresholds}{Optional numeric vector of confidence criteria at which
+to evaluate the ROC. The default uses the confidence levels of the
+responses that can move an operating point; see Details. Supplying the
+criteria of a full sample keeps them fixed across bootstrap resamples.}
 }
 \value{
 A list containing:
@@ -35,6 +45,7 @@ A list containing:
     \item pauc: Partial area under the curve
     \item n_target_present: Number of target-present lineups
     \item n_target_absent: Number of target-absent lineups
+    \item thresholds: The confidence criteria used, highest first
   }
 }
 \description{
@@ -43,11 +54,19 @@ experiments following the methodology of Mickes, Wixted, and Gronlund.
 }
 \details{
 This function computes ROC curves following Wixted & Mickes (2012) and
-Mickes (2015). For each confidence level:
+Mickes (2015). For each confidence criterion:
 \itemize{
   \item Correct ID rate = proportion of target-present lineups where suspect identified
   \item False ID rate = proportion of target-absent lineups where suspect identified
 }
+
+The criteria are the confidence levels of the responses that enter the
+ROC: target-present suspect IDs, and target-absent suspect IDs (designated
+suspect) or filler IDs (estimated). The confidence given to rejections, or
+to filler IDs in target-present lineups, does not define a criterion,
+because it cannot move an operating point. Each criterion therefore gives a
+distinct point, and averages over points (DPP, z-ROC d') do not depend on
+how rejection confidence was coded.
 
 With a designated innocent suspect, target-absent \code{"suspect"}
 responses are used directly. Without one, filler IDs are divided by lineup
