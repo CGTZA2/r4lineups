@@ -207,8 +207,10 @@ fairness_server <- function(id) {
       validate(need(!is.null(f), "Functional size is undefined when nobody chooses the suspect."))
       data.frame(
         quantity = c("Functional size", "Normal-theory 95% CI", "Bootstrap percentile 95% CI",
-                     "Bootstrap BCa 95% CI", "Bootstrap R"),
-        value = c(fmt_num(f$estimate, 3), fmt_ci(f$normal), fmt_ci(f$percentile), fmt_ci(f$bca), f$R)
+                     "Bootstrap BCa 95% CI", "Exact (Clopper-Pearson) 95% CI", "Bootstrap R",
+                     "Bootstrap samples with no suspect choices"),
+        value = c(fmt_num(f$estimate, 3), fmt_ci(f$normal), fmt_ci(f$percentile), fmt_ci(f$bca),
+                  fmt_ci(f$exact), f$R, f$n_infinite)
       )
     })
     serve_table(output, "func_table", func_df, "functional_size.csv")

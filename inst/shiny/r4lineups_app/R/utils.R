@@ -98,7 +98,8 @@ dt_table <- function(df, digits = 3, page_length = 25) {
 }
 
 fmt_ci <- function(x, digits = 3) {
-  if (length(x) < 2 || any(!is.finite(x[1:2]))) {
+  # An infinite limit is a real (unbounded) limit; only missing ones are blank.
+  if (length(x) < 2 || anyNA(x[1:2])) {
     return("")
   }
   sprintf("[%s, %s]", format(round(x[1], digits), nsmall = digits),

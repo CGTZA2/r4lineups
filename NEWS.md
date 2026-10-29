@@ -41,6 +41,18 @@
 
 ## Bug fixes
 
+* `func_size_report()` bootstrapped functional size, 1/p, and `boot.ci()`
+  silently dropped the resamples with no target choices, where it is
+  infinite. With one target choice among 30 mock witnesses, 353 of 1,000
+  resamples were dropped and the percentile interval was [10, 30]. The
+  bootstrap now resamples p and inverts its limits, which gives the same
+  percentile and BCa intervals when every resample is finite and an
+  unbounded upper limit when it is not ([10, Inf] here). The result gains an
+  exact interval (inverted Clopper-Pearson, [5.81, 1185.44] here) and
+  `n_infinite`, the number of resamples without target choices. The app's
+  Bias & size tab shows both, and displays infinite limits instead of
+  leaving them blank.
+
 * `standardize_lineup_data()` kept only the columns it maps, so it dropped
   `suspect_pos` and `lineup_member`. A designated suspect who was never chosen
   then fell back to the filler estimate after standardization (false-ID rate

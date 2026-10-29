@@ -16,15 +16,28 @@ func_size_report(lineup_vec, target_pos, k, R = 1000)
 \item{R}{Number of bootstrap samples. Defaults to 1000}
 }
 \value{
-Invisibly returns the functional-size estimate, normal, percentile,
- and BCa intervals, the number of replications, and the bootstrap object.
+Invisibly returns the functional-size estimate; the normal,
+ percentile and BCa bootstrap intervals; the exact interval; the number of
+ replications; the number of replications in which nobody chose the target
+ (\code{n_infinite}); and the bootstrap object, whose statistic is the
+ proportion choosing the target.
 }
 \description{
 This function is a master function, calling other functions it needs,
 and reporting results in some detail
 }
 \details{
-Function depends on functions from package 'boot'
+Functional size is the reciprocal of the proportion of mock witnesses
+ choosing the target, p. The bootstrap resamples p, which stays finite when a
+ resample contains no target choices, and the interval limits for p are
+ inverted. Percentile and BCa intervals respect monotone transformations, so
+ they are the intervals for functional size itself, computed from the whole
+ bootstrap distribution; a lower limit of 0 for p gives an unbounded
+ (\code{Inf}) upper limit. The normal interval is the normal-theory interval
+ for p, inverted. The exact interval inverts the Clopper-Pearson interval for
+ p (\code{\link[stats]{binom.test}}).
+
+ Function depends on functions from package 'boot'
 }
 \examples{
 #Data:

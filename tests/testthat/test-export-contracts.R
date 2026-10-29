@@ -202,3 +202,28 @@ test_that("Winter bootstrap export returns finite intervals", {
   expect_s3_class(boot, "winter_2ht_boot")
   expect_true(all(is.finite(boot$ci)))
 })
+
+test_that("func_size_report keeps resamples with no target choices", {
+  # Codex review 2, finding 3: boot.ci() dropped the infinite replicates of
+  # 1/p, giving a percentile interval of [10, 30] for one choice in 30.
+  x <- c(1, rep(2:6, length.out = 29))
+  set.seed(1)
+  expect_output(fs <- func_size_report(x, target_pos = 1, k = 6, R = 1000),
+                "no target choices")
+  expect_gt(fs$n_infinite, 300)
+  expect_equal(fs$n_infinite, sum(fs$boot$t[, 1] == 0))
+  expect_equal(fs$percentile[2], Inf)
+  expect_equal(fs$bca[2], Inf)
+  expect_equal(fs$exact, 1 / rev(stats::binom.test(1, 30)$conf.int))
+  expect_equal(fs$exact, c(5.81, 1185.44), tolerance = 1e-3)
+
+  # With no resample lacking target choices, the limits are those of 1/p.
+  y <- rep(1:3, 20)
+  set.seed(2)
+  expect_output(fs <- func_size_report(y, 1, 3, R = 200), "Exact")
+  expect_equal(fs$n_infinite, 0)
+  expect_equal(fs$percentile,
+               unname(stats::quantile(1 / fs$boot$t[, 1], c(0.025, 0.975), type = 6)),
+               tolerance = 0.05)
+  expect_true(fs$percentile[1] < 3 && fs$percentile[2] > 3)
+})
