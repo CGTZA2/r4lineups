@@ -125,8 +125,14 @@ innocent_id_rate_uncorrected <- function(error_rate) {
 #'   per confidence bin (must have columns: conf_level, effective_size).
 #'   If NULL and correction="effective", computes from data.
 #' @param quiet Logical. Suppress the note issued when \code{correction} is not
-#'   applied because the data designate an innocent suspect. Default
-#'   \code{FALSE}.
+#'   applied because the data designate an innocent suspect, and the note
+#'   issued when the two arms differ in size. Default \code{FALSE}.
+#' @param base_rate Prior probability that the suspect is guilty.
+#'   \code{NULL} (default) computes PPV from counts, as below. A number
+#'   strictly between 0 and 1 computes it from the guilty-ID rate (per
+#'   target-present trial) and the innocent-suspect-ID rate (per
+#'   target-absent trial) at that prior, so the result does not depend on the
+#'   TP:TA split.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -160,10 +166,15 @@ innocent_id_rate_uncorrected <- function(error_rate) {
 #'   \item "none": assumes all errors are innocent-suspect IDs (error_rate)
 #' }
 #'
-#' \strong{Note on the implicit base rate:} PPV is computed from raw
+#' \strong{Note on the base rate:} by default PPV is computed from raw
 #' target-present and target-absent counts, so the prior probability of guilt
 #' is implicitly the experiment's TP:TA ratio (e.g., 0.5 for the usual balanced
-#' design). PPV is \emph{not} base-rate-free: at different real-world base
+#' design), and a message is issued when the two arms differ in size. Set
+#' \code{base_rate} to compute
+#' \eqn{\pi g(c) / (\pi g(c) + (1 - \pi) i(c))} from the guilty-ID rate
+#' \eqn{g(c)} and innocent-suspect-ID rate \eqn{i(c)} instead;
+#' \code{base_rate = 0.5} reproduces the balanced-design value at any sample
+#' sizes. PPV is \emph{not} base-rate-free: at different real-world base
 #' rates the PPV of the same procedure will differ. When target-absent lineups
 #' have no designated innocent suspect, the correction also relies on the
 #' pseudo-distribution assumption of spreading filler choices over lineup
@@ -186,6 +197,7 @@ innocent_id_rate_uncorrected <- function(error_rate) {
 #'                                 correction = "effective",
 #'                                 confidence_bins = c(0, 60, 80, 100))
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 ppv_by_confidence <- function(data,
@@ -193,8 +205,11 @@ ppv_by_confidence <- function(data,
                                 confidence_bins = NULL,
                                 correction = c("nominal", "effective", "none"),
                                 effective_size_data = NULL,
-                                quiet = FALSE) {
+                                quiet = FALSE,
+                                innocent_suspect = "auto",
+                                base_rate = NULL) {
   .validate_lineup_analysis(data)
+  .check_base_rate(base_rate)
 
   # Validate inputs
   correction <- match.arg(correction)
@@ -218,7 +233,12 @@ ppv_by_confidence <- function(data,
   # Separate target-present and target-absent
   tp_data <- data[data$target_present == TRUE, ]
   ta_data <- data[data$target_present == FALSE, ]
-  innocent_method <- .innocent_suspect_method(ta_data)
+  innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
+  n_tp <- nrow(tp_data)
+  n_ta <- nrow(ta_data)
+  if (is.null(base_rate) && !isTRUE(quiet)) {
+    .unbalanced_note(n_tp, n_ta)
+  }
 
   # With a designated innocent suspect the error count is observed directly, so
   # the branch below never consults `correction`. Say so: three "different"
@@ -254,8 +274,24 @@ ppv_by_confidence <- function(data,
     ta_conf <- ta_data[ta_data$conf_level == conf, ]
     n_ta_total <- nrow(ta_conf)
 
+    # A bin is skipped only when neither arm has trials in it. A bin with
+    # target-present trials but no target-absent ones has no innocent-suspect
+    # IDs, so its PPV is 1 if it has guilty IDs. Dropping it would remove those
+    # guilty IDs from the overall PPV as well.
+    n_tp_bin <- sum(tp_data$conf_level == conf, na.rm = TRUE)
+    if (n_ta_total == 0 && n_tp_bin == 0) {
+      next
+    }
     if (n_ta_total == 0) {
-      # Skip empty bins
+      ppv_results <- rbind(ppv_results, tibble::tibble(
+        confidence = as.character(conf),
+        n_guilty_ids = n_guilty,
+        n_innocent_ids_est = 0,
+        n_total_ids = n_guilty,
+        ppv = .suspect_id_ppv(n_guilty, 0, n_tp, n_ta, base_rate),
+        error_rate = NA_real_,
+        effective_size = NA_real_
+      ))
       next
     }
 
@@ -339,11 +375,7 @@ ppv_by_confidence <- function(data,
 
     # PPV calculation
     n_total_ids <- n_guilty + n_innocent_est
-    if (n_total_ids > 0) {
-      ppv <- n_guilty / n_total_ids
-    } else {
-      ppv <- NA
-    }
+    ppv <- .suspect_id_ppv(n_guilty, n_innocent_est, n_tp, n_ta, base_rate)
 
     ppv_results <- rbind(ppv_results, tibble::tibble(
       confidence = as.character(conf),
@@ -359,16 +391,18 @@ ppv_by_confidence <- function(data,
   # Calculate overall PPV
   total_guilty <- sum(ppv_results$n_guilty_ids)
   total_innocent_est <- sum(ppv_results$n_innocent_ids_est)
-  overall_ppv <- total_guilty / (total_guilty + total_innocent_est)
+  overall_ppv <- .suspect_id_ppv(total_guilty, total_innocent_est, n_tp, n_ta,
+                                 base_rate)
 
   result <- list(
     ppv_data = ppv_results,
     overall_ppv = overall_ppv,
     correction_method = correction,
     innocent_suspect_method = innocent_method,
+    base_rate = base_rate,
     lineup_size = lineup_size,
-    n_target_present = nrow(tp_data),
-    n_target_absent = nrow(ta_data)
+    n_target_present = n_tp,
+    n_target_absent = n_ta
   )
 
   class(result) <- c("lineup_ppv", "list")
@@ -385,6 +419,7 @@ ppv_by_confidence <- function(data,
 #' @param lineup_size Integer. Nominal number of people in lineup (default = 6)
 #' @param confidence_bins Numeric vector of bin edges (optional)
 #' @param effective_size_data Optional pre-computed effective sizes
+#' @inheritParams ppv_by_confidence
 #'
 #' @return A list of class "lineup_ppv_range" containing:
 #'   \itemize{
@@ -423,21 +458,32 @@ ppv_by_confidence <- function(data,
 #' ppv_range$ppv_effective$overall_ppv
 #' ppv_range$ppv_none$overall_ppv
 #'
+#' @inheritParams make_rocdata
 #' @export
 ppv_range_by_confidence <- function(data,
                                      lineup_size = 6,
                                      confidence_bins = NULL,
-                                     effective_size_data = NULL) {
+                                     effective_size_data = NULL,
+                                     innocent_suspect = "auto",
+                                     base_rate = NULL) {
+  .check_base_rate(base_rate)
+  innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
 
   # Compute PPV with each correction method. The three calls are silenced and
   # the designated-innocent-suspect note issued once below, rather than three
   # times over.
   ppv_nominal <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                    "nominal", effective_size_data, quiet = TRUE)
+                                    "nominal", effective_size_data, quiet = TRUE,
+                                    innocent_suspect = innocent_suspect,
+                                    base_rate = base_rate)
   ppv_effective <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                      "effective", effective_size_data, quiet = TRUE)
+                                      "effective", effective_size_data, quiet = TRUE,
+                                      innocent_suspect = innocent_suspect,
+                                      base_rate = base_rate)
   ppv_none <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                 "none", effective_size_data, quiet = TRUE)
+                                 "none", effective_size_data, quiet = TRUE,
+                                 innocent_suspect = innocent_suspect,
+                                 base_rate = base_rate)
 
   if (identical(ppv_nominal$innocent_suspect_method, "designated")) {
     message("Target-absent lineups contain a designated innocent suspect, so ",
@@ -447,6 +493,10 @@ ppv_range_by_confidence <- function(data,
             "diverge only when no innocent suspect is designated and the ",
             "number of innocent-suspect IDs has to be estimated from the ",
             "filler IDs.")
+  }
+  if (is.null(base_rate)) {
+    .unbalanced_note(ppv_nominal$n_target_present,
+                     ppv_nominal$n_target_absent)
   }
 
   # Combine into a single dataframe for easy plotting
@@ -466,7 +516,8 @@ ppv_range_by_confidence <- function(data,
     ppv_effective = ppv_effective,
     ppv_none = ppv_none,
     lineup_size = lineup_size,
-    confidence_bins = confidence_bins
+    confidence_bins = confidence_bins,
+    base_rate = base_rate
   )
 
   class(result) <- c("lineup_ppv_range", "list")
@@ -483,6 +534,9 @@ print.lineup_ppv <- function(x, ...) {
   cat("\n=== Lineup PPV Analysis ===\n\n")
   cat("Correction method:", x$correction_method, "\n")
   cat("Overall PPV:", round(x$overall_ppv, 3), "\n")
+  if (!is.null(x$base_rate)) {
+    cat("Computed from rates at base rate:", x$base_rate, "\n")
+  }
   cat("Lineup size:", x$lineup_size, "\n")
   cat("Sample sizes:\n")
   cat("  Target-present:", x$n_target_present, "\n")
@@ -502,7 +556,11 @@ print.lineup_ppv <- function(x, ...) {
 #' @export
 print.lineup_ppv_range <- function(x, ...) {
   cat("\n=== Lineup PPV Range Analysis ===\n\n")
-  cat("Lineup size:", x$lineup_size, "\n\n")
+  cat("Lineup size:", x$lineup_size, "\n")
+  if (!is.null(x$base_rate)) {
+    cat("Computed from rates at base rate:", x$base_rate, "\n")
+  }
+  cat("\n")
 
   cat("Overall PPV by correction method:\n")
   cat("  Nominal (best-case):", round(x$ppv_nominal$overall_ppv, 3), "\n")

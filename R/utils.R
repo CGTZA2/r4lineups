@@ -21,6 +21,7 @@ utils::globalVariables(c(
   "delta",
   "difference",
   "distance",
+  "dpp",
   "effective_size",
   "error_rate",
   "evidence_direction",
@@ -76,15 +77,110 @@ utils::globalVariables(c(
 ))
 
 # Determine how innocent-suspect identifications are represented in a
-# target-absent dataset. If explicit suspect rows are present, they are the
-# designated innocent-suspect responses and filler rows must not be added to
-# them. Otherwise, filler choices are divided by nominal lineup size.
-.innocent_suspect_method <- function(ta_data) {
-  if (any(ta_data$identification == "suspect", na.rm = TRUE)) {
-    "designated"
-  } else {
-    "estimated_from_fillers"
+# target-absent dataset. With a designated innocent suspect, the explicit
+# suspect rows are the innocent-suspect responses and filler rows must not be
+# added to them. Without one, filler choices are divided by nominal lineup size.
+#
+# `innocent_suspect = "auto"` treats the lineups as having a designated suspect
+# when any target-absent row is a suspect ID or the data carry a non-missing
+# `suspect_pos` column for target-absent rows. A designated suspect who is never
+# chosen is still designated, so zero suspect IDs alone is not evidence that
+# there was none. Resolved values ("designated", "estimated_from_fillers") pass
+# through unchanged, so a bootstrap can resolve once on the full data and reuse
+# the result in every replicate.
+.innocent_suspect_method <- function(ta_data, innocent_suspect = "auto") {
+  if (!is.character(innocent_suspect) || length(innocent_suspect) != 1L ||
+      !innocent_suspect %in% c("auto", "designated", "estimated",
+                               "estimated_from_fillers")) {
+    stop("innocent_suspect must be one of \"auto\", \"designated\" or ",
+         "\"estimated\".", call. = FALSE)
   }
+  if (innocent_suspect == "designated") return("designated")
+  if (innocent_suspect %in% c("estimated", "estimated_from_fillers")) {
+    return("estimated_from_fillers")
+  }
+  has_suspect_id <- any(ta_data$identification == "suspect", na.rm = TRUE)
+  has_suspect_pos <- "suspect_pos" %in% names(ta_data) &&
+    any(!is.na(ta_data$suspect_pos))
+  if (has_suspect_id || has_suspect_pos) {
+    return("designated")
+  }
+  message("No target-absent suspect IDs and no suspect_pos column; treating ",
+          "the lineups as having no designated innocent suspect and estimating ",
+          "innocent-suspect IDs as filler IDs / lineup_size. Set ",
+          "innocent_suspect = \"designated\" if a suspect was designated but ",
+          "never chosen.")
+  "estimated_from_fillers"
+}
+
+# Resolve the innocent-suspect design once on a full dataset, so that resampled
+# or subsetted analyses all use the same design.
+.resolve_innocent_suspect <- function(data, innocent_suspect = "auto") {
+  .innocent_suspect_method(
+    data[!as.logical(data$target_present), , drop = FALSE], innocent_suspect
+  )
+}
+
+# Probability of guilt given a suspect ID. With `base_rate = NULL` this is the
+# count ratio that Mickes (2015) defines for CAC accuracy, which equals the
+# posterior at the design's own TP:TA ratio. With a base rate it is computed
+# from the two arms' rates, so it no longer depends on how many trials each arm
+# had.
+.suspect_id_ppv <- function(n_guilty, n_innocent, n_tp, n_ta, base_rate = NULL) {
+  if (is.null(base_rate)) {
+    n <- n_guilty + n_innocent
+    return(if (n > 0) n_guilty / n else NA_real_)
+  }
+  g <- if (n_tp > 0) base_rate * n_guilty / n_tp else 0
+  i <- if (n_ta > 0) (1 - base_rate) * n_innocent / n_ta else 0
+  if (g + i > 0) g / (g + i) else NA_real_
+}
+
+.check_base_rate <- function(base_rate) {
+  if (!is.null(base_rate) &&
+      (!is.numeric(base_rate) || length(base_rate) != 1L || is.na(base_rate) ||
+       base_rate <= 0 || base_rate >= 1)) {
+    stop("base_rate must be NULL or a single number strictly between 0 and 1.",
+         call. = FALSE)
+  }
+  invisible(base_rate)
+}
+
+# Count-based accuracy mixes witness performance with the design's TP:TA split.
+# Say so when the arms differ, and point to the rate-based alternative.
+.unbalanced_note <- function(n_tp, n_ta) {
+  if (n_tp != n_ta) {
+    message("Target-present and target-absent samples differ in size (",
+            n_tp, " and ", n_ta, "). Accuracy computed from counts, as in ",
+            "Mickes (2015), then reflects that split as well as witness ",
+            "performance. Set base_rate = 0.5 to compute it from the hit and ",
+            "false-ID rates instead.")
+  }
+  invisible(NULL)
+}
+
+# Confidence criteria for a suspect-ID ROC, highest first. Only responses that
+# can move an operating point define a criterion: target-present suspect IDs,
+# plus target-absent suspect IDs (designated) or filler IDs (estimated). The
+# confidence of rejections and target-present filler IDs would only add
+# duplicate points, which reweight averages over points such as DPP. With no
+# such responses the single highest confidence gives one (0, 0) point.
+.roc_thresholds <- function(tp_data, ta_data, method, thresholds = NULL) {
+  if (!is.null(thresholds)) {
+    if (!is.numeric(thresholds) || length(thresholds) == 0L ||
+        anyNA(thresholds)) {
+      stop("thresholds must be a non-empty numeric vector.", call. = FALSE)
+    }
+    return(sort(unique(thresholds), decreasing = TRUE))
+  }
+  ta_type <- if (method == "designated") "suspect" else "filler"
+  conf <- c(tp_data$confidence[tp_data$identification == "suspect"],
+            ta_data$confidence[ta_data$identification == ta_type])
+  conf <- conf[!is.na(conf)]
+  if (length(conf) == 0L) {
+    conf <- max(c(tp_data$confidence, ta_data$confidence), na.rm = TRUE)
+  }
+  sort(unique(conf), decreasing = TRUE)
 }
 
 .innocent_suspect_count <- function(ta_data, include, lineup_size,

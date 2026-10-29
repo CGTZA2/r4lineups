@@ -190,3 +190,24 @@ test_that("negative alpha raises error", {
   pres <- make_vecs(20, 100, pos=3); abs_ <- make_vecs(10, 80, pos=3)
   expect_error(diag_ratio_T_bayes(pres, abs_, 3, 3, 6, 6, alpha=-1))
 })
+
+test_that("the posterior mean of DR is exact and infinite when it does not exist", {
+  set.seed(2)
+  pres <- c(rep(3, 40), rep(c(1, 2, 4, 5, 6), 12))
+  abs <- c(rep(3, 10), rep(c(1, 2, 4, 5, 6), 18))
+  res <- diag_ratio_T_bayes(pres, abs, 3, 3, 6, 6, S = 1e5)
+  expected <- 40.5 / 101 * (10.5 + 90.5 - 1) / (10.5 - 1)
+  expect_equal(res$posterior_mean, expected)
+  expect_equal(res$posterior_mean, mean(res$DR_draws), tolerance = 0.01)
+
+  abs0 <- rep(c(1, 2, 4, 5, 6), 20)
+  inf <- diag_ratio_T_bayes(pres, abs0, 3, 3, 6, 6, S = 1000)
+  expect_equal(inf$posterior_mean, Inf)
+  cmp <- diag_ratio_T_bayes_compare(pres, abs0, 3, 3, 6, 6,
+                                    pres, abs0, 3, 3, 6, 6, S = 1000)
+  expect_true(is.na(cmp$posterior_mean))
+  expect_output(print(cmp), "both means are infinite")
+  finite_vs_inf <- diag_ratio_T_bayes_compare(pres, abs, 3, 3, 6, 6,
+                                              pres, abs0, 3, 3, 6, 6, S = 1000)
+  expect_equal(finite_vs_inf$posterior_mean, -Inf)
+})

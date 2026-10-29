@@ -5,7 +5,7 @@ library(shiny)
 # so the current version is installed from r-universe.
 if (identical(R.version$os, "emscripten") &&
     (!requireNamespace("r4lineups", quietly = TRUE) ||
-     utils::packageVersion("r4lineups") < "2.2.0")) {
+     utils::packageVersion("r4lineups") < "2.3.0")) {
   webr::install("r4lineups", repos = c("https://cgtza2.r-universe.dev", "https://repo.r-wasm.org"))
 }
 library(r4lineups)

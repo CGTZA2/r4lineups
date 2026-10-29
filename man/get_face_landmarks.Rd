@@ -2,7 +2,7 @@
 % Please edit documentation in R/landmarks.R
 \name{get_face_landmarks}
 \alias{get_face_landmarks}
-\title{Get 468-Point Face Mesh Landmarks}
+\title{Get 478-Point Face Mesh Landmarks}
 \usage{
 get_face_landmarks(img_path, return_3d = TRUE)
 }
@@ -15,22 +15,23 @@ If FALSE, returns only 2D coordinates (x, y). Default is TRUE.}
 \value{
 A list containing:
 \itemize{
-  \item landmarks - Matrix of landmark coordinates (468 x 2 or 468 x 3)
+  \item landmarks - Matrix of landmark coordinates (478 x 2 or 478 x 3)
   \item face_detected - Logical indicating if a face was found
   \item image_width - Width of the input image
   \item image_height - Height of the input image
+  \item n_landmarks - Number of landmarks (when a face was found)
 }
 }
 \description{
-Extracts dense facial landmarks using MediaPipe Face Mesh,
-which provides 468 3D landmark points covering the entire face.
+Extracts dense facial landmarks using MediaPipe Face Mesh, which provides
+478 3D landmark points covering the entire face, including the irises.
 }
 \details{
 MediaPipe Face Mesh provides detailed landmarks covering:
 \itemize{
   \item Face oval/contour
   \item Left and right eyebrows
-  \item Left and right eyes (including iris)
+  \item Left and right eyes, with 10 iris points (468 to 477)
   \item Nose
   \item Lips (inner and outer contours)
   \item Face interior regions (cheeks, forehead)
@@ -38,6 +39,14 @@ MediaPipe Face Mesh provides detailed landmarks covering:
 
 The x and y coordinates are normalized to [0, 1] relative to image
 dimensions. The z coordinate represents depth relative to the face center.
+
+Older MediaPipe releases expose the legacy
+\code{mediapipe.solutions.face_mesh} interface, which is used when present.
+Current releases have only the Tasks API (\code{FaceLandmarker}), which
+needs a model file. It is downloaded once, on first use, to
+\code{tools::R_user_dir("r4lineups", "cache")}. On macOS the Tasks API runs
+on the GPU delegate, because the CPU delegate in current macOS wheels aborts
+the process.
 }
 \note{
 Requires MediaPipe to be installed (installed by default with

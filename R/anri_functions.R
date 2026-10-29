@@ -77,13 +77,15 @@
 #' result <- compute_anri(data, confidence_bins = seq(0, 100, 20))
 #' result$anri
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 compute_anri <- function(data,
                         confidence_bins,
                         choosers_only = TRUE,
                         lineup_size = 6,
-                        confidence_scale = c("auto", "0-1", "0-100")) {
+                        confidence_scale = c("auto", "0-1", "0-100"),
+                        innocent_suspect = "auto") {
 
   confidence_scale <- match.arg(confidence_scale)
 
@@ -97,7 +99,8 @@ compute_anri <- function(data,
     confidence_bins = confidence_bins,
     choosers_only = choosers_only,
     lineup_size = lineup_size,
-    confidence_scale = confidence_scale
+    confidence_scale = confidence_scale,
+    innocent_suspect = innocent_suspect
   )
 
   N <- cal_obj$n_total
@@ -179,6 +182,7 @@ compute_anri <- function(data,
 #' c(boot_result$ci_lower, boot_result$ci_upper)
 #' }
 #'
+#' @inheritParams make_rocdata
 #' @export
 bootstrap_anri <- function(data,
                           confidence_bins,
@@ -187,9 +191,14 @@ bootstrap_anri <- function(data,
                           n_bootstrap = 1000,
                           conf_level = 0.95,
                           seed = NULL,
-                          confidence_scale = c("auto", "0-1", "0-100")) {
+                          confidence_scale = c("auto", "0-1", "0-100"),
+                          innocent_suspect = "auto") {
 
   confidence_scale <- match.arg(confidence_scale)
+  # Resolve the design once, so every resample uses the same one
+  if (choosers_only) {
+    innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
+  }
 
   # Set seed for reproducibility if provided
   restore_rng <- .local_seed(seed)
@@ -197,14 +206,16 @@ bootstrap_anri <- function(data,
 
   # Compute point estimate
   anri_point <- compute_anri(data, confidence_bins, choosers_only, lineup_size,
-                             confidence_scale = confidence_scale)
+                             confidence_scale = confidence_scale,
+                             innocent_suspect = innocent_suspect)
 
   # Bootstrap function
   bootstrap_anri_once <- function(indices) {
     boot_data <- data[indices, ]
     tryCatch({
       boot_anri <- compute_anri(boot_data, confidence_bins, choosers_only, lineup_size,
-                                confidence_scale = confidence_scale)
+                                confidence_scale = confidence_scale,
+                                innocent_suspect = innocent_suspect)
       boot_anri$anri
     }, error = function(e) {
       NA_real_
@@ -306,6 +317,7 @@ bootstrap_anri <- function(data,
 #' c(cmp$ci_lower, cmp$ci_upper)
 #' }
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 compare_anri <- function(data,
@@ -316,9 +328,13 @@ compare_anri <- function(data,
                         n_bootstrap = 1000,
                         conf_level = 0.95,
                         seed = NULL,
-                        confidence_scale = c("auto", "0-1", "0-100")) {
+                        confidence_scale = c("auto", "0-1", "0-100"),
+                        innocent_suspect = "auto") {
 
   confidence_scale <- match.arg(confidence_scale)
+  if (choosers_only) {
+    innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
+  }
 
   # Validate group variable
   if (!group_var %in% names(data)) {
@@ -347,7 +363,8 @@ compare_anri <- function(data,
     n_bootstrap = n_bootstrap,
     conf_level = conf_level,
     seed = if (!is.null(seed)) seed else NULL,
-    confidence_scale = confidence_scale
+    confidence_scale = confidence_scale,
+    innocent_suspect = innocent_suspect
   )
 
   boot_group2 <- bootstrap_anri(
@@ -358,7 +375,8 @@ compare_anri <- function(data,
     n_bootstrap = n_bootstrap,
     conf_level = conf_level,
     seed = if (!is.null(seed)) seed + 1 else NULL,
-    confidence_scale = confidence_scale
+    confidence_scale = confidence_scale,
+    innocent_suspect = innocent_suspect
   )
 
   # Compute bootstrap distribution of difference

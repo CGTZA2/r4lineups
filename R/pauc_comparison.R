@@ -87,6 +87,7 @@
 #' plot(comparison)
 #' }
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @importFrom stats qnorm pnorm
 compare_pauc <- function(data1,
@@ -97,7 +98,8 @@ compare_pauc <- function(data1,
                          conf_level = 0.95,
                          seed = NULL,
                          label1 = "Condition 1",
-                         label2 = "Condition 2") {
+                         label2 = "Condition 2",
+                         innocent_suspect = "auto") {
   if (!is.numeric(n_bootstrap) || length(n_bootstrap) != 1L ||
       n_bootstrap < 2 || n_bootstrap != as.integer(n_bootstrap)) {
     stop("n_bootstrap must be an integer of at least 2.", call. = FALSE)
@@ -110,8 +112,10 @@ compare_pauc <- function(data1,
   on.exit(restore_rng(), add = TRUE)
 
   # Compute ROC for both conditions
-  roc1 <- make_rocdata(data1, lineup_size = lineup_size)
-  roc2 <- make_rocdata(data2, lineup_size = lineup_size)
+  roc1 <- make_rocdata(data1, lineup_size = lineup_size,
+                       innocent_suspect = innocent_suspect)
+  roc2 <- make_rocdata(data2, lineup_size = lineup_size,
+                       innocent_suspect = innocent_suspect)
 
   # Determine max false ID rate cutoff.
   #
@@ -151,7 +155,9 @@ compare_pauc <- function(data1,
     data1, data2,
     lineup_size = lineup_size,
     max_false_id_rate = max_false_id_rate,
-    n_bootstrap = n_bootstrap
+    n_bootstrap = n_bootstrap,
+    innocent_suspect = c(roc1$innocent_suspect_method,
+                         roc2$innocent_suspect_method)
   )
 
   # Standard errors
@@ -215,58 +221,8 @@ compare_pauc <- function(data1,
       is.na(max_false_id_rate) || max_false_id_rate < 0) {
     stop("max_false_id_rate must be a non-negative numeric scalar.", call. = FALSE)
   }
-  roc_data <- roc_data[order(roc_data$false_id_rate, roc_data$correct_id_rate), ]
-  roc_data <- roc_data[!duplicated(roc_data$false_id_rate, fromLast = TRUE), ]
-
-  # Filter to points at or below cutoff
-  roc_filtered <- roc_data[roc_data$false_id_rate <= max_false_id_rate, ]
-
-  # If no points at cutoff, interpolate
-  if (nrow(roc_filtered) == 0 || max(roc_filtered$false_id_rate) < max_false_id_rate) {
-    # Find points immediately below and above cutoff
-    below_idx <- which(roc_data$false_id_rate <= max_false_id_rate)
-    above_idx <- which(roc_data$false_id_rate > max_false_id_rate)
-
-    if (length(below_idx) > 0 && length(above_idx) > 0) {
-      # Get nearest points
-      below_pt <- roc_data[below_idx[which.max(roc_data$false_id_rate[below_idx])], ]
-      above_pt <- roc_data[above_idx[which.min(roc_data$false_id_rate[above_idx])], ]
-
-      # Linear interpolation
-      slope <- (above_pt$correct_id_rate - below_pt$correct_id_rate) /
-               (above_pt$false_id_rate - below_pt$false_id_rate)
-      interpolated_correct_rate <- below_pt$correct_id_rate +
-        slope * (max_false_id_rate - below_pt$false_id_rate)
-
-      # Add interpolated point
-      interp_pt <- data.frame(
-        confidence = NA,
-        correct_id_rate = interpolated_correct_rate,
-        false_id_rate = max_false_id_rate,
-        n_correct_ids = NA,
-        n_false_ids = NA
-      )
-
-      roc_filtered <- rbind(roc_filtered, interp_pt)
-    }
-  }
-
-  # Sort by false ID rate
-  roc_filtered <- roc_filtered[order(roc_filtered$false_id_rate), ]
-
-  # Compute AUC using trapezoidal rule
-  if (nrow(roc_filtered) < 2) {
-    return(0)
-  }
-
-  pauc <- 0
-  for (i in 2:nrow(roc_filtered)) {
-    width <- roc_filtered$false_id_rate[i] - roc_filtered$false_id_rate[i-1]
-    height <- (roc_filtered$correct_id_rate[i] + roc_filtered$correct_id_rate[i-1]) / 2
-    pauc <- pauc + (width * height)
-  }
-
-  return(pauc)
+  .roc_area(roc_data$false_id_rate, roc_data$correct_id_rate,
+            max_far = max_false_id_rate)
 }
 
 
@@ -277,11 +233,14 @@ compare_pauc <- function(data1,
 #' @param lineup_size Lineup size
 #' @param max_false_id_rate Maximum false ID rate
 #' @param n_bootstrap Number of bootstrap samples
+#' @param innocent_suspect Resolved innocent-suspect methods for the two
+#'   conditions, reused in every replicate
 #'
 #' @return List with bootstrap distributions
 #' @keywords internal
 .bootstrap_pauc_comparison <- function(data1, data2, lineup_size,
-                                       max_false_id_rate, n_bootstrap) {
+                                       max_false_id_rate, n_bootstrap,
+                                       innocent_suspect = c("auto", "auto")) {
 
   pauc1_boot <- numeric(n_bootstrap)
   pauc2_boot <- numeric(n_bootstrap)
@@ -290,8 +249,8 @@ compare_pauc <- function(data1,
   for (b in 1:n_bootstrap) {
     # Stratify by target presence so every resample preserves both trial types.
     resample_condition <- function(dat) {
-      tp <- which(dat$target_present)
-      ta <- which(!dat$target_present)
+      tp <- which(as.logical(dat$target_present))
+      ta <- which(!as.logical(dat$target_present))
       dat[c(sample(tp, length(tp), replace = TRUE),
             sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
     }
@@ -300,8 +259,10 @@ compare_pauc <- function(data1,
 
     # Compute ROC and pAUC for bootstrap samples
     tryCatch({
-      boot_roc1 <- make_rocdata(boot_data1, lineup_size = lineup_size)
-      boot_roc2 <- make_rocdata(boot_data2, lineup_size = lineup_size)
+      boot_roc1 <- make_rocdata(boot_data1, lineup_size = lineup_size,
+                                innocent_suspect = innocent_suspect[[1]])
+      boot_roc2 <- make_rocdata(boot_data2, lineup_size = lineup_size,
+                                innocent_suspect = innocent_suspect[[2]])
 
       pauc1_boot[b] <- .compute_pauc_with_cutoff(boot_roc1$roc_data, max_false_id_rate)
       pauc2_boot[b] <- .compute_pauc_with_cutoff(boot_roc2$roc_data, max_false_id_rate)

@@ -24,8 +24,9 @@ expect_outputs_render <- function(output, ids) {
 }
 
 trial_data <- function(df = lineup_example, lineup_size = 6, bins = c(0, 60, 80, 100),
-                       groups = NULL) {
-  shiny::reactive(list(data = df, label = "test", lineup_size = lineup_size, bins = bins,
+                       groups = NULL, innocent_suspect = "auto") {
+  shiny::reactive(list(data = df, label = "test", lineup_size = lineup_size,
+                       innocent_suspect = innocent_suspect, bins = bins,
                        groups = groups, has_rt = "response_time" %in% names(df)))
 }
 
@@ -44,6 +45,9 @@ test_that("data module loads the examples and finds the grouping column", {
     expect_true(d$has_rt)
     expect_equal(d$groups$labels, c("A", "B"))
     expect_equal(d$bins, c(0, 60, 80, 100))
+    expect_equal(d$innocent_suspect, "auto")
+    session$setInputs(innocent_suspect = "designated")
+    expect_equal(session$returned()$innocent_suspect, "designated")
   })
 })
 
@@ -82,6 +86,25 @@ test_that("fairness module accepts counts", {
                       `lineup-k` = 6, `lineup-target` = 2, R = 100, seed = 1, unbiased = TRUE,
                       run = 1)
     expect_equal(session$returned()$esize, esize_T(c(2, 5, 1, 0, 3, 1), unbiased = TRUE))
+  })
+})
+
+test_that("fairness module bootstraps the corrected E' when it reports it", {
+  vec <- nortje2012$lineup_1
+  shiny::testServer(mod("fairness_server"), {
+    session$setInputs(`lineup-type` = "vector", `lineup-values` = paste(vec, collapse = ","),
+                      `lineup-k` = 8, `lineup-target` = 3, R = 200, seed = 1, unbiased = TRUE,
+                      run = 1)
+    r <- session$returned()
+    tab <- table(factor(vec, levels = 1:8))
+    set.seed(1)
+    ref <- esize_boot_dist(vec, 8, metric = "tredoux", R = 200, unbiased = TRUE)
+    expect_equal(r$esize, esize_T(tab, unbiased = TRUE))
+    expect_equal(r$esize_boot, ref)
+    expect_equal(r$plugin, esize_T(tab))
+    ci <- stats::quantile(ref, c(0.025, 0.975))
+    expect_match(output$vb_esize_ci, format(round(ci[[1]], 2), nsmall = 2), fixed = TRUE)
+    expect_outputs_render(output, c("esize_table", "esize_dist"))
   })
 })
 
@@ -137,6 +160,21 @@ test_that("ROC module honours the lineup size from the Data tab", {
   })
 })
 
+test_that("ROC module honours the innocent-suspect setting from the Data tab", {
+  # No target-absent suspect IDs and no suspect_pos column
+  df <- lineup_example[, c("target_present", "identification", "confidence")]
+  df$identification[!df$target_present & df$identification == "suspect"] <- "filler"
+  shiny::testServer(mod("roc_server"),
+                    args = list(data = trial_data(df, innocent_suspect = "designated")), {
+    session$setInputs(order = "apriori", n_boot = 100, seed = 1, run = 1)
+    r <- session$returned()
+    expect_equal(r$roc$innocent_suspect_method, "designated")
+    expect_equal(max(r$roc$roc_data$false_id_rate), 0)
+    expect_equal(r$cac$innocent_suspect_method, "designated")
+    expect_equal(r$fullroc$innocent_suspect_method, "designated")
+  })
+})
+
 test_that("ROC module runs the pAUC comparison for two groups", {
   shiny::testServer(mod("roc_server"), args = list(data = trial_data(groups = two_groups())), {
     session$setInputs(order = "apriori", n_boot = 100, seed = 1, run = 1)
@@ -157,6 +195,27 @@ test_that("calibration module matches make_calibration and renders every panel",
     expect_outputs_render(output, c("vb_c", "cal_plot", "cal_table", "anri_table", "anri_plot",
                                     "dpp_table", "dpp_plot", "util_plot", "util_table",
                                     "bayes_pp", "bayes_ig", "bree_plot", "rac_plot", "rac_table"))
+  })
+})
+
+test_that("calibration module's DPP matches make_dpp and compare_dpp", {
+  shiny::testServer(mod("calibration_server"), args = list(data = trial_data()), {
+    session$setInputs(choosers = TRUE, n_boot = 100, seed = 1, base_rate = 0.5, u_tp = 1,
+                      u_fn = -0.5, u_fp = -2, u_tn = 0.5, bayes_cat = "confidence",
+                      time_bins = "", run = 1)
+    expect_equal(session$returned$dpp()$value$single$dpp, make_dpp(lineup_example)$dpp)
+    expect_outputs_render(output, c("dpp_table", "dpp_plot"))
+  })
+  df <- mod("example_trial_data")("two_procedures")
+  g <- two_groups()
+  shiny::testServer(mod("calibration_server"), args = list(data = trial_data(df, groups = g)), {
+    session$setInputs(choosers = TRUE, n_boot = 100, seed = 1, base_rate = 0.5, u_tp = 1,
+                      u_fn = -0.5, u_fp = -2, u_tn = 0.5, bayes_cat = "confidence",
+                      time_bins = "", run = 1)
+    ref <- compare_dpp(g$data[[1]], g$data[[2]], n_bootstrap = 100, seed = 1)
+    cmp <- session$returned$dpp()$value$compare
+    expect_equal(cmp$dpp_difference, ref$dpp_difference)
+    expect_equal(cmp$ci_difference, ref$ci_difference)
   })
 })
 

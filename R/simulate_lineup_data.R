@@ -276,11 +276,14 @@
 #' roc_ensemble <- make_roc(ensemble_data, lineup_size = 6)
 #'
 #' \donttest{
-#' # Power analysis: vary sample size
+#' # Power analysis: vary sample size (few simulations, to keep this quick;
+#' # use hundreds in practice)
 #' power_results <- simulate_power_analysis(
 #'   sample_sizes = c(50, 100),
 #'   d_prime = 1.5,
-#'   n_simulations = 100
+#'   n_simulations = 5,
+#'   n_bootstrap = 50,
+#'   seed = 1
 #' )
 #' }
 #'
@@ -631,8 +634,8 @@ print.simulated_lineup_data <- function(x, ...) {
 #' power_res <- simulate_power_analysis(
 #'   sample_sizes = c(50, 100),
 #'   d_prime = 1.5,
-#'   n_simulations = 20,
-#'   n_bootstrap = 100,
+#'   n_simulations = 8,
+#'   n_bootstrap = 50,
 #'   conf_levels = 5,
 #'   seed = 123
 #' )

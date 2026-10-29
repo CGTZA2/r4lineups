@@ -20,7 +20,7 @@
 #'   \item opencv-python - Image processing
 #'   \item numpy - Numerical computing
 #'   \item tf-keras - TensorFlow/Keras backend
-#'   \item mediapipe - For 468-point face mesh (optional but recommended)
+#'   \item mediapipe - For 478-point face mesh (optional but recommended)
 #'   \item retinaface - Best face detector
 #' }
 #'
@@ -151,7 +151,9 @@ install_r4lineups_python <- function(method = "auto",
 #'
 #' @param verbose Logical. If TRUE, prints detailed information.
 #'
-#' @return A tibble with package names, installed status, and versions.
+#' @return A tibble with package names, installed status, and versions. Its
+#'   \code{"face_mesh"} attribute says whether \code{get_face_landmarks()} can
+#'   run: \code{"solutions"}, \code{"tasks"} or \code{"unavailable"}.
 #'
 #' @examples
 #' \dontrun{
@@ -219,6 +221,24 @@ check_python_deps <- function(verbose = TRUE) {
     }
   }
 
+  # Importing mediapipe is not enough: get_face_landmarks() needs either the
+  # legacy solutions interface or the Tasks FaceLandmarker
+  face_mesh <- "unavailable"
+  if (results$installed[packages == "mediapipe"]) {
+    face_mesh <- tryCatch({
+      mp <- reticulate::import("mediapipe")
+      if (reticulate::py_has_attr(mp, "solutions")) {
+        "solutions"
+      } else if (reticulate::py_has_attr(
+        reticulate::import("mediapipe.tasks.python.vision"), "FaceLandmarker")) {
+        "tasks"
+      } else {
+        "unavailable"
+      }
+    }, error = function(e) "unavailable")
+  }
+  attr(results, "face_mesh") <- face_mesh
+
   if (verbose) {
     cat("\n=== r4lineups Python Dependencies ===\n\n")
     cat(sprintf("Python version: %s\n", reticulate::py_config()$version))
@@ -234,6 +254,12 @@ check_python_deps <- function(verbose = TRUE) {
       }
       cat(sprintf("%-25s %s\n", results$package[i], status))
     }
+
+    cat(sprintf("%-25s %s\n", "face mesh landmarks",
+                switch(face_mesh,
+                       solutions = "\u2713 mediapipe.solutions",
+                       tasks = "\u2713 MediaPipe Tasks FaceLandmarker",
+                       "\u2717 unavailable (get_face_landmarks() will fail)")))
 
     # Summary
     missing_required <- sum(!results$installed & results$required)

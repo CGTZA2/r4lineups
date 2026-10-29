@@ -40,6 +40,9 @@
 #'   TA arms separately.
 #' @param conf_level Confidence level for bootstrap intervals. Default 0.95.
 #' @param seed Optional random seed for the bootstrap.
+#' @param innocent_suspect For trial-level \code{data}, how innocent-suspect
+#'   identifications are obtained; see \code{\link{make_rocdata}}. Ignored
+#'   for \code{counts}, where the presence of \code{I} decides.
 #'
 #' @details
 #' With each d' computed as the difference between two z-transformed
@@ -138,7 +141,8 @@ make_multid <- function(data = NULL,
                         conf_thresholds = NULL,
                         n_bootstrap = 0,
                         conf_level = 0.95,
-                        seed = NULL) {
+                        seed = NULL,
+                        innocent_suspect = "auto") {
   filler_rate <- match.arg(filler_rate)
   correction <- match.arg(correction)
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
@@ -159,7 +163,8 @@ make_multid <- function(data = NULL,
 
   if (!is.null(data)) {
     .validate_lineup_analysis(data, require_confidence = isTRUE(by_confidence))
-    raw <- .multid_counts_from_data(data)
+    innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
+    raw <- .multid_counts_from_data(data, innocent_suspect)
   } else {
     if (isTRUE(by_confidence)) {
       stop("by_confidence = TRUE requires trial-level 'data'.", call. = FALSE)
@@ -186,7 +191,8 @@ make_multid <- function(data = NULL,
   by_conf <- NULL
   if (isTRUE(by_confidence)) {
     by_conf <- .multid_by_confidence(data, lineup_size, filler_rate,
-                                     correction, conf_thresholds)
+                                     correction, conf_thresholds,
+                                     innocent_suspect)
   }
 
   structure(
@@ -224,12 +230,12 @@ make_multid <- function(data = NULL,
   dr = "Diagnosticity ratio G/I"
 )
 
-.multid_counts_from_data <- function(data) {
+.multid_counts_from_data <- function(data, innocent_suspect = "auto") {
   tp <- as.logical(data$target_present)
   id <- as.character(data$identification)
   tally <- function(mask, what) sum(mask & id == what, na.rm = TRUE)
   ta <- data[!tp, , drop = FALSE]
-  designated <- .innocent_suspect_method(ta) == "designated"
+  designated <- .innocent_suspect_method(ta, innocent_suspect) == "designated"
   c(
     G = tally(tp, "suspect"),
     Fp = tally(tp, "filler"),
@@ -337,19 +343,19 @@ make_multid <- function(data = NULL,
 }
 
 .multid_by_confidence <- function(data, lineup_size, filler_rate, correction,
-                                  conf_thresholds) {
+                                  conf_thresholds, innocent_suspect) {
   conf <- as.numeric(data$confidence)
   if (is.null(conf_thresholds)) {
     conf_thresholds <- sort(unique(conf[!is.na(conf)]), decreasing = TRUE)
   } else {
     conf_thresholds <- sort(unique(conf_thresholds), decreasing = TRUE)
   }
-  full <- .multid_counts_from_data(data)
+  full <- .multid_counts_from_data(data, innocent_suspect)
   n_tp <- sum(full[c("G", "Fp", "Rp")])
   n_ta <- sum(full[c("I", "Fa", "Ra")], na.rm = TRUE)
   rows <- lapply(conf_thresholds, function(thr) {
     keep <- !is.na(conf) & conf >= thr
-    raw <- .multid_counts_from_data(data[keep, , drop = FALSE])
+    raw <- .multid_counts_from_data(data[keep, , drop = FALSE], innocent_suspect)
     if (!is.na(full[["I"]]) && is.na(raw[["I"]])) raw[["I"]] <- 0
     split <- .multid_split_innocent(raw, lineup_size)
     est <- .multid_compute(split, n_tp, n_ta, lineup_size, filler_rate, correction)
@@ -494,11 +500,16 @@ plot.multid <- function(x, type = c("decomposition", "indices", "confidence"), .
 #' for example simultaneous versus sequential lineups, or high- versus
 #' low-similarity lineups. When both objects carry bootstrap draws, standard
 #' errors, percentile intervals and normal-approximation p-values are given
-#' for each difference. The two conditions are treated as independent samples.
+#' for each difference. The two conditions are treated as independent samples:
+#' the standard error is the square root of the sum of the two bootstrap
+#' variances, and the interval is taken from differences between randomly
+#' re-paired draws, so the result does not depend on whether the two fits used
+#' the same seed.
 #'
 #' @param x,y Objects of class \code{"multid"} from \code{\link{make_multid}},
 #'   fitted with the same \code{filler_rate}.
 #' @param labels Names for the two conditions.
+#' @param seed Optional random seed for re-pairing the bootstrap draws.
 #' @return A data frame of class \code{"multid_comparison"}.
 #' @examples
 #' # Simultaneous vs sequential lineups, Lee & Penrod's (2019) Table 3
@@ -508,7 +519,7 @@ plot.multid <- function(x, type = c("decomposition", "indices", "confidence"), .
 #'                    correction = "none")
 #' compare_multid(sim, sqn, labels = c("simultaneous", "sequential"))
 #' @export
-compare_multid <- function(x, y, labels = c("x", "y")) {
+compare_multid <- function(x, y, labels = c("x", "y"), seed = NULL) {
   if (!inherits(x, "multid") || !inherits(y, "multid")) {
     stop("x and y must be objects from make_multid().", call. = FALSE)
   }
@@ -528,10 +539,17 @@ compare_multid <- function(x, y, labels = c("x", "y")) {
   )
   names(out)[3:4] <- labels
   if (!is.null(x$boot) && !is.null(y$boot)) {
+    # The conditions are independent samples, but draws from fits that shared
+    # a seed are correlated row by row, so re-pair y's draws at random.
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
     b <- min(nrow(x$boot), nrow(y$boot))
-    diffs <- x$boot[seq_len(b), keep, drop = FALSE] - y$boot[seq_len(b), keep, drop = FALSE]
+    xb <- x$boot[seq_len(b), keep, drop = FALSE]
+    yb <- y$boot[sample.int(nrow(y$boot), b), keep, drop = FALSE]
+    diffs <- xb - yb
     alpha <- (1 - x$conf_level) / 2
-    out$se <- apply(diffs, 2, stats::sd, na.rm = TRUE)
+    out$se <- sqrt(apply(x$boot[, keep, drop = FALSE], 2, stats::var, na.rm = TRUE) +
+                     apply(y$boot[, keep, drop = FALSE], 2, stats::var, na.rm = TRUE))
     out$ci_lower <- apply(diffs, 2, stats::quantile, probs = alpha, na.rm = TRUE)
     out$ci_upper <- apply(diffs, 2, stats::quantile, probs = 1 - alpha, na.rm = TRUE)
     out$p_value <- 2 * stats::pnorm(-abs(out$difference / out$se))

@@ -38,6 +38,15 @@ jobs:
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
+      # The browser app needs WebAssembly builds of the current r4lineups,
+      # which r-universe provides; the webR repository carries an old version.
+      - name: Export the browser app (Shinylive)
+        run: |
+          install.packages("shinylive")
+          install.packages("r4lineups", repos = c("https://cgtza2.r-universe.dev", "https://cloud.r-project.org"))
+          shinylive::export("inst/shiny/r4lineups_app", "docs/app")
+        shell: Rscript {0}
+
       - name: Deploy to GitHub pages
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.5.0

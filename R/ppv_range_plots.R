@@ -168,6 +168,10 @@ plot_effective_size_conf <- function(ppv_range_obj,
   if (!all(c("confidence", "effective_size") %in% names(plot_data))) {
     stop("Data must have columns: confidence, effective_size")
   }
+  # Bins with no target-absent trials have no error rate to show
+  if ("error_rate" %in% names(plot_data)) {
+    plot_data <- plot_data[!is.na(plot_data$error_rate), , drop = FALSE]
+  }
 
   # Create numeric x-axis
   plot_data$conf_numeric <- seq_len(nrow(plot_data))
@@ -258,6 +262,10 @@ plot_error_rate_conf <- function(ppv_range_obj, show_points = TRUE) {
   if (!all(c("confidence", "error_rate") %in% names(plot_data))) {
     stop("Data must have columns: confidence, error_rate")
   }
+  # Bins with no target-absent trials have no error rate to show
+  if ("error_rate" %in% names(plot_data)) {
+    plot_data <- plot_data[!is.na(plot_data$error_rate), , drop = FALSE]
+  }
 
   # Create numeric x-axis
   plot_data$conf_numeric <- seq_len(nrow(plot_data))
@@ -318,15 +326,21 @@ plot_error_rate_conf <- function(ppv_range_obj, show_points = TRUE) {
 #' result$plot_ppv_range
 #' result$plot_effective_size
 #'
+#' @inheritParams make_rocdata
+#' @inheritParams ppv_by_confidence
 #' @export
 make_ppv_range <- function(data,
                             lineup_size = 6,
                             confidence_bins = NULL,
                             show_plots = TRUE,
-                            plot_type = "all") {
+                            plot_type = "all",
+                            innocent_suspect = "auto",
+                            base_rate = NULL) {
 
   # Compute PPV range
-  ppv_obj <- ppv_range_by_confidence(data, lineup_size, confidence_bins)
+  ppv_obj <- ppv_range_by_confidence(data, lineup_size, confidence_bins,
+                                     innocent_suspect = innocent_suspect,
+                                     base_rate = base_rate)
 
   # Create plots if requested
   plot_ppv <- NULL

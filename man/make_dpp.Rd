@@ -4,7 +4,15 @@
 \alias{make_dpp}
 \title{Compute Deviation from Perfect Performance (DPP)}
 \usage{
-make_dpp(data, lineup_size = 6, use_roc_obj = FALSE)
+make_dpp(
+  data,
+  lineup_size = 6,
+  use_roc_obj = FALSE,
+  alpha = NULL,
+  beta = NULL,
+  innocent_suspect = "auto",
+  thresholds = NULL
+)
 }
 \arguments{
 \item{data}{A dataframe with the following columns:
@@ -12,74 +20,102 @@ make_dpp(data, lineup_size = 6, use_roc_obj = FALSE)
   \item target_present: Logical. TRUE if guilty suspect in lineup
   \item identification: Character. "suspect", "filler", or "reject"
   \item confidence: Numeric. Confidence rating
-}}
+}
+Alternatively, with \code{use_roc_obj = TRUE}, the output of
+\code{\link{make_rocdata}}.}
 
 \item{lineup_size}{Integer. Number of people in lineup (default = 6)}
 
 \item{use_roc_obj}{Logical. If FALSE (default), computes ROC from data.
-If TRUE, data should be the output from make_rocdata().}
+If TRUE, data should be the output from make_rocdata(), whose first
+\code{roc_data} row is the origin and is not an operating point.}
+
+\item{alpha, beta}{Optional weights for Smith et al.'s Equation 3.
+\code{alpha} is the cost of an innocent-suspect identification relative to
+a missed culprit identification, and \code{beta} is the base rate of
+culprit presence. Supply both or neither. When both are \code{NULL}
+(default), the unweighted Equation 2 is used.}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
+
+\item{thresholds}{Optional numeric vector of confidence criteria at which
+to evaluate the ROC. The default uses the confidence levels of the
+responses that can move an operating point; see Details. Supplying the
+criteria of a full sample keeps them fixed across bootstrap resamples.}
 }
 \value{
 A list containing:
   \itemize{
-    \item dpp: Deviation from Perfect Performance (0 = perfect, 1 = worst)
-    \item auc_observed: Area under observed ROC curve
-    \item auc_perfect: Area under perfect ROC curve (for same FA range)
-    \item auc_gap: Raw area gap, \eqn{AUC_{perfect} - AUC_{observed}}
-    \item roc_data: ROC curve data
-    \item max_fa: Maximum false alarm rate in observed data
+    \item dpp: Average DPP over the operating points
+    \item dpp_by_point: Tibble with confidence threshold, culprit
+      (correct-ID) rate, innocent-suspect ID rate and DPP at each operating
+      point
+    \item best_point: The operating point with the lowest DPP, which is the
+      point of maximum utility
+    \item roc_data: ROC curve data from \code{make_rocdata()}
+    \item alpha, beta: The weights used (\code{NULL} for Equation 2)
+    \item n_target_present, n_target_absent: Sample sizes
+    \item innocent_suspect_method: How innocent-suspect IDs were obtained
+    \item thresholds: The confidence criteria of the operating points
   }
 }
 \description{
-Computes DPP metric following Smith et al. (2018). DPP measures how much
-an observed ROC curve deviates from perfect performance, providing a
-single-number summary that is less affected by ROC truncation than pAUC.
+Computes the average deviation from perfect performance of Smith, Lampinen,
+Wells, Smalarz and Mackovichova (2019). DPP is calculated at every operating
+point (cumulative confidence threshold) of the ROC and averaged over them,
+so that, unlike pAUC, it is not tied to a region of false-ID rates that two
+differently truncated ROC curves may not share.
 }
 \details{
-DPP (Deviation from Perfect Performance) compares the observed ROC curve
-to a perfect ROC curve within the same false alarm rate range:
+At an operating point \eqn{c}, Smith et al.'s (2019) Equation 2 is
 
-\deqn{DPP = 1 - \frac{AUC_{observed}}{AUC_{perfect}}}
+\deqn{DPP(c) = 1 - Culprit(c) + Innocent(c)}
 
-Where:
-\itemize{
-  \item \strong{Perfect ROC}: Goes from (0,0) → (0,1) → (max_FA,1)
-    (immediate jump to 100% hit rate, then horizontal)
-  \item \strong{Observed ROC}: Actual performance from data
-  \item \strong{AUC}: Area under curve computed via trapezoidal rule
-}
+where \eqn{Culprit(c)} is the culprit (correct) identification rate and
+\eqn{Innocent(c)} the innocent-suspect identification rate at that point.
+DPP(c) ranges from 0 (perfect performance: every culprit identified, no
+innocent suspect identified) to 2 (the reverse). Any point on the chance
+diagonal has DPP(c) = 1. When the base rate of culprit presence is .5 and
+the costs of the two errors are equal, DPP(c) = 1 - U(c), where
+\eqn{U(c) = Culprit(c) - Innocent(c)} is the expected utility.
 
-**Interpretation**:
-\itemize{
-  \item DPP = 0: Perfect performance (all correct IDs at 0% false alarms)
-  \item DPP → 1: Very poor performance (near chance)
-  \item Lower DPP = better performance
-}
+The reported \code{dpp} is the mean of DPP(c) over the operating points,
+one for each confidence criterion of the ROC, from the highest to the
+lowest (which includes every identification). Lower values are better. The
+criteria are the confidence levels of the responses that enter the ROC
+(see \code{\link{make_rocdata}}), so the confidence given to rejections
+does not add points or change the average.
 
-**Advantages over pAUC** (Smith et al. 2018):
-\itemize{
-  \item Less affected by ROC truncation (different confidence distributions)
-  \item Normalized relative to best achievable performance
-  \item More consistent rankings across datasets
-  \item Accounts for achievable performance given observed FA range
-}
+Equation 3 weights the two errors:
 
-The perfect ROC is constrained to the same FA range as the observed data,
-making DPP a fair measure even when procedures produce different confidence
-distributions (and thus different ROC truncation points).
+\deqn{DPP_{\alpha\beta}(c) = \beta[1 - Culprit(c)] + \alpha(1 - \beta)Innocent(c)}
+
+With \code{alpha = 1} and \code{beta = 0.5} this is half of Equation 2.
+Weighted values no longer range from 0 to 2.
 }
 \examples{
 data(lineup_example)
 dpp <- make_dpp(lineup_example)
 dpp$dpp
+dpp$dpp_by_point
+
+# Innocent-suspect IDs twice as costly as misses, culprit base rate .5
+make_dpp(lineup_example, alpha = 2, beta = 0.5)$dpp
 
 }
 \references{
-Smith, A. M., Wilford, M. M., Quigley-McBride, A., & Wells, G. L. (2019).
-Mistaken eyewitness identification rates increase when either witnessing or
-testing conditions get worse. \emph{Law and Human Behavior, 43}(4), 358-368.
-
-Smith, A. M., et al. (2018). Deviation from perfect performance measures
-the diagnostic utility of eyewitness lineups but partial area under the
-ROC does not. \emph{Journal of Applied Research in Memory and Cognition}.
+Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova,
+S. (2019). Deviation from perfect performance measures the diagnostic
+utility of eyewitness lineups but partial area under the ROC curve does
+not. \emph{Journal of Applied Research in Memory and Cognition, 8}(1),
+50-59. \doi{10.1016/j.jarmac.2018.09.003}
 }

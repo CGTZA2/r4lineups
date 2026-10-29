@@ -46,7 +46,8 @@ An object of class \code{"diag_ratio_T_bayes"} containing:
 \describe{
   \item{DR_draws}{Numeric vector of length \code{S}: posterior draws of DR.}
   \item{lnDR_draws}{Log-transformed posterior draws.}
-  \item{posterior_mean, posterior_median}{Posterior point estimates.}
+  \item{posterior_mean, posterior_median}{Posterior point estimates. The
+    mean is exact, and is \code{Inf} when it does not exist (see Details).}
   \item{credible_interval}{Named two-element vector (lower, upper).}
   \item{prior_alpha}{Alpha value used.}
   \item{n_tp, n_ta, S, credible_mass}{Input metadata.}
@@ -69,6 +70,16 @@ The default Jeffreys prior (\eqn{\alpha = 0.5}) is recommended for small samples
 Unlike the continuity-corrected point estimate, the posterior handles zero cell
 counts naturally and provides direct probability statements such as
 \eqn{P(DR > 1 \mid \mathbf{n})}.
+
+The posterior mean is computed exactly, not from the draws. Because the two
+rates are independent, \eqn{E[DR] = E[p_{TP}] \, E[1/p_{TA}]}, with
+\eqn{E[1/p_{TA}] = (a + b - 1)/(a - 1)} for \eqn{p_{TA} \sim
+\mathrm{Beta}(a, b)} when \eqn{a > 1}. When \eqn{a \le 1} (for example,
+no target-absent suspect choices under the Jeffreys prior) the mean is
+infinite, and an average of the draws would not settle on any value as
+\code{S} grew. Report the median and interval instead. In
+\code{diag_ratio_T_bayes_compare()}, the mean difference is \code{NA} when
+both means are infinite.
 }
 \examples{
 set.seed(1)

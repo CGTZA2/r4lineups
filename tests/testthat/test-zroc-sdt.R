@@ -314,3 +314,30 @@ test_that("fit_sdt_roc model diagnostics", {
     sdt_fit$fit_diagnostics$n_points
   )
 })
+
+test_that("0/1 target_present coding bootstraps like logical coding", {
+  # Codex review 2, finding 4: which() on 0/1 coding failed in every
+  # replicate, and fit_sdt_roc() silently returned NA intervals.
+  d <- simulate_lineup_data(n_tp = 100, n_ta = 100, seed = 1)
+  d01 <- d
+  d01$target_present <- as.integer(d01$target_present)
+
+  fit <- suppressWarnings(fit_sdt_roc(d, lineup_size = 6, n_bootstrap = 30, seed = 1))
+  fit01 <- suppressWarnings(fit_sdt_roc(d01, lineup_size = 6, n_bootstrap = 30, seed = 1))
+  expect_equal(fit01$bootstrap_ci$n_successful, fit$bootstrap_ci$n_successful)
+  expect_gt(fit01$bootstrap_ci$n_successful, 0)
+  expect_equal(fit01$bootstrap_ci$dprime_ci, fit$bootstrap_ci$dprime_ci)
+
+  cmp <- suppressMessages(compare_pauc(d, d, n_bootstrap = 20, seed = 1))
+  cmp01 <- suppressMessages(compare_pauc(d01, d01, n_bootstrap = 20, seed = 1))
+  expect_equal(cmp01$se_diff, cmp$se_diff)
+  expect_equal(cmp01$ci_diff, cmp$ci_diff)
+})
+
+test_that("fit_sdt_roc warns when bootstrap samples fail", {
+  d <- simulate_lineup_data(n_tp = 100, n_ta = 100, seed = 1)
+  roc <- make_rocdata(d, lineup_size = 6)
+  roc$raw_data$identification <- NULL
+  expect_warning(fit_sdt_roc(roc, n_bootstrap = 5, seed = 1),
+                 "All 5 bootstrap samples failed")
+})

@@ -40,7 +40,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `esize_T_ci_n()` — normal‑theory CI for Tredoux effective size.
 - `func_size()` — functional size (N / suspect IDs).
 - `func_size.boot()` — bootstrap statistic for functional size.
-- `func_size_report()` — functional size + boot CIs.
+- `func_size_report()` — functional size + boot CIs (bootstraps p and inverts, so a limit can be `Inf`) and an exact Clopper–Pearson CI.
 - `effsize_compare()` — compare effective sizes across lineups.
 - `compare_eff_sizes.boot()` — bootstrap stat for effective size differences.
 - `eff_size_per_foils()` — effective size contribution per foil.
@@ -60,10 +60,10 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `rep_index()` — representation index helper.
 
 ### ROC, CAC, RAC (confidence‑based)
-- `make_rocdata()` — ROC data (suspect IDs only).
+- `make_rocdata()` — ROC data (suspect IDs only); criteria are the confidence levels of responses that move a point (`thresholds` to fix them).
 - `make_roc()` — ROC analysis + plot wrapper.
 - `make_roc_gg()` — ROC ggplot.
-- `make_cacdata()` — CAC data.
+- `make_cacdata()` — CAC data (counts by default; `base_rate` computes from rates).
 - `make_cac()` — CAC analysis + plot wrapper.
 - `make_cac_gg()` — CAC ggplot.
 - `make_racdata()` — RAC data.
@@ -87,7 +87,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 
 ### PPV range & error‑rate estimation (Fitzgerald et al.)
 - `make_ppv_range()` — PPV‑range analysis (nominal/effective/none).
-- `ppv_by_confidence()` — PPV by confidence.
+- `ppv_by_confidence()` — PPV by confidence (counts by default; `base_rate` computes from rates).
 - `ppv_range_by_confidence()` — PPV range by confidence.
 - `innocent_id_rate_nominal()` — false ID rate corrected by nominal size.
 - `innocent_id_rate_effective()` — false ID rate corrected by effective size.
@@ -123,11 +123,11 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `compare_utility()` — wrapper for comparison output.
 
 ### DPP (Deviation from Perfect Performance)
-- `make_dpp()` — compute DPP from data or ROC object.
+- `make_dpp()` — Smith et al. (2019) DPP: mean of 1 − HR + FAR over ROC operating points (Eq. 2), or the α/β-weighted Eq. 3.
 - `compute_dpp()` — DPP analysis + plot wrapper.
-- `compare_dpp()` — compare DPP across procedures.
-- `plot_dpp()` — DPP plot.
-- `plot_dpp_comparison()` — DPP comparison plot.
+- `compare_dpp()` — difference in average DPP with a stratified bootstrap SE and percentile CI.
+- `plot_dpp()` — DPP at each operating point, with the average.
+- `plot_dpp_comparison()` — two procedures overlaid.
 
 ### Winter 2‑HT model
 - `fit_winter_2ht()` — fit 2‑HT model from counts/data.
@@ -152,7 +152,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `plot_embedding_space()` — embedding projection plot.
 - `display_lineup()` — grid display of lineup faces.
 - `detect_faces()` — detect faces in an image.
-- `get_face_landmarks()` — 468‑point landmark extraction.
+- `get_face_landmarks()` — 478‑point MediaPipe face mesh (legacy `solutions` or Tasks `FaceLandmarker`).
 - `get_key_landmarks()` — 5‑point landmark extraction.
 - `has_valid_face()` — quick face‑detection check.
 - `rot_vector()` — helper for landmark rotation.
@@ -177,7 +177,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 
 ### Multi‑d′ model (Lee & Penrod, 2019)
 - `make_multid()` — d′(GI), d′(GFp), d′(IFa), d′(FaFp), d′(RaRp) + TP/TA lineup‑bias indices from TP/TA data or counts; bootstrap CIs; cumulative by confidence; fair‑lineup reference for d′(IFa).
-- `compare_multid()` — differences between two conditions on every index (bootstrap SE/CI/p).
+- `compare_multid()` — differences between two conditions on every index (independent-sample bootstrap SE/CI/p).
 - `plot.multid()` — decomposition waterfall, index dot plot, or indices by confidence.
 
 ### Simulation & power
@@ -238,7 +238,9 @@ These wrappers combine data creation, analysis, and plotting:
 
 ## Notes for agents
 
+- ROC-based summaries (`make_rocdata()`, `make_dpp()`, `make_utility_curves()`, z-ROC) share one criterion grid from `.roc_thresholds()` (`R/utils.R`): target-present suspect IDs plus target-absent suspect IDs (designated) or filler IDs (estimated). Rejection confidence never defines a criterion. Bootstraps pass the full-sample grid via `thresholds`.
 - Most analyses expect either a **lineup vector** (mock‑witness choices) or a **data frame** with `target_present`, `identification`, and `confidence` for confidence‑based methods.
+- Every analysis that uses target‑absent lineups takes `innocent_suspect = c("auto", "designated", "estimated")`. `"auto"` treats the lineups as designated when a TA row is a suspect ID or a non‑missing `suspect_pos` column exists; bootstraps resolve it once on the full data via `.resolve_innocent_suspect()` (`R/utils.R`).
 - `make_*()` functions typically return structured S3 objects with `print()`, `summary()`, and `plot()` methods.
 - For face similarity, ensure Python deps are installed (`install_r4lineups_python()`), and set `MPLCONFIGDIR` if matplotlib cache issues appear.
 - The Shiny app (`inst/shiny/r4lineups_app`) is a thin `app.R` plus one module per tab in its `R/` folder (`mod_*.R`, helpers in `utils.R`). Modules call only exported package functions. `tests/testthat/test-shiny-app.R` checks each module against direct package calls with `shiny::testServer()`; `test-shiny-app-browser.R` is an opt-in headless-Chrome smoke test (install the package, then set `R4LINEUPS_TEST_APP=true`).

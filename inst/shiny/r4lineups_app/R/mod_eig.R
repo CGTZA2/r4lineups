@@ -50,8 +50,10 @@ eig_server <- function(id, data) {
       d <- data()
       run <- capture_notes(list(
         eig = r4lineups::make_eig(d$data, prior_guilt = input$prior, confidence_bins = d$bins,
-                                  show_plot = FALSE, lineup_size = d$lineup_size),
+                                  show_plot = FALSE, lineup_size = d$lineup_size,
+                                  innocent_suspect = d$innocent_suspect),
         ppv = r4lineups::make_ppv_range(d$data, lineup_size = d$lineup_size,
+                                        innocent_suspect = d$innocent_suspect,
                                         confidence_bins = d$bins, show_plots = FALSE)
       ))
       c(run$value, list(notes = run$notes))

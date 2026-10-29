@@ -466,8 +466,12 @@ test_that("standardized data works with make_roc", {
 test_that("standardized data works with make_cac", {
   data <- create_example_lineup_data(n_trials = 200, seed = 222)
 
-  expect_silent({
+  # The simulated arms are unequal, so count-based accuracy carries a note
+  expect_message({
     cac <- make_cac(data, lineup_size = 6, show_plot = FALSE)
+  }, "differ in size")
+  expect_silent({
+    cac <- make_cac(data, lineup_size = 6, show_plot = FALSE, base_rate = 0.5)
   })
 
   expect_true("overall_accuracy" %in% names(cac))
@@ -525,4 +529,35 @@ test_that("standardize handles real-world messy data", {
   expect_s3_class(result, "lineup_data")
   expect_true(all(result$identification %in% c("suspect", "filler", "reject")))
   expect_equal(result$participant_id, c("S01", "S02", "S03", "S04", "S05"))
+})
+
+test_that("standardize_lineup_data keeps the columns that fix the design", {
+  # Codex review 2, finding 2: dropping suspect_pos switched a designated
+  # suspect who was never chosen to the filler estimate (false-ID rate 0 -> .10).
+  data <- data.frame(
+    target_present = rep(c(TRUE, FALSE), each = 100),
+    identification = c(rep(c("suspect", "filler", "reject"), c(60, 20, 20)),
+                       rep(c("filler", "reject"), c(60, 40))),
+    confidence = rep(c(90, 70, 50, 30), 50),
+    suspect_pos = 1,
+    lineup_member = c(rep(c(1, 2, 0), c(60, 20, 20)), rep(c(2, 0), c(60, 40))),
+    condition = "a"
+  )
+  std <- standardize_lineup_data(data, validate = FALSE)
+  expect_equal(std$suspect_pos, data$suspect_pos)
+  expect_equal(std$lineup_member, data$lineup_member)
+  expect_equal(std$condition, data$condition)
+
+  before <- make_rocdata(data)
+  after <- make_rocdata(std)
+  expect_equal(after$innocent_suspect_method, "designated")
+  expect_equal(after$roc_data, before$roc_data)
+  expect_equal(max(after$roc_data$false_id_rate), 0)
+
+  # Member choices drive the effective-size correction.
+  ppv_before <- suppressMessages(ppv_by_confidence(
+    data, correction = "effective", innocent_suspect = "estimated"))
+  ppv_after <- suppressMessages(ppv_by_confidence(
+    std, correction = "effective", innocent_suspect = "estimated"))
+  expect_equal(ppv_after, ppv_before)
 })

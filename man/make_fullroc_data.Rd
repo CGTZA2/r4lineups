@@ -9,7 +9,8 @@ make_fullroc_data(
   conf_bins = NULL,
   order = c("diagnosticity", "apriori"),
   lineup_size = 6,
-  epsilon = 0.001
+  epsilon = 0.001,
+  innocent_suspect = "auto"
 )
 }
 \arguments{
@@ -33,6 +34,17 @@ create low (0-60), medium (60-80), and high (80-100) confidence categories.}
 \item{lineup_size}{Integer. Number of people in the lineup (default = 6)}
 
 \item{epsilon}{Numeric. Small value to add when FAR = 0 to avoid infinite DR (default = 0.001)}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 }
 \value{
 A list containing:

@@ -115,11 +115,12 @@ multid_server <- function(id, data) {
           fits <- lapply(seq_along(sets), function(i) {
             do.call(r4lineups::make_multid,
                     c(list(data = sets[[i]], lineup_size = d$lineup_size,
+                           innocent_suspect = d$innocent_suspect,
                            by_confidence = isTRUE(input$by_conf), seed = input$seed + i - 1), args))
           })
         }
         comparison <- if (length(fits) == 2) {
-          r4lineups::compare_multid(fits[[1]], fits[[2]], labels = labels)
+          r4lineups::compare_multid(fits[[1]], fits[[2]], labels = labels, seed = input$seed)
         }
         list(fits = fits, labels = labels, comparison = comparison)
       })

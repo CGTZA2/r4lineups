@@ -96,6 +96,7 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' }
 #'
 #' @importFrom stats coef fitted lm residuals
+#' @inheritParams make_rocdata
 #' @export
 fit_sdt_roc <- function(data,
                         lineup_size = NULL,
@@ -103,7 +104,8 @@ fit_sdt_roc <- function(data,
                         bootstrap = TRUE,
                         n_bootstrap = 1000,
                         conf_level = 0.95,
-                        seed = NULL) {
+                        seed = NULL,
+                        innocent_suspect = "auto") {
 
   model <- match.arg(model)
 
@@ -117,7 +119,8 @@ fit_sdt_roc <- function(data,
     if (is.null(lineup_size)) {
       stop("lineup_size must be provided when data is not a rocdata object")
     }
-    roc_obj <- make_rocdata(data, lineup_size = lineup_size)
+    roc_obj <- make_rocdata(data, lineup_size = lineup_size,
+                            innocent_suspect = innocent_suspect)
   }
   raw_data <- roc_obj$raw_data
 
@@ -143,7 +146,9 @@ fit_sdt_roc <- function(data,
       bootstrap <- FALSE
     } else {
       params$bootstrap_ci <- .bootstrap_sdt_fit(
-        raw_data, roc_obj$lineup_size, model, n_bootstrap, conf_level
+        raw_data, roc_obj$lineup_size, model, n_bootstrap, conf_level,
+        innocent_suspect = roc_obj$innocent_suspect_method,
+        thresholds = roc_obj$thresholds
       )
     }
   }
@@ -280,19 +285,24 @@ fit_sdt_roc <- function(data,
 
 #' Bootstrap SDT Parameter Estimates
 #' @keywords internal
-.bootstrap_sdt_fit <- function(raw_data, lineup_size, model, n_bootstrap, conf_level) {
+.bootstrap_sdt_fit <- function(raw_data, lineup_size, model, n_bootstrap, conf_level,
+                               innocent_suspect = "auto", thresholds = NULL) {
   # Stratified trial-level resampling and complete ROC reconstruction.
 
   boot_dprime <- numeric(n_bootstrap)
   boot_variance_ratio <- numeric(n_bootstrap)
+  first_error <- NULL
+  is_tp <- as.logical(raw_data$target_present)
 
   for (i in 1:n_bootstrap) {
     tryCatch({
-      tp <- which(raw_data$target_present)
-      ta <- which(!raw_data$target_present)
+      tp <- which(is_tp)
+      ta <- which(!is_tp)
       boot_data <- raw_data[c(sample(tp, length(tp), replace = TRUE),
                               sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
-      boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size)
+      boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size,
+                               innocent_suspect = innocent_suspect,
+                               thresholds = thresholds)
       zroc_boot <- .compute_zroc(
         boot_obj$roc_data, boot_obj$n_target_present, boot_obj$n_target_absent
       )
@@ -304,12 +314,24 @@ fit_sdt_roc <- function(data,
     }, error = function(e) {
       boot_dprime[i] <<- NA
       boot_variance_ratio[i] <<- NA
+      if (is.null(first_error)) first_error <<- conditionMessage(e)
     })
   }
 
-  # Remove failed bootstraps
+  # Remove failed bootstraps, and say so
   boot_dprime <- boot_dprime[!is.na(boot_dprime)]
   boot_variance_ratio <- boot_variance_ratio[!is.na(boot_variance_ratio)]
+  n_failed <- n_bootstrap - length(boot_dprime)
+  if (n_failed == n_bootstrap) {
+    warning("All ", n_bootstrap, " bootstrap samples failed, so the bootstrap ",
+            "intervals are NA",
+            if (!is.null(first_error)) paste0(". First error: ", first_error),
+            ".", call. = FALSE)
+  } else if (n_failed > 0) {
+    warning(n_failed, " of ", n_bootstrap, " bootstrap samples failed and were ",
+            "dropped", if (!is.null(first_error)) paste0(" (first error: ", first_error, ")"),
+            ".", call. = FALSE)
+  }
 
   # Compute confidence intervals
   alpha <- 1 - conf_level

@@ -65,10 +65,10 @@ detect_faces <- function(img_path, detector = "retinaface") {
 }
 
 
-#' Get 468-Point Face Mesh Landmarks
+#' Get 478-Point Face Mesh Landmarks
 #'
-#' Extracts dense facial landmarks using MediaPipe Face Mesh,
-#' which provides 468 3D landmark points covering the entire face.
+#' Extracts dense facial landmarks using MediaPipe Face Mesh, which provides
+#' 478 3D landmark points covering the entire face, including the irises.
 #'
 #' @param img_path Path to the image file.
 #' @param return_3d Logical. If TRUE, returns 3D coordinates (x, y, z).
@@ -76,10 +76,11 @@ detect_faces <- function(img_path, detector = "retinaface") {
 #'
 #' @return A list containing:
 #' \itemize{
-#'   \item landmarks - Matrix of landmark coordinates (468 x 2 or 468 x 3)
+#'   \item landmarks - Matrix of landmark coordinates (478 x 2 or 478 x 3)
 #'   \item face_detected - Logical indicating if a face was found
 #'   \item image_width - Width of the input image
 #'   \item image_height - Height of the input image
+#'   \item n_landmarks - Number of landmarks (when a face was found)
 #' }
 #'
 #' @details
@@ -87,7 +88,7 @@ detect_faces <- function(img_path, detector = "retinaface") {
 #' \itemize{
 #'   \item Face oval/contour
 #'   \item Left and right eyebrows
-#'   \item Left and right eyes (including iris)
+#'   \item Left and right eyes, with 10 iris points (468 to 477)
 #'   \item Nose
 #'   \item Lips (inner and outer contours)
 #'   \item Face interior regions (cheeks, forehead)
@@ -96,6 +97,14 @@ detect_faces <- function(img_path, detector = "retinaface") {
 #' The x and y coordinates are normalized to [0, 1] relative to image
 #' dimensions. The z coordinate represents depth relative to the face center.
 #'
+#' Older MediaPipe releases expose the legacy
+#' \code{mediapipe.solutions.face_mesh} interface, which is used when present.
+#' Current releases have only the Tasks API (\code{FaceLandmarker}), which
+#' needs a model file. It is downloaded once, on first use, to
+#' \code{tools::R_user_dir("r4lineups", "cache")}. On macOS the Tasks API runs
+#' on the GPU delegate, because the CPU delegate in current macOS wheels aborts
+#' the process.
+#'
 #' @note Requires MediaPipe to be installed (installed by default with
 #'   install_r4lineups_python()).
 #'
@@ -103,55 +112,42 @@ detect_faces <- function(img_path, detector = "retinaface") {
 #' \dontrun{
 #' # Get face mesh landmarks
 #' mesh <- get_face_landmarks("face.jpg")
-#' 
+#'
 #' # Plot the landmarks
 #' plot(mesh$landmarks[, 1], mesh$landmarks[, 2], pch = ".")
 #' }
 #'
 #' @export
 get_face_landmarks <- function(img_path, return_3d = TRUE) {
-  
+
   if (!file.exists(img_path)) {
     stop("Image file not found: ", img_path, call. = FALSE)
   }
-  
+
   mediapipe <- get_mediapipe()
-  cv2 <- get_cv2()
-  np <- get_numpy()
-  
   if (is.null(mediapipe)) {
     stop("MediaPipe is not installed. Run: pip install mediapipe", call. = FALSE)
   }
-  
+  # Keep the image a uint8 numpy array: converting it to an R array and back
+  # turns it into int32, which cvtColor and MediaPipe reject.
+  cv2 <- reticulate::import("cv2", convert = FALSE)
+
   tryCatch({
-    # Read image
     img <- cv2$imread(normalizePath(img_path))
-    if (is.null(img)) {
+    if (inherits(img, "python.builtin.NoneType")) {
       stop("Could not read image: ", img_path)
     }
-    
-    # Convert BGR to RGB
-    img_rgb <- cv2$cvtColor(img, cv2$COLOR_BGR2RGB)
-    
-    # Get image dimensions
-    img_height <- as.integer(dim(img)[1])
-    img_width <- as.integer(dim(img)[2])
-    
-    # Initialize Face Mesh
-    mp_face_mesh <- mediapipe$solutions$face_mesh
-    face_mesh <- mp_face_mesh$FaceMesh(
-      static_image_mode = TRUE,
-      max_num_faces = 1L,
-      refine_landmarks = TRUE,  # Include iris landmarks
-      min_detection_confidence = 0.5
-    )
-    
-    # Process image
-    results <- face_mesh$process(img_rgb)
-    
-    # Check if face was detected
-    if (is.null(results$multi_face_landmarks) || 
-        length(results$multi_face_landmarks) == 0) {
+    shape <- reticulate::py_to_r(img$shape)
+    img_height <- as.integer(shape[[1]])
+    img_width <- as.integer(shape[[2]])
+
+    coords <- if (reticulate::py_has_attr(mediapipe, "solutions")) {
+      .face_mesh_solutions(mediapipe, cv2, img)
+    } else {
+      .face_mesh_tasks(cv2, img)
+    }
+
+    if (is.null(coords)) {
       return(list(
         landmarks = NULL,
         face_detected = FALSE,
@@ -159,43 +155,105 @@ get_face_landmarks <- function(img_path, return_3d = TRUE) {
         image_height = img_height
       ))
     }
-    
-    # Extract landmarks from first face
-    face_landmarks <- results$multi_face_landmarks[[1]]
-    
-    n_landmarks <- length(face_landmarks$landmark)
-    
-    if (return_3d) {
-      landmarks <- matrix(0, nrow = n_landmarks, ncol = 3)
-      colnames(landmarks) <- c("x", "y", "z")
-    } else {
-      landmarks <- matrix(0, nrow = n_landmarks, ncol = 2)
-      colnames(landmarks) <- c("x", "y")
-    }
-    
-    for (i in seq_len(n_landmarks)) {
-      lm <- face_landmarks$landmark[[i - 1]]  # Python 0-indexed
-      landmarks[i, 1] <- lm$x
-      landmarks[i, 2] <- lm$y
-      if (return_3d) {
-        landmarks[i, 3] <- lm$z
-      }
-    }
-    
-    # Clean up
-    face_mesh$close()
-    
+
+    landmarks <- if (return_3d) coords else coords[, 1:2, drop = FALSE]
     list(
       landmarks = landmarks,
       face_detected = TRUE,
       image_width = img_width,
       image_height = img_height,
-      n_landmarks = n_landmarks
+      n_landmarks = nrow(landmarks)
     )
-    
+
   }, error = function(e) {
     stop("Error extracting landmarks: ", e$message, call. = FALSE)
   })
+}
+
+# Landmark sequence -> n x 3 matrix
+.landmark_matrix <- function(points) {
+  to_xyz <- reticulate::py_eval("lambda pts: [[p.x, p.y, p.z] for p in pts]")
+  xyz <- to_xyz(points)
+  m <- matrix(unlist(xyz), ncol = 3, byrow = TRUE)
+  colnames(m) <- c("x", "y", "z")
+  m
+}
+
+# Legacy interface: mediapipe.solutions.face_mesh
+.face_mesh_solutions <- function(mediapipe, cv2, img) {
+  face_mesh <- mediapipe$solutions$face_mesh$FaceMesh(
+    static_image_mode = TRUE,
+    max_num_faces = 1L,
+    refine_landmarks = TRUE,  # Include iris landmarks
+    min_detection_confidence = 0.5
+  )
+  on.exit(face_mesh$close(), add = TRUE)
+  results <- face_mesh$process(cv2$cvtColor(img, cv2$COLOR_BGR2RGB))
+  faces <- results$multi_face_landmarks
+  if (is.null(faces) || length(faces) == 0) return(NULL)
+  .landmark_matrix(faces[[1]]$landmark)
+}
+
+# Tasks interface: mediapipe.tasks.python.vision.FaceLandmarker
+.face_mesh_tasks <- function(cv2, img) {
+  if (!reticulate::py_module_available("mediapipe.tasks.python.vision")) {
+    stop("This MediaPipe version has neither mediapipe.solutions nor the ",
+         "Tasks FaceLandmarker.", call. = FALSE)
+  }
+  # Unconverted, so that enum members stay enums rather than R integers
+  mp <- reticulate::import("mediapipe", convert = FALSE)
+  tasks <- reticulate::import("mediapipe.tasks.python", convert = FALSE)
+  vision <- reticulate::import("mediapipe.tasks.python.vision", convert = FALSE)
+  mac <- identical(Sys.info()[["sysname"]], "Darwin")
+  base_options <- tasks$BaseOptions(
+    model_asset_path = .face_landmarker_model(),
+    delegate = if (mac) tasks$BaseOptions$Delegate$GPU else tasks$BaseOptions$Delegate$CPU
+  )
+  landmarker <- vision$FaceLandmarker$create_from_options(
+    vision$FaceLandmarkerOptions(
+      base_options = base_options,
+      running_mode = vision$RunningMode$IMAGE,
+      num_faces = 1L
+    )
+  )
+  on.exit(landmarker$close(), add = TRUE)
+  # The macOS GPU path accepts only four-channel images
+  image <- if (mac) {
+    mp$Image(image_format = mp$ImageFormat$SRGBA,
+             data = cv2$cvtColor(img, cv2$COLOR_BGR2RGBA))
+  } else {
+    mp$Image(image_format = mp$ImageFormat$SRGB,
+             data = cv2$cvtColor(img, cv2$COLOR_BGR2RGB))
+  }
+  faces <- landmarker$detect(image)$face_landmarks
+  if (reticulate::py_len(faces) == 0) return(NULL)
+  .landmark_matrix(reticulate::py_get_item(faces, 0L))
+}
+
+.face_landmarker_url <- paste0(
+  "https://storage.googleapis.com/mediapipe-models/face_landmarker/",
+  "face_landmarker/float16/1/face_landmarker.task"
+)
+
+# Path to the FaceLandmarker model, downloading it once if needed
+.face_landmarker_model <- function() {
+  dir <- tools::R_user_dir("r4lineups", "cache")
+  path <- file.path(dir, "face_landmarker.task")
+  if (!file.exists(path)) {
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+    message("Downloading the MediaPipe face landmarker model (about 3.7 MB) to ",
+            dir, "; this happens once.")
+    tmp <- tempfile(fileext = ".task")
+    status <- utils::download.file(.face_landmarker_url, tmp, mode = "wb",
+                                   quiet = TRUE)
+    if (status != 0 || !file.exists(tmp) || file.size(tmp) == 0) {
+      stop("Could not download the face landmarker model from ",
+           .face_landmarker_url, call. = FALSE)
+    }
+    file.copy(tmp, path, overwrite = TRUE)
+    unlink(tmp)
+  }
+  path
 }
 
 
@@ -220,7 +278,7 @@ get_face_landmarks <- function(img_path, return_3d = TRUE) {
 #' @details
 #' These 5 landmarks are sufficient for basic face alignment and are
 #' commonly used in face recognition pipelines. For more detailed
-#' landmarks (468 points), use \code{\link{get_face_landmarks}}.
+#' landmarks (478 points), use \code{\link{get_face_landmarks}}.
 #'
 #' @examples
 #' \dontrun{

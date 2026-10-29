@@ -47,3 +47,4 @@
 ^data-raw$
 ^Gmail.*\.pdf$
 ^cran_submission_.*$
+^codex_(qa|review)_[0-9]+\.md$

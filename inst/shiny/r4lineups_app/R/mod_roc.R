@@ -63,13 +63,17 @@ roc_server <- function(id, data) {
       d <- data()
       df <- d$data
       run <- capture_notes({
-        roc <- r4lineups::make_rocdata(df, lineup_size = d$lineup_size)
-        cac <- r4lineups::make_cacdata(df, lineup_size = d$lineup_size, confidence_bins = d$bins)
+        roc <- r4lineups::make_rocdata(df, lineup_size = d$lineup_size,
+                                       innocent_suspect = d$innocent_suspect)
+        cac <- r4lineups::make_cacdata(df, lineup_size = d$lineup_size,
+                                       innocent_suspect = d$innocent_suspect, confidence_bins = d$bins)
         fullroc <- r4lineups::make_fullroc_data(df, conf_bins = d$bins, order = input$order,
-                                                lineup_size = d$lineup_size)
+                                                lineup_size = d$lineup_size,
+                                                innocent_suspect = d$innocent_suspect)
         pauc <- if (!is.null(d$groups)) {
           r4lineups::compare_pauc(d$groups$data[[1]], d$groups$data[[2]],
                                   lineup_size = d$lineup_size,
+                                  innocent_suspect = d$innocent_suspect,
                                   n_bootstrap = as.integer(input$n_boot), seed = input$seed,
                                   label1 = d$groups$labels[1], label2 = d$groups$labels[2])
         }

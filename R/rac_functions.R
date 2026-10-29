@@ -56,9 +56,11 @@ utils::globalVariables("time_numeric")
 #' rac <- make_racdata(data, time_bins = c(0, 4000, 8000, 12000, 20000))
 #' rac$rac_data
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
-make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
+make_racdata <- function(data, lineup_size = 6, time_bins = NULL,
+                         innocent_suspect = "auto") {
   .validate_lineup_analysis(data, require_confidence = FALSE,
                             require_response_time = TRUE)
 
@@ -103,7 +105,7 @@ make_racdata <- function(data, lineup_size = 6, time_bins = NULL) {
   }
 
   # Initialize results
-  innocent_method <- .innocent_suspect_method(ta_data)
+  innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
   rac_results <- tibble::tibble(
     response_time = character(),
     mean_time = numeric(),
@@ -286,13 +288,15 @@ make_rac_gg <- function(racobj_list, show_errorbars = TRUE, show_n = TRUE,
 #' print(rac_result)
 #' rac_result$plot
 #'
+#' @inheritParams make_rocdata
 #' @export
 make_rac <- function(data, lineup_size = 6, time_bins = NULL,
-                     show_plot = TRUE, ...) {
+                     show_plot = TRUE, innocent_suspect = "auto", ...) {
 
   # Compute RAC data
   rac_obj <- make_racdata(data, lineup_size = lineup_size,
-                          time_bins = time_bins)
+                          time_bins = time_bins,
+                          innocent_suspect = innocent_suspect)
 
   # Create plot
   # The plot is always built, so that it is available as $plot and to the

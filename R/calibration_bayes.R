@@ -66,6 +66,7 @@
 #' plot(res)
 #'
 #' @importFrom stats rbeta quantile median
+#' @inheritParams make_rocdata
 #' @export
 calibration_bayes <- function(data,
                                confidence_bins = NULL,
@@ -74,7 +75,8 @@ calibration_bayes <- function(data,
                                alpha           = 0.5,
                                S               = 10000,
                                credible_mass   = 0.95,
-                               confidence_scale = c("auto", "0-1", "0-100")) {
+                               confidence_scale = c("auto", "0-1", "0-100"),
+                               innocent_suspect = "auto") {
   confidence_scale <- match.arg(confidence_scale)
   alpha_val <- .resolve_alpha_scalar(alpha)
   if (!is.numeric(S) || S < 1)
@@ -86,7 +88,8 @@ calibration_bayes <- function(data,
                                 confidence_bins = confidence_bins,
                                 choosers_only   = choosers_only,
                                 lineup_size     = lineup_size,
-                                confidence_scale = confidence_scale)
+                                confidence_scale = confidence_scale,
+                                innocent_suspect = innocent_suspect)
   bin_df <- freq$calibration_data
   N      <- freq$n_total
   conf_scale <- freq$confidence_scale

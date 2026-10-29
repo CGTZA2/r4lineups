@@ -158,6 +158,29 @@ testthat::test_that("compare_multid returns differences and bootstrap tests", {
                          "same filler_rate")
 })
 
+testthat::test_that("compare_multid treats same-seed fits as independent samples", {
+  # Codex review 2, finding 1: row-by-row differences of same-seed draws gave
+  # SE .0136 and p < .0001 for GFp; the independent-sample SE is about .35.
+  a <- make_multid(counts = c(G = 60, Fp = 25, Rp = 15, I = 10, Fa = 30, Ra = 60),
+                   n_bootstrap = 1000, seed = 1)
+  b <- make_multid(counts = c(G = 60, Fp = 27, Rp = 13, I = 10, Fa = 30, Ra = 60),
+                   n_bootstrap = 1000, seed = 1)
+  cmp <- compare_multid(a, b, seed = 1)
+  gfp <- cmp[cmp$index == "GFp", ]
+  testthat::expect_equal(gfp$se, sqrt(stats::var(a$boot[, "GFp"]) + stats::var(b$boot[, "GFp"])))
+  testthat::expect_gt(gfp$se, 0.25)
+  testthat::expect_gt(gfp$p_value, 0.7)
+  testthat::expect_lt(gfp$ci_lower, 0)
+  testthat::expect_gt(gfp$ci_upper, 0)
+
+  # Identical data and seed: the difference is 0 but its uncertainty is not.
+  same <- compare_multid(a, a, seed = 1)
+  se_a <- stats::sd(a$boot[, "GFp"])
+  testthat::expect_equal(same$se[same$index == "GFp"], sqrt(2) * se_a)
+  testthat::expect_lt(same$ci_lower[same$index == "GFp"], -se_a)
+  testthat::expect_identical(compare_multid(a, b, seed = 7), compare_multid(a, b, seed = 7))
+})
+
 testthat::test_that("multid input validation", {
   testthat::expect_error(make_multid(), "exactly one")
   testthat::expect_error(make_multid(counts = c(G = 1, Fp = 1)), "named numeric")

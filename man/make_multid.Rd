@@ -14,7 +14,8 @@ make_multid(
   conf_thresholds = NULL,
   n_bootstrap = 0,
   conf_level = 0.95,
-  seed = NULL
+  seed = NULL,
+  innocent_suspect = "auto"
 )
 }
 \arguments{
@@ -60,6 +61,10 @@ TA arms separately.}
 \item{conf_level}{Confidence level for bootstrap intervals. Default 0.95.}
 
 \item{seed}{Optional random seed for the bootstrap.}
+
+\item{innocent_suspect}{For trial-level \code{data}, how innocent-suspect
+identifications are obtained; see \code{\link{make_rocdata}}. Ignored
+for \code{counts}, where the presence of \code{I} decides.}
 }
 \value{
 An object of class \code{"multid"}, a list with:

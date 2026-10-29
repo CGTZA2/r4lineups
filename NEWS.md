@@ -1,3 +1,172 @@
+# r4lineups 2.3.0 (development)
+
+## Breaking changes
+
+* `make_dpp()` now computes the deviation from perfect performance as
+  Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) define it: DPP(c) =
+  1 - Culprit(c) + Innocent(c) at each ROC operating point, averaged over the
+  operating points (their Equation 2). The previous statistic,
+  1 - AUC(observed) / AUC(perfect) over the observed false-ID range, was a
+  different quantity under the same name, and it cited an unrelated paper. On
+  a single operating point with culprit rate .8 and innocent-suspect rate .1,
+  the old function returned .6; the published measure is .3. The new version
+  reproduces Smith et al.'s Table 4 (.864 and .816). The return value now has
+  `dpp`, `dpp_by_point` and `best_point` in place of `auc_observed`,
+  `auc_perfect`, `auc_gap`, `perfect_roc` and `max_fa`. Optional `alpha` and
+  `beta` arguments give their weighted Equation 3.
+* `compare_dpp()` now bootstraps the difference in average DPP (stratified by
+  target presence within each procedure) and returns its standard error and a
+  percentile interval, with a print method. `plot_dpp()` plots DPP at each
+  operating point; `plot_dpp_comparison()` overlays two procedures and loses
+  its `layout` argument. `plot_dpp()` arguments are now `show_mean`,
+  `show_chance` and `show_dpp`.
+
+## New features
+
+* Every analysis that uses target-absent lineups gains an `innocent_suspect`
+  argument: `"designated"`, `"estimated"` (filler IDs / lineup size), or
+  `"auto"` (the default). The app's Data tab has a matching control. See the
+  bug fix below.
+* `make_cacdata()`, `make_cac()`, `ppv_by_confidence()`,
+  `ppv_range_by_confidence()` and `make_ppv_range()` gain `base_rate`.
+  Count-based accuracy, the Mickes (2015) definition, stays the default, but
+  it equals the probability of guilt only when the target-present and
+  target-absent samples are the same size: with HR = .6 and FAR = .1 it gives
+  .857, .923 or .667 for TP:TA splits of 100:100, 200:100 and 100:300. These
+  functions now say so in a message when the arms differ. `base_rate = 0.5`
+  computes accuracy from the hit and false-ID rates instead, which gives .857
+  for all three; other values apply Bayes' rule at that prior. The
+  rate-based CAC standard error is a delta-method approximation. Existing
+  results are unchanged.
+
+## Bug fixes
+
+* `make_rocdata()` and `make_utility_curves()` took a confidence criterion
+  from every response, rejections included. The extra criteria only
+  duplicated existing operating points, so the ROC path and partial AUC were
+  unaffected, but averages over points were reweighted by how rejection
+  confidence happened to be coded. Changing only the rejection confidences
+  (from 0 to values between 51 and 99) moved average DPP from .417 to .647
+  and equal-variance z-ROC d' from 1.879 to 1.398. The criteria are now the
+  confidence levels of the responses that can move an operating point:
+  target-present suspect IDs, plus target-absent suspect IDs with a
+  designated suspect or filler IDs without one. Both codings now give DPP
+  .475 and d' 1.757. Results change for data in which rejections or filler
+  IDs carry confidence levels that no counted ID uses; `lineup_example` is
+  unaffected. `make_rocdata()`, `make_dpp()` and `make_utility_curves()` gain
+  `thresholds` to set the criteria, and `make_rocdata()` and `make_dpp()`
+  return the criteria used. `compare_dpp()` and the `fit_sdt_roc()`
+  bootstrap reuse the full-sample criteria in every replicate, so that all
+  replicates estimate the same average.
+
+* Target presence coded 0/1, which the validator accepts, broke the
+  bootstraps in `compare_pauc()` (an error) and `fit_sdt_roc()`, where every
+  replicate failed silently and the intervals were `NA` with
+  `n_successful = 0`. Both now resample 0/1 and logical coding identically.
+  `fit_sdt_roc()` also warns when bootstrap samples fail, giving the number
+  and the first error.
+
+* `func_size_report()` bootstrapped functional size, 1/p, and `boot.ci()`
+  silently dropped the resamples with no target choices, where it is
+  infinite. With one target choice among 30 mock witnesses, 353 of 1,000
+  resamples were dropped and the percentile interval was [10, 30]. The
+  bootstrap now resamples p and inverts its limits, which gives the same
+  percentile and BCa intervals when every resample is finite and an
+  unbounded upper limit when it is not ([10, Inf] here). The result gains an
+  exact interval (inverted Clopper-Pearson, [5.81, 1185.44] here) and
+  `n_infinite`, the number of resamples without target choices. The app's
+  Bias & size tab shows both, and displays infinite limits instead of
+  leaving them blank.
+
+* `standardize_lineup_data()` kept only the columns it maps, so it dropped
+  `suspect_pos` and `lineup_member`. A designated suspect who was never chosen
+  then fell back to the filler estimate after standardization (false-ID rate
+  .10 instead of 0), and effective-size-corrected PPV lost its member choices
+  (.833 instead of .50 when target-absent choices fall on one member). Every
+  column it does not map is now carried through unchanged.
+
+* `compare_multid()` differenced the two bootstrap matrices row by row. The
+  conditions are independent samples, but fits made with the same seed have
+  correlated draws, so the standard error collapsed. Comparing counts
+  (60, 25, 15, 10, 30, 60) with (60, 27, 13, 10, 30, 60), both fitted with
+  seed 1, gave d'(GFp) a standard error of .014 and p < .0001; the correct
+  values are .347 and .86. Identical inputs gave a zero-width interval. The
+  standard error is now the square root of the sum of the two bootstrap
+  variances, and the interval comes from randomly re-paired draws.
+  `compare_multid()` gains `seed`.
+
+* `get_face_landmarks()` failed with every current MediaPipe release. The
+  image was read into R and passed back as an int32 array, which OpenCV and
+  MediaPipe reject, and the function used `mediapipe.solutions.face_mesh`,
+  which current MediaPipe no longer has. The image now stays a uint8 numpy
+  array, and when `solutions` is absent the MediaPipe Tasks `FaceLandmarker`
+  is used. Its model is downloaded once to
+  `tools::R_user_dir("r4lineups", "cache")`. Both routes return the 478-point
+  mesh (468 face points plus 10 iris points); the documentation said 468.
+  `check_python_deps()` now records in a `"face_mesh"` attribute whether
+  landmarks can actually be extracted, not only whether MediaPipe imports.
+  An opt-in test (`R4LINEUPS_RUN_FACE=true`) exercises the whole path.
+
+* In the app's Bias & size tab, ticking "Small-sample corrected E'" changed
+  the reported estimate but left its intervals on the plug-in estimator, so the
+  value box could show a corrected E' with a plug-in interval that did not
+  contain it. `esize_boot_dist()` gains `unbiased = FALSE`, which bootstraps
+  the corrected estimator (dropping, with a warning, resamples where it is
+  unbounded). The app now bootstraps the corrected E' when it reports it, and
+  lists the plug-in estimate with its own normal-theory and bootstrap
+  intervals on separately labelled rows.
+
+* Target-absent data with a designated innocent suspect who was never chosen
+  were treated as having no designated suspect, so the false-ID rate was
+  estimated from filler IDs instead of being zero. With 100 target-absent
+  lineups, 60 filler IDs and no suspect IDs, the ROC reached a false-ID rate
+  of .10 instead of 0. `"auto"` now treats the lineups as designated when any
+  target-absent row is a suspect ID *or* the data carry a non-missing
+  `suspect_pos` column (as `simulate_lineup_data()` output and
+  `lineup_example` do). Otherwise it falls back to the filler estimate with a
+  message. Bootstraps (`compare_pauc()`, `fit_sdt_roc()`, `bootstrap_anri()`,
+  `compare_anri()`), `make_calibration_by_condition()`,
+  `make_utility_difference()`, `ppv_range_by_confidence()` and the
+  `make_multid()` confidence breakdown now resolve the design once on the full
+  data, so a resample that happens to contain no suspect IDs no longer switches
+  estimator.
+
+* `ppv_by_confidence()` dropped every confidence bin that contained no
+  target-absent trials, and with it that bin's guilty-suspect IDs, so both the
+  bin and the overall PPV were wrong. With 90 guilty IDs at confidence 100 and
+  all target-absent responses at 50, the overall PPV was .50 instead of .909.
+  Such bins are now kept, with no innocent-suspect IDs (PPV 1) and an `NA`
+  error rate and effective size. Only bins empty in both arms are dropped.
+  `make_ppv_range()` and its plots inherit the fix.
+
+* `boot_winter_2ht(method = "bca")` failed with a `dimnames` error, because
+  the interval matrix was transposed into the wrong shape, and even before
+  that its acceleration was fixed at 0, so the "BCa" interval was only
+  bias-corrected. The acceleration is now the jackknife estimate (one refit
+  per non-empty response cell, weighted by its count), the bias correction
+  handles ties and stays finite, and both methods return a parameters x
+  (Lower, Upper) matrix.
+
+* The posterior means reported by `func_size_bayes()`, `diag_ratio_T_bayes()`
+  and `diag_ratio_T_bayes_compare()` were averages of reciprocal draws. When
+  the relevant Beta posterior has shape a <= 1 (for example, no suspect
+  choices under the Jeffreys prior), the true mean is infinite and the average
+  never settled: it was about 11 million, 3 million and 36 million for 10^3,
+  10^4 and 10^5 draws of the same functional size. The means are now computed
+  exactly, `(a + b - 1) / (a - 1)` for `1/p`, and are `Inf` when they do not
+  exist. Print methods say so; a difference of two infinite means is `NA`.
+  Medians, intervals and threshold probabilities are unchanged.
+
+* `compare_pauc()` overstated partial AUC whenever the ROC had a vertical
+  segment, that is, when a confidence level added correct IDs but no false IDs.
+  Its integrator kept only the upper endpoint of each such segment, so the next
+  sloping segment started from too high a correct-ID rate. A curve through
+  (0, 0), (0, .5), (.1, .5) and (.1, 1) has area .05; `compare_pauc()` reported
+  .075 while `make_rocdata()` reported .05. Both now use one internal
+  integrator that keeps every endpoint and interpolates within the segment that
+  crosses the cutoff, and their results agree. The `compare_pauc()` bootstrap
+  and `simulate_power_analysis()` use the same integrator.
+
 # r4lineups 2.2.0 (2026-10-28)
 
 ## Breaking changes

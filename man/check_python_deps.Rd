@@ -10,7 +10,9 @@ check_python_deps(verbose = TRUE)
 \item{verbose}{Logical. If TRUE, prints detailed information.}
 }
 \value{
-A tibble with package names, installed status, and versions.
+A tibble with package names, installed status, and versions. Its
+  \code{"face_mesh"} attribute says whether \code{get_face_landmarks()} can
+  run: \code{"solutions"}, \code{"tasks"} or \code{"unavailable"}.
 }
 \description{
 Verifies that all required Python packages are installed and reports

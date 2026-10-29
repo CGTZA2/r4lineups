@@ -15,7 +15,7 @@ authors:
 affiliations:
   - name: Department of Psychology, University of Cape Town, South Africa
     index: 1
-date: 11 August 2026
+date: 28 October 2026
 bibliography: paper.bib
 ---
 
@@ -35,8 +35,10 @@ analysis, and models of lineup decisions [@wells1979; @wells1980;
 It provides classical and modern measures of lineup fairness,
 bootstrap and Bayesian uncertainty summaries, ROC/CAC/RAC and full-ROC
 analyses, calibration and evidential measures, signal-detection and
-two-high-threshold models, simulation and power tools, and optional
-face-similarity and lineup-memory-model workflows. The intended users are
+two-high-threshold models, Lee and Penrod's Multi-d′ framework
+[@lee2019], simulation and power tools, and optional face-similarity and
+lineup-memory-model workflows. An interactive application covers most of
+these analyses and runs in a web browser without installation. The intended users are
 eyewitness researchers, forensic psychologists, students, and applied analysts.
 
 # Statement of need
@@ -49,7 +51,10 @@ size are traditionally computed from mock-witness choices. Eyewitness
 experiments instead compare
 target-present and target-absent decisions, often with confidence and response
 time, although eyewitness data can also support estimates of lineup fairness
-[@fitzgerald2023]. Analysts therefore need both lineup-construction
+[@fitzgerald2023]. Lee and Penrod, for example, proposed the difference
+between the z-transformed rates at which witnesses choose the innocent suspect
+and the fillers from target-absent lineups as a resultant index of lineup bias
+[@lee2019]. Analysts therefore need both lineup-construction
 measures--including
 suspect-selection proportion, foil bias, functional size, Malpass effective
 size, and Tredoux effective size--and measures of identification performance
@@ -60,7 +65,7 @@ article supplements, small bespoke scripts, and general statistical packages.
 That fragmentation made input conventions, denominators, base-rate
 assumptions, continuity corrections, and uncertainty procedures difficult to
 audit consistently. `r4lineups` supplies lineup-specific validation and common
-data conventions together with worked examples. Version 2.1.0 is a major
+data conventions together with worked examples. Version 2.2.0 is a major
 extension of the original package, first released on CRAN as version 0.1.1 in
 2018 [@r4lineups].
 
@@ -95,48 +100,60 @@ choice vectors or tables. Confidence-based functions use trial-level data with
 as response time and experimental condition. Analysis wrappers return
 structured S3 objects with `print()`, `summary()`, and `plot()` methods, making
 assumptions and derived quantities inspectable while supporting normal R
-workflows.
+workflows. Two helpers make data coding explicit: `lineup_table()` tabulates
+choices over every lineup position, so that members nobody chose remain
+visible, and `classify_lineup_choices()` derives suspect, filler, and rejection
+responses from the chosen position and the suspect's position.
 
-The package favors R-native calculations for its statistical core and makes
+The package favours R-native calculations for its statistical core and makes
 external systems explicit. Face embeddings and the pyWitness bridge require
-separately managed Python environments; neither is initialized or installed
+separately managed Python environments; neither is initialised or installed
 when the package loads or during CRAN checks. Results from the lineup-model
 bridge contain extracted R tables rather than live Python objects, so saved
 analyses remain readable without an active Python session. This design trades
 some installation convenience for reproducibility and a clear
 boundary between package code and external models.
 
-The fifteen vignettes carry the methodological detail that users will need.
+We built the interactive application from modules that call only exported
+package functions, so that every number it reports can be reproduced in R.
+Confidence-based data are loaded once, with the nominal lineup size and any
+grouping variable used for comparisons, and bootstrap and posterior analyses
+run on request with a user-supplied seed. The application is installed with
+the package and also runs entirely in the browser through WebAssembly, from
+the package website. In the browser version, mock-witness and experimental
+data stay on the user's computer, an important safeguard when the data come
+from police casework.
+
+The sixteen vignettes carry the methodological detail that users will need.
 They cover fairness and diagnosticity, Bayesian inference,
 ROC/CAC/RAC and full ROC, calibration and decision measures, expected
 information gain and error-rate ranges, Winter's two-high-threshold model,
-summary and regression-based signal-detection methods, mSDT and Wixted models,
-simulation and power, and optional face similarity. Mathematical corrections
-in version 2.1.0 were checked against primary publications, small independent
+summary and regression-based signal-detection methods, the Multi-d′, mSDT and
+Wixted models, simulation and power, and optional face similarity.
+Mathematical corrections in versions 2.1.0 and 2.2.0 were checked against primary publications, small independent
 calculations, invariance identities, and simulation recovery.
 
 # Research impact statement
 
 `r4lineups` has been publicly available through CRAN since 2018 and has been
 used in published eyewitness research, including analyses of eyewitness
-decision processes [@mansour2024; @mansour2025]. Version 2.1.0 substantially
+decision processes [@mansour2024; @mansour2025]. Version 2.2.0 substantially
 extends that established research tool while preserving the classical
 fairness functions used by earlier work. Its immediate scholarly contribution
 is a tested R workflow spanning lineup construction, identification outcomes,
 confidence, evidence, and competing process models. The package website,
-fifteen reproducible vignettes, example datasets, and optional hosted Shiny
-application also support teaching, method comparison, and applied
-review.
+sixteen reproducible vignettes, example datasets, and the browser-based
+application also support teaching, method comparison, and applied review.
 
 # AI usage disclosure
 
 Development used multiple dynamically updated frontier models: Anthropic
-Claude Sonnet 4 and 5 and Claude Opus 4.6 and 4.8, and OpenAI Codex with
+Claude Sonnet 4 and 5 and Claude Opus 4.6, 4.8 and 5.5, and OpenAI Codex with
 GPT-5-family models including GPT-5.5 and GPT-5.6 Sol. Additional Claude and
 Codex sessions were used, but exact session-level model identifiers were not
 consistently recorded. These tools assisted with code review and drafting,
-debugging, test scaffolding, documentation, package-check remediation, and
-manuscript editing. Colin Tredoux and Tamsyn Naylor reviewed, modified, and
+debugging, test scaffolding, documentation, package-check remediation, the
+interactive application, and manuscript editing. Colin Tredoux and Tamsyn Naylor reviewed, modified, and
 validated the AI-assisted outputs, made the statistical and software-design
 decisions, and retain full responsibility for accuracy, originality,
 licensing, and scholarly claims.

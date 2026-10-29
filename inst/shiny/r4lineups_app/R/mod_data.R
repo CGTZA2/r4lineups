@@ -22,6 +22,10 @@ data_ui <- function(id) {
         downloadLink(ns("template"), "Download a template CSV")
       ),
       numericInput(ns("lineup_size"), "Nominal lineup size", value = 6, min = 2, step = 1),
+      selectInput(ns("innocent_suspect"), "Innocent suspect in target-absent lineups",
+                  choices = c("Auto-detect" = "auto",
+                              "Designated suspect" = "designated",
+                              "None: estimate from fillers" = "estimated")),
       textInput(ns("bins"), "Confidence bins (edges)", value = "0, 60, 80, 100"),
       helpText("Bin edges are used by CAC, full ROC, calibration, EIG and PPV."),
       selectInput(ns("group_col"), "Compare two groups by column", choices = c("None" = "")),
@@ -157,6 +161,7 @@ data_server <- function(id) {
       data = prepared()$data,
       label = if (identical(input$source, "upload")) input$file$name else input$source,
       lineup_size = input$lineup_size,
+      innocent_suspect = input$innocent_suspect %||% "auto",
       bins = parse_bins(input$bins),
       groups = groups(),
       has_rt = "response_time" %in% names(prepared()$data)

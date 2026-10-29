@@ -11,6 +11,7 @@
 #'   }
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
 #' @param show_plot Logical. Whether to display the plot (default = TRUE)
+#' @inheritParams make_rocdata
 #' @param ... Additional arguments passed to make_roc_gg()
 #'
 #' @return A list containing:
@@ -47,12 +48,14 @@
 #' \emph{Journal of Applied Research in Memory and Cognition, 4}(2), 93-102.
 #'
 #' @export
-make_roc <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
+make_roc <- function(data, lineup_size = 6, show_plot = TRUE,
+                     innocent_suspect = "auto", ...) {
 
   # Compute ROC data. make_rocdata() records a data-source label from its own
   # call, which here would just be the formal name "data", so overwrite it with
   # the expression this function was called with.
-  roc_obj <- make_rocdata(data, lineup_size = lineup_size)
+  roc_obj <- make_rocdata(data, lineup_size = lineup_size,
+                          innocent_suspect = innocent_suspect)
   attr(roc_obj, "data_source") <- deparse(substitute(data))[1]
 
   # Create plot

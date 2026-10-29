@@ -122,3 +122,36 @@ test_that("ppv_range_by_confidence returns all three corrections", {
   expect_true(all(c("ppv_nominal", "ppv_effective", "ppv_none") %in%
                     names(result$ppv_range_data)))
 })
+
+test_that("PPV keeps confidence bins that contain no target-absent trials", {
+  # All 90 TP suspect IDs at 100; the 10 TA suspect IDs and all rejections at 50
+  x <- data.frame(
+    target_present = rep(c(TRUE, FALSE), each = 100),
+    identification = c(rep("suspect", 100), rep("suspect", 10), rep("reject", 90)),
+    confidence = c(rep(100, 90), rep(50, 110))
+  )
+  ppv <- ppv_by_confidence(x, confidence_bins = c(0, 60, 80, 100), quiet = TRUE)
+  expect_equal(ppv$overall_ppv, 100 / 110)
+  expect_equal(ppv$overall_ppv, make_cacdata(x)$overall_accuracy)
+  top <- ppv$ppv_data[ppv$ppv_data$confidence == "(80,100]", ]
+  expect_equal(top$ppv, 1)
+  expect_true(is.na(top$error_rate))
+  # The empty middle bin is still dropped
+  expect_false("(60,80]" %in% ppv$ppv_data$confidence)
+
+  # A TA-only bin has PPV 0
+  y <- x
+  y$confidence[y$target_present & y$confidence == 50] <- 100
+  y$confidence[!y$target_present & y$identification == "suspect"] <- 70
+  ppv_y <- ppv_by_confidence(y, confidence_bins = c(0, 60, 80, 100), quiet = TRUE)
+  expect_equal(ppv_y$ppv_data$ppv[ppv_y$ppv_data$confidence == "(60,80]"], 0)
+
+  # Unbinned PPV agrees with the overall counts
+  expect_equal(ppv_by_confidence(x, quiet = TRUE)$overall_ppv, 100 / 110)
+
+  # The range and its plots cope with the NA rows
+  rng <- suppressMessages(make_ppv_range(x, confidence_bins = c(0, 60, 80, 100),
+                                         show_plots = FALSE))
+  expect_s3_class(plot_error_rate_conf(rng), "ggplot")
+  expect_s3_class(plot_ppv_range(rng), "ggplot")
+})

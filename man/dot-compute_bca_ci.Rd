@@ -4,7 +4,12 @@
 \alias{.compute_bca_ci}
 \title{Compute BCa Confidence Intervals}
 \usage{
-.compute_bca_ci(boot_estimates, original_est, conf_level)
+.compute_bca_ci(
+  boot_estimates,
+  original_est,
+  conf_level,
+  accel = rep(0, ncol(boot_estimates))
+)
 }
 \arguments{
 \item{boot_estimates}{Matrix of bootstrap estimates}
@@ -12,6 +17,8 @@
 \item{original_est}{Vector of original parameter estimates}
 
 \item{conf_level}{Confidence level}
+
+\item{accel}{Vector of acceleration constants, one per parameter}
 }
 \value{
 Matrix of confidence intervals

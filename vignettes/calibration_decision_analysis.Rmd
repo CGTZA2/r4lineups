@@ -570,11 +570,23 @@ and the comparison is made somewhere neither procedure was actually operating.
 Smith et al. argue that pAUC consequently fails to track which procedure has
 greater diagnostic utility, and that DPP does.
 
-DPP takes a different approach: rather than integrating over a region, it
-measures how far the observed ROC falls short of the best curve attainable given
-the false-alarm rate the procedure actually reached. Because the comparison is
-made against a benchmark defined by the data themselves, curves of different
-lengths remain comparable.
+DPP takes a different approach. Rather than integrating over a region, it is
+computed at every operating point of the ROC, that is, at every cumulative
+confidence threshold, and then averaged. At an operating point $c$ (their
+Equation 2),
+
+$$DPP(c) = 1 - \text{Culprit}(c) + \text{Innocent}(c),$$
+
+where Culprit($c$) is the culprit (correct) identification rate and
+Innocent($c$) the innocent-suspect identification rate at that threshold.
+DPP($c$) is 0 for perfect performance (every culprit identified and no innocent
+suspect), 1 for any point on the chance diagonal, and 2 for the worst possible
+performance. When culprits are present in half of all lineups and the two
+errors are equally costly, DPP($c$) is one minus the expected utility at that
+threshold, so the average DPP measures the average utility of the procedure
+across the confidence levels witnesses actually use. Because every procedure
+is evaluated at its own operating points, curves of different lengths remain
+comparable.
 
 This is an active disagreement rather than settled ground, and the pAUC vignette
 takes up the other side of it.
@@ -582,55 +594,66 @@ takes up the other side of it.
 ### Basic DPP
 
 ```{r dpp}
-# Compute DPP
 dpp_result <- make_dpp(
   lineup_example,
   lineup_size = 6
 )
 
-print(dpp_result)
+dpp_result$dpp
+dpp_result$dpp_by_point
 
-# Plot ROC with perfect performance comparison
 plot_dpp(dpp_result)
 ```
 
-Interpretation:
+The table lists each operating point, from the strictest threshold to the most
+lenient, which counts every identification. The plot shows DPP($c$) at each of
+them, the average as a dashed line, and the chance reference at 1. The circled
+point has the lowest DPP and so the highest utility; it is the threshold at
+which acting on identifications would do the most good under equal costs and a
+base rate of .5.
 
-- **DPP = 0**: Perfect performance
-- **DPP = 1**: Chance performance
-- **DPP < 0**: Better than perfect (impossible, indicates error)
+### Different costs and base rates
 
-The plot shows:
+Smith et al.'s Equation 3 weights the two errors:
 
-- **Black curve**: Observed ROC
-- **Red dashed line**: Perfect ROC given the maximum false alarm rate
-- **Shaded area**: Deviation from perfect performance
+$$DPP_{\alpha\beta}(c) = \beta[1 - \text{Culprit}(c)] + \alpha(1 - \beta)\text{Innocent}(c),$$
 
-The shaded area is the quantity of interest, and it has a concrete reading: it
-is the improvement that would be available if this procedure extracted
-everything its witnesses had to give, without their choosing any more often than
-they already do. A large shaded area means the procedure is leaving
-discriminability unclaimed; a small one means the procedure is close to the best
-that could be done at that rate of choosing.
+where $\alpha$ is the cost of identifying an innocent suspect relative to
+missing the culprit, and $\beta$ is the base rate of culprit presence. With
+$\alpha = 1$ and $\beta = .5$ this is half of Equation 2. Weighted values no
+longer range from 0 to 2, so they are comparable only with other values
+computed with the same weights.
+
+```{r dpp-weighted}
+# An innocent-suspect identification three times as costly as a miss,
+# with culprits present in 30% of lineups
+make_dpp(lineup_example, alpha = 3, beta = 0.3)$dpp
+```
 
 ### Compare DPP Between Groups
 
 The comparison is the usual use. Here the two simulated procedures from earlier
 differ in the strength of the evidence they generate, so Procedure A should show
-the smaller deviation:
+the smaller deviation. As Smith et al. did, `compare_dpp()` tests the
+difference with a nonparametric bootstrap, resampling target-present and
+target-absent trials separately within each procedure:
 
 ```{r dpp-comparison}
 dpp_comparison <- compare_dpp(
   data_proc_a,
   data_proc_b,
-  lineup_size = 6
+  lineup_size = 6,
+  n_bootstrap = 500,
+  seed = 2026
 )
 
-print(dpp_comparison)
+dpp_comparison
 
-# Plot comparison side-by-side
 plot_dpp_comparison(dpp_comparison)
 ```
+
+A negative difference favours Procedure A. The interval is a percentile
+bootstrap interval for the difference in average DPP.
 
 ### When to Use DPP
 
@@ -772,7 +795,7 @@ bins <- c(0, 60, 80, 100)
 cal <- make_calibration(lineup_example, confidence_bins = bins,
                         show_plot = FALSE)
 
-# 2. DPP: overall discriminability
+# 2. DPP: average utility across operating points
 dpp <- make_dpp(lineup_example, lineup_size = 6)
 
 # 3. ANRI: resolution, with inference
@@ -823,8 +846,10 @@ ou_dir <- if (cal$OU < 0) "underconfident" else "overconfident"
 > Witnesses were well calibrated overall (C = `r round(cal$C, 3)`), but
 > systematically **`r ou_dir`** (O/U = `r round(cal$OU, 3)`): accuracy in the
 > lowest confidence band was substantially higher than stated confidence implied.
-> DPP was `r round(dpp$dpp, 3)`, indicating performance above chance but well
-> short of what was attainable at the observed rate of choosing. Resolution,
+> Average DPP was `r round(dpp$dpp, 3)` (0 = perfect, 1 = chance), and the
+> operating point of maximum utility was confidence of
+> `r dpp$best_point$confidence` or above (DPP = `r round(dpp$best_point$dpp, 3)`).
+> Resolution,
 > measured by ANRI, was `r round(anri$anri, 3)`
 > (95% CI [`r round(anri$ci_lower, 3)`, `r round(anri$ci_upper, 3)`]), against an
 > uncorrected NRI of `r round(anri$nri, 3)`.
@@ -880,6 +905,7 @@ allows a reader to judge how much weight it will bear.
   (2019). Deviation from perfect performance measures the diagnostic utility of
   eyewitness lineups but partial area under the ROC curve does not. *Journal of
   Applied Research in Memory and Cognition, 8*(1), 50-59.
+  https://doi.org/10.1016/j.jarmac.2018.09.003
 
 **ANRI:**
 

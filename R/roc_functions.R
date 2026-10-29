@@ -11,6 +11,20 @@
 #'   }
 #' @param lineup_size Integer. Number of people in the lineup (default = 6).
 #'   Used to estimate false ID rate when fillers are chosen from target-absent lineups.
+#' @param innocent_suspect How innocent-suspect identifications in
+#'   target-absent lineups are obtained. \code{"designated"}: the lineups had a
+#'   designated innocent suspect, so target-absent \code{"suspect"} rows are
+#'   counted directly, and zero such rows means a false-ID rate of zero.
+#'   \code{"estimated"}: there was no designated innocent suspect, so the
+#'   innocent-suspect count is estimated as filler IDs divided by
+#'   \code{lineup_size}. \code{"auto"} (the default) chooses
+#'   \code{"designated"} when any target-absent row is a suspect ID or the data
+#'   have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+#'   otherwise, with a message.
+#' @param thresholds Optional numeric vector of confidence criteria at which
+#'   to evaluate the ROC. The default uses the confidence levels of the
+#'   responses that can move an operating point; see Details. Supplying the
+#'   criteria of a full sample keeps them fixed across bootstrap resamples.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -18,19 +32,29 @@
 #'     \item pauc: Partial area under the curve
 #'     \item n_target_present: Number of target-present lineups
 #'     \item n_target_absent: Number of target-absent lineups
+#'     \item thresholds: The confidence criteria used, highest first
 #'   }
 #'
 #' @details
 #' This function computes ROC curves following Wixted & Mickes (2012) and
-#' Mickes (2015). For each confidence level:
+#' Mickes (2015). For each confidence criterion:
 #' \itemize{
 #'   \item Correct ID rate = proportion of target-present lineups where suspect identified
 #'   \item False ID rate = proportion of target-absent lineups where suspect identified
 #' }
 #'
-#' If target-absent data contain explicit \code{"suspect"} responses, those
-#' designated innocent-suspect IDs are used directly. Otherwise, filler IDs
-#' are divided by lineup size. The two estimators are never added together.
+#' The criteria are the confidence levels of the responses that enter the
+#' ROC: target-present suspect IDs, and target-absent suspect IDs (designated
+#' suspect) or filler IDs (estimated). The confidence given to rejections, or
+#' to filler IDs in target-present lineups, does not define a criterion,
+#' because it cannot move an operating point. Each criterion therefore gives a
+#' distinct point, and averages over points (DPP, z-ROC d') do not depend on
+#' how rejection confidence was coded.
+#'
+#' With a designated innocent suspect, target-absent \code{"suspect"}
+#' responses are used directly. Without one, filler IDs are divided by lineup
+#' size. The two estimators are never added together. See
+#' \code{innocent_suspect} for how the design is determined.
 #'
 #' @references
 #' Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should
@@ -54,7 +78,8 @@
 #'
 #' @export
 #' @import tibble
-make_rocdata <- function(data, lineup_size = 6) {
+make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto",
+                         thresholds = NULL) {
   .validate_lineup_analysis(data)
 
   # Validate required columns
@@ -75,8 +100,10 @@ make_rocdata <- function(data, lineup_size = 6) {
     stop("Data must include both target-present and target-absent lineups")
   }
 
-  # Get unique confidence levels (sorted from high to low)
-  conf_levels <- sort(unique(data$confidence), decreasing = TRUE)
+  method <- .innocent_suspect_method(ta_data, innocent_suspect)
+
+  # Confidence criteria, from high to low
+  conf_levels <- .roc_thresholds(tp_data, ta_data, method, thresholds)
 
   # Initialize results
   roc_results <- tibble::tibble(
@@ -93,7 +120,6 @@ make_rocdata <- function(data, lineup_size = 6) {
     n_correct <- sum(tp_data$identification == "suspect" & tp_data$confidence >= conf)
     correct_id_rate <- n_correct / n_tp
 
-    method <- .innocent_suspect_method(ta_data)
     n_false <- .innocent_suspect_count(
       ta_data, ta_data$confidence >= conf, lineup_size, method
     )
@@ -117,16 +143,8 @@ make_rocdata <- function(data, lineup_size = 6) {
     n_false_ids = 0
   ), roc_results)
 
-  # Calculate partial AUC (using trapezoidal rule)
-  # Sort by false_id_rate for integration
-  roc_sorted <- roc_results[order(roc_results$false_id_rate), ]
-
-  pauc <- 0
-  for (i in 2:nrow(roc_sorted)) {
-    width <- roc_sorted$false_id_rate[i] - roc_sorted$false_id_rate[i-1]
-    height <- (roc_sorted$correct_id_rate[i] + roc_sorted$correct_id_rate[i-1]) / 2
-    pauc <- pauc + (width * height)
-  }
+  # Partial AUC over the observed false-ID range (trapezoidal rule)
+  pauc <- .roc_area(roc_results$false_id_rate, roc_results$correct_id_rate)
 
   out <- list(
     roc_data = roc_results,
@@ -135,6 +153,7 @@ make_rocdata <- function(data, lineup_size = 6) {
     n_target_absent = n_ta,
     lineup_size = lineup_size,
     innocent_suspect_method = method,
+    thresholds = conf_levels,
     raw_data = data
   )
   class(out) <- c("lineup_roc_data", "list")
@@ -226,4 +245,29 @@ make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE,
   }
 
   p
+}
+
+
+# Area under a cumulative ROC path by the trapezoidal rule, up to max_far.
+# Points are ordered by false-ID rate and then by correct-ID rate, so a vertical
+# segment keeps both of its endpoints and the next sloping segment starts from
+# the right height. The segment that crosses max_far is interpolated linearly.
+.roc_area <- function(far, hr, max_far = Inf) {
+  ord <- order(far, hr)
+  far <- far[ord]
+  hr <- hr[ord]
+  area <- 0
+  for (i in seq_along(far)[-1]) {
+    x0 <- far[i - 1]
+    if (x0 >= max_far) break
+    x1 <- far[i]
+    y0 <- hr[i - 1]
+    y1 <- hr[i]
+    if (x1 > max_far) {
+      y1 <- y0 + (y1 - y0) * (max_far - x0) / (x1 - x0)
+      x1 <- max_far
+    }
+    area <- area + (x1 - x0) * (y0 + y1) / 2
+  }
+  area
 }

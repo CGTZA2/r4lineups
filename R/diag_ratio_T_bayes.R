@@ -22,7 +22,8 @@
 #' \describe{
 #'   \item{DR_draws}{Numeric vector of length \code{S}: posterior draws of DR.}
 #'   \item{lnDR_draws}{Log-transformed posterior draws.}
-#'   \item{posterior_mean, posterior_median}{Posterior point estimates.}
+#'   \item{posterior_mean, posterior_median}{Posterior point estimates. The
+#'     mean is exact, and is \code{Inf} when it does not exist (see Details).}
 #'   \item{credible_interval}{Named two-element vector (lower, upper).}
 #'   \item{prior_alpha}{Alpha value used.}
 #'   \item{n_tp, n_ta, S, credible_mass}{Input metadata.}
@@ -40,6 +41,16 @@
 #' Unlike the continuity-corrected point estimate, the posterior handles zero cell
 #' counts naturally and provides direct probability statements such as
 #' \eqn{P(DR > 1 \mid \mathbf{n})}.
+#'
+#' The posterior mean is computed exactly, not from the draws. Because the two
+#' rates are independent, \eqn{E[DR] = E[p_{TP}] \, E[1/p_{TA}]}, with
+#' \eqn{E[1/p_{TA}] = (a + b - 1)/(a - 1)} for \eqn{p_{TA} \sim
+#' \mathrm{Beta}(a, b)} when \eqn{a > 1}. When \eqn{a \le 1} (for example,
+#' no target-absent suspect choices under the Jeffreys prior) the mean is
+#' infinite, and an average of the draws would not settle on any value as
+#' \code{S} grew. Report the median and interval instead. In
+#' \code{diag_ratio_T_bayes_compare()}, the mean difference is \code{NA} when
+#' both means are infinite.
 #'
 #' @references
 #' Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness.
@@ -106,7 +117,8 @@ diag_ratio_T_bayes <- function(lineup_pres, lineup_abs, pos_pres, pos_abs,
       lnDR_draws      = lnDR_draws,
       p_tp_draws      = p_tp_draws,
       p_ta_draws      = p_ta_draws,
-      posterior_mean   = mean(DR_draws),
+      posterior_mean   = (n_tp_s + alpha_val) / (N_tp + 2 * alpha_val) *
+        .beta_reciprocal_mean(n_ta_s + alpha_val, N_ta - n_ta_s + alpha_val),
       posterior_median = median(DR_draws),
       credible_interval = ci,
       prior_alpha      = alpha_val,
@@ -130,7 +142,7 @@ print.diag_ratio_T_bayes <- function(x, digits = 3, ...) {
   cat(sprintf("  Prior: Jeffreys-type Beta(%.2f, %.2f)\n", x$prior_alpha, x$prior_alpha))
   cat(sprintf("  TP lineup: n = %d, suspect IDs = %d\n", x$n_tp, x$n_tp_suspect))
   cat(sprintf("  TA lineup: n = %d, suspect IDs = %d\n", x$n_ta, x$n_ta_suspect))
-  cat(sprintf("  Posterior mean DR:   %.3f\n", x$posterior_mean))
+  cat(.format_posterior_mean("  Posterior mean DR:   ", x$posterior_mean))
   cat(sprintf("  Posterior median DR: %.3f\n", x$posterior_median))
   cat(sprintf("  %d%% credible interval: [%.3f, %.3f]\n",
               pct, x$credible_interval["lower"], x$credible_interval["upper"]))
@@ -212,7 +224,8 @@ diag_ratio_T_bayes_compare <- function(pres_A, abs_A, pos_pres_A, pos_abs_A, k1_
   structure(
     list(
       delta            = delta,
-      posterior_mean   = mean(delta),
+      posterior_mean   = .difference_of_means(res_A$posterior_mean,
+                                              res_B$posterior_mean),
       posterior_median = median(delta),
       credible_interval = ci_delta,
       P_A_greater      = mean(delta > 0),
@@ -230,9 +243,9 @@ diag_ratio_T_bayes_compare <- function(pres_A, abs_A, pos_pres_A, pos_abs_A, k1_
 print.diag_ratio_T_bayes_compare <- function(x, digits = 3, ...) {
   pct <- round(x$credible_mass * 100)
   cat("Bayesian comparison of diagnosticity ratios (DR_A - DR_B)\n")
-  cat(sprintf("  DR_A posterior mean: %.3f\n", x$res_A$posterior_mean))
-  cat(sprintf("  DR_B posterior mean: %.3f\n", x$res_B$posterior_mean))
-  cat(sprintf("  Delta posterior mean:   %.3f\n", x$posterior_mean))
+  cat(.format_posterior_mean("  DR_A posterior mean: ", x$res_A$posterior_mean))
+  cat(.format_posterior_mean("  DR_B posterior mean: ", x$res_B$posterior_mean))
+  cat(.format_posterior_mean("  Delta posterior mean:   ", x$posterior_mean))
   cat(sprintf("  Delta posterior median: %.3f\n", x$posterior_median))
   cat(sprintf("  %d%% CI on delta: [%.3f, %.3f]\n",
               pct, x$credible_interval["lower"], x$credible_interval["upper"]))

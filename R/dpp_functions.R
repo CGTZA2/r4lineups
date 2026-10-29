@@ -1,8 +1,10 @@
 #' Compute Deviation from Perfect Performance (DPP)
 #'
-#' Computes DPP metric following Smith et al. (2018). DPP measures how much
-#' an observed ROC curve deviates from perfect performance, providing a
-#' single-number summary that is less affected by ROC truncation than pAUC.
+#' Computes the average deviation from perfect performance of Smith, Lampinen,
+#' Wells, Smalarz and Mackovichova (2019). DPP is calculated at every operating
+#' point (cumulative confidence threshold) of the ROC and averaged over them,
+#' so that, unlike pAUC, it is not tied to a region of false-ID rates that two
+#' differently truncated ROC curves may not share.
 #'
 #' @param data A dataframe with the following columns:
 #'   \itemize{
@@ -10,217 +12,316 @@
 #'     \item identification: Character. "suspect", "filler", or "reject"
 #'     \item confidence: Numeric. Confidence rating
 #'   }
+#'   Alternatively, with \code{use_roc_obj = TRUE}, the output of
+#'   \code{\link{make_rocdata}}.
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
 #' @param use_roc_obj Logical. If FALSE (default), computes ROC from data.
-#'   If TRUE, data should be the output from make_rocdata().
+#'   If TRUE, data should be the output from make_rocdata(), whose first
+#'   \code{roc_data} row is the origin and is not an operating point.
+#' @param alpha,beta Optional weights for Smith et al.'s Equation 3.
+#'   \code{alpha} is the cost of an innocent-suspect identification relative to
+#'   a missed culprit identification, and \code{beta} is the base rate of
+#'   culprit presence. Supply both or neither. When both are \code{NULL}
+#'   (default), the unweighted Equation 2 is used.
+#' @inheritParams make_rocdata
 #'
 #' @return A list containing:
 #'   \itemize{
-#'     \item dpp: Deviation from Perfect Performance (0 = perfect, 1 = worst)
-#'     \item auc_observed: Area under observed ROC curve
-#'     \item auc_perfect: Area under perfect ROC curve (for same FA range)
-#'     \item auc_gap: Raw area gap, \eqn{AUC_{perfect} - AUC_{observed}}
-#'     \item roc_data: ROC curve data
-#'     \item max_fa: Maximum false alarm rate in observed data
+#'     \item dpp: Average DPP over the operating points
+#'     \item dpp_by_point: Tibble with confidence threshold, culprit
+#'       (correct-ID) rate, innocent-suspect ID rate and DPP at each operating
+#'       point
+#'     \item best_point: The operating point with the lowest DPP, which is the
+#'       point of maximum utility
+#'     \item roc_data: ROC curve data from \code{make_rocdata()}
+#'     \item alpha, beta: The weights used (\code{NULL} for Equation 2)
+#'     \item n_target_present, n_target_absent: Sample sizes
+#'     \item innocent_suspect_method: How innocent-suspect IDs were obtained
+#'     \item thresholds: The confidence criteria of the operating points
 #'   }
 #'
 #' @details
-#' DPP (Deviation from Perfect Performance) compares the observed ROC curve
-#' to a perfect ROC curve within the same false alarm rate range:
+#' At an operating point \eqn{c}, Smith et al.'s (2019) Equation 2 is
 #'
-#' \deqn{DPP = 1 - \frac{AUC_{observed}}{AUC_{perfect}}}
+#' \deqn{DPP(c) = 1 - Culprit(c) + Innocent(c)}
 #'
-#' Where:
-#' \itemize{
-#'   \item \strong{Perfect ROC}: Goes from (0,0) → (0,1) → (max_FA,1)
-#'     (immediate jump to 100% hit rate, then horizontal)
-#'   \item \strong{Observed ROC}: Actual performance from data
-#'   \item \strong{AUC}: Area under curve computed via trapezoidal rule
-#' }
+#' where \eqn{Culprit(c)} is the culprit (correct) identification rate and
+#' \eqn{Innocent(c)} the innocent-suspect identification rate at that point.
+#' DPP(c) ranges from 0 (perfect performance: every culprit identified, no
+#' innocent suspect identified) to 2 (the reverse). Any point on the chance
+#' diagonal has DPP(c) = 1. When the base rate of culprit presence is .5 and
+#' the costs of the two errors are equal, DPP(c) = 1 - U(c), where
+#' \eqn{U(c) = Culprit(c) - Innocent(c)} is the expected utility.
 #'
-#' **Interpretation**:
-#' \itemize{
-#'   \item DPP = 0: Perfect performance (all correct IDs at 0% false alarms)
-#'   \item DPP → 1: Very poor performance (near chance)
-#'   \item Lower DPP = better performance
-#' }
+#' The reported \code{dpp} is the mean of DPP(c) over the operating points,
+#' one for each confidence criterion of the ROC, from the highest to the
+#' lowest (which includes every identification). Lower values are better. The
+#' criteria are the confidence levels of the responses that enter the ROC
+#' (see \code{\link{make_rocdata}}), so the confidence given to rejections
+#' does not add points or change the average.
 #'
-#' **Advantages over pAUC** (Smith et al. 2018):
-#' \itemize{
-#'   \item Less affected by ROC truncation (different confidence distributions)
-#'   \item Normalized relative to best achievable performance
-#'   \item More consistent rankings across datasets
-#'   \item Accounts for achievable performance given observed FA range
-#' }
+#' Equation 3 weights the two errors:
 #'
-#' The perfect ROC is constrained to the same FA range as the observed data,
-#' making DPP a fair measure even when procedures produce different confidence
-#' distributions (and thus different ROC truncation points).
+#' \deqn{DPP_{\alpha\beta}(c) = \beta[1 - Culprit(c)] + \alpha(1 - \beta)Innocent(c)}
+#'
+#' With \code{alpha = 1} and \code{beta = 0.5} this is half of Equation 2.
+#' Weighted values no longer range from 0 to 2.
 #'
 #' @references
-#' Smith, A. M., Wilford, M. M., Quigley-McBride, A., & Wells, G. L. (2019).
-#' Mistaken eyewitness identification rates increase when either witnessing or
-#' testing conditions get worse. \emph{Law and Human Behavior, 43}(4), 358-368.
-#'
-#' Smith, A. M., et al. (2018). Deviation from perfect performance measures
-#' the diagnostic utility of eyewitness lineups but partial area under the
-#' ROC does not. \emph{Journal of Applied Research in Memory and Cognition}.
+#' Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova,
+#' S. (2019). Deviation from perfect performance measures the diagnostic
+#' utility of eyewitness lineups but partial area under the ROC curve does
+#' not. \emph{Journal of Applied Research in Memory and Cognition, 8}(1),
+#' 50-59. \doi{10.1016/j.jarmac.2018.09.003}
 #'
 #' @examples
 #' data(lineup_example)
 #' dpp <- make_dpp(lineup_example)
 #' dpp$dpp
+#' dpp$dpp_by_point
+#'
+#' # Innocent-suspect IDs twice as costly as misses, culprit base rate .5
+#' make_dpp(lineup_example, alpha = 2, beta = 0.5)$dpp
 #'
 #' @export
 #' @import tibble
-make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE) {
+make_dpp <- function(data, lineup_size = 6, use_roc_obj = FALSE,
+                     alpha = NULL, beta = NULL, innocent_suspect = "auto",
+                     thresholds = NULL) {
+  weights <- .dpp_weights(alpha, beta)
 
-  # If data is already ROC object, use it; otherwise compute ROC
   if (use_roc_obj) {
     roc_obj <- data
-    roc_data <- roc_obj$roc_data
+    if (!is.list(roc_obj) || is.null(roc_obj$roc_data) ||
+        !all(c("confidence", "correct_id_rate", "false_id_rate") %in%
+             names(roc_obj$roc_data))) {
+      stop("With use_roc_obj = TRUE, data must be output from make_rocdata().",
+           call. = FALSE)
+    }
   } else {
-    # Validate required columns
     required_cols <- c("target_present", "identification", "confidence")
     missing_cols <- setdiff(required_cols, names(data))
     if (length(missing_cols) > 0) {
       stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
     }
-
-    # Compute ROC data
-    roc_obj <- make_rocdata(data, lineup_size = lineup_size)
-    roc_data <- roc_obj$roc_data
+    roc_obj <- make_rocdata(data, lineup_size = lineup_size,
+                            innocent_suspect = innocent_suspect,
+                            thresholds = thresholds)
   }
+  roc_data <- roc_obj$roc_data
 
-  # Sort ROC points by false alarm rate
-  roc_sorted <- roc_data[order(roc_data$false_id_rate), ]
-
-  # Get maximum false alarm rate (defines truncation point)
-  max_fa <- max(roc_sorted$false_id_rate)
-
-  # Compute area under observed ROC curve using trapezoidal rule
-  auc_observed <- 0
-  for (i in 2:nrow(roc_sorted)) {
-    width <- roc_sorted$false_id_rate[i] - roc_sorted$false_id_rate[i-1]
-    height <- (roc_sorted$correct_id_rate[i] + roc_sorted$correct_id_rate[i-1]) / 2
-    auc_observed <- auc_observed + (width * height)
+  # Row 1 of make_rocdata() output is the (0, 0) origin, which is not an
+  # operating point (no confidence level produces it).
+  points <- roc_data[-1, , drop = FALSE]
+  if (nrow(points) == 0) {
+    stop("The ROC has no operating points.", call. = FALSE)
   }
-
-  # Compute area under perfect ROC curve
-  # Perfect curve: (0,0) → (0,1) → (max_fa, 1)
-  # This is a rectangle with width = max_fa and height = 1
-  auc_perfect <- max_fa * 1.0
-
-  # Compute raw area gap and normalized DPP
-  auc_gap <- auc_perfect - auc_observed
-  if (auc_perfect == 0) {
-    # Special case: If max_fa = 0, check if we have perfect performance
-    # If hit rate is 1.0 at FA=0, then DPP = 0 (perfect)
-    # Otherwise, can't compute DPP meaningfully
-    max_hit <- max(roc_sorted$correct_id_rate)
-    if (max_hit >= 0.999) {  # Allow small numerical error
-      dpp <- 0  # Perfect performance
-    } else {
-      dpp <- NA  # Cannot compute DPP without any false alarms
-    }
-  } else {
-    dpp <- 1 - (auc_observed / auc_perfect)
-  }
-
-  # Create perfect ROC data for plotting
-  perfect_roc <- tibble::tibble(
-    false_id_rate = c(0, 0, max_fa),
-    correct_id_rate = c(0, 1, 1)
+  dpp_by_point <- tibble::tibble(
+    confidence = points$confidence,
+    culprit_rate = points$correct_id_rate,
+    innocent_rate = points$false_id_rate,
+    dpp = .dpp_at(points$correct_id_rate, points$false_id_rate, weights)
   )
 
   list(
-    dpp = dpp,
-    auc_observed = auc_observed,
-    auc_perfect = auc_perfect,
-    auc_gap = auc_gap,
-    roc_data = roc_sorted,
-    perfect_roc = perfect_roc,
-    max_fa = max_fa,
-    n_target_present = if (use_roc_obj) roc_obj$n_target_present else nrow(data[data$target_present == TRUE, ]),
-    n_target_absent = if (use_roc_obj) roc_obj$n_target_absent else nrow(data[data$target_present == FALSE, ])
+    dpp = mean(dpp_by_point$dpp),
+    dpp_by_point = dpp_by_point,
+    best_point = dpp_by_point[which.min(dpp_by_point$dpp), ],
+    roc_data = roc_data,
+    alpha = alpha,
+    beta = beta,
+    n_target_present = roc_obj$n_target_present,
+    n_target_absent = roc_obj$n_target_absent,
+    innocent_suspect_method = roc_obj$innocent_suspect_method,
+    thresholds = roc_obj$thresholds
   )
+}
+
+# Validate the Equation 3 weights; NULL means the unweighted Equation 2.
+.dpp_weights <- function(alpha, beta) {
+  if (is.null(alpha) && is.null(beta)) return(NULL)
+  if (is.null(alpha) || is.null(beta)) {
+    stop("Supply both alpha and beta, or neither.", call. = FALSE)
+  }
+  if (!is.numeric(alpha) || length(alpha) != 1L || !is.finite(alpha) ||
+      alpha < 0) {
+    stop("alpha must be a single non-negative number.", call. = FALSE)
+  }
+  if (!is.numeric(beta) || length(beta) != 1L || !is.finite(beta) ||
+      beta < 0 || beta > 1) {
+    stop("beta must be a single number between 0 and 1.", call. = FALSE)
+  }
+  c(alpha = alpha, beta = beta)
+}
+
+# DPP at each operating point (Smith et al., 2019, Equations 2 and 3)
+.dpp_at <- function(culprit, innocent, weights) {
+  if (is.null(weights)) {
+    1 - culprit + innocent
+  } else {
+    weights[["beta"]] * (1 - culprit) +
+      weights[["alpha"]] * (1 - weights[["beta"]]) * innocent
+  }
 }
 
 
 #' Compare DPP Between Two Procedures
 #'
-#' Computes and compares DPP for two lineup procedures.
+#' Computes average DPP for two lineup procedures and tests their difference
+#' with a nonparametric bootstrap, as Smith et al. (2019) did.
 #'
 #' @param data_proc_a Dataframe for procedure A (standard lineup format)
 #' @param data_proc_b Dataframe for procedure B (standard lineup format)
 #' @param lineup_size Integer. Lineup size (default = 6)
+#' @param alpha,beta Optional Equation 3 weights; see \code{\link{make_dpp}}.
+#' @param n_bootstrap Integer. Number of bootstrap samples (default = 1000).
+#'   Use 0 to skip the bootstrap.
+#' @param conf_level Numeric. Confidence level for the interval (default = 0.95)
+#' @param seed Integer. Random seed for reproducibility (default = NULL)
+#' @inheritParams make_rocdata
 #'
-#' @return A list containing:
+#' @return An object of class \code{"lineup_dpp_comparison"}, a list containing:
 #'   \itemize{
-#'     \item dpp_a: DPP for procedure A
-#'     \item dpp_b: DPP for procedure B
+#'     \item dpp_a: Average DPP for procedure A
+#'     \item dpp_b: Average DPP for procedure B
 #'     \item dpp_difference: DPP_A - DPP_B (negative = A is better)
-#'     \item dpp_obj_a: Full DPP object for procedure A
-#'     \item dpp_obj_b: Full DPP object for procedure B
+#'     \item se_difference: Bootstrap standard error of the difference
+#'     \item ci_difference: Percentile bootstrap interval for the difference
+#'     \item boot_differences: Bootstrap distribution of the difference
+#'     \item dpp_obj_a, dpp_obj_b: Full \code{make_dpp()} objects
+#'     \item n_bootstrap, conf_level: Settings used
 #'   }
 #'
 #' @details
-#' Compares two procedures using DPP. Since lower DPP indicates better
-#' performance, a negative difference (DPP_A - DPP_B < 0) means procedure A
-#' is better.
+#' Lower DPP indicates better performance, so a negative difference means
+#' procedure A is better. Each bootstrap replicate resamples target-present
+#' and target-absent trials separately within each procedure, so every
+#' replicate keeps the original design, and the two procedures are treated as
+#' independent samples. The innocent-suspect design and the confidence
+#' criteria are determined once on each full dataset and reused in every
+#' replicate, so every replicate averages over the same criteria.
 #'
-#' DPP comparison is advantageous when:
-#' \itemize{
-#'   \item ROC curves have different truncation points
-#'   \item Confidence distributions differ between procedures
-#'   \item pAUC comparisons might be misleading
-#' }
+#' @references
+#' Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova,
+#' S. (2019). Deviation from perfect performance measures the diagnostic
+#' utility of eyewitness lineups but partial area under the ROC curve does
+#' not. \emph{Journal of Applied Research in Memory and Cognition, 8}(1),
+#' 50-59. \doi{10.1016/j.jarmac.2018.09.003}
 #'
 #' @examples
 #' data(lineup_example)
 #' # Compare two halves of the example data (odd vs even rows)
 #' odd <- seq(1, nrow(lineup_example), by = 2)
-#' cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
-#' cmp$dpp_difference
+#' cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ],
+#'                    n_bootstrap = 200, seed = 1)
+#' cmp
 #'
 #' @export
-compare_dpp <- function(data_proc_a, data_proc_b, lineup_size = 6) {
+compare_dpp <- function(data_proc_a, data_proc_b, lineup_size = 6,
+                        alpha = NULL, beta = NULL, n_bootstrap = 1000,
+                        conf_level = 0.95, seed = NULL,
+                        innocent_suspect = "auto") {
+  if (!is.numeric(n_bootstrap) || length(n_bootstrap) != 1L ||
+      n_bootstrap < 0 || n_bootstrap != as.integer(n_bootstrap) ||
+      n_bootstrap == 1) {
+    stop("n_bootstrap must be 0 or an integer of at least 2.", call. = FALSE)
+  }
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      !is.finite(conf_level) || conf_level <= 0 || conf_level >= 1) {
+    stop("conf_level must be strictly between 0 and 1.", call. = FALSE)
+  }
 
-  dpp_a <- make_dpp(data_proc_a, lineup_size = lineup_size)
-  dpp_b <- make_dpp(data_proc_b, lineup_size = lineup_size)
+  dpp_a <- make_dpp(data_proc_a, lineup_size = lineup_size, alpha = alpha,
+                    beta = beta, innocent_suspect = innocent_suspect)
+  dpp_b <- make_dpp(data_proc_b, lineup_size = lineup_size, alpha = alpha,
+                    beta = beta, innocent_suspect = innocent_suspect)
+  difference <- dpp_a$dpp - dpp_b$dpp
 
-  list(
-    dpp_a = dpp_a$dpp,
-    dpp_b = dpp_b$dpp,
-    dpp_difference = dpp_a$dpp - dpp_b$dpp,
-    dpp_obj_a = dpp_a,
-    dpp_obj_b = dpp_b
+  boot_diff <- numeric()
+  se <- NA_real_
+  ci <- c(lower = NA_real_, upper = NA_real_)
+  if (n_bootstrap > 0) {
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
+    resample <- function(dat) {
+      tp <- which(as.logical(dat$target_present))
+      ta <- which(!as.logical(dat$target_present))
+      dat[c(tp[sample.int(length(tp), length(tp), replace = TRUE)],
+            ta[sample.int(length(ta), length(ta), replace = TRUE)]), ,
+          drop = FALSE]
+    }
+    boot_dpp <- function(dat, fit) {
+      make_dpp(resample(dat), lineup_size = lineup_size, alpha = alpha,
+               beta = beta, innocent_suspect = fit$innocent_suspect_method,
+               thresholds = fit$thresholds)$dpp
+    }
+    boot_diff <- vapply(seq_len(n_bootstrap), function(b) {
+      boot_dpp(data_proc_a, dpp_a) - boot_dpp(data_proc_b, dpp_b)
+    }, numeric(1))
+    se <- stats::sd(boot_diff)
+    tail <- (1 - conf_level) / 2
+    ci <- stats::quantile(boot_diff, c(tail, 1 - tail), names = FALSE)
+    names(ci) <- c("lower", "upper")
+  }
+
+  structure(
+    list(
+      dpp_a = dpp_a$dpp,
+      dpp_b = dpp_b$dpp,
+      dpp_difference = difference,
+      se_difference = se,
+      ci_difference = ci,
+      boot_differences = boot_diff,
+      dpp_obj_a = dpp_a,
+      dpp_obj_b = dpp_b,
+      n_bootstrap = n_bootstrap,
+      conf_level = conf_level
+    ),
+    class = c("lineup_dpp_comparison", "list")
   )
 }
 
 
-#' Plot DPP with Observed and Perfect ROC Curves
+#' Print Method for lineup_dpp_comparison Objects
+#' @param x A lineup_dpp_comparison object from \code{compare_dpp()}
+#' @param ... Additional arguments (ignored)
+#' @export
+print.lineup_dpp_comparison <- function(x, ...) {
+  cat("\n=== DPP Comparison ===\n\n")
+  cat("Average DPP, procedure A: ", sprintf("%.4f", x$dpp_a), "\n")
+  cat("Average DPP, procedure B: ", sprintf("%.4f", x$dpp_b), "\n")
+  cat("Difference (A - B):       ", sprintf("%.4f", x$dpp_difference),
+      " (negative = A better)\n")
+  if (x$n_bootstrap > 0) {
+    cat(sprintf("Bootstrap SE:              %.4f\n", x$se_difference))
+    cat(sprintf("%g%% percentile interval:  [%.4f, %.4f]  (%d resamples)\n",
+                100 * x$conf_level, x$ci_difference[["lower"]],
+                x$ci_difference[["upper"]], x$n_bootstrap))
+  }
+  invisible(x)
+}
+
+
+#' Plot DPP Across Operating Points
 #'
-#' Creates a plot showing the observed ROC curve and perfect ROC curve,
-#' with shaded area representing deviation from perfect performance.
+#' Plots DPP at each operating point of the ROC against the confidence
+#' threshold that defines it, with the average marked.
 #'
-#' @param dpp_obj List output from make_dpp()
-#' @param show_perfect Logical. Whether to show perfect ROC curve (default = TRUE)
-#' @param show_dpp Logical. Whether to display DPP value on plot (default = TRUE)
-#' @param show_shading Logical. Whether to shade area between curves (default = TRUE)
+#' @param dpp_obj List output from make_dpp() or compute_dpp()
+#' @param show_mean Logical. Draw the average DPP as a dashed line
+#'   (default = TRUE)
+#' @param show_chance Logical. Draw the chance reference at DPP = 1, which
+#'   applies to the unweighted measure only (default = TRUE)
+#' @param show_dpp Logical. Display the average DPP value on the plot
+#'   (default = TRUE)
 #'
 #' @return A ggplot2 object
 #'
 #' @details
-#' The plot shows:
-#' \itemize{
-#'   \item \strong{Observed ROC} (blue): Actual performance
-#'   \item \strong{Perfect ROC} (red dashed): Best achievable performance
-#'   \item \strong{Shaded area} (red): Deviation from perfect (area = DPP × AUC_perfect)
-#'   \item \strong{DPP value}: Proportion of perfect area that is lost
-#' }
-#'
-#' A smaller shaded area (lower DPP) indicates better performance.
+#' Points are ordered from the strictest threshold (highest confidence, left)
+#' to the most lenient (right), as in Smith et al.'s (2019) Table 4. The
+#' operating point with the lowest DPP, the point of maximum utility, is
+#' highlighted.
 #'
 #' @examples
 #' data(lineup_example)
@@ -229,79 +330,48 @@ compare_dpp <- function(data_proc_a, data_proc_b, lineup_size = 6) {
 #'
 #' @export
 #' @import ggplot2
-plot_dpp <- function(dpp_obj, show_perfect = TRUE, show_dpp = TRUE,
-                    show_shading = TRUE) {
+plot_dpp <- function(dpp_obj, show_mean = TRUE, show_chance = TRUE,
+                     show_dpp = TRUE) {
+  pts <- dpp_obj$dpp_by_point
+  best <- dpp_obj$best_point
+  weighted <- !is.null(dpp_obj$alpha)
 
-  roc_data <- dpp_obj$roc_data
-  perfect_data <- dpp_obj$perfect_roc
-
-  # Create base plot
-  p <- ggplot(roc_data, aes(x = false_id_rate, y = correct_id_rate)) +
+  p <- ggplot(pts, aes(x = confidence, y = dpp)) +
     geom_line(linewidth = 1, color = "steelblue") +
-    geom_point(size = 2, color = "steelblue") +
+    geom_point(size = 2.5, color = "steelblue") +
+    geom_point(data = best, size = 4, shape = 21, fill = "white",
+               color = "firebrick", stroke = 1.2) +
+    scale_x_reverse() +
     theme_bw(base_size = 14) +
     labs(
-      x = "False ID Rate (Innocent Suspect)",
-      y = "Correct ID Rate (Guilty Suspect)",
-      title = "ROC Curve with Deviation from Perfect Performance (DPP)",
-      caption = "Lower DPP = better performance"
-    ) +
-    coord_cartesian(xlim = c(0, max(roc_data$false_id_rate) * 1.1),
-                    ylim = c(0, 1))
-
-  # Add perfect ROC curve
-  if (show_perfect) {
-    p <- p + geom_line(data = perfect_data,
-                      aes(x = false_id_rate, y = correct_id_rate),
-                      linewidth = 1, color = "red", linetype = "dashed")
-  }
-
-  # Shade area between observed and perfect
-  if (show_shading) {
-    # Create polygon for shaded area
-    # Perfect curve: (0,0) → (0,1) → (max_fa,1)
-    # Observed curve: follows roc_data
-    # Shade the area between them
-
-    # Start with perfect curve points (going right)
-    shade_data <- rbind(
-      data.frame(false_id_rate = 0, correct_id_rate = 0),
-      data.frame(false_id_rate = 0, correct_id_rate = 1),
-      data.frame(false_id_rate = dpp_obj$max_fa, correct_id_rate = 1)
+      x = "Confidence threshold (identifications at or above)",
+      y = if (weighted) "Weighted DPP(c)" else "DPP(c)",
+      title = "Deviation from Perfect Performance by Operating Point",
+      caption = "0 = perfect; lower is better. Circled: point of maximum utility."
     )
 
-    # Add observed curve points (going left, in reverse)
-    obs_reversed <- roc_data[nrow(roc_data):1, ]
-    shade_data <- rbind(shade_data, obs_reversed[, c("false_id_rate", "correct_id_rate")])
-
-    p <- p + geom_polygon(data = shade_data,
-                         aes(x = false_id_rate, y = correct_id_rate),
-                         fill = "red", alpha = 0.2)
+  if (show_chance && !weighted) {
+    p <- p + geom_hline(yintercept = 1, linetype = "dotted", color = "gray40")
   }
-
-  # Add DPP annotation
+  if (show_mean) {
+    p <- p + geom_hline(yintercept = dpp_obj$dpp, linetype = "dashed",
+                        color = "steelblue")
+  }
   if (show_dpp) {
-    p <- p + annotate(
-      "text",
-      x = dpp_obj$max_fa * 0.6,
-      y = 0.2,
-      label = sprintf("DPP = %.3f\nAUC_obs = %.3f\nAUC_perf = %.3f",
-                     dpp_obj$dpp, dpp_obj$auc_observed, dpp_obj$auc_perfect),
-      size = 4.5,
-      hjust = 0
-    )
+    p <- p + labs(subtitle = sprintf("Average DPP = %.3f", dpp_obj$dpp))
   }
-
+  if (!weighted) {
+    p <- p + coord_cartesian(ylim = c(0, max(1.05, max(pts$dpp))))
+  }
   p
 }
 
 
 #' Plot DPP Comparison Between Two Procedures
 #'
-#' Creates side-by-side or overlaid plots comparing DPP for two procedures.
+#' Overlays DPP at each operating point for two procedures.
 #'
 #' @param compare_obj List output from compare_dpp()
-#' @param layout Character. "side-by-side" or "overlay" (default = "side-by-side")
 #' @param proc_a_label Character. Label for procedure A (default = "Procedure A")
 #' @param proc_b_label Character. Label for procedure B (default = "Procedure B")
 #'
@@ -310,82 +380,58 @@ plot_dpp <- function(dpp_obj, show_perfect = TRUE, show_dpp = TRUE,
 #' @examples
 #' data(lineup_example)
 #' odd <- seq(1, nrow(lineup_example), by = 2)
-#' cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
+#' cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ],
+#'                    n_bootstrap = 0)
 #' plot_dpp_comparison(cmp)
 #'
 #' @export
 #' @import ggplot2
 plot_dpp_comparison <- function(compare_obj,
-                                layout = c("side-by-side", "overlay"),
                                 proc_a_label = "Procedure A",
                                 proc_b_label = "Procedure B") {
+  a <- compare_obj$dpp_obj_a$dpp_by_point
+  b <- compare_obj$dpp_obj_b$dpp_by_point
+  a$procedure <- proc_a_label
+  b$procedure <- proc_b_label
+  pts <- rbind(a, b)
+  pts$procedure <- factor(pts$procedure, levels = c(proc_a_label, proc_b_label))
+  means <- data.frame(
+    procedure = factor(c(proc_a_label, proc_b_label),
+                       levels = c(proc_a_label, proc_b_label)),
+    dpp = c(compare_obj$dpp_a, compare_obj$dpp_b)
+  )
+  weighted <- !is.null(compare_obj$dpp_obj_a$alpha)
 
-  layout <- match.arg(layout)
-
-  dpp_a <- compare_obj$dpp_obj_a
-  dpp_b <- compare_obj$dpp_obj_b
-
-  if (layout == "side-by-side") {
-    # Create two separate plots
-    p1 <- plot_dpp(dpp_a, show_dpp = TRUE) +
-      labs(title = proc_a_label,
-           subtitle = sprintf("DPP = %.3f", dpp_a$dpp))
-
-    p2 <- plot_dpp(dpp_b, show_dpp = TRUE) +
-      labs(title = proc_b_label,
-           subtitle = sprintf("DPP = %.3f", dpp_b$dpp))
-
-    # Combine using patchwork if available, otherwise just return first plot
-    if (requireNamespace("patchwork", quietly = TRUE)) {
-      p <- p1 + p2 + patchwork::plot_annotation(
-        title = "DPP Comparison",
-        subtitle = sprintf("Difference (A - B) = %.3f  (negative = A better)",
-                          compare_obj$dpp_difference)
-      )
-    } else {
-      warning("Install 'patchwork' package for side-by-side plots. Returning first plot only.")
-      p <- p1
-    }
-
-  } else {  # overlay
-    # Combine ROC data
-    roc_a <- dpp_a$roc_data
-    roc_b <- dpp_b$roc_data
-    roc_a$procedure <- proc_a_label
-    roc_b$procedure <- proc_b_label
-    roc_combined <- rbind(roc_a, roc_b)
-
-    # Combine perfect curves
-    perfect_a <- dpp_a$perfect_roc
-    perfect_b <- dpp_b$perfect_roc
-    perfect_a$procedure <- proc_a_label
-    perfect_b$procedure <- proc_b_label
-    perfect_combined <- rbind(perfect_a, perfect_b)
-
-    # Create overlay plot
-    p <- ggplot(roc_combined, aes(x = false_id_rate, y = correct_id_rate,
-                                   color = procedure, group = procedure)) +
-      geom_line(linewidth = 1) +
-      geom_point(size = 2) +
-      geom_line(data = perfect_combined,
-               aes(x = false_id_rate, y = correct_id_rate, color = procedure),
-               linetype = "dashed", linewidth = 0.8) +
-      theme_bw(base_size = 14) +
-      labs(
-        x = "False ID Rate",
-        y = "Correct ID Rate",
-        title = "DPP Comparison",
-        subtitle = sprintf("%s: DPP=%.3f  |  %s: DPP=%.3f  |  Diff=%.3f",
-                          proc_a_label, dpp_a$dpp,
-                          proc_b_label, dpp_b$dpp,
-                          compare_obj$dpp_difference),
-        color = "Procedure",
-        caption = "Solid = observed ROC; Dashed = perfect ROC; Lower DPP = better"
-      ) +
-      coord_cartesian(xlim = c(0, max(roc_combined$false_id_rate) * 1.1),
-                     ylim = c(0, 1))
+  subtitle <- sprintf("%s: %.3f  |  %s: %.3f  |  Difference = %.3f",
+                      proc_a_label, compare_obj$dpp_a,
+                      proc_b_label, compare_obj$dpp_b,
+                      compare_obj$dpp_difference)
+  if (isTRUE(compare_obj$n_bootstrap > 0)) {
+    subtitle <- sprintf("%s [%.3f, %.3f]", subtitle,
+                        compare_obj$ci_difference[["lower"]],
+                        compare_obj$ci_difference[["upper"]])
   }
 
+  p <- ggplot(pts, aes(x = confidence, y = dpp, color = procedure,
+                       group = procedure)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 2.5) +
+    geom_hline(data = means, aes(yintercept = dpp, color = procedure),
+               linetype = "dashed") +
+    scale_x_reverse() +
+    theme_bw(base_size = 14) +
+    labs(
+      x = "Confidence threshold (identifications at or above)",
+      y = if (weighted) "Weighted DPP(c)" else "DPP(c)",
+      title = "DPP Comparison",
+      subtitle = subtitle,
+      color = "Procedure",
+      caption = "Dashed lines: average DPP. Lower is better."
+    )
+  if (!weighted) {
+    p <- p + geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
+      coord_cartesian(ylim = c(0, max(1.05, max(pts$dpp))))
+  }
   p
 }
 
@@ -397,23 +443,25 @@ plot_dpp_comparison <- function(compare_obj,
 #' @param data Dataframe with standard lineup format
 #' @param lineup_size Integer. Lineup size (default = 6)
 #' @param show_plot Logical. Whether to display plot (default = TRUE)
+#' @param alpha,beta Optional Equation 3 weights; see \code{\link{make_dpp}}.
 #' @param ... Additional arguments passed to plot_dpp()
+#' @inheritParams make_rocdata
 #'
-#' @return A list containing the DPP result, raw AUC gap, AUC values, ROC data,
-#'   perfect-performance ROC data, maximum false-alarm rate, and plot.
+#' @return An object of class \code{"lineup_dpp"}: the \code{make_dpp()}
+#'   result plus the plot.
 #'
 #' @examples
 #' data(lineup_example)
-#' dpp_result <- compute_dpp(lineup_example)
+#' dpp_result <- compute_dpp(lineup_example, show_plot = FALSE)
 #' print(dpp_result)
 #'
 #' @export
-compute_dpp <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
+compute_dpp <- function(data, lineup_size = 6, show_plot = TRUE,
+                        alpha = NULL, beta = NULL, innocent_suspect = "auto",
+                        ...) {
+  dpp_obj <- make_dpp(data, lineup_size = lineup_size, alpha = alpha,
+                      beta = beta, innocent_suspect = innocent_suspect)
 
-  # Compute DPP
-  dpp_obj <- make_dpp(data, lineup_size = lineup_size)
-
-  # Create plot
   # The plot is always built, so that it is available as $plot and to the
   # plot() method. show_plot controls only whether it is displayed now:
   # suppressing display should not destroy the object.
@@ -422,17 +470,7 @@ compute_dpp <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
     print(dpp_plot)
   }
 
-  result <- list(
-    plot = dpp_plot,
-    dpp = dpp_obj$dpp,
-    auc_observed = dpp_obj$auc_observed,
-    auc_perfect = dpp_obj$auc_perfect,
-    auc_gap = dpp_obj$auc_gap,
-    roc_data = dpp_obj$roc_data,
-    perfect_roc = dpp_obj$perfect_roc,
-    max_fa = dpp_obj$max_fa
-  )
-
+  result <- c(list(plot = dpp_plot), dpp_obj)
   class(result) <- c("lineup_dpp", "list")
   result
 }
@@ -445,16 +483,18 @@ compute_dpp <- function(data, lineup_size = 6, show_plot = TRUE, ...) {
 print.lineup_dpp <- function(x, ...) {
   cat("\n=== Deviation from Perfect Performance (DPP) ===\n\n")
 
-  cat("DPP:                ", sprintf("%.4f", x$dpp), "\n")
-  cat("  (0 = perfect performance, 1 = worst performance)\n\n")
+  cat("Average DPP:", sprintf("%.4f", x$dpp), "\n")
+  if (is.null(x$alpha)) {
+    cat("  (0 = perfect, 1 = chance, 2 = worst; Smith et al., 2019, Eq. 2)\n\n")
+  } else {
+    cat(sprintf("  (weighted, alpha = %g, beta = %g; Smith et al., 2019, Eq. 3)\n\n",
+                x$alpha, x$beta))
+  }
+  cat("Point of maximum utility: confidence >=", format(x$best_point$confidence),
+      sprintf("(DPP = %.4f)\n\n", x$best_point$dpp))
 
-  cat("Area under observed ROC:  ", sprintf("%.4f", x$auc_observed), "\n")
-  cat("Area under perfect ROC:   ", sprintf("%.4f", x$auc_perfect), "\n")
-  cat("Raw AUC gap:              ", sprintf("%.4f", x$auc_gap), "\n")
-  cat("Maximum FA rate observed: ", sprintf("%.4f", x$max_fa), "\n\n")
-
-  cat("ROC Data:\n")
-  print(x$roc_data, n = Inf)
+  cat("DPP by operating point:\n")
+  print(x$dpp_by_point, n = Inf)
 
   if (!is.null(x$plot)) {
     cat("\nPlot: save this object first, then extract it with x$plot\n")

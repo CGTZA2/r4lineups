@@ -170,7 +170,9 @@ library(r4lineups)
 run_r4lineups_app()
 ```
 
-For deployment, the app lives at `inst/shiny/r4lineups_app`.
+The app also runs entirely in the browser, with no installation, at
+<https://cgtza2.github.io/r4lineups/app/>. Data loaded there stay on your
+computer. The browser version leaves out face similarity, which needs Python.
 
 ## Vignettes
 
