@@ -107,3 +107,46 @@ test_that("plot_2ht_parameters accepts a bootstrap object and uses its intervals
   # normal approximation, so the two generally differ
   expect_false(isTRUE(all.equal(p_fit$data$lower, p_boot$data$lower)))
 })
+
+test_that("BCa intervals run and use a jackknife acceleration", {
+  cnt <- c(n_tp_suspect = 60, n_tp_filler = 25, n_tp_reject = 15,
+           n_ta_suspect = 12, n_ta_filler = 38, n_ta_reject = 50)
+  fit <- fit_winter_2ht(cnt)
+  b <- suppressMessages(boot_winter_2ht(fit, nboot = 200, method = "bca", seed = 1))
+  expect_equal(dim(b$ci), c(4L, 2L))
+  expect_equal(dimnames(b$ci), list(c("dP", "dA", "b", "g"), c("Lower", "Upper")))
+  interior <- fit$parameters > 0.01 & fit$parameters < 0.99
+  expect_true(all(b$ci[interior, "Lower"] <= fit$parameters[interior]))
+  expect_true(all(b$ci[interior, "Upper"] >= fit$parameters[interior]))
+  p <- suppressMessages(boot_winter_2ht(fit, nboot = 50, seed = 1))
+  expect_equal(dimnames(p$ci), dimnames(b$ci))
+})
+
+test_that("the weighted jackknife equals brute-force leave-one-out", {
+  cnt <- c(n_tp_suspect = 14, n_tp_filler = 6, n_tp_reject = 5,
+           n_ta_suspect = 3, n_ta_filler = 9, n_ta_reject = 11)
+  fit <- fit_winter_2ht(cnt)
+  accel <- r4lineups:::.jackknife_acceleration_2ht(fit)
+  cells <- rep(names(cnt), cnt)
+  theta <- t(vapply(seq_along(cells), function(i) {
+    loo <- table(factor(cells[-i], levels = names(cnt)))
+    fit_winter_2ht(stats::setNames(as.numeric(loo), names(cnt)))$parameters
+  }, numeric(4)))
+  brute <- apply(theta, 2, function(th) {
+    d <- mean(th) - th
+    sum(d^3) / (6 * sum(d^2)^1.5)
+  })
+  expect_equal(unname(accel), unname(brute), tolerance = 1e-8)
+})
+
+test_that("BCa intervals stay finite at a boundary", {
+  # No target-absent rejections puts dA on its boundary
+  cnt <- c(n_tp_suspect = 30, n_tp_filler = 20, n_tp_reject = 10,
+           n_ta_suspect = 10, n_ta_filler = 30, n_ta_reject = 0)
+  fit <- fit_winter_2ht(cnt)
+  expect_warning(
+    b <- suppressMessages(boot_winter_2ht(fit, nboot = 100, method = "bca", seed = 2)),
+    "Jackknife variance is zero for dA"
+  )
+  expect_true(all(is.finite(b$ci)))
+})

@@ -53,6 +53,14 @@
   error rate and effective size. Only bins empty in both arms are dropped.
   `make_ppv_range()` and its plots inherit the fix.
 
+* `boot_winter_2ht(method = "bca")` failed with a `dimnames` error, because
+  the interval matrix was transposed into the wrong shape, and even before
+  that its acceleration was fixed at 0, so the "BCa" interval was only
+  bias-corrected. The acceleration is now the jackknife estimate (one refit
+  per non-empty response cell, weighted by its count), the bias correction
+  handles ties and stays finite, and both methods return a parameters x
+  (Lower, Upper) matrix.
+
 * `compare_pauc()` overstated partial AUC whenever the ROC had a vertical
   segment, that is, when a confidence level added correct IDs but no false IDs.
   Its integrator kept only the upper endpoint of each such segment, so the next

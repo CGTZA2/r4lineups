@@ -30,8 +30,16 @@
 #' Two types of confidence intervals are available:
 #' \itemize{
 #'   \item \strong{percentile}: Uses quantiles of the bootstrap distribution
-#'   \item \strong{bca}: Bias-corrected and accelerated intervals (more accurate but slower)
+#'   \item \strong{bca}: Bias-corrected and accelerated intervals (Efron,
+#'     1987). The bias correction counts bootstrap ties with the estimate as
+#'     half, and the acceleration comes from the jackknife over individual
+#'     observations, which needs at most six refits because the data are six
+#'     response counts.
 #' }
+#'
+#' @references
+#' Efron, B. (1987). Better bootstrap confidence intervals. \emph{Journal of
+#' the American Statistical Association, 82}(397), 171-185.
 #'
 #' @examples
 #' \donttest{
@@ -139,18 +147,18 @@ boot_winter_2ht <- function(x,
     boot_estimates <- boot_estimates[valid_rows, , drop = FALSE]
   }
 
-  # Compute confidence intervals
+  # Compute confidence intervals: one row per parameter, Lower and Upper
   if (method == "percentile") {
-    ci <- apply(boot_estimates, 2, function(x) {
+    ci <- t(apply(boot_estimates, 2, function(x) {
       stats::quantile(x, probs = c((1 - conf_level)/2, 1 - (1 - conf_level)/2), na.rm = TRUE)
-    })
+    }))
   } else if (method == "bca") {
-    # BCA intervals
-    ci <- .compute_bca_ci(boot_estimates, original_fit$parameters, conf_level)
+    accel <- .jackknife_acceleration_2ht(original_fit, ...)
+    ci <- .compute_bca_ci(boot_estimates, original_fit$parameters, conf_level,
+                          accel)
   }
 
-  ci <- t(ci)
-  colnames(ci) <- c("Lower", "Upper")
+  dimnames(ci) <- list(colnames(boot_estimates), c("Lower", "Upper"))
 
   # Create result object
   result <- list(
@@ -198,15 +206,68 @@ boot_winter_2ht <- function(x,
 }
 
 
+#' Jackknife Acceleration for 2-HT BCa Intervals
+#'
+#' Leaving out one observation changes one of the six response counts by one,
+#' so there are at most six distinct leave-one-out fits. Each is weighted by
+#' the number of observations in its cell (Efron, 1987).
+#'
+#' @param original_fit A winter_2ht object
+#' @param ... Additional arguments passed to fit_winter_2ht()
+#'
+#' @return Named vector of acceleration constants, one per parameter
+#' @keywords internal
+.jackknife_acceleration_2ht <- function(original_fit, ...) {
+  counts <- c(
+    n_tp_suspect = original_fit$observed_counts$tp[[1]],
+    n_tp_filler = original_fit$observed_counts$tp[[2]],
+    n_tp_reject = original_fit$observed_counts$tp[[3]],
+    n_ta_suspect = original_fit$observed_counts$ta[[1]],
+    n_ta_filler = original_fit$observed_counts$ta[[2]],
+    n_ta_reject = original_fit$observed_counts$ta[[3]]
+  )
+  cells <- which(counts > 0)
+  theta <- tryCatch(
+    t(vapply(cells, function(j) {
+      loo <- counts
+      loo[j] <- loo[j] - 1
+      fit_winter_2ht(loo, lineup_size = original_fit$lineup_size, ...)$parameters
+    }, numeric(4))),
+    error = function(e) NULL
+  )
+  params <- c("dP", "dA", "b", "g")
+  if (is.null(theta)) {
+    warning("Jackknife refits failed; BCa acceleration set to 0.", call. = FALSE)
+    return(stats::setNames(rep(0, 4), params))
+  }
+  w <- counts[cells]
+  accel <- vapply(seq_len(4), function(k) {
+    th <- theta[, k]
+    d <- sum(w * th) / sum(w) - th
+    denom <- 6 * sum(w * d^2)^1.5
+    if (!is.finite(denom) || denom <= 0) NaN else sum(w * d^3) / denom
+  }, numeric(1))
+  if (any(is.nan(accel))) {
+    warning("Jackknife variance is zero for ", paste(params[is.nan(accel)],
+            collapse = ", "), " (a boundary estimate?); BCa acceleration set ",
+            "to 0 for that parameter.", call. = FALSE)
+    accel[is.nan(accel)] <- 0
+  }
+  stats::setNames(accel, params)
+}
+
+
 #' Compute BCa Confidence Intervals
 #'
 #' @param boot_estimates Matrix of bootstrap estimates
 #' @param original_est Vector of original parameter estimates
 #' @param conf_level Confidence level
+#' @param accel Vector of acceleration constants, one per parameter
 #'
 #' @return Matrix of confidence intervals
 #' @keywords internal
-.compute_bca_ci <- function(boot_estimates, original_est, conf_level) {
+.compute_bca_ci <- function(boot_estimates, original_est, conf_level,
+                            accel = rep(0, ncol(boot_estimates))) {
 
   n_params <- ncol(boot_estimates)
   ci_matrix <- matrix(NA, nrow = n_params, ncol = 2)
@@ -214,11 +275,14 @@ boot_winter_2ht <- function(x,
   alpha <- (1 - conf_level) / 2
 
   for (i in 1:n_params) {
-    # Bias correction factor
-    z0 <- stats::qnorm(mean(boot_estimates[, i] < original_est[i], na.rm = TRUE))
-
-    # Acceleration factor (simplified - full version requires jackknife)
-    a <- 0  # Setting to 0 gives standard percentile intervals
+    # Bias correction. Ties with the estimate count half, and the proportion
+    # is kept off 0 and 1 so that z0 stays finite.
+    boot_i <- boot_estimates[!is.na(boot_estimates[, i]), i]
+    B <- length(boot_i)
+    p0 <- mean(boot_i < original_est[i]) + 0.5 * mean(boot_i == original_est[i])
+    p0 <- min(max(p0, 1 / (B + 1)), B / (B + 1))
+    z0 <- stats::qnorm(p0)
+    a <- accel[[i]]
 
     # Adjusted quantiles
     z_alpha <- stats::qnorm(alpha)
