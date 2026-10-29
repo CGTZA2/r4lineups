@@ -43,13 +43,17 @@ by CI after the second set of fixes was merged. See NEWS.md.
   release revision: GitHub Actions run `40967586729`.
 - [x] The TeX-equipped reference-manual job produces a PDF (same run).
 - [x] The official JOSS/Open Journals job produces a clean `paper.pdf`.
-- [x] The Linux/macOS/Windows pinned-pyWitness workflow passes on the 2.3.0
-  sources (run `40962145807`).
-- [x] r-universe builds 2.3.0 for Linux, macOS, Windows and WebAssembly.
+- [x] The Linux/macOS/Windows pinned-pyWitness workflow passes on commit
+  `28c8768` (run `40962145807`); the later `fit_max_sdt()` fix does not touch
+  the pyWitness bridge.
+- [x] r-universe built 2.3.0 from `1a4ed4e` for macOS, Windows, WebAssembly
+  and Linux R-devel. Its Linux R-release check failed on the `fit_max_sdt()`
+  convergence test that the release PR fixes.
 - [x] The browser app at https://cgtza2.github.io/r4lineups/app/ returns 200
   and starts in headless Chrome with every tab present.
-- [ ] After the release PR is merged, confirm that the deployed app bundles
-  r4lineups 2.3.0 and that `main` passes the check matrix.
+- [ ] After the release PR is merged, confirm that `main` passes the check
+  matrix, that r-universe's Linux R-release check passes, and that the
+  deployed app bundles r4lineups 2.3.0.
 - [ ] Submit the 29 October archive to CRAN. Do not submit any earlier
   archive.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
