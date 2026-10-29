@@ -30,6 +30,15 @@
 
 ## Bug fixes
 
+* In the app's Bias & size tab, ticking "Small-sample corrected E'" changed
+  the reported estimate but left its intervals on the plug-in estimator, so the
+  value box could show a corrected E' with a plug-in interval that did not
+  contain it. `esize_boot_dist()` gains `unbiased = FALSE`, which bootstraps
+  the corrected estimator (dropping, with a warning, resamples where it is
+  unbounded). The app now bootstraps the corrected E' when it reports it, and
+  lists the plug-in estimate with its own normal-theory and bootstrap
+  intervals on separately labelled rows.
+
 * Target-absent data with a designated innocent suspect who was never chosen
   were treated as having no designated suspect, so the false-ID rate was
   estimated from filler IDs instead of being zero. With 100 target-absent

@@ -89,6 +89,25 @@ test_that("fairness module accepts counts", {
   })
 })
 
+test_that("fairness module bootstraps the corrected E' when it reports it", {
+  vec <- nortje2012$lineup_1
+  shiny::testServer(mod("fairness_server"), {
+    session$setInputs(`lineup-type` = "vector", `lineup-values` = paste(vec, collapse = ","),
+                      `lineup-k` = 8, `lineup-target` = 3, R = 200, seed = 1, unbiased = TRUE,
+                      run = 1)
+    r <- session$returned()
+    tab <- table(factor(vec, levels = 1:8))
+    set.seed(1)
+    ref <- esize_boot_dist(vec, 8, metric = "tredoux", R = 200, unbiased = TRUE)
+    expect_equal(r$esize, esize_T(tab, unbiased = TRUE))
+    expect_equal(r$esize_boot, ref)
+    expect_equal(r$plugin, esize_T(tab))
+    ci <- stats::quantile(ref, c(0.025, 0.975))
+    expect_match(output$vb_esize_ci, format(round(ci[[1]], 2), nsmall = 2), fixed = TRUE)
+    expect_outputs_render(output, c("esize_table", "esize_dist"))
+  })
+})
+
 test_that("diagnosticity module matches diag_ratio_T and homog_diag", {
   choose_pos1 <- function(n1) c(rep(1, n1), rep(2:6, length.out = 100 - n1))
   tp <- lapply(c(60, 45, 32), choose_pos1)

@@ -103,21 +103,36 @@ plot_lineup_bias_distribution <- function(boot_values, target_pos = NULL,
 #' @param metric Either "tredoux" or "malpass".
 #' @param input_type Either "vector" or "table".
 #' @param R Number of bootstrap resamples.
+#' @param unbiased Logical. For \code{metric = "tredoux"}, bootstrap the
+#'   small-sample corrected E' of \code{\link{esize_T}(unbiased = TRUE)}
+#'   instead of the plug-in estimate. Default \code{FALSE}.
 #'
 #' @return A numeric vector of bootstrap estimates, carrying an \code{"n"}
-#'   attribute equal to the number of lineup choices resampled.
+#'   attribute equal to the number of lineup choices resampled. With
+#'   \code{unbiased = TRUE}, resamples in which every choice fell on a
+#'   different member have an unbounded corrected estimate; they are dropped,
+#'   with a warning, and their number is recorded in an \code{"n_undefined"}
+#'   attribute.
 #' @export
 #'
 #' @examples
 #' vec <- round(runif(200, 1, 6))
 #' dist <- esize_boot_dist(vec, k = 6, metric = "tredoux", R = 500)
+#' dist_corrected <- esize_boot_dist(vec, k = 6, R = 500, unbiased = TRUE)
 esize_boot_dist <- function(lineup_input,
                             k,
                             metric = c("tredoux", "malpass"),
                             input_type = c("vector", "table"),
-                            R = 1000) {
+                            R = 1000,
+                            unbiased = FALSE) {
   metric <- match.arg(metric)
   input_type <- match.arg(input_type)
+  if (!is.logical(unbiased) || length(unbiased) != 1L || is.na(unbiased)) {
+    stop("unbiased must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (unbiased && metric == "malpass") {
+    stop("unbiased applies only to metric = \"tredoux\".", call. = FALSE)
+  }
   if (length(k) != 1 || !is.finite(k) || k < 2) {
     stop("k must be a finite scalar >= 2.", call. = FALSE)
   }
@@ -128,7 +143,16 @@ esize_boot_dist <- function(lineup_input,
     stop("Need at least two selections for bootstrap.", call. = FALSE)
   }
 
-  if (metric == "tredoux") {
+  if (metric == "tredoux" && unbiased) {
+    # The corrected estimator directly, so that an unbounded resample gives NA
+    # rather than a per-resample warning and the plug-in value
+    boot_fun <- function(lineup_vec, d) {
+      counts <- as.numeric(table(factor(lineup_vec[d], levels = seq_len(k))))
+      n <- sum(counts)
+      concentration <- sum(counts * (counts - 1))
+      if (concentration > 0) n * (n - 1) / concentration else NA_real_
+    }
+  } else if (metric == "tredoux") {
     boot_fun <- function(lineup_vec, d) {
       boot_tab <- table(factor(lineup_vec[d], levels = seq_len(k)))
       esize_T(boot_tab)
@@ -141,6 +165,16 @@ esize_boot_dist <- function(lineup_input,
   }
 
   out <- as.vector(boot::boot(vec, boot_fun, R = R)$t)
+  if (unbiased) {
+    undefined <- sum(is.na(out))
+    if (undefined > 0) {
+      warning(undefined, " of ", R, " resamples had every choice on a different ",
+              "member, so the corrected estimate is unbounded; they are excluded.",
+              call. = FALSE)
+      out <- out[!is.na(out)]
+    }
+    attr(out, "n_undefined") <- undefined
+  }
   attr(out, "n") <- length(vec)
   out
 }

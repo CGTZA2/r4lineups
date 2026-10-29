@@ -93,3 +93,23 @@ testthat::test_that("esize plot falls back to fixed bins when near-continuous", 
   )$data[[1]]
   testthat::expect_equal(nrow(layer_data), 30)
 })
+
+test_that("esize_boot_dist can bootstrap the corrected E'", {
+  set.seed(3)
+  vec <- sample(1:6, 60, replace = TRUE)
+  set.seed(4)
+  corrected <- esize_boot_dist(vec, k = 6, R = 200, unbiased = TRUE)
+  set.seed(4)
+  plugin <- esize_boot_dist(vec, k = 6, R = 200)
+  expect_length(corrected, 200)
+  expect_equal(attr(corrected, "n_undefined"), 0)
+  # The correction always raises E' (n(n-1)/sum(o(o-1)) > n^2/sum(o^2))
+  expect_true(all(corrected > plugin))
+  expect_error(esize_boot_dist(vec, k = 6, metric = "malpass", unbiased = TRUE),
+               "tredoux")
+  # Two choices on different members: every resample with both is unbounded
+  set.seed(5)
+  expect_warning(few <- esize_boot_dist(c(1, 2), k = 6, R = 100, unbiased = TRUE),
+                 "unbounded")
+  expect_equal(length(few) + attr(few, "n_undefined"), 100)
+})

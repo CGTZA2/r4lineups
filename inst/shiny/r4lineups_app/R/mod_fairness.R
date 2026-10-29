@@ -67,11 +67,18 @@ fairness_server <- function(id) {
       validate(need(!is.na(L$target), "Enter the suspect position."))
       R <- as.integer(input$R)
       set.seed(input$seed)
+      unbiased <- isTRUE(input$unbiased)
       run <- capture_notes({
+        # The corrected E' and its bootstrap come first, so that the latter
+        # can be reproduced from the seed alone
+        corrected <- if (unbiased) r4lineups::esize_T(L$tab, unbiased = TRUE)
+        corrected_boot <- if (unbiased) {
+          r4lineups::esize_boot_dist(L$vec, L$k, metric = "tredoux", R = R, unbiased = TRUE)
+        }
         props <- r4lineups::allprop(L$vec, L$k)
         prop_ci <- r4lineups::lineup_boot_allprop(L$vec, L$k, R = R)
         bias_boot <- r4lineups::lineup_bias_boot_dist(L$vec, L$target, L$k, R = R)
-        esize <- r4lineups::esize_T(L$tab, unbiased = isTRUE(input$unbiased))
+        plugin <- r4lineups::esize_T(L$tab)
         esize_normal <- r4lineups::esize_T_ci_n(L$tab, 0.95)
         esize_boot <- r4lineups::esize_boot_dist(L$vec, L$k, metric = "tredoux", R = R)
         malpass <- r4lineups::esize_m(L$tab, L$k)
@@ -81,9 +88,14 @@ fairness_server <- function(id) {
                            warning("Functional size: ", conditionMessage(e), call. = FALSE)
                            NULL
                          })
-        list(props = props, prop_ci = prop_ci, bias_boot = bias_boot, esize = esize,
-             esize_normal = esize_normal, esize_boot = esize_boot, malpass = malpass,
-             malpass_boot = malpass_boot, func = func)
+        # esize and esize_boot are the estimator shown in the value box and
+        # distribution plot: the corrected one when it is requested
+        list(props = props, prop_ci = prop_ci, bias_boot = bias_boot,
+             esize = if (unbiased) corrected else plugin,
+             esize_boot = if (unbiased) corrected_boot else esize_boot,
+             plugin = plugin, plugin_boot = esize_boot, esize_normal = esize_normal,
+             unbiased = unbiased, malpass = malpass, malpass_boot = malpass_boot,
+             func = func)
       })
       c(run$value, list(notes = run$notes, L = L))
     }) |>
@@ -162,20 +174,32 @@ fairness_server <- function(id) {
 
     esize_df <- reactive({
       r <- result()
-      data.frame(
-        measure = c(if (isTRUE(input$unbiased)) "E' (Tredoux, 1998), corrected" else "E' (Tredoux, 1998)",
-                    "E' normal-theory 95% CI", "E' bootstrap 95% CI",
-                    "Effective size (Malpass, 1981; Tredoux adjustment)", "Malpass bootstrap 95% CI",
-                    "Nominal size k"),
-        value = c(fmt_num(r$esize, 3), fmt_ci(c(r$esize_normal$ci_low, r$esize_normal$ci_high)),
-                  fmt_ci(stats::quantile(r$esize_boot, c(0.025, 0.975))),
-                  fmt_num(r$malpass, 3), fmt_ci(stats::quantile(r$malpass_boot, c(0.025, 0.975))),
-                  r$L$k)
+      boot_ci <- function(x) fmt_ci(stats::quantile(x, c(0.025, 0.975)))
+      plugin_rows <- data.frame(
+        measure = c(if (r$unbiased) "E' (Tredoux, 1998), plug-in" else "E' (Tredoux, 1998)",
+                    "E' plug-in normal-theory 95% CI", "E' plug-in bootstrap 95% CI"),
+        value = c(fmt_num(r$plugin, 3), fmt_ci(c(r$esize_normal$ci_low, r$esize_normal$ci_high)),
+                  boot_ci(r$plugin_boot))
+      )
+      corrected_rows <- if (r$unbiased) {
+        data.frame(measure = c("E' (Tredoux, 1998), small-sample corrected",
+                               "E' corrected bootstrap 95% CI"),
+                   value = c(fmt_num(r$esize, 3), boot_ci(r$esize_boot)))
+      }
+      rbind(
+        corrected_rows,
+        plugin_rows,
+        data.frame(measure = c("Effective size (Malpass, 1981; Tredoux adjustment)",
+                               "Malpass bootstrap 95% CI", "Nominal size k"),
+                   value = c(fmt_num(r$malpass, 3), boot_ci(r$malpass_boot), r$L$k))
       )
     })
     serve_table(output, "esize_table", esize_df, "effective_size.csv")
     serve_plot(output, "esize_dist", function() {
-      r4lineups::plot_esize_distribution(result()$esize_boot, metric = "E' (Tredoux)")
+      r4lineups::plot_esize_distribution(
+        result()$esize_boot,
+        metric = if (result()$unbiased) "E' (Tredoux), corrected" else "E' (Tredoux)"
+      )
     }, "effective_size_distribution.png")
 
     func_df <- reactive({

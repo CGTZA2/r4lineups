@@ -9,7 +9,8 @@ esize_boot_dist(
   k,
   metric = c("tredoux", "malpass"),
   input_type = c("vector", "table"),
-  R = 1000
+  R = 1000,
+  unbiased = FALSE
 )
 }
 \arguments{
@@ -22,10 +23,18 @@ esize_boot_dist(
 \item{input_type}{Either "vector" or "table".}
 
 \item{R}{Number of bootstrap resamples.}
+
+\item{unbiased}{Logical. For \code{metric = "tredoux"}, bootstrap the
+small-sample corrected E' of \code{\link{esize_T}(unbiased = TRUE)}
+instead of the plug-in estimate. Default \code{FALSE}.}
 }
 \value{
 A numeric vector of bootstrap estimates, carrying an \code{"n"}
-  attribute equal to the number of lineup choices resampled.
+  attribute equal to the number of lineup choices resampled. With
+  \code{unbiased = TRUE}, resamples in which every choice fell on a
+  different member have an unbounded corrected estimate; they are dropped,
+  with a warning, and their number is recorded in an \code{"n_undefined"}
+  attribute.
 }
 \description{
 Computes a bootstrap distribution for effective size using either
@@ -34,4 +43,5 @@ Tredoux's E' or Malpass's adjusted E.
 \examples{
 vec <- round(runif(200, 1, 6))
 dist <- esize_boot_dist(vec, k = 6, metric = "tredoux", R = 500)
+dist_corrected <- esize_boot_dist(vec, k = 6, R = 500, unbiased = TRUE)
 }
