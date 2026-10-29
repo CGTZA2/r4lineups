@@ -121,6 +121,44 @@ utils::globalVariables(c(
   )
 }
 
+# Probability of guilt given a suspect ID. With `base_rate = NULL` this is the
+# count ratio that Mickes (2015) defines for CAC accuracy, which equals the
+# posterior at the design's own TP:TA ratio. With a base rate it is computed
+# from the two arms' rates, so it no longer depends on how many trials each arm
+# had.
+.suspect_id_ppv <- function(n_guilty, n_innocent, n_tp, n_ta, base_rate = NULL) {
+  if (is.null(base_rate)) {
+    n <- n_guilty + n_innocent
+    return(if (n > 0) n_guilty / n else NA_real_)
+  }
+  g <- if (n_tp > 0) base_rate * n_guilty / n_tp else 0
+  i <- if (n_ta > 0) (1 - base_rate) * n_innocent / n_ta else 0
+  if (g + i > 0) g / (g + i) else NA_real_
+}
+
+.check_base_rate <- function(base_rate) {
+  if (!is.null(base_rate) &&
+      (!is.numeric(base_rate) || length(base_rate) != 1L || is.na(base_rate) ||
+       base_rate <= 0 || base_rate >= 1)) {
+    stop("base_rate must be NULL or a single number strictly between 0 and 1.",
+         call. = FALSE)
+  }
+  invisible(base_rate)
+}
+
+# Count-based accuracy mixes witness performance with the design's TP:TA split.
+# Say so when the arms differ, and point to the rate-based alternative.
+.unbalanced_note <- function(n_tp, n_ta) {
+  if (n_tp != n_ta) {
+    message("Target-present and target-absent samples differ in size (",
+            n_tp, " and ", n_ta, "). Accuracy computed from counts, as in ",
+            "Mickes (2015), then reflects that split as well as witness ",
+            "performance. Set base_rate = 0.5 to compute it from the hit and ",
+            "false-ID rates instead.")
+  }
+  invisible(NULL)
+}
+
 .innocent_suspect_count <- function(ta_data, include, lineup_size,
                                     method = .innocent_suspect_method(ta_data)) {
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||

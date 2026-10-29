@@ -10,7 +10,8 @@ make_ppv_range(
   confidence_bins = NULL,
   show_plots = TRUE,
   plot_type = "all",
-  innocent_suspect = "auto"
+  innocent_suspect = "auto",
+  base_rate = NULL
 )
 }
 \arguments{
@@ -35,6 +36,13 @@ innocent-suspect count is estimated as filler IDs divided by
 \code{"designated"} when any target-absent row is a suspect ID or the data
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
+
+\item{base_rate}{Prior probability that the suspect is guilty.
+\code{NULL} (default) computes PPV from counts, as below. A number
+strictly between 0 and 1 computes it from the guilty-ID rate (per
+target-present trial) and the innocent-suspect-ID rate (per
+target-absent trial) at that prior, so the result does not depend on the
+TP:TA split.}
 }
 \value{
 A list of class "lineup_ppv_range" containing:

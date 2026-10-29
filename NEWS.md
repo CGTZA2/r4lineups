@@ -27,6 +27,17 @@
   argument: `"designated"`, `"estimated"` (filler IDs / lineup size), or
   `"auto"` (the default). The app's Data tab has a matching control. See the
   bug fix below.
+* `make_cacdata()`, `make_cac()`, `ppv_by_confidence()`,
+  `ppv_range_by_confidence()` and `make_ppv_range()` gain `base_rate`.
+  Count-based accuracy, the Mickes (2015) definition, stays the default, but
+  it equals the probability of guilt only when the target-present and
+  target-absent samples are the same size: with HR = .6 and FAR = .1 it gives
+  .857, .923 or .667 for TP:TA splits of 100:100, 200:100 and 100:300. These
+  functions now say so in a message when the arms differ. `base_rate = 0.5`
+  computes accuracy from the hit and false-ID rates instead, which gives .857
+  for all three; other values apply Bayes' rule at that prior. The
+  rate-based CAC standard error is a delta-method approximation. Existing
+  results are unchanged.
 
 ## Bug fixes
 

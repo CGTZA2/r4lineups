@@ -327,17 +327,20 @@ plot_error_rate_conf <- function(ppv_range_obj, show_points = TRUE) {
 #' result$plot_effective_size
 #'
 #' @inheritParams make_rocdata
+#' @inheritParams ppv_by_confidence
 #' @export
 make_ppv_range <- function(data,
                             lineup_size = 6,
                             confidence_bins = NULL,
                             show_plots = TRUE,
                             plot_type = "all",
-                            innocent_suspect = "auto") {
+                            innocent_suspect = "auto",
+                            base_rate = NULL) {
 
   # Compute PPV range
   ppv_obj <- ppv_range_by_confidence(data, lineup_size, confidence_bins,
-                                     innocent_suspect = innocent_suspect)
+                                     innocent_suspect = innocent_suspect,
+                                     base_rate = base_rate)
 
   # Create plots if requested
   plot_ppv <- NULL

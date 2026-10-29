@@ -63,7 +63,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `make_rocdata()` — ROC data (suspect IDs only).
 - `make_roc()` — ROC analysis + plot wrapper.
 - `make_roc_gg()` — ROC ggplot.
-- `make_cacdata()` — CAC data.
+- `make_cacdata()` — CAC data (counts by default; `base_rate` computes from rates).
 - `make_cac()` — CAC analysis + plot wrapper.
 - `make_cac_gg()` — CAC ggplot.
 - `make_racdata()` — RAC data.
@@ -87,7 +87,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 
 ### PPV range & error‑rate estimation (Fitzgerald et al.)
 - `make_ppv_range()` — PPV‑range analysis (nominal/effective/none).
-- `ppv_by_confidence()` — PPV by confidence.
+- `ppv_by_confidence()` — PPV by confidence (counts by default; `base_rate` computes from rates).
 - `ppv_range_by_confidence()` — PPV range by confidence.
 - `innocent_id_rate_nominal()` — false ID rate corrected by nominal size.
 - `innocent_id_rate_effective()` — false ID rate corrected by effective size.

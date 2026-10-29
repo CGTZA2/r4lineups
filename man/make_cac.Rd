@@ -10,6 +10,7 @@ make_cac(
   confidence_bins = NULL,
   show_plot = TRUE,
   innocent_suspect = "auto",
+  base_rate = NULL,
   ...
 )
 }
@@ -32,6 +33,8 @@ innocent-suspect count is estimated as filler IDs divided by
 \code{"designated"} when any target-absent row is a suspect ID or the data
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
+
+\item{base_rate}{See \code{\link{make_cacdata}}.}
 
 \item{...}{Additional arguments passed to make_cac_gg()}
 }

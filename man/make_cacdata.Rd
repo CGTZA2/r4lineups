@@ -8,7 +8,8 @@ make_cacdata(
   data,
   lineup_size = 6,
   confidence_bins = NULL,
-  innocent_suspect = "auto"
+  innocent_suspect = "auto",
+  base_rate = NULL
 )
 }
 \arguments{
@@ -35,13 +36,20 @@ innocent-suspect count is estimated as filler IDs divided by
 \code{"designated"} when any target-absent row is a suspect ID or the data
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
+
+\item{base_rate}{Prior probability that the suspect is guilty, used to
+compute accuracy from rates rather than counts. \code{NULL} (default)
+keeps the count definition of Mickes (2015). A number strictly between 0
+and 1 gives \eqn{\pi HR(c) / (\pi HR(c) + (1 - \pi) FAR(c))}; see Details.}
 }
 \value{
 A list containing:
   \itemize{
     \item cac_data: Dataframe with confidence levels and accuracy
-    \item n_ids_per_level: Number of suspect IDs at each confidence level
     \item overall_accuracy: Overall accuracy across all suspect IDs
+    \item n_total_suspect_ids: Correct plus incorrect suspect IDs
+    \item base_rate: The base rate used, or NULL for count-based accuracy
+    \item n_target_present, n_target_absent: Sample sizes of the two arms
   }
 }
 \description{
@@ -56,6 +64,19 @@ CAC analysis computes, for each confidence level:
 Explicit target-absent suspect IDs are used when present. Otherwise,
 target-absent filler IDs are divided by lineup size to estimate incorrect
 suspect IDs. The two estimators are never added together.
+
+The count ratio equals the probability of guilt given a suspect ID only
+when the target-present and target-absent samples are the same size, which
+Mickes (2015) assumes; she notes that unequal base rates make the
+calculation more complicated. With unequal samples the count-based
+accuracy shifts with the TP:TA split even when hit and false-ID rates are
+unchanged, and the function says so in a message. Setting \code{base_rate}
+computes accuracy from the hit rate HR(c) = correct IDs / n(TP) and the
+false-ID rate FAR(c) = incorrect IDs / n(TA) at the stated prior, so that
+\code{base_rate = 0.5} gives the balanced-design value whatever the sample
+sizes. Its standard error is then a delta-method approximation from the two
+independent binomial rates; the count-based standard error is binomial over
+the bin's suspect IDs.
 
 According to Mickes (2015), CAC analysis is most relevant for triers of fact
 (judges/jurors) evaluating estimator variables (e.g., exposure duration,

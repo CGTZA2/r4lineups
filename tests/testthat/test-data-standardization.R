@@ -466,8 +466,12 @@ test_that("standardized data works with make_roc", {
 test_that("standardized data works with make_cac", {
   data <- create_example_lineup_data(n_trials = 200, seed = 222)
 
-  expect_silent({
+  # The simulated arms are unequal, so count-based accuracy carries a note
+  expect_message({
     cac <- make_cac(data, lineup_size = 6, show_plot = FALSE)
+  }, "differ in size")
+  expect_silent({
+    cac <- make_cac(data, lineup_size = 6, show_plot = FALSE, base_rate = 0.5)
   })
 
   expect_true("overall_accuracy" %in% names(cac))
