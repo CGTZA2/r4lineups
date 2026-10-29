@@ -57,7 +57,7 @@ This function installs:
 
 - tf-keras - TensorFlow/Keras backend
 
-- mediapipe - For 468-point face mesh (optional but recommended)
+- mediapipe - For 478-point face mesh (optional but recommended)
 
 - retinaface - Best face detector
 

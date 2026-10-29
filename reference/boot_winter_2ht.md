@@ -96,8 +96,16 @@ Two types of confidence intervals are available:
 
 - **percentile**: Uses quantiles of the bootstrap distribution
 
-- **bca**: Bias-corrected and accelerated intervals (more accurate but
-  slower)
+- **bca**: Bias-corrected and accelerated intervals (Efron, 1987). The
+  bias correction counts bootstrap ties with the estimate as half, and
+  the acceleration comes from the jackknife over individual
+  observations, which needs at most six refits because the data are six
+  response counts.
+
+## References
+
+Efron, B. (1987). Better bootstrap confidence intervals. *Journal of the
+American Statistical Association, 82*(397), 171-185.
 
 ## Examples
 

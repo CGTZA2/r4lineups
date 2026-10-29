@@ -71,6 +71,9 @@ A standardized data frame with class "lineup_data" containing:
 
 - response_time: Numeric (if present)
 
+followed by every other column of `data` unchanged, including
+`suspect_pos` and `lineup_member`, which some analyses use.
+
 ## Details
 
 This function:

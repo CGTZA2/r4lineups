@@ -12,7 +12,9 @@ make_utility_curves(
   base_rate = 0.5,
   utility_matrix = c(tp = 1, fn = -0.5, fp = -2, tn = 0.5),
   lineup_size = 6,
-  criteria = c("confidence", "all")
+  criteria = c("confidence", "all"),
+  innocent_suspect = "auto",
+  thresholds = NULL
 )
 ```
 
@@ -63,6 +65,27 @@ make_utility_curves(
   - "all": Include all identifications regardless of confidence
 
   Default = "confidence".
+
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
+
+- thresholds:
+
+  Optional numeric vector of confidence criteria. The default uses the
+  confidence levels of the responses that can change the hit or
+  false-alarm rate, as in
+  [`make_rocdata`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md),
+  so the confidence given to rejections does not add criteria or change
+  the average utility.
 
 ## Value
 

@@ -82,7 +82,7 @@ bootobject
 #> 
 #> Bootstrap Statistics :
 #>     original   bias    std. error
-#> t1*     5.46 -0.21534   0.2121728
+#> t1*      5.2 -0.15596   0.2371141
 
 #To get confidence intervals:
 cis <- boot::boot.ci(bootobject, conf = 0.95, type = "all", k = 6)

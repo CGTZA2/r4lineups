@@ -13,7 +13,8 @@ make_calibration_data(
   confidence_bins = NULL,
   choosers_only = TRUE,
   lineup_size = 6,
-  confidence_scale = c("auto", "0-1", "0-100")
+  confidence_scale = c("auto", "0-1", "0-100"),
+  innocent_suspect = "auto"
 )
 ```
 
@@ -51,6 +52,18 @@ make_calibration_data(
   treated as 0-1, otherwise as 0-100, with a warning for ambiguous
   Likert/0-10 scales), "0-1", or "0-100". C and O/U require a 0-1/0-100
   probability scale.
+
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
 
 ## Value
 

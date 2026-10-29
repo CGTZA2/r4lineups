@@ -10,7 +10,8 @@ Bootstrap pAUC Comparison
   data2,
   lineup_size,
   max_false_id_rate,
-  n_bootstrap
+  n_bootstrap,
+  innocent_suspect = c("auto", "auto")
 )
 ```
 
@@ -35,6 +36,11 @@ Bootstrap pAUC Comparison
 - n_bootstrap:
 
   Number of bootstrap samples
+
+- innocent_suspect:
+
+  Resolved innocent-suspect methods for the two conditions, reused in
+  every replicate
 
 ## Value
 

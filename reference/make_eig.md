@@ -11,7 +11,8 @@ make_eig(
   confidence_bins = NULL,
   show_plot = TRUE,
   plot_type = "both",
-  lineup_size = 6
+  lineup_size = 6,
+  innocent_suspect = "auto"
 )
 ```
 
@@ -42,6 +43,18 @@ make_eig(
 
   Nominal lineup size used when no designated innocent suspect is
   present.
+
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
 
 ## Value
 

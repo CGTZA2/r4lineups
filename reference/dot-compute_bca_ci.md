@@ -5,7 +5,12 @@ Compute BCa Confidence Intervals
 ## Usage
 
 ``` r
-.compute_bca_ci(boot_estimates, original_est, conf_level)
+.compute_bca_ci(
+  boot_estimates,
+  original_est,
+  conf_level,
+  accel = rep(0, ncol(boot_estimates))
+)
 ```
 
 ## Arguments
@@ -21,6 +26,10 @@ Compute BCa Confidence Intervals
 - conf_level:
 
   Confidence level
+
+- accel:
+
+  Vector of acceleration constants, one per parameter
 
 ## Value
 

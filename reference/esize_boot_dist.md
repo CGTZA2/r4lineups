@@ -11,7 +11,8 @@ esize_boot_dist(
   k,
   metric = c("tredoux", "malpass"),
   input_type = c("vector", "table"),
-  R = 1000
+  R = 1000,
+  unbiased = FALSE
 )
 ```
 
@@ -37,14 +38,25 @@ esize_boot_dist(
 
   Number of bootstrap resamples.
 
+- unbiased:
+
+  Logical. For `metric = "tredoux"`, bootstrap the small-sample
+  corrected E' of
+  [`esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)`(unbiased = TRUE)`
+  instead of the plug-in estimate. Default `FALSE`.
+
 ## Value
 
 A numeric vector of bootstrap estimates, carrying an `"n"` attribute
-equal to the number of lineup choices resampled.
+equal to the number of lineup choices resampled. With `unbiased = TRUE`,
+resamples in which every choice fell on a different member have an
+unbounded corrected estimate; they are dropped, with a warning, and
+their number is recorded in an `"n_undefined"` attribute.
 
 ## Examples
 
 ``` r
 vec <- round(runif(200, 1, 6))
 dist <- esize_boot_dist(vec, k = 6, metric = "tredoux", R = 500)
+dist_corrected <- esize_boot_dist(vec, k = 6, R = 500, unbiased = TRUE)
 ```

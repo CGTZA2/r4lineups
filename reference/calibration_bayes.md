@@ -16,7 +16,8 @@ calibration_bayes(
   alpha = 0.5,
   S = 10000,
   credible_mass = 0.95,
-  confidence_scale = c("auto", "0-1", "0-100")
+  confidence_scale = c("auto", "0-1", "0-100"),
+  innocent_suspect = "auto"
 )
 ```
 
@@ -61,6 +62,18 @@ calibration_bayes(
   How the confidence scale is interpreted: "auto" (default), "0-1", or
   "0-100". See
   [`make_calibration_data`](https://cgtza2.github.io/r4lineups/reference/make_calibration_data.md).
+
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
 
 ## Value
 

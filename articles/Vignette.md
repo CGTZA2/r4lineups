@@ -529,9 +529,10 @@ target position, and another indicating nominal size:
 func_size_report(lineup_vec, target_pos = 3, k = 8, R = 1000)
 Functional size of lineup is 7
 Confidence intervals [95%]
-Normal Theory 3.003 10.127 
-Bootstrap: percentile (R = 1000) 4.926 12.065 
-Bootstrap: bias-corrected (R = 1000) 4.586 10.231 
+Normal Theory 4.93 11.628 
+Bootstrap: percentile (R = 1000) 4.926 12.063 
+Bootstrap: bias-corrected (R = 1000) 4.926 11.889 
+Exact (Clopper-Pearson) 4.671 11.331 
 ```
 
 **Functional size can exceed nominal size.** This surprises people, but

@@ -83,9 +83,9 @@ res <- diag_ratio_T_bayes_compare(pres_A, abs_A, 3, 3, 6, 6,
                                    pres_B, abs_B, 3, 3, 6, 6)
 print(res)
 #> Bayesian comparison of diagnosticity ratios (DR_A - DR_B)
-#>   DR_A posterior mean: 1.365
-#>   DR_B posterior mean: 0.918
-#>   Delta posterior mean:   0.447
+#>   DR_A posterior mean: 1.368
+#>   DR_B posterior mean: 0.914
+#>   Delta posterior mean:   0.454
 #>   Delta posterior median: 0.421
 #>   95% CI on delta: [-0.370, 1.445]
 #>   P(DR_A > DR_B | data): 0.8532

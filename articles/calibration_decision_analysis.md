@@ -879,11 +879,26 @@ and the comparison is made somewhere neither procedure was actually
 operating. Smith et al. argue that pAUC consequently fails to track
 which procedure has greater diagnostic utility, and that DPP does.
 
-DPP takes a different approach: rather than integrating over a region,
-it measures how far the observed ROC falls short of the best curve
-attainable given the false-alarm rate the procedure actually reached.
-Because the comparison is made against a benchmark defined by the data
-themselves, curves of different lengths remain comparable.
+DPP takes a different approach. Rather than integrating over a region,
+it is computed at every operating point of the ROC, that is, at every
+cumulative confidence threshold, and then averaged. At an operating
+point $`c`$ (their Equation 2),
+
+``` math
+DPP(c) = 1 - \text{Culprit}(c) + \text{Innocent}(c),
+```
+
+where Culprit($`c`$) is the culprit (correct) identification rate and
+Innocent($`c`$) the innocent-suspect identification rate at that
+threshold. DPP($`c`$) is 0 for perfect performance (every culprit
+identified and no innocent suspect), 1 for any point on the chance
+diagonal, and 2 for the worst possible performance. When culprits are
+present in half of all lineups and the two errors are equally costly,
+DPP($`c`$) is one minus the expected utility at that threshold, so the
+average DPP measures the average utility of the procedure across the
+confidence levels witnesses actually use. Because every procedure is
+evaluated at its own operating points, curves of different lengths
+remain comparable.
 
 This is an active disagreement rather than settled ground, and the pAUC
 vignette takes up the other side of it.
@@ -891,202 +906,96 @@ vignette takes up the other side of it.
 ### Basic DPP
 
 ``` r
-# Compute DPP
 dpp_result <- make_dpp(
   lineup_example,
   lineup_size = 6
 )
 
-print(dpp_result)
-$dpp
-[1] 0.5757224
+dpp_result$dpp
+[1] 0.7001587
+dpp_result$dpp_by_point
+ [38;5;246m# A tibble: 9 × 4 [39m
+  confidence culprit_rate innocent_rate   dpp
+        [3m [38;5;246m<dbl> [39m [23m         [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<dbl> [39m [23m
+ [38;5;250m1 [39m        100       0.097 [4m1 [24m       0       0.903
+ [38;5;250m2 [39m         90       0.143        0.005 [4m7 [24m [4m1 [24m 0.863
+ [38;5;250m3 [39m         80       0.189        0.014 [4m3 [24m  0.826
+ [38;5;250m4 [39m         70       0.26         0.022 [4m9 [24m  0.763
+ [38;5;250m5 [39m         60       0.351        0.03    0.679
+ [38;5;250m6 [39m         50       0.436        0.054 [4m3 [24m  0.619
+ [38;5;250m7 [39m         40       0.507        0.077 [4m1 [24m  0.57 
+ [38;5;250m8 [39m         30       0.556        0.103   0.547
+ [38;5;250m9 [39m         20       0.593        0.126   0.533
 
-$auc_observed
-[1] 0.05333776
-
-$auc_perfect
-[1] 0.1257143
-
-$auc_gap
-[1] 0.07237653
-
-$roc_data
- [38;5;246m# A tibble: 10 × 5 [39m
-   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
-         [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m         19          0            0                   0           0
- [38;5;250m 2 [39m        100          0.097 [4m1 [24m       0                  68           0
- [38;5;250m 3 [39m         90          0.143        0.005 [4m7 [24m [4m1 [24m           100           4
- [38;5;250m 4 [39m         80          0.189        0.014 [4m3 [24m            132          10
- [38;5;250m 5 [39m         70          0.26         0.022 [4m9 [24m            182          16
- [38;5;250m 6 [39m         60          0.351        0.03              246          21
- [38;5;250m 7 [39m         50          0.436        0.054 [4m3 [24m            305          38
- [38;5;250m 8 [39m         40          0.507        0.077 [4m1 [24m            355          54
- [38;5;250m 9 [39m         30          0.556        0.103             389          72
- [38;5;250m10 [39m         20          0.593        0.126             415          88
-
-$perfect_roc
- [38;5;246m# A tibble: 3 × 2 [39m
-  false_id_rate correct_id_rate
-           [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m1 [39m         0                   0
- [38;5;250m2 [39m         0                   1
- [38;5;250m3 [39m         0.126               1
-
-$max_fa
-[1] 0.1257143
-
-$n_target_present
-[1] 700
-
-$n_target_absent
-[1] 700
-
-# Plot ROC with perfect performance comparison
 plot_dpp(dpp_result)
 ```
 
 ![](calibration_decision_analysis_files/figure-html/dpp-1.png)
 
-Interpretation:
+The table lists each operating point, from the strictest threshold to
+the most lenient, which counts every identification. The plot shows
+DPP($`c`$) at each of them, the average as a dashed line, and the chance
+reference at 1. The circled point has the lowest DPP and so the highest
+utility; it is the threshold at which acting on identifications would do
+the most good under equal costs and a base rate of .5.
 
-- **DPP = 0**: Perfect performance
-- **DPP = 1**: Chance performance
-- **DPP \< 0**: Better than perfect (impossible, indicates error)
+### Different costs and base rates
 
-The plot shows:
+Smith et al.’s Equation 3 weights the two errors:
 
-- **Black curve**: Observed ROC
-- **Red dashed line**: Perfect ROC given the maximum false alarm rate
-- **Shaded area**: Deviation from perfect performance
+``` math
+DPP_{\alpha\beta}(c) = \beta[1 - \text{Culprit}(c)] + \alpha(1 - \beta)\text{Innocent}(c),
+```
 
-The shaded area is the quantity of interest, and it has a concrete
-reading: it is the improvement that would be available if this procedure
-extracted everything its witnesses had to give, without their choosing
-any more often than they already do. A large shaded area means the
-procedure is leaving discriminability unclaimed; a small one means the
-procedure is close to the best that could be done at that rate of
-choosing.
+where $`\alpha`$ is the cost of identifying an innocent suspect relative
+to missing the culprit, and $`\beta`$ is the base rate of culprit
+presence. With $`\alpha = 1`$ and $`\beta = .5`$ this is half of
+Equation 2. Weighted values no longer range from 0 to 2, so they are
+comparable only with other values computed with the same weights.
+
+``` r
+# An innocent-suspect identification three times as costly as a miss,
+# with culprits present in 30% of lineups
+make_dpp(lineup_example, alpha = 3, beta = 0.3)$dpp
+[1] 0.296619
+```
 
 ### Compare DPP Between Groups
 
 The comparison is the usual use. Here the two simulated procedures from
 earlier differ in the strength of the evidence they generate, so
-Procedure A should show the smaller deviation:
+Procedure A should show the smaller deviation. As Smith et al. did,
+[`compare_dpp()`](https://cgtza2.github.io/r4lineups/reference/compare_dpp.md)
+tests the difference with a nonparametric bootstrap, resampling
+target-present and target-absent trials separately within each
+procedure:
 
 ``` r
 dpp_comparison <- compare_dpp(
   data_proc_a,
   data_proc_b,
-  lineup_size = 6
+  lineup_size = 6,
+  n_bootstrap = 500,
+  seed = 2026
 )
 
-print(dpp_comparison)
-$dpp_a
-[1] 0.4591228
+dpp_comparison
 
-$dpp_b
-[1] 0.7065426
+=== DPP Comparison ===
 
-$dpp_difference
-[1] -0.2474197
+Average DPP, procedure A:  0.6022 
+Average DPP, procedure B:  0.8247 
+Difference (A - B):        -0.2225  (negative = A better)
+Bootstrap SE:              0.0268
+95% percentile interval:  [-0.2797, -0.1726]  (500 resamples)
 
-$dpp_obj_a
-$dpp_obj_a$dpp
-[1] 0.4591228
-
-$dpp_obj_a$auc_observed
-[1] 0.077075
-
-$dpp_obj_a$auc_perfect
-[1] 0.1425
-
-$dpp_obj_a$auc_gap
-[1] 0.065425
-
-$dpp_obj_a$roc_data
- [38;5;246m# A tibble: 10 × 5 [39m
-   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
-         [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m         19           0            0                  0           0
- [38;5;250m 2 [39m        100           0.16         0                 64           0
- [38;5;250m 3 [39m         90           0.215        0.005             86           2
- [38;5;250m 4 [39m         80           0.302        0.012 [4m5 [24m           121           5
- [38;5;250m 5 [39m         70           0.372        0.025            149          10
- [38;5;250m 6 [39m         60           0.462        0.032 [4m5 [24m           185          13
- [38;5;250m 7 [39m         50           0.52         0.06             208          24
- [38;5;250m 8 [39m         40           0.628        0.082 [4m5 [24m           251          33
- [38;5;250m 9 [39m         30           0.68         0.115            272          46
- [38;5;250m10 [39m         20           0.715        0.142            286          57
-
-$dpp_obj_a$perfect_roc
- [38;5;246m# A tibble: 3 × 2 [39m
-  false_id_rate correct_id_rate
-           [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m1 [39m         0                   0
- [38;5;250m2 [39m         0                   1
- [38;5;250m3 [39m         0.142               1
-
-$dpp_obj_a$max_fa
-[1] 0.1425
-
-$dpp_obj_a$n_target_present
-[1] 400
-
-$dpp_obj_a$n_target_absent
-[1] 400
-
-
-$dpp_obj_b
-$dpp_obj_b$dpp
-[1] 0.7065426
-
-$dpp_obj_b$auc_observed
-[1] 0.03448125
-
-$dpp_obj_b$auc_perfect
-[1] 0.1175
-
-$dpp_obj_b$auc_gap
-[1] 0.08301875
-
-$dpp_obj_b$roc_data
- [38;5;246m# A tibble: 10 × 5 [39m
-   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
-         [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m         19          0             0                  0           0
- [38;5;250m 2 [39m        100          0.037 [4m5 [24m        0                 15           0
- [38;5;250m 3 [39m         90          0.055         0                 22           0
- [38;5;250m 4 [39m         80          0.085         0.005             34           2
- [38;5;250m 5 [39m         70          0.128         0.015             51           6
- [38;5;250m 6 [39m         60          0.198         0.027 [4m5 [24m            79          11
- [38;5;250m 7 [39m         50          0.272         0.047 [4m5 [24m           109          19
- [38;5;250m 8 [39m         40          0.338         0.057 [4m5 [24m           135          23
- [38;5;250m 9 [39m         30          0.392         0.087 [4m5 [24m           157          35
- [38;5;250m10 [39m         20          0.43          0.118            172          47
-
-$dpp_obj_b$perfect_roc
- [38;5;246m# A tibble: 3 × 2 [39m
-  false_id_rate correct_id_rate
-           [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m1 [39m         0                   0
- [38;5;250m2 [39m         0                   1
- [38;5;250m3 [39m         0.118               1
-
-$dpp_obj_b$max_fa
-[1] 0.1175
-
-$dpp_obj_b$n_target_present
-[1] 400
-
-$dpp_obj_b$n_target_absent
-[1] 400
-
-# Plot comparison side-by-side
 plot_dpp_comparison(dpp_comparison)
 ```
 
 ![](calibration_decision_analysis_files/figure-html/dpp-comparison-1.png)
+
+A negative difference favours Procedure A. The interval is a percentile
+bootstrap interval for the difference in average DPP.
 
 ### When to Use DPP
 
@@ -1420,7 +1329,7 @@ bins <- c(0, 60, 80, 100)
 cal <- make_calibration(lineup_example, confidence_bins = bins,
                         show_plot = FALSE)
 
-# 2. DPP: overall discriminability
+# 2. DPP: average utility across operating points
 dpp <- make_dpp(lineup_example, lineup_size = 6)
 
 # 3. ANRI: resolution, with inference
@@ -1452,7 +1361,7 @@ knitr::kable(
 |:---------------------------|---------:|
 | Calibration (C)            |    0.073 |
 | Over/underconfidence (O/U) |   -0.229 |
-| DPP                        |    0.576 |
+| DPP                        |    0.700 |
 | ANRI                       |    0.041 |
 | Max expected utility       |    0.288 |
 
@@ -1474,11 +1383,11 @@ manuscript.
 >
 > Witnesses were well calibrated overall (C = 0.073), but systematically
 > **underconfident** (O/U = -0.229): accuracy in the lowest confidence
-> band was substantially higher than stated confidence implied. DPP was
-> 0.576, indicating performance above chance but well short of what was
-> attainable at the observed rate of choosing. Resolution, measured by
-> ANRI, was 0.041 (95% CI \[0.02, 0.077\]), against an uncorrected NRI
-> of 0.045.
+> band was substantially higher than stated confidence implied. Average
+> DPP was 0.7 (0 = perfect, 1 = chance), and the operating point of
+> maximum utility was confidence of 20 or above (DPP = 0.533).
+> Resolution, measured by ANRI, was 0.041 (95% CI \[0.02, 0.077\]),
+> against an uncorrected NRI of 0.045.
 >
 > Expected utility analysis assumed a base rate of 50% and the cost
 > matrix u(correct suspect ID) = 1, u(missed guilty suspect) = -0.5,
@@ -1531,6 +1440,7 @@ is what allows a reader to judge how much weight it will bear.
   the diagnostic utility of eyewitness lineups but partial area under
   the ROC curve does not. *Journal of Applied Research in Memory and
   Cognition, 8*(1), 50-59.
+  <https://doi.org/10.1016/j.jarmac.2018.09.003>
 
 **ANRI:**
 
@@ -1550,13 +1460,13 @@ is what allows a reader to judge how much weight it will bear.
 
 ``` r
 sessionInfo()
-R version 4.6.1 (2026-06-24)
+R version 4.6.2 (2026-10-29)
 Platform: x86_64-pc-linux-gnu
-Running under: Ubuntu 24.04.5 LTS
+Running under: Ubuntu 26.04.1 LTS
 
 Matrix products: default
 BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
 
 locale:
  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
@@ -1571,21 +1481,21 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] r4lineups_2.2.0
+[1] r4lineups_2.3.0
 
 loaded via a namespace (and not attached):
- [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1       
- [5] compiler_4.6.1     tidyselect_1.2.1   Rcpp_1.1.2         gridExtra_2.3.1   
+ [1] Matrix_1.7-6       gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1       
+ [5] compiler_4.6.2     tidyselect_1.2.1   Rcpp_1.1.2         gridExtra_2.3.1   
  [9] jquerylib_0.1.4    png_0.1-9          systemfonts_1.3.2  scales_1.4.0      
 [13] textshaping_1.0.5  boot_1.3-32        yaml_2.3.12        fastmap_1.2.0     
-[17] lattice_0.22-9     reticulate_1.47.0  ggplot2_4.0.3      R6_2.6.1          
-[21] patchwork_1.3.2    labeling_0.4.3     generics_0.1.4     knitr_1.52        
-[25] htmlwidgets_1.6.4  ggrepel_0.9.8      tibble_3.3.1       desc_1.4.3        
-[29] bslib_0.12.0       pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.3.0       
-[33] utf8_1.2.6         cachem_1.1.0       xfun_0.62          fs_2.1.0          
-[37] sass_0.4.10        S7_0.2.2           otel_0.2.0         cli_3.6.6         
-[41] withr_3.0.3        pkgdown_2.2.1      magrittr_2.0.5     digest_0.6.39     
-[45] grid_4.6.1         lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5    
-[49] glue_1.8.1         farver_2.1.2       ragg_1.5.2         purrr_1.2.2       
-[53] rmarkdown_2.32     tools_4.6.1        pkgconfig_2.0.3    htmltools_0.5.9   
+[17] lattice_0.23-1     reticulate_1.47.0  ggplot2_4.0.3      R6_2.6.1          
+[21] labeling_0.4.3     generics_0.1.4     knitr_1.52         htmlwidgets_1.6.4 
+[25] ggrepel_0.9.8      tibble_3.3.1       desc_1.4.3         bslib_0.12.0      
+[29] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.3.0        utf8_1.2.6        
+[33] cachem_1.1.0       xfun_0.62          fs_2.1.0           sass_0.4.10       
+[37] S7_0.2.2           otel_0.2.0         cli_3.6.6          withr_3.0.3       
+[41] pkgdown_2.2.1      magrittr_2.0.5     digest_0.6.39      grid_4.6.2        
+[45] lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1        
+[49] farver_2.1.2       ragg_1.5.2         purrr_1.2.2        rmarkdown_2.32    
+[53] tools_4.6.2        pkgconfig_2.0.3    htmltools_0.5.9   
 ```

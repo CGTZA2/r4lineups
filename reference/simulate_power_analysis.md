@@ -120,16 +120,16 @@ it is not a power analysis, because no hypothesis is being tested.
 power_res <- simulate_power_analysis(
   sample_sizes = c(50, 100),
   d_prime = 1.5,
-  n_simulations = 20,
-  n_bootstrap = 100,
+  n_simulations = 8,
+  n_bootstrap = 50,
   conf_levels = 5,
   seed = 123
 )
-#> Simulating sample size 50 (20 studies)
-#> Simulating sample size 100 (20 studies)
+#> Simulating sample size 50 (8 studies)
+#> Simulating sample size 100 (8 studies)
 print(power_res)
-#>   sample_size power   power_se mean_effect  sd_effect n_valid
-#> 1          50   0.9 0.06708204  0.04664036 0.01806107      20
-#> 2         100   1.0 0.00000000  0.05148993 0.01764658      20
+#>   sample_size power  power_se mean_effect  sd_effect n_valid
+#> 1          50 0.875 0.1169268  0.04444208 0.01567793       8
+#> 2         100 1.000 0.0000000  0.04280260 0.01922859       8
 # }
 ```

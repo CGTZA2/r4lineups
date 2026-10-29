@@ -16,7 +16,8 @@ compare_pauc(
   conf_level = 0.95,
   seed = NULL,
   label1 = "Condition 1",
-  label2 = "Condition 2"
+  label2 = "Condition 2",
+  innocent_suspect = "auto"
 )
 ```
 
@@ -63,6 +64,18 @@ compare_pauc(
 - label2:
 
   Character. Label for second condition (default = "Condition 2")
+
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
 
 ## Value
 
@@ -163,11 +176,11 @@ print(comparison)
 #>   Procedure B: pAUC = 0.0468 (SE = 0.005)
 #> 
 #> Difference: 0.0043
-#>   95% CI: [-0.0088, 0.0175]
+#>   95% CI: [-0.0088, 0.0174]
 #> 
 #> Statistical Test:
-#>   Z = 0.642
-#>   p-value = 0.5207
+#>   Z = 0.646
+#>   p-value = 0.5185
 #> 
 #> Interpretation: Procedure A has higher discriminability than Procedure B (ns)
 #> 

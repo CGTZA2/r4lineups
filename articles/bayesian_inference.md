@@ -164,7 +164,7 @@ func_post
 #> Bayesian Functional Size - Beta-Binomial model
 #>   Prior: Jeffreys-type Beta(0.50, 0.50)
 #>   n = 133, suspect IDs = 19 (rate = 0.143)
-#>   Posterior mean F:   7.144
+#>   Posterior mean F:   7.189
 #>   Posterior median F: 6.904
 #>   95% credible interval: [4.746, 10.898]
 #>   P(F < 8.000 | data): 0.7480
@@ -208,7 +208,7 @@ diag_post
 #>   Prior: Jeffreys-type Beta(0.50, 0.50)
 #>   TP lineup: n = 133, suspect IDs = 19
 #>   TA lineup: n = 133, suspect IDs = 5
-#>   Posterior mean DR:   4.337
+#>   Posterior mean DR:   4.301
 #>   Posterior median DR: 3.645
 #>   95% credible interval: [1.550, 11.214]
 #>   P(DR < 1.000 | data): 0.0010

@@ -37,7 +37,7 @@ A list with named landmark coordinates:
 
 These 5 landmarks are sufficient for basic face alignment and are
 commonly used in face recognition pipelines. For more detailed landmarks
-(468 points), use
+(478 points), use
 [`get_face_landmarks`](https://cgtza2.github.io/r4lineups/reference/get_face_landmarks.md).
 
 ## Examples

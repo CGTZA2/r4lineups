@@ -7,7 +7,12 @@ and Gronlund.
 ## Usage
 
 ``` r
-make_rocdata(data, lineup_size = 6)
+make_rocdata(
+  data,
+  lineup_size = 6,
+  innocent_suspect = "auto",
+  thresholds = NULL
+)
 ```
 
 ## Arguments
@@ -29,6 +34,25 @@ make_rocdata(data, lineup_size = 6)
   estimate false ID rate when fillers are chosen from target-absent
   lineups.
 
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
+
+- thresholds:
+
+  Optional numeric vector of confidence criteria at which to evaluate
+  the ROC. The default uses the confidence levels of the responses that
+  can move an operating point; see Details. Supplying the criteria of a
+  full sample keeps them fixed across bootstrap resamples.
+
 ## Value
 
 A list containing:
@@ -42,10 +66,12 @@ A list containing:
 
 - n_target_absent: Number of target-absent lineups
 
+- thresholds: The confidence criteria used, highest first
+
 ## Details
 
 This function computes ROC curves following Wixted & Mickes (2012) and
-Mickes (2015). For each confidence level:
+Mickes (2015). For each confidence criterion:
 
 - Correct ID rate = proportion of target-present lineups where suspect
   identified
@@ -53,9 +79,18 @@ Mickes (2015). For each confidence level:
 - False ID rate = proportion of target-absent lineups where suspect
   identified
 
-If target-absent data contain explicit `"suspect"` responses, those
-designated innocent-suspect IDs are used directly. Otherwise, filler IDs
-are divided by lineup size. The two estimators are never added together.
+The criteria are the confidence levels of the responses that enter the
+ROC: target-present suspect IDs, and target-absent suspect IDs
+(designated suspect) or filler IDs (estimated). The confidence given to
+rejections, or to filler IDs in target-present lineups, does not define
+a criterion, because it cannot move an operating point. Each criterion
+therefore gives a distinct point, and averages over points (DPP, z-ROC
+d') do not depend on how rejection confidence was coded.
+
+With a designated innocent suspect, target-absent `"suspect"` responses
+are used directly. Without one, filler IDs are divided by lineup size.
+The two estimators are never added together. See `innocent_suspect` for
+how the design is determined.
 
 ## References
 

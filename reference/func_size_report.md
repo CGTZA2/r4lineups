@@ -30,10 +30,24 @@ func_size_report(lineup_vec, target_pos, k, R = 1000)
 
 ## Value
 
-Invisibly returns the functional-size estimate, normal, percentile, and
-BCa intervals, the number of replications, and the bootstrap object.
+Invisibly returns the functional-size estimate; the normal, percentile
+and BCa bootstrap intervals; the exact interval; the number of
+replications; the number of replications in which nobody chose the
+target (`n_infinite`); and the bootstrap object, whose statistic is the
+proportion choosing the target.
 
 ## Details
+
+Functional size is the reciprocal of the proportion of mock witnesses
+choosing the target, p. The bootstrap resamples p, which stays finite
+when a resample contains no target choices, and the interval limits for
+p are inverted. Percentile and BCa intervals respect monotone
+transformations, so they are the intervals for functional size itself,
+computed from the whole bootstrap distribution; a lower limit of 0 for p
+gives an unbounded (`Inf`) upper limit. The normal interval is the
+normal-theory interval for p, inverted. The exact interval inverts the
+Clopper-Pearson interval for p
+([`binom.test`](https://rdrr.io/r/stats/binom.test.html)).
 
 Function depends on functions from package 'boot'
 
@@ -69,13 +83,15 @@ target_pos <- 3
 x <- func_size_report(lineup_vec, target_pos, 6)
 #> Functional size of lineup is 5.556
 #> Confidence intervals [95%]
-#> Normal Theory 2.573 8.041 
+#> Normal Theory 3.936 9.623 
 #> Bootstrap: percentile (R = 1000) 3.846 9.091 
-#> Bootstrap: bias-corrected (R = 1000) 3.704 8.333 
+#> Bootstrap: bias-corrected (R = 1000) 4.021 10 
+#> Exact (Clopper-Pearson) 3.711 9.065 
 x <- func_size_report(lineup_vec, 3, 6)
 #> Functional size of lineup is 5.556
 #> Confidence intervals [95%]
-#> Normal Theory 2.498 8.031 
+#> Normal Theory 3.894 9.684 
 #> Bootstrap: percentile (R = 1000) 3.846 9.091 
-#> Bootstrap: bias-corrected (R = 1000) 3.571 8.333 
+#> Bootstrap: bias-corrected (R = 1000) 4 10 
+#> Exact (Clopper-Pearson) 3.711 9.065 
 ```

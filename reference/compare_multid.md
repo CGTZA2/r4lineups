@@ -5,12 +5,15 @@ example simultaneous versus sequential lineups, or high- versus
 low-similarity lineups. When both objects carry bootstrap draws,
 standard errors, percentile intervals and normal-approximation p-values
 are given for each difference. The two conditions are treated as
-independent samples.
+independent samples: the standard error is the square root of the sum of
+the two bootstrap variances, and the interval is taken from differences
+between randomly re-paired draws, so the result does not depend on
+whether the two fits used the same seed.
 
 ## Usage
 
 ``` r
-compare_multid(x, y, labels = c("x", "y"))
+compare_multid(x, y, labels = c("x", "y"), seed = NULL)
 ```
 
 ## Arguments
@@ -24,6 +27,10 @@ compare_multid(x, y, labels = c("x", "y"))
 - labels:
 
   Names for the two conditions.
+
+- seed:
+
+  Optional random seed for re-pairing the bootstrap draws.
 
 ## Value
 

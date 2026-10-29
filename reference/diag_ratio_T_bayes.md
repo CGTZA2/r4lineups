@@ -80,7 +80,8 @@ An object of class `"diag_ratio_T_bayes"` containing:
 
 - posterior_mean, posterior_median:
 
-  Posterior point estimates.
+  Posterior point estimates. The mean is exact, and is `Inf` when it
+  does not exist (see Details).
 
 - credible_interval:
 
@@ -112,6 +113,16 @@ small samples. Unlike the continuity-corrected point estimate, the
 posterior handles zero cell counts naturally and provides direct
 probability statements such as \\P(DR \> 1 \mid \mathbf{n})\\.
 
+The posterior mean is computed exactly, not from the draws. Because the
+two rates are independent, \\E\[DR\] = E\[p\_{TP}\] \\ E\[1/p\_{TA}\]\\,
+with \\E\[1/p\_{TA}\] = (a + b - 1)/(a - 1)\\ for \\p\_{TA} \sim
+\mathrm{Beta}(a, b)\\ when \\a \> 1\\. When \\a \le 1\\ (for example, no
+target-absent suspect choices under the Jeffreys prior) the mean is
+infinite, and an average of the draws would not settle on any value as
+`S` grew. Report the median and interval instead. In
+[`diag_ratio_T_bayes_compare()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T_bayes_compare.md),
+the mean difference is `NA` when both means are infinite.
+
 ## References
 
 Tredoux, C. G. (1998). Statistical inference on measures of lineup
@@ -139,7 +150,7 @@ print(res)
 #>   Prior: Jeffreys-type Beta(0.50, 0.50)
 #>   TP lineup: n = 100, suspect IDs = 28
 #>   TA lineup: n = 80, suspect IDs = 17
-#>   Posterior mean DR:   1.367
+#>   Posterior mean DR:   1.368
 #>   Posterior median DR: 1.306
 #>   95% credible interval: [0.782, 2.284]
 plot(res)

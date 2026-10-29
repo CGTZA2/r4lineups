@@ -963,7 +963,7 @@ summary(comparison$fitted_models$`2ht`)
 #>            Observed Expected      Residual
 #> Suspect ID      165      165  1.841166e-03
 #> Filler ID        97       97 -1.909498e-03
-#> Reject           38       38  6.833132e-05
+#> Reject           38       38  6.833131e-05
 #> 
 #> Target-Absent Lineups:
 #>            Observed Expected     Residual

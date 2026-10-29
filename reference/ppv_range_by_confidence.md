@@ -11,7 +11,9 @@ ppv_range_by_confidence(
   data,
   lineup_size = 6,
   confidence_bins = NULL,
-  effective_size_data = NULL
+  effective_size_data = NULL,
+  innocent_suspect = "auto",
+  base_rate = NULL
 )
 ```
 
@@ -32,6 +34,26 @@ ppv_range_by_confidence(
 - effective_size_data:
 
   Optional pre-computed effective sizes
+
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
+
+- base_rate:
+
+  Prior probability that the suspect is guilty. `NULL` (default)
+  computes PPV from counts, as below. A number strictly between 0 and 1
+  computes it from the guilty-ID rate (per target-present trial) and the
+  innocent-suspect-ID rate (per target-absent trial) at that prior, so
+  the result does not depend on the TP:TA split.
 
 ## Value
 

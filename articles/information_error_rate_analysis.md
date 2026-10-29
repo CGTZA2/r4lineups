@@ -245,16 +245,16 @@ knitr::kable(
 
 | Correction               | Overall PPV |
 |:-------------------------|------------:|
-| Nominal size (best case) |      0.8331 |
-| Effective size           |      0.7691 |
-| None (worst case)        |      0.4540 |
+| Nominal size (best case) |           1 |
+| Effective size           |           1 |
+| None (worst case)        |           1 |
 
 PPV under three corrections, same data with the innocent-suspect
 designation removed. This is the range the method exists to report.
 {.table}
 
-The spread is large — from about 0.45 to about 0.83 — and that spread is
-the finding. An analysis reporting only the nominal-size figure would be
+The spread is large — from about 1 to about 1 — and that spread is the
+finding. An analysis reporting only the nominal-size figure would be
 asserting that the lineup was perfectly fair, which is precisely what is
 unknown.
 
@@ -277,15 +277,15 @@ knitr::kable(
 
 | Confidence bin | Effective size | Error rate |
 |:---------------|---------------:|-----------:|
-| 20             |           4.55 |      0.314 |
-| 30             |           4.58 |      1.000 |
-| 40             |           3.98 |      1.000 |
-| 50             |           4.07 |      1.000 |
-| 60             |           3.45 |      1.000 |
-| 70             |           3.33 |      1.000 |
-| 80             |           3.77 |      1.000 |
-| 90             |           3.63 |      1.000 |
-| 100            |           3.33 |      1.000 |
+| 20             |             NA |      0.314 |
+| 30             |             NA |      1.000 |
+| 40             |             NA |      1.000 |
+| 50             |             NA |      1.000 |
+| 60             |             NA |      1.000 |
+| 70             |             NA |      1.000 |
+| 80             |             NA |      1.000 |
+| 90             |             NA |      1.000 |
+| 100            |             NA |      1.000 |
 
 Effective size estimated within each confidence bin, against a nominal
 size of 6. {.table}

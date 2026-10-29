@@ -20,7 +20,8 @@ make_multid(
   conf_thresholds = NULL,
   n_bootstrap = 0,
   conf_level = 0.95,
-  seed = NULL
+  seed = NULL,
+  innocent_suspect = "auto"
 )
 ```
 
@@ -88,6 +89,13 @@ make_multid(
 - seed:
 
   Optional random seed for the bootstrap.
+
+- innocent_suspect:
+
+  For trial-level `data`, how innocent-suspect identifications are
+  obtained; see
+  [`make_rocdata`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md).
+  Ignored for `counts`, where the presence of `I` decides.
 
 ## Value
 

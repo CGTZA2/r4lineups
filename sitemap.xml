@@ -80,6 +80,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/dot-extract_counts_from_df.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/dot-extract_sdt_parameters.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/dot-fit_zroc_line.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/dot-jackknife_acceleration_2ht.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/dot-reconstruct_raw_data.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/eff_size_per_foils.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/effsize_compare.html</loc></url>
@@ -219,6 +220,7 @@
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_calibration.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_data.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_dpp.html</loc></url>
+<url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_dpp_comparison.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_eig.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_fullroc.html</loc></url>
 <url><loc>https://cgtza2.github.io/r4lineups/reference/print.lineup_ppv.html</loc></url>

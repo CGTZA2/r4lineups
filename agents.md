@@ -73,7 +73,8 @@ area), and composite workflows that combine multiple functions.
 - [`func_size.boot()`](https://cgtza2.github.io/r4lineups/reference/func_size.boot.md)
   — bootstrap statistic for functional size.
 - [`func_size_report()`](https://cgtza2.github.io/r4lineups/reference/func_size_report.md)
-  — functional size + boot CIs.
+  — functional size + boot CIs (bootstraps p and inverts, so a limit can
+  be `Inf`) and an exact Clopper–Pearson CI.
 - [`effsize_compare()`](https://cgtza2.github.io/r4lineups/reference/effsize_compare.md)
   — compare effective sizes across lineups.
 - [`compare_eff_sizes.boot()`](https://cgtza2.github.io/r4lineups/reference/compare_eff_sizes.boot.md)
@@ -111,13 +112,14 @@ area), and composite workflows that combine multiple functions.
 ### ROC, CAC, RAC (confidence‑based)
 
 - [`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md)
-  — ROC data (suspect IDs only).
+  — ROC data (suspect IDs only); criteria are the confidence levels of
+  responses that move a point (`thresholds` to fix them).
 - [`make_roc()`](https://cgtza2.github.io/r4lineups/reference/make_roc.md)
   — ROC analysis + plot wrapper.
 - [`make_roc_gg()`](https://cgtza2.github.io/r4lineups/reference/make_roc_gg.md)
   — ROC ggplot.
 - [`make_cacdata()`](https://cgtza2.github.io/r4lineups/reference/make_cacdata.md)
-  — CAC data.
+  — CAC data (counts by default; `base_rate` computes from rates).
 - [`make_cac()`](https://cgtza2.github.io/r4lineups/reference/make_cac.md)
   — CAC analysis + plot wrapper.
 - [`make_cac_gg()`](https://cgtza2.github.io/r4lineups/reference/make_cac_gg.md)
@@ -162,7 +164,8 @@ area), and composite workflows that combine multiple functions.
 - [`make_ppv_range()`](https://cgtza2.github.io/r4lineups/reference/make_ppv_range.md)
   — PPV‑range analysis (nominal/effective/none).
 - [`ppv_by_confidence()`](https://cgtza2.github.io/r4lineups/reference/ppv_by_confidence.md)
-  — PPV by confidence.
+  — PPV by confidence (counts by default; `base_rate` computes from
+  rates).
 - [`ppv_range_by_confidence()`](https://cgtza2.github.io/r4lineups/reference/ppv_range_by_confidence.md)
   — PPV range by confidence.
 - [`innocent_id_rate_nominal()`](https://cgtza2.github.io/r4lineups/reference/innocent_id_rate_nominal.md)
@@ -230,15 +233,17 @@ area), and composite workflows that combine multiple functions.
 ### DPP (Deviation from Perfect Performance)
 
 - [`make_dpp()`](https://cgtza2.github.io/r4lineups/reference/make_dpp.md)
-  — compute DPP from data or ROC object.
+  — Smith et al. (2019) DPP: mean of 1 − HR + FAR over ROC operating
+  points (Eq. 2), or the α/β-weighted Eq. 3.
 - [`compute_dpp()`](https://cgtza2.github.io/r4lineups/reference/compute_dpp.md)
   — DPP analysis + plot wrapper.
 - [`compare_dpp()`](https://cgtza2.github.io/r4lineups/reference/compare_dpp.md)
-  — compare DPP across procedures.
+  — difference in average DPP with a stratified bootstrap SE and
+  percentile CI.
 - [`plot_dpp()`](https://cgtza2.github.io/r4lineups/reference/plot_dpp.md)
-  — DPP plot.
+  — DPP at each operating point, with the average.
 - [`plot_dpp_comparison()`](https://cgtza2.github.io/r4lineups/reference/plot_dpp_comparison.md)
-  — DPP comparison plot.
+  — two procedures overlaid.
 
 ### Winter 2‑HT model
 
@@ -286,7 +291,8 @@ area), and composite workflows that combine multiple functions.
 - [`detect_faces()`](https://cgtza2.github.io/r4lineups/reference/detect_faces.md)
   — detect faces in an image.
 - [`get_face_landmarks()`](https://cgtza2.github.io/r4lineups/reference/get_face_landmarks.md)
-  — 468‑point landmark extraction.
+  — 478‑point MediaPipe face mesh (legacy `solutions` or Tasks
+  `FaceLandmarker`).
 - [`get_key_landmarks()`](https://cgtza2.github.io/r4lineups/reference/get_key_landmarks.md)
   — 5‑point landmark extraction.
 - [`has_valid_face()`](https://cgtza2.github.io/r4lineups/reference/has_valid_face.md)
@@ -342,8 +348,8 @@ area), and composite workflows that combine multiple functions.
   indices from TP/TA data or counts; bootstrap CIs; cumulative by
   confidence; fair‑lineup reference for d′(IFa).
 - [`compare_multid()`](https://cgtza2.github.io/r4lineups/reference/compare_multid.md)
-  — differences between two conditions on every index (bootstrap
-  SE/CI/p).
+  — differences between two conditions on every index
+  (independent-sample bootstrap SE/CI/p).
 - [`plot.multid()`](https://cgtza2.github.io/r4lineups/reference/plot.multid.md)
   — decomposition waterfall, index dot plot, or indices by confidence.
 
@@ -460,9 +466,23 @@ validation for recent additions.
 
 ## Notes for agents
 
+- ROC-based summaries
+  ([`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md),
+  [`make_dpp()`](https://cgtza2.github.io/r4lineups/reference/make_dpp.md),
+  [`make_utility_curves()`](https://cgtza2.github.io/r4lineups/reference/make_utility_curves.md),
+  z-ROC) share one criterion grid from `.roc_thresholds()`
+  (`R/utils.R`): target-present suspect IDs plus target-absent suspect
+  IDs (designated) or filler IDs (estimated). Rejection confidence never
+  defines a criterion. Bootstraps pass the full-sample grid via
+  `thresholds`.
 - Most analyses expect either a **lineup vector** (mock‑witness choices)
   or a **data frame** with `target_present`, `identification`, and
   `confidence` for confidence‑based methods.
+- Every analysis that uses target‑absent lineups takes
+  `innocent_suspect = c("auto", "designated", "estimated")`. `"auto"`
+  treats the lineups as designated when a TA row is a suspect ID or a
+  non‑missing `suspect_pos` column exists; bootstraps resolve it once on
+  the full data via `.resolve_innocent_suspect()` (`R/utils.R`).
 - `make_*()` functions typically return structured S3 objects with
   [`print()`](https://rdrr.io/r/base/print.html),
   [`summary()`](https://rdrr.io/r/base/summary.html), and

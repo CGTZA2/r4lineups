@@ -391,11 +391,11 @@ knitr::kable(
 
 | Quantity        |    Value |
 |:----------------|---------:|
-| Mean            |  0.01548 |
+| Mean            |  0.01547 |
 | SD              |  0.00674 |
-| Skewness        | -0.04900 |
-| Excess kurtosis |  0.54300 |
-| Shapiro-Wilk p  |  0.08470 |
+| Skewness        | -0.04200 |
+| Excess kurtosis |  0.54700 |
+| Shapiro-Wilk p  |  0.08370 |
 
 Shape of the bootstrap distribution of the pAUC difference, simulated
 data (600 bootstrap resamples). {.table}
@@ -445,7 +445,7 @@ knitr::kable(
 
 | Method                      |   Lower |   Upper |
 |:----------------------------|--------:|--------:|
-| Wald (normal approximation) | 0.00431 | 0.03073 |
+| Wald (normal approximation) | 0.00431 | 0.03072 |
 | Bootstrap percentile        | 0.00230 | 0.02886 |
 
 95% confidence intervals for the pAUC difference by two methods,
@@ -472,8 +472,8 @@ print(comparison)
 #>   95% CI: [0.0043, 0.0307]
 #> 
 #> Statistical Test:
-#>   Z = 2.599
-#>   p-value = 0.009337
+#>   Z = 2.6
+#>   p-value = 0.009329
 #> 
 #> Interpretation: Strong (d' = 2.0) has higher discriminability than Weak (d' = 1.4) (**)
 #> 
@@ -516,8 +516,8 @@ summary(comparison)
 #>   Estimate: 0.0175 
 #>   SE(diff): 0.0067 
 #>   95% CI: [0.0043, 0.0307]
-#>   Z-score: 2.599 
-#>   p-value: 0.009337 
+#>   Z-score: 2.6 
+#>   p-value: 0.009329 
 #> 
 #> Effect size (d): 3.781 
 #> 
@@ -560,8 +560,8 @@ knitr::kable(
 
 | Region                   | pAUC difference | p-value |
 |:-------------------------|----------------:|--------:|
-| Default (to 0.113)       |         0.01752 | 0.00934 |
-| Policy cutoff (to 0.100) |         0.01527 | 0.00216 |
+| Default (to 0.113)       |         0.01752 | 0.00933 |
+| Policy cutoff (to 0.100) |         0.01527 | 0.00212 |
 
 The same two conditions compared over two different regions, simulated
 data. {.table}
@@ -617,9 +617,9 @@ knitr::kable(
 
 | Comparison       | pAUC difference |     Z |        p | p (Bonferroni) |
 |:-----------------|----------------:|------:|---------:|---------------:|
-| Strong vs Medium |         0.00335 | 0.598 | 0.549800 |        1.00000 |
-| Strong vs Weak   |         0.01752 | 2.717 | 0.006586 |        0.01976 |
-| Medium vs Weak   |         0.01192 | 2.192 | 0.028360 |        0.08508 |
+| Strong vs Medium |         0.00335 | 0.598 | 0.549600 |        1.00000 |
+| Strong vs Weak   |         0.01752 | 2.718 | 0.006571 |        0.01971 |
+| Medium vs Weak   |         0.01192 | 2.190 | 0.028510 |        0.08553 |
 
 Pairwise pAUC comparisons with Bonferroni adjustment, simulated data
 (400 target-present and 400 target-absent lineups per condition).

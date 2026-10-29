@@ -207,13 +207,15 @@ performance.
 - [`make_dpp()`](https://cgtza2.github.io/r4lineups/reference/make_dpp.md)
   : Compute Deviation from Perfect Performance (DPP)
 - [`plot_dpp()`](https://cgtza2.github.io/r4lineups/reference/plot_dpp.md)
-  : Plot DPP with Observed and Perfect ROC Curves
+  : Plot DPP Across Operating Points
 - [`plot_dpp_comparison()`](https://cgtza2.github.io/r4lineups/reference/plot_dpp_comparison.md)
   : Plot DPP Comparison Between Two Procedures
 - [`plot(`*`<pauc_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.pauc_comparison.md)
   : Plot pAUC Comparison
 - [`print(`*`<lineup_dpp>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.lineup_dpp.md)
   : Print Method for lineup_dpp Objects
+- [`print(`*`<lineup_dpp_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.lineup_dpp_comparison.md)
+  : Print Method for lineup_dpp_comparison Objects
 - [`print(`*`<pauc_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.pauc_comparison.md)
   : Print Method for pauc_comparison Objects
 - [`summary(`*`<pauc_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/summary.pauc_comparison.md)
@@ -465,7 +467,7 @@ optional Python setup).
 - [`get_embedding()`](https://cgtza2.github.io/r4lineups/reference/get_embedding.md)
   : Extract Face Embedding from an Image
 - [`get_face_landmarks()`](https://cgtza2.github.io/r4lineups/reference/get_face_landmarks.md)
-  : Get 468-Point Face Mesh Landmarks
+  : Get 478-Point Face Mesh Landmarks
 - [`get_key_landmarks()`](https://cgtza2.github.io/r4lineups/reference/get_key_landmarks.md)
   : Get Key Facial Landmarks (5-Point)
 - [`has_valid_face()`](https://cgtza2.github.io/r4lineups/reference/has_valid_face.md)

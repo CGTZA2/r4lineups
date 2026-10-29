@@ -56,7 +56,8 @@ An object of class `"func_size_bayes"` containing:
 
 - posterior_mean, posterior_median:
 
-  Posterior point estimates.
+  Posterior point estimates. The mean is exact, and is `Inf` when it
+  does not exist (see Details).
 
 - credible_interval:
 
@@ -81,6 +82,13 @@ is recommended. The posterior gives direct probability statements such
 as \\P(F \< k \mid \mathbf{n})\\, where \\k\\ is the nominal lineup
 size.
 
+The posterior mean of a reciprocal is computed exactly, not from the
+draws: with \\a = n_s + \alpha\\ and \\b = N - n_s + \alpha\\, \\E\[F
+\mid \mathbf{n}\] = (a + b - 1)/(a - 1)\\ when \\a \> 1\\. When \\a \le
+1\\ (for example, no suspect choices under the Jeffreys prior) the mean
+is infinite, and the Monte Carlo average of the draws would not settle
+on any value as `S` grew. Report the median and interval instead.
+
 ## References
 
 Tredoux, C. G. (1998). Statistical inference on measures of lineup
@@ -101,7 +109,7 @@ print(res)
 #> Bayesian Functional Size - Beta-Binomial model
 #>   Prior: Jeffreys-type Beta(0.50, 0.50)
 #>   n = 100, suspect IDs = 28 (rate = 0.280)
-#>   Posterior mean F:   3.637
+#>   Posterior mean F:   3.636
 #>   Posterior median F: 3.567
 #>   95% credible interval: [2.673, 5.034]
 plot(res)
@@ -113,7 +121,7 @@ print(res_t)
 #> Bayesian Functional Size - Beta-Binomial model
 #>   Prior: Jeffreys-type Beta(0.50, 0.50)
 #>   n = 100, suspect IDs = 28 (rate = 0.280)
-#>   Posterior mean F:   3.637
+#>   Posterior mean F:   3.636
 #>   Posterior median F: 3.563
 #>   95% credible interval: [2.668, 5.005]
 #>   P(F < 6.000 | data): 0.9983

@@ -5,5 +5,13 @@ Bootstrap SDT Parameter Estimates
 ## Usage
 
 ``` r
-.bootstrap_sdt_fit(raw_data, lineup_size, model, n_bootstrap, conf_level)
+.bootstrap_sdt_fit(
+  raw_data,
+  lineup_size,
+  model,
+  n_bootstrap,
+  conf_level,
+  innocent_suspect = "auto",
+  thresholds = NULL
+)
 ```

@@ -13,7 +13,9 @@ ppv_by_confidence(
   confidence_bins = NULL,
   correction = c("nominal", "effective", "none"),
   effective_size_data = NULL,
-  quiet = FALSE
+  quiet = FALSE,
+  innocent_suspect = "auto",
+  base_rate = NULL
 )
 ```
 
@@ -53,7 +55,28 @@ ppv_by_confidence(
 - quiet:
 
   Logical. Suppress the note issued when `correction` is not applied
-  because the data designate an innocent suspect. Default `FALSE`.
+  because the data designate an innocent suspect, and the note issued
+  when the two arms differ in size. Default `FALSE`.
+
+- innocent_suspect:
+
+  How innocent-suspect identifications in target-absent lineups are
+  obtained. `"designated"`: the lineups had a designated innocent
+  suspect, so target-absent `"suspect"` rows are counted directly, and
+  zero such rows means a false-ID rate of zero. `"estimated"`: there was
+  no designated innocent suspect, so the innocent-suspect count is
+  estimated as filler IDs divided by `lineup_size`. `"auto"` (the
+  default) chooses `"designated"` when any target-absent row is a
+  suspect ID or the data have a non-missing `suspect_pos` column, and
+  `"estimated"` otherwise, with a message.
+
+- base_rate:
+
+  Prior probability that the suspect is guilty. `NULL` (default)
+  computes PPV from counts, as below. A number strictly between 0 and 1
+  computes it from the guilty-ID rate (per target-present trial) and the
+  innocent-suspect-ID rate (per target-absent trial) at that prior, so
+  the result does not depend on the TP:TA split.
 
 ## Value
 
@@ -86,10 +109,14 @@ Different correction methods estimate innocent_suspect_IDs differently:
 
 - "none": assumes all errors are innocent-suspect IDs (error_rate)
 
-**Note on the implicit base rate:** PPV is computed from raw
+**Note on the base rate:** by default PPV is computed from raw
 target-present and target-absent counts, so the prior probability of
 guilt is implicitly the experiment's TP:TA ratio (e.g., 0.5 for the
-usual balanced design). PPV is *not* base-rate-free: at different
+usual balanced design), and a message is issued when the two arms differ
+in size. Set `base_rate` to compute \\\pi g(c) / (\pi g(c) + (1 - \pi)
+i(c))\\ from the guilty-ID rate \\g(c)\\ and innocent-suspect-ID rate
+\\i(c)\\ instead; `base_rate = 0.5` reproduces the balanced-design value
+at any sample sizes. PPV is *not* base-rate-free: at different
 real-world base rates the PPV of the same procedure will differ. When
 target-absent lineups have no designated innocent suspect, the
 correction also relies on the pseudo-distribution assumption of
