@@ -41,6 +41,16 @@
 
 ## Bug fixes
 
+* `fit_max_sdt()` could report non-convergence at a correctly found minimum.
+  It chose the best of its L-BFGS-B starts by value and kept that start's
+  convergence code, so a start that stopped with a line-search code at a flat
+  minimum was reported as not converged even when the Nelder-Mead polish
+  converged to the same value. This happened with R 4.6.2 on Linux, where
+  `compare_max_sdt()` then refused to compare two fits to identical
+  conditions. A polish that converges without being worse than the best
+  start is now the reported solution, and `compare_max_sdt()` gives the
+  convergence codes when it refuses. Estimates are unchanged.
+
 * `make_rocdata()` and `make_utility_curves()` took a confidence criterion
   from every response, rejections included. The extra criteria only
   duplicated existing operating points, so the ROC path and partial AUC were

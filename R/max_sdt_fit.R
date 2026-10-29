@@ -356,12 +356,21 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
   if (is.null(opt))
     stop("Optimisation failed from all starting values.", call. = FALSE)
   # Polish; report convergence honestly (do not mask a non-converged result).
+  # A polish that converges without being worse than the best start is the
+  # converged solution: at a flat minimum the best L-BFGS-B start can stop with
+  # a line-search code although no start does better.
   opt_nm <- tryCatch(
     optim(par = opt$par, fn = obj, method = "Nelder-Mead",
           control = list(maxit = 5000)),
     error = function(e) NULL
   )
-  if (!is.null(opt_nm) && opt_nm$value < opt$value) opt <- opt_nm
+  if (!is.null(opt_nm)) {
+    tol <- 1e-8 * (1 + abs(opt$value))
+    if (opt_nm$value < opt$value ||
+        (opt_nm$convergence == 0L && opt_nm$value <= opt$value + tol)) {
+      opt <- opt_nm
+    }
+  }
 
   phat <- opt$par
   chisq_val <- opt$value
@@ -632,8 +641,9 @@ compare_max_sdt <- function(free, constrained) {
          call. = FALSE)
   }
   if (free$convergence != 0L || constrained$convergence != 0L) {
-    stop("Both models must have converged before they can be compared.",
-         call. = FALSE)
+    stop("Both models must have converged before they can be compared ",
+         "(optim convergence codes: free ", free$convergence,
+         ", constrained ", constrained$convergence, ").", call. = FALSE)
   }
   if (free$n_params <= constrained$n_params)
     stop("'free' must have more free parameters than 'constrained'.", call. = FALSE)
