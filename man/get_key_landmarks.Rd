@@ -29,7 +29,7 @@ left eye, right eye, nose tip, left mouth corner, right mouth corner.
 \details{
 These 5 landmarks are sufficient for basic face alignment and are
 commonly used in face recognition pipelines. For more detailed
-landmarks (468 points), use \code{\link{get_face_landmarks}}.
+landmarks (478 points), use \code{\link{get_face_landmarks}}.
 }
 \examples{
 \dontrun{

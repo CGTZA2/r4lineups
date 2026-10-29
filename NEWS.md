@@ -30,6 +30,18 @@
 
 ## Bug fixes
 
+* `get_face_landmarks()` failed with every current MediaPipe release. The
+  image was read into R and passed back as an int32 array, which OpenCV and
+  MediaPipe reject, and the function used `mediapipe.solutions.face_mesh`,
+  which current MediaPipe no longer has. The image now stays a uint8 numpy
+  array, and when `solutions` is absent the MediaPipe Tasks `FaceLandmarker`
+  is used. Its model is downloaded once to
+  `tools::R_user_dir("r4lineups", "cache")`. Both routes return the 478-point
+  mesh (468 face points plus 10 iris points); the documentation said 468.
+  `check_python_deps()` now records in a `"face_mesh"` attribute whether
+  landmarks can actually be extracted, not only whether MediaPipe imports.
+  An opt-in test (`R4LINEUPS_RUN_FACE=true`) exercises the whole path.
+
 * In the app's Bias & size tab, ticking "Small-sample corrected E'" changed
   the reported estimate but left its intervals on the plug-in estimator, so the
   value box could show a corrected E' with a plug-in interval that did not

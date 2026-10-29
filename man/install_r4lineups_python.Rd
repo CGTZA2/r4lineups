@@ -41,7 +41,7 @@ This function installs:
   \item opencv-python - Image processing
   \item numpy - Numerical computing
   \item tf-keras - TensorFlow/Keras backend
-  \item mediapipe - For 468-point face mesh (optional but recommended)
+  \item mediapipe - For 478-point face mesh (optional but recommended)
   \item retinaface - Best face detector
 }
 
