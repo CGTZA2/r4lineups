@@ -41,6 +41,16 @@
 
 ## Bug fixes
 
+* `compare_multid()` differenced the two bootstrap matrices row by row. The
+  conditions are independent samples, but fits made with the same seed have
+  correlated draws, so the standard error collapsed. Comparing counts
+  (60, 25, 15, 10, 30, 60) with (60, 27, 13, 10, 30, 60), both fitted with
+  seed 1, gave d'(GFp) a standard error of .014 and p < .0001; the correct
+  values are .347 and .86. Identical inputs gave a zero-width interval. The
+  standard error is now the square root of the sum of the two bootstrap
+  variances, and the interval comes from randomly re-paired draws.
+  `compare_multid()` gains `seed`.
+
 * `get_face_landmarks()` failed with every current MediaPipe release. The
   image was read into R and passed back as an int32 array, which OpenCV and
   MediaPipe reject, and the function used `mediapipe.solutions.face_mesh`,

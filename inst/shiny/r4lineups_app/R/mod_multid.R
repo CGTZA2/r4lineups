@@ -120,7 +120,7 @@ multid_server <- function(id, data) {
           })
         }
         comparison <- if (length(fits) == 2) {
-          r4lineups::compare_multid(fits[[1]], fits[[2]], labels = labels)
+          r4lineups::compare_multid(fits[[1]], fits[[2]], labels = labels, seed = input$seed)
         }
         list(fits = fits, labels = labels, comparison = comparison)
       })

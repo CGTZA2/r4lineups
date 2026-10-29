@@ -500,11 +500,16 @@ plot.multid <- function(x, type = c("decomposition", "indices", "confidence"), .
 #' for example simultaneous versus sequential lineups, or high- versus
 #' low-similarity lineups. When both objects carry bootstrap draws, standard
 #' errors, percentile intervals and normal-approximation p-values are given
-#' for each difference. The two conditions are treated as independent samples.
+#' for each difference. The two conditions are treated as independent samples:
+#' the standard error is the square root of the sum of the two bootstrap
+#' variances, and the interval is taken from differences between randomly
+#' re-paired draws, so the result does not depend on whether the two fits used
+#' the same seed.
 #'
 #' @param x,y Objects of class \code{"multid"} from \code{\link{make_multid}},
 #'   fitted with the same \code{filler_rate}.
 #' @param labels Names for the two conditions.
+#' @param seed Optional random seed for re-pairing the bootstrap draws.
 #' @return A data frame of class \code{"multid_comparison"}.
 #' @examples
 #' # Simultaneous vs sequential lineups, Lee & Penrod's (2019) Table 3
@@ -514,7 +519,7 @@ plot.multid <- function(x, type = c("decomposition", "indices", "confidence"), .
 #'                    correction = "none")
 #' compare_multid(sim, sqn, labels = c("simultaneous", "sequential"))
 #' @export
-compare_multid <- function(x, y, labels = c("x", "y")) {
+compare_multid <- function(x, y, labels = c("x", "y"), seed = NULL) {
   if (!inherits(x, "multid") || !inherits(y, "multid")) {
     stop("x and y must be objects from make_multid().", call. = FALSE)
   }
@@ -534,10 +539,17 @@ compare_multid <- function(x, y, labels = c("x", "y")) {
   )
   names(out)[3:4] <- labels
   if (!is.null(x$boot) && !is.null(y$boot)) {
+    # The conditions are independent samples, but draws from fits that shared
+    # a seed are correlated row by row, so re-pair y's draws at random.
+    restore_rng <- .local_seed(seed)
+    on.exit(restore_rng(), add = TRUE)
     b <- min(nrow(x$boot), nrow(y$boot))
-    diffs <- x$boot[seq_len(b), keep, drop = FALSE] - y$boot[seq_len(b), keep, drop = FALSE]
+    xb <- x$boot[seq_len(b), keep, drop = FALSE]
+    yb <- y$boot[sample.int(nrow(y$boot), b), keep, drop = FALSE]
+    diffs <- xb - yb
     alpha <- (1 - x$conf_level) / 2
-    out$se <- apply(diffs, 2, stats::sd, na.rm = TRUE)
+    out$se <- sqrt(apply(x$boot[, keep, drop = FALSE], 2, stats::var, na.rm = TRUE) +
+                     apply(y$boot[, keep, drop = FALSE], 2, stats::var, na.rm = TRUE))
     out$ci_lower <- apply(diffs, 2, stats::quantile, probs = alpha, na.rm = TRUE)
     out$ci_upper <- apply(diffs, 2, stats::quantile, probs = 1 - alpha, na.rm = TRUE)
     out$p_value <- 2 * stats::pnorm(-abs(out$difference / out$se))

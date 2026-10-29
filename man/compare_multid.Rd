@@ -4,13 +4,15 @@
 \alias{compare_multid}
 \title{Compare Multi-d' Indices Between Two Conditions}
 \usage{
-compare_multid(x, y, labels = c("x", "y"))
+compare_multid(x, y, labels = c("x", "y"), seed = NULL)
 }
 \arguments{
 \item{x, y}{Objects of class \code{"multid"} from \code{\link{make_multid}},
 fitted with the same \code{filler_rate}.}
 
 \item{labels}{Names for the two conditions.}
+
+\item{seed}{Optional random seed for re-pairing the bootstrap draws.}
 }
 \value{
 A data frame of class \code{"multid_comparison"}.
@@ -20,7 +22,11 @@ Computes the difference (\code{x} minus \code{y}) on every Multi-d' index,
 for example simultaneous versus sequential lineups, or high- versus
 low-similarity lineups. When both objects carry bootstrap draws, standard
 errors, percentile intervals and normal-approximation p-values are given
-for each difference. The two conditions are treated as independent samples.
+for each difference. The two conditions are treated as independent samples:
+the standard error is the square root of the sum of the two bootstrap
+variances, and the interval is taken from differences between randomly
+re-paired draws, so the result does not depend on whether the two fits used
+the same seed.
 }
 \examples{
 # Simultaneous vs sequential lineups, Lee & Penrod's (2019) Table 3
