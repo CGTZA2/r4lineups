@@ -40,7 +40,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `esize_T_ci_n()` — normal‑theory CI for Tredoux effective size.
 - `func_size()` — functional size (N / suspect IDs).
 - `func_size.boot()` — bootstrap statistic for functional size.
-- `func_size_report()` — functional size + boot CIs.
+- `func_size_report()` — functional size + boot CIs (bootstraps p and inverts, so a limit can be `Inf`) and an exact Clopper–Pearson CI.
 - `effsize_compare()` — compare effective sizes across lineups.
 - `compare_eff_sizes.boot()` — bootstrap stat for effective size differences.
 - `eff_size_per_foils()` — effective size contribution per foil.
@@ -60,7 +60,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 - `rep_index()` — representation index helper.
 
 ### ROC, CAC, RAC (confidence‑based)
-- `make_rocdata()` — ROC data (suspect IDs only).
+- `make_rocdata()` — ROC data (suspect IDs only); criteria are the confidence levels of responses that move a point (`thresholds` to fix them).
 - `make_roc()` — ROC analysis + plot wrapper.
 - `make_roc_gg()` — ROC ggplot.
 - `make_cacdata()` — CAC data (counts by default; `base_rate` computes from rates).
@@ -177,7 +177,7 @@ This document gives a concise, systematic overview of the **r4lineups** codebase
 
 ### Multi‑d′ model (Lee & Penrod, 2019)
 - `make_multid()` — d′(GI), d′(GFp), d′(IFa), d′(FaFp), d′(RaRp) + TP/TA lineup‑bias indices from TP/TA data or counts; bootstrap CIs; cumulative by confidence; fair‑lineup reference for d′(IFa).
-- `compare_multid()` — differences between two conditions on every index (bootstrap SE/CI/p).
+- `compare_multid()` — differences between two conditions on every index (independent-sample bootstrap SE/CI/p).
 - `plot.multid()` — decomposition waterfall, index dot plot, or indices by confidence.
 
 ### Simulation & power
@@ -238,6 +238,7 @@ These wrappers combine data creation, analysis, and plotting:
 
 ## Notes for agents
 
+- ROC-based summaries (`make_rocdata()`, `make_dpp()`, `make_utility_curves()`, z-ROC) share one criterion grid from `.roc_thresholds()` (`R/utils.R`): target-present suspect IDs plus target-absent suspect IDs (designated) or filler IDs (estimated). Rejection confidence never defines a criterion. Bootstraps pass the full-sample grid via `thresholds`.
 - Most analyses expect either a **lineup vector** (mock‑witness choices) or a **data frame** with `target_present`, `identification`, and `confidence` for confidence‑based methods.
 - Every analysis that uses target‑absent lineups takes `innocent_suspect = c("auto", "designated", "estimated")`. `"auto"` treats the lineups as designated when a TA row is a suspect ID or a non‑missing `suspect_pos` column exists; bootstraps resolve it once on the full data via `.resolve_innocent_suspect()` (`R/utils.R`).
 - `make_*()` functions typically return structured S3 objects with `print()`, `summary()`, and `plot()` methods.
