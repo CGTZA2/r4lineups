@@ -168,6 +168,10 @@ plot_effective_size_conf <- function(ppv_range_obj,
   if (!all(c("confidence", "effective_size") %in% names(plot_data))) {
     stop("Data must have columns: confidence, effective_size")
   }
+  # Bins with no target-absent trials have no error rate to show
+  if ("error_rate" %in% names(plot_data)) {
+    plot_data <- plot_data[!is.na(plot_data$error_rate), , drop = FALSE]
+  }
 
   # Create numeric x-axis
   plot_data$conf_numeric <- seq_len(nrow(plot_data))
@@ -257,6 +261,10 @@ plot_error_rate_conf <- function(ppv_range_obj, show_points = TRUE) {
   # Validate required columns
   if (!all(c("confidence", "error_rate") %in% names(plot_data))) {
     stop("Data must have columns: confidence, error_rate")
+  }
+  # Bins with no target-absent trials have no error rate to show
+  if ("error_rate" %in% names(plot_data)) {
+    plot_data <- plot_data[!is.na(plot_data$error_rate), , drop = FALSE]
   }
 
   # Create numeric x-axis

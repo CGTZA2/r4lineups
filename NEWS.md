@@ -45,6 +45,14 @@
   data, so a resample that happens to contain no suspect IDs no longer switches
   estimator.
 
+* `ppv_by_confidence()` dropped every confidence bin that contained no
+  target-absent trials, and with it that bin's guilty-suspect IDs, so both the
+  bin and the overall PPV were wrong. With 90 guilty IDs at confidence 100 and
+  all target-absent responses at 50, the overall PPV was .50 instead of .909.
+  Such bins are now kept, with no innocent-suspect IDs (PPV 1) and an `NA`
+  error rate and effective size. Only bins empty in both arms are dropped.
+  `make_ppv_range()` and its plots inherit the fix.
+
 * `compare_pauc()` overstated partial AUC whenever the ROC had a vertical
   segment, that is, when a confidence level added correct IDs but no false IDs.
   Its integrator kept only the upper endpoint of each such segment, so the next

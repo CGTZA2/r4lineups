@@ -256,8 +256,24 @@ ppv_by_confidence <- function(data,
     ta_conf <- ta_data[ta_data$conf_level == conf, ]
     n_ta_total <- nrow(ta_conf)
 
+    # A bin is skipped only when neither arm has trials in it. A bin with
+    # target-present trials but no target-absent ones has no innocent-suspect
+    # IDs, so its PPV is 1 if it has guilty IDs. Dropping it would remove those
+    # guilty IDs from the overall PPV as well.
+    n_tp_bin <- sum(tp_data$conf_level == conf, na.rm = TRUE)
+    if (n_ta_total == 0 && n_tp_bin == 0) {
+      next
+    }
     if (n_ta_total == 0) {
-      # Skip empty bins
+      ppv_results <- rbind(ppv_results, tibble::tibble(
+        confidence = as.character(conf),
+        n_guilty_ids = n_guilty,
+        n_innocent_ids_est = 0,
+        n_total_ids = n_guilty,
+        ppv = if (n_guilty > 0) 1 else NA_real_,
+        error_rate = NA_real_,
+        effective_size = NA_real_
+      ))
       next
     }
 
