@@ -11,6 +11,7 @@ make_calibration(
   lineup_size = 6,
   show_plot = TRUE,
   confidence_scale = c("auto", "0-1", "0-100"),
+  innocent_suspect = "auto",
   ...
 )
 }
@@ -27,6 +28,17 @@ make_calibration(
 
 \item{confidence_scale}{How the confidence scale is interpreted: "auto" (default),
 "0-1", or "0-100". See \code{\link{make_calibration_data}}.}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 
 \item{...}{Additional arguments passed to make_calibration_gg()}
 }

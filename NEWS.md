@@ -1,6 +1,28 @@
 # r4lineups 2.3.0 (development)
 
+## New features
+
+* Every analysis that uses target-absent lineups gains an `innocent_suspect`
+  argument: `"designated"`, `"estimated"` (filler IDs / lineup size), or
+  `"auto"` (the default). The app's Data tab has a matching control. See the
+  bug fix below.
+
 ## Bug fixes
+
+* Target-absent data with a designated innocent suspect who was never chosen
+  were treated as having no designated suspect, so the false-ID rate was
+  estimated from filler IDs instead of being zero. With 100 target-absent
+  lineups, 60 filler IDs and no suspect IDs, the ROC reached a false-ID rate
+  of .10 instead of 0. `"auto"` now treats the lineups as designated when any
+  target-absent row is a suspect ID *or* the data carry a non-missing
+  `suspect_pos` column (as `simulate_lineup_data()` output and
+  `lineup_example` do). Otherwise it falls back to the filler estimate with a
+  message. Bootstraps (`compare_pauc()`, `fit_sdt_roc()`, `bootstrap_anri()`,
+  `compare_anri()`), `make_calibration_by_condition()`,
+  `make_utility_difference()`, `ppv_range_by_confidence()` and the
+  `make_multid()` confidence breakdown now resolve the design once on the full
+  data, so a resample that happens to contain no suspect IDs no longer switches
+  estimator.
 
 * `compare_pauc()` overstated partial AUC whenever the ROC had a vertical
   segment, that is, when a confidence level added correct IDs but no false IDs.

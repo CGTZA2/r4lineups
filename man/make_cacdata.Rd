@@ -4,7 +4,12 @@
 \alias{make_cacdata}
 \title{Compute CAC (Confidence-Accuracy Characteristic) Data}
 \usage{
-make_cacdata(data, lineup_size = 6, confidence_bins = NULL)
+make_cacdata(
+  data,
+  lineup_size = 6,
+  confidence_bins = NULL,
+  innocent_suspect = "auto"
+)
 }
 \arguments{
 \item{data}{A dataframe with the following columns:
@@ -19,6 +24,17 @@ make_cacdata(data, lineup_size = 6, confidence_bins = NULL)
 \item{confidence_bins}{Numeric vector of bin edges for grouping confidence
 (e.g., c(0, 60, 80, 100) creates bins 0-60, 61-80, 81-100).
 If NULL, uses individual confidence levels.}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 }
 \value{
 A list containing:

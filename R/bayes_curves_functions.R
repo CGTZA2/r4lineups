@@ -66,13 +66,15 @@
 #' bayes <- make_bayes_curves(lineup_example)
 #' bayes$likelihoods
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 make_bayes_curves <- function(data,
                                response_categories = c("simple", "confidence"),
                                confidence_bins = NULL,
                                prior_grid = seq(0.01, 0.99, 0.01),
-                               lineup_size = 6) {
+                               lineup_size = 6,
+                               innocent_suspect = "auto") {
 
   # Validate required columns
   required_cols <- c("target_present", "identification")
@@ -119,7 +121,7 @@ make_bayes_curves <- function(data,
   }
 
   guilty_counts <- table(guilty_data$response_cat)
-  innocent_method <- .innocent_suspect_method(innocent_data)
+  innocent_method <- .innocent_suspect_method(innocent_data, innocent_suspect)
   innocent_counts <- .adjust_innocent_response_counts(
     table(innocent_data$response_cat), lineup_size, innocent_method
   )
@@ -279,6 +281,7 @@ make_bayes_curves <- function(data,
 #' bree <- make_bree_curve(lineup_example[odd, ], lineup_example[-odd, ])
 #' head(bree$bree_curve)
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 make_bree_curve <- function(data_proc_a,
@@ -286,7 +289,8 @@ make_bree_curve <- function(data_proc_a,
                              reference_response = "suspect",
                              confidence_bins = NULL,
                              prior_grid = seq(0.01, 0.99, 0.01),
-                             lineup_size = 6) {
+                             lineup_size = 6,
+                             innocent_suspect = "auto") {
 
   # Determine response category type
   if (is.null(confidence_bins)) {
@@ -300,13 +304,15 @@ make_bree_curve <- function(data_proc_a,
                                 response_categories = response_type,
                                 confidence_bins = confidence_bins,
                                 prior_grid = prior_grid,
-                                lineup_size = lineup_size)
+                                lineup_size = lineup_size,
+                                innocent_suspect = innocent_suspect)
 
   curves_b <- make_bayes_curves(data_proc_b,
                                 response_categories = response_type,
                                 confidence_bins = confidence_bins,
                                 prior_grid = prior_grid,
-                                lineup_size = lineup_size)
+                                lineup_size = lineup_size,
+                                innocent_suspect = innocent_suspect)
 
   # Check if reference response exists in both procedures
   if (!reference_response %in% curves_a$likelihoods$response) {

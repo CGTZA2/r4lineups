@@ -24,8 +24,9 @@ expect_outputs_render <- function(output, ids) {
 }
 
 trial_data <- function(df = lineup_example, lineup_size = 6, bins = c(0, 60, 80, 100),
-                       groups = NULL) {
-  shiny::reactive(list(data = df, label = "test", lineup_size = lineup_size, bins = bins,
+                       groups = NULL, innocent_suspect = "auto") {
+  shiny::reactive(list(data = df, label = "test", lineup_size = lineup_size,
+                       innocent_suspect = innocent_suspect, bins = bins,
                        groups = groups, has_rt = "response_time" %in% names(df)))
 }
 
@@ -44,6 +45,9 @@ test_that("data module loads the examples and finds the grouping column", {
     expect_true(d$has_rt)
     expect_equal(d$groups$labels, c("A", "B"))
     expect_equal(d$bins, c(0, 60, 80, 100))
+    expect_equal(d$innocent_suspect, "auto")
+    session$setInputs(innocent_suspect = "designated")
+    expect_equal(session$returned()$innocent_suspect, "designated")
   })
 })
 
@@ -134,6 +138,21 @@ test_that("ROC module honours the lineup size from the Data tab", {
     expect_null(r$pauc)
     expect_outputs_render(output, c("vb_pauc", "roc_plot", "roc_table", "cac_plot", "cac_table",
                                     "fullroc_plot", "fullroc_table"))
+  })
+})
+
+test_that("ROC module honours the innocent-suspect setting from the Data tab", {
+  # No target-absent suspect IDs and no suspect_pos column
+  df <- lineup_example[, c("target_present", "identification", "confidence")]
+  df$identification[!df$target_present & df$identification == "suspect"] <- "filler"
+  shiny::testServer(mod("roc_server"),
+                    args = list(data = trial_data(df, innocent_suspect = "designated")), {
+    session$setInputs(order = "apriori", n_boot = 100, seed = 1, run = 1)
+    r <- session$returned()
+    expect_equal(r$roc$innocent_suspect_method, "designated")
+    expect_equal(max(r$roc$roc_data$false_id_rate), 0)
+    expect_equal(r$cac$innocent_suspect_method, "designated")
+    expect_equal(r$fullroc$innocent_suspect_method, "designated")
   })
 })
 

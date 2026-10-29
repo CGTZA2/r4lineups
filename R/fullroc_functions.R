@@ -75,13 +75,15 @@
 #' operating characteristic curves of lineup identification performance.
 #' \emph{Perspectives on Psychological Science, 15}(3), 589-607.
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 make_fullroc_data <- function(data,
                                conf_bins = NULL,
                                order = c("diagnosticity", "apriori"),
                                lineup_size = 6,
-                               epsilon = 0.001) {
+                               epsilon = 0.001,
+                               innocent_suspect = "auto") {
   .validate_lineup_analysis(data)
 
   order <- match.arg(order)
@@ -128,7 +130,7 @@ make_fullroc_data <- function(data,
 
   n_tp <- nrow(tp_data)
   n_ta <- nrow(ta_data)
-  innocent_method <- .innocent_suspect_method(ta_data)
+  innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
       !is.finite(lineup_size) || lineup_size < 2) {
     stop("lineup_size must be a finite number of at least 2.", call. = FALSE)
@@ -319,6 +321,7 @@ make_fullroc_data <- function(data,
 #' operating characteristic curves of lineup identification performance.
 #' \emph{Perspectives on Psychological Science, 15}(3), 589-607.
 #'
+#' @inheritParams make_rocdata
 #' @export
 make_fullroc <- function(data,
                          conf_bins = NULL,
@@ -326,6 +329,7 @@ make_fullroc <- function(data,
                          lineup_size = 6,
                          show_plot = TRUE,
                          epsilon = 0.001,
+                         innocent_suspect = "auto",
                          ...) {
 
   order <- match.arg(order)
@@ -336,7 +340,8 @@ make_fullroc <- function(data,
     conf_bins = conf_bins,
     order = order,
     lineup_size = lineup_size,
-    epsilon = epsilon
+    epsilon = epsilon,
+    innocent_suspect = innocent_suspect
   )
 
   # Create plot

@@ -4,7 +4,7 @@
 \alias{make_rocdata}
 \title{Compute ROC Data for Lineup Identification}
 \usage{
-make_rocdata(data, lineup_size = 6)
+make_rocdata(data, lineup_size = 6, innocent_suspect = "auto")
 }
 \arguments{
 \item{data}{A dataframe with the following columns:
@@ -16,6 +16,17 @@ make_rocdata(data, lineup_size = 6)
 
 \item{lineup_size}{Integer. Number of people in the lineup (default = 6).
 Used to estimate false ID rate when fillers are chosen from target-absent lineups.}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 }
 \value{
 A list containing:
@@ -38,9 +49,10 @@ Mickes (2015). For each confidence level:
   \item False ID rate = proportion of target-absent lineups where suspect identified
 }
 
-If target-absent data contain explicit \code{"suspect"} responses, those
-designated innocent-suspect IDs are used directly. Otherwise, filler IDs
-are divided by lineup size. The two estimators are never added together.
+With a designated innocent suspect, target-absent \code{"suspect"}
+responses are used directly. Without one, filler IDs are divided by lineup
+size. The two estimators are never added together. See
+\code{innocent_suspect} for how the design is determined.
 }
 \examples{
 data(lineup_example)

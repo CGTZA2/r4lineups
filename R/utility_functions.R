@@ -81,13 +81,15 @@
 #' util <- make_utility_curves(lineup_example)
 #' util$max_utility
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 make_utility_curves <- function(data,
                                 base_rate = 0.5,
                                 utility_matrix = c(tp = 1, fn = -0.5, fp = -2, tn = 0.5),
                                 lineup_size = 6,
-                                criteria = c("confidence", "all")) {
+                                criteria = c("confidence", "all"),
+                                innocent_suspect = "auto") {
   .validate_lineup_analysis(data)
 
   # Validate inputs
@@ -122,7 +124,7 @@ make_utility_curves <- function(data,
 
   # Get confidence levels (sorted from high to low for cumulative criteria)
   conf_levels <- sort(unique(data$confidence), decreasing = TRUE)
-  innocent_method <- .innocent_suspect_method(ta_data)
+  innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
 
   # Initialize results
   utility_results <- tibble::tibble(
@@ -282,6 +284,7 @@ make_utility_curves <- function(data,
 #' util_diff$difference_curve
 #' }
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 make_utility_difference <- function(data_proc_a,
@@ -289,7 +292,8 @@ make_utility_difference <- function(data_proc_a,
                                     base_rate_grid = seq(0.01, 0.99, 0.01),
                                     utility_matrix = c(tp = 1, fn = -0.5, fp = -2, tn = 0.5),
                                     utility_type = c("max", "avg", "all"),
-                                    lineup_size = 6) {
+                                    lineup_size = 6,
+                                    innocent_suspect = "auto") {
 
   utility_type <- match.arg(utility_type)
 
@@ -301,18 +305,24 @@ make_utility_difference <- function(data_proc_a,
     difference = numeric()
   )
 
+  # Resolve each procedure's design once, not once per base rate
+  innocent_a <- .resolve_innocent_suspect(data_proc_a, innocent_suspect)
+  innocent_b <- .resolve_innocent_suspect(data_proc_b, innocent_suspect)
+
   # Compute utilities at each base rate
   for (br in base_rate_grid) {
     # Compute utility curves for both procedures
     util_a <- make_utility_curves(data_proc_a,
                                   base_rate = br,
                                   utility_matrix = utility_matrix,
-                                  lineup_size = lineup_size)
+                                  lineup_size = lineup_size,
+                                  innocent_suspect = innocent_a)
 
     util_b <- make_utility_curves(data_proc_b,
                                   base_rate = br,
                                   utility_matrix = utility_matrix,
-                                  lineup_size = lineup_size)
+                                  lineup_size = lineup_size,
+                                  innocent_suspect = innocent_b)
 
     # Extract the relevant utility value based on type
     if (utility_type == "max") {
@@ -533,6 +543,7 @@ plot_utility_difference <- function(util_diff_obj, show_crossover = TRUE) {
 #' print(comparison)
 #' }
 #'
+#' @inheritParams make_rocdata
 #' @export
 compare_utility <- function(data_proc_a,
                            data_proc_b,
@@ -540,6 +551,7 @@ compare_utility <- function(data_proc_a,
                            utility_matrix = c(tp = 1, fn = -0.5, fp = -2, tn = 0.5),
                            utility_type = c("max", "avg", "all"),
                            show_plot = TRUE,
+                           innocent_suspect = "auto",
                            ...) {
 
   utility_type <- match.arg(utility_type)
@@ -550,7 +562,8 @@ compare_utility <- function(data_proc_a,
     data_proc_b,
     base_rate_grid = base_rate_grid,
     utility_matrix = utility_matrix,
-    utility_type = utility_type
+    utility_type = utility_type,
+    innocent_suspect = innocent_suspect
   )
 
   # Create plot

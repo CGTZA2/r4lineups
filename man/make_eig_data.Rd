@@ -4,7 +4,12 @@
 \alias{make_eig_data}
 \title{Prepare EIG Data from Lineup Identification}
 \usage{
-make_eig_data(data, confidence_bins = NULL, lineup_size = 6)
+make_eig_data(
+  data,
+  confidence_bins = NULL,
+  lineup_size = 6,
+  innocent_suspect = "auto"
+)
 }
 \arguments{
 \item{data}{A dataframe with the following columns:
@@ -20,6 +25,17 @@ If NULL, uses individual confidence levels.}
 
 \item{lineup_size}{Nominal lineup size. Used to split target-absent filler
 identifications when no designated innocent suspect is present.}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 }
 \value{
 A list containing:

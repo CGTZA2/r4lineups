@@ -10,7 +10,8 @@ ppv_by_confidence(
   confidence_bins = NULL,
   correction = c("nominal", "effective", "none"),
   effective_size_data = NULL,
-  quiet = FALSE
+  quiet = FALSE,
+  innocent_suspect = "auto"
 )
 }
 \arguments{
@@ -37,6 +38,17 @@ If NULL and correction="effective", computes from data.}
 \item{quiet}{Logical. Suppress the note issued when \code{correction} is not
 applied because the data designate an innocent suspect. Default
 \code{FALSE}.}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 }
 \value{
 A list containing:

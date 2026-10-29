@@ -64,9 +64,11 @@ entropy <- function(p, base = 2) {
 #' eig_data <- make_eig_data(lineup_example, confidence_bins = c(0, 60, 80, 100))
 #' eig_data$response_data
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
-make_eig_data <- function(data, confidence_bins = NULL, lineup_size = 6) {
+make_eig_data <- function(data, confidence_bins = NULL, lineup_size = 6,
+                          innocent_suspect = "auto") {
   .validate_lineup_analysis(data)
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
       !is.finite(lineup_size) || lineup_size < 2) {
@@ -120,7 +122,7 @@ make_eig_data <- function(data, confidence_bins = NULL, lineup_size = 6) {
   # Count frequencies for each response category
   guilty_counts <- table(guilty_data$response_cat)
   innocent_counts <- table(innocent_data$response_cat)
-  innocent_method <- .innocent_suspect_method(innocent_data)
+  innocent_method <- .innocent_suspect_method(innocent_data, innocent_suspect)
   innocent_counts <- .adjust_innocent_response_counts(
     innocent_counts, lineup_size, innocent_method
   )
@@ -215,14 +217,16 @@ make_eig_data <- function(data, confidence_bins = NULL, lineup_size = 6) {
 #'                           confidence_bins = c(0, 60, 80, 100))
 #' print(eig_result)
 #'
+#' @inheritParams make_rocdata
 #' @export
 compute_eig <- function(eig_data, prior_guilt = 0.5, confidence_bins = NULL,
-                        lineup_size = 6) {
+                        lineup_size = 6, innocent_suspect = "auto") {
 
   # If eig_data is a raw dataframe, prepare it first
   if (is.data.frame(eig_data) && !("response_data" %in% names(eig_data))) {
     eig_data <- make_eig_data(eig_data, confidence_bins = confidence_bins,
-                              lineup_size = lineup_size)
+                              lineup_size = lineup_size,
+                              innocent_suspect = innocent_suspect)
   }
 
   # Validate prior
@@ -574,14 +578,17 @@ plot_eig_posteriors <- function(eig_obj, max_responses = 15, show_prior = TRUE) 
 #' result$plot_ig
 #' result$plot_posteriors
 #'
+#' @inheritParams make_rocdata
 #' @export
 make_eig <- function(data, prior_guilt = 0.5, confidence_bins = NULL,
-                     show_plot = TRUE, plot_type = "both", lineup_size = 6) {
+                     show_plot = TRUE, plot_type = "both", lineup_size = 6,
+                     innocent_suspect = "auto") {
 
   # Compute EIG
   eig_obj <- compute_eig(data, prior_guilt = prior_guilt,
                          confidence_bins = confidence_bins,
-                         lineup_size = lineup_size)
+                         lineup_size = lineup_size,
+                         innocent_suspect = innocent_suspect)
 
   # Create plots if requested
   plot_ig <- NULL

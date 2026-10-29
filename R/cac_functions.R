@@ -51,9 +51,11 @@
 #' cac <- make_cacdata(lineup_example, confidence_bins = c(0, 60, 80, 100))
 #' cac$cac_data
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
-make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
+make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL,
+                         innocent_suspect = "auto") {
   .validate_lineup_analysis(data)
 
   # Validate required columns
@@ -94,7 +96,7 @@ make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL) {
   }
 
   # Initialize results
-  innocent_method <- .innocent_suspect_method(ta_data)
+  innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
   cac_results <- tibble::tibble(
     confidence = character(),
     n_correct = numeric(),
@@ -261,13 +263,15 @@ make_cac_gg <- function(cacobj_list, show_errorbars = TRUE, show_n = TRUE) {
 #' cac_result <- make_cac(lineup_example, confidence_bins = c(0, 60, 80, 100))
 #' print(cac_result)
 #'
+#' @inheritParams make_rocdata
 #' @export
 make_cac <- function(data, lineup_size = 6, confidence_bins = NULL,
-                     show_plot = TRUE, ...) {
+                     show_plot = TRUE, innocent_suspect = "auto", ...) {
 
   # Compute CAC data
   cac_obj <- make_cacdata(data, lineup_size = lineup_size,
-                          confidence_bins = confidence_bins)
+                          confidence_bins = confidence_bins,
+                          innocent_suspect = innocent_suspect)
 
   # Create plot
   # The plot is always built, so that it is available as $plot and to the

@@ -4,7 +4,14 @@
 \alias{make_cac}
 \title{Compute and Plot CAC for Lineup Identification}
 \usage{
-make_cac(data, lineup_size = 6, confidence_bins = NULL, show_plot = TRUE, ...)
+make_cac(
+  data,
+  lineup_size = 6,
+  confidence_bins = NULL,
+  show_plot = TRUE,
+  innocent_suspect = "auto",
+  ...
+)
 }
 \arguments{
 \item{data}{A dataframe with columns: target_present, identification, confidence}
@@ -14,6 +21,17 @@ make_cac(data, lineup_size = 6, confidence_bins = NULL, show_plot = TRUE, ...)
 \item{confidence_bins}{Numeric vector of bin edges (optional)}
 
 \item{show_plot}{Logical. Whether to display the plot (default = TRUE)}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 
 \item{...}{Additional arguments passed to make_cac_gg()}
 }

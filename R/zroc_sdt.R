@@ -96,6 +96,7 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #' }
 #'
 #' @importFrom stats coef fitted lm residuals
+#' @inheritParams make_rocdata
 #' @export
 fit_sdt_roc <- function(data,
                         lineup_size = NULL,
@@ -103,7 +104,8 @@ fit_sdt_roc <- function(data,
                         bootstrap = TRUE,
                         n_bootstrap = 1000,
                         conf_level = 0.95,
-                        seed = NULL) {
+                        seed = NULL,
+                        innocent_suspect = "auto") {
 
   model <- match.arg(model)
 
@@ -117,7 +119,8 @@ fit_sdt_roc <- function(data,
     if (is.null(lineup_size)) {
       stop("lineup_size must be provided when data is not a rocdata object")
     }
-    roc_obj <- make_rocdata(data, lineup_size = lineup_size)
+    roc_obj <- make_rocdata(data, lineup_size = lineup_size,
+                            innocent_suspect = innocent_suspect)
   }
   raw_data <- roc_obj$raw_data
 
@@ -143,7 +146,8 @@ fit_sdt_roc <- function(data,
       bootstrap <- FALSE
     } else {
       params$bootstrap_ci <- .bootstrap_sdt_fit(
-        raw_data, roc_obj$lineup_size, model, n_bootstrap, conf_level
+        raw_data, roc_obj$lineup_size, model, n_bootstrap, conf_level,
+        innocent_suspect = roc_obj$innocent_suspect_method
       )
     }
   }
@@ -280,7 +284,8 @@ fit_sdt_roc <- function(data,
 
 #' Bootstrap SDT Parameter Estimates
 #' @keywords internal
-.bootstrap_sdt_fit <- function(raw_data, lineup_size, model, n_bootstrap, conf_level) {
+.bootstrap_sdt_fit <- function(raw_data, lineup_size, model, n_bootstrap, conf_level,
+                               innocent_suspect = "auto") {
   # Stratified trial-level resampling and complete ROC reconstruction.
 
   boot_dprime <- numeric(n_bootstrap)
@@ -292,7 +297,8 @@ fit_sdt_roc <- function(data,
       ta <- which(!raw_data$target_present)
       boot_data <- raw_data[c(sample(tp, length(tp), replace = TRUE),
                               sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
-      boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size)
+      boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size,
+                               innocent_suspect = innocent_suspect)
       zroc_boot <- .compute_zroc(
         boot_obj$roc_data, boot_obj$n_target_present, boot_obj$n_target_absent
       )

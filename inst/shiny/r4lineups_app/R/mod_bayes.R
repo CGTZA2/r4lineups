@@ -135,7 +135,8 @@ bayes_server <- function(id, data) {
           d <- data()
           res <- r4lineups::calibration_bayes(d$data, confidence_bins = d$bins,
                                               choosers_only = isTRUE(input$choosers),
-                                              lineup_size = d$lineup_size, alpha = a, S = S)
+                                              lineup_size = d$lineup_size,
+                                              innocent_suspect = d$innocent_suspect, alpha = a, S = S)
           stat_row <- function(m) {
             data.frame(statistic = m, posterior_mean = res[[paste0(m, "_mean")]],
                        posterior_median = res[[paste0(m, "_median")]],

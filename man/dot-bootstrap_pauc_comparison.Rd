@@ -9,7 +9,8 @@
   data2,
   lineup_size,
   max_false_id_rate,
-  n_bootstrap
+  n_bootstrap,
+  innocent_suspect = c("auto", "auto")
 )
 }
 \arguments{
@@ -22,6 +23,9 @@
 \item{max_false_id_rate}{Maximum false ID rate}
 
 \item{n_bootstrap}{Number of bootstrap samples}
+
+\item{innocent_suspect}{Resolved innocent-suspect methods for the two
+conditions, reused in every replicate}
 }
 \value{
 List with bootstrap distributions

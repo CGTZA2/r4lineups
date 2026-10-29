@@ -84,11 +84,13 @@
 #' cal$C
 #' cal$calibration_data
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = TRUE,
                                    lineup_size = 6,
-                                   confidence_scale = c("auto", "0-1", "0-100")) {
+                                   confidence_scale = c("auto", "0-1", "0-100"),
+                                   innocent_suspect = "auto") {
   .validate_lineup_analysis(data)
 
   confidence_scale <- match.arg(confidence_scale)
@@ -103,7 +105,7 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
   # Filter to choosers only if requested
   if (choosers_only) {
     ta_data <- data[data$target_present == FALSE, , drop = FALSE]
-    innocent_method <- .innocent_suspect_method(ta_data)
+    innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
     if (innocent_method == "designated") {
       data_filtered <- data[data$identification == "suspect", , drop = FALSE]
       data_filtered$.weight <- 1
@@ -298,13 +300,15 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 #'                                          confidence_bins = c(0, 60, 80, 100))
 #' by_cond$condition_summary
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 make_calibration_by_condition <- function(data, condition_vars,
                                           confidence_bins = NULL,
                                           choosers_only = TRUE,
                                           lineup_size = 6,
-                                          confidence_scale = c("auto", "0-1", "0-100")) {
+                                          confidence_scale = c("auto", "0-1", "0-100"),
+                                          innocent_suspect = "auto") {
 
   confidence_scale <- match.arg(confidence_scale)
 
@@ -323,6 +327,9 @@ make_calibration_by_condition <- function(data, condition_vars,
   }
 
   condition_levels <- unique(data$condition_combo)
+  if (choosers_only) {
+    innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
+  }
 
   # Compute calibration for each condition
   results_by_condition <- list()
@@ -337,7 +344,8 @@ make_calibration_by_condition <- function(data, condition_vars,
         confidence_bins = confidence_bins,
         choosers_only = choosers_only,
         lineup_size = lineup_size,
-        confidence_scale = confidence_scale
+        confidence_scale = confidence_scale,
+        innocent_suspect = innocent_suspect
       )
 
       results_by_condition[[cond]] <- cal_result
@@ -587,10 +595,12 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 #'                                confidence_bins = c(0, 60, 80, 100))
 #' print(cal_result)
 #'
+#' @inheritParams make_rocdata
 #' @export
 make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
                             lineup_size = 6, show_plot = TRUE,
-                            confidence_scale = c("auto", "0-1", "0-100"), ...) {
+                            confidence_scale = c("auto", "0-1", "0-100"),
+                            innocent_suspect = "auto", ...) {
 
   confidence_scale <- match.arg(confidence_scale)
 
@@ -600,7 +610,8 @@ make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
     confidence_bins = confidence_bins,
     choosers_only = choosers_only,
     lineup_size = lineup_size,
-    confidence_scale = confidence_scale
+    confidence_scale = confidence_scale,
+    innocent_suspect = innocent_suspect
   )
 
   # Create plot

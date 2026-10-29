@@ -96,12 +96,14 @@ calibration_server <- function(id, data) {
 
     cal <- analysis(function(d) {
       single <- r4lineups::make_calibration(d$data, d$bins, choosers_only = isTRUE(input$choosers),
-                                            lineup_size = d$lineup_size, show_plot = FALSE)
+                                            lineup_size = d$lineup_size,
+                                            innocent_suspect = d$innocent_suspect, show_plot = FALSE)
       by_group <- if (!is.null(d$groups)) {
         df <- rbind(d$groups$data[[1]], d$groups$data[[2]])
         r4lineups::make_calibration_by_condition(df, d$groups$column, d$bins,
                                                  choosers_only = isTRUE(input$choosers),
-                                                 lineup_size = d$lineup_size)
+                                                 lineup_size = d$lineup_size,
+                                                 innocent_suspect = d$innocent_suspect)
       }
       list(single = single, by_group = by_group)
     })
@@ -122,7 +124,8 @@ calibration_server <- function(id, data) {
 
     anri <- analysis(function(d) {
       common <- list(confidence_bins = d$bins, choosers_only = isTRUE(input$choosers),
-                     lineup_size = d$lineup_size, n_bootstrap = as.integer(input$n_boot),
+                     lineup_size = d$lineup_size,
+                     innocent_suspect = d$innocent_suspect, n_bootstrap = as.integer(input$n_boot),
                      seed = input$seed)
       if (is.null(d$groups)) {
         list(single = do.call(r4lineups::bootstrap_anri, c(list(data = d$data), common)))
@@ -189,7 +192,8 @@ calibration_server <- function(id, data) {
     util <- analysis(function(d) {
       um <- c(tp = input$u_tp, fn = input$u_fn, fp = input$u_fp, tn = input$u_tn)
       r4lineups::make_utility_curves(d$data, base_rate = input$base_rate, utility_matrix = um,
-                                     lineup_size = d$lineup_size)
+                                     lineup_size = d$lineup_size,
+                                     innocent_suspect = d$innocent_suspect)
     })
     output$util_notes <- renderUI(notes_ui(util()$notes))
     serve_plot(output, "util_plot", function() r4lineups::plot_utility_curves(util()$value),
@@ -198,7 +202,8 @@ calibration_server <- function(id, data) {
 
     bayes <- analysis(function(d) {
       r4lineups::make_bayes_curves(d$data, response_categories = input$bayes_cat,
-                                   confidence_bins = d$bins, lineup_size = d$lineup_size)
+                                   confidence_bins = d$bins, lineup_size = d$lineup_size,
+                                   innocent_suspect = d$innocent_suspect)
     })
     output$bayes_notes <- renderUI(notes_ui(bayes()$notes))
     serve_plot(output, "bayes_pp", function() r4lineups::plot_bayes_prior_posterior(bayes()$value),
@@ -210,7 +215,8 @@ calibration_server <- function(id, data) {
     bree <- analysis(function(d) {
       validate(need(!is.null(d$groups), "Choose two groups on the Data tab for the BREE curve."))
       r4lineups::make_bree_curve(d$groups$data[[1]], d$groups$data[[2]],
-                                 lineup_size = d$lineup_size)
+                                 lineup_size = d$lineup_size,
+                                 innocent_suspect = d$innocent_suspect)
     })
     serve_plot(output, "bree_plot", function() r4lineups::plot_bree(bree()$value), "bree.png")
 
@@ -221,7 +227,8 @@ calibration_server <- function(id, data) {
         rt <- d$data$response_time[d$data$identification == "suspect"]
         bins <- unique(stats::quantile(rt, seq(0, 1, 0.2), na.rm = TRUE, names = FALSE))
       }
-      r4lineups::make_racdata(d$data, lineup_size = d$lineup_size, time_bins = bins)
+      r4lineups::make_racdata(d$data, lineup_size = d$lineup_size,
+                              innocent_suspect = d$innocent_suspect, time_bins = bins)
     })
     output$rac_notes <- renderUI(notes_ui(rac()$notes))
     serve_plot(output, "rac_plot", function() r4lineups::make_rac_gg(rac()$value), "rac.png")

@@ -76,15 +76,48 @@ utils::globalVariables(c(
 ))
 
 # Determine how innocent-suspect identifications are represented in a
-# target-absent dataset. If explicit suspect rows are present, they are the
-# designated innocent-suspect responses and filler rows must not be added to
-# them. Otherwise, filler choices are divided by nominal lineup size.
-.innocent_suspect_method <- function(ta_data) {
-  if (any(ta_data$identification == "suspect", na.rm = TRUE)) {
-    "designated"
-  } else {
-    "estimated_from_fillers"
+# target-absent dataset. With a designated innocent suspect, the explicit
+# suspect rows are the innocent-suspect responses and filler rows must not be
+# added to them. Without one, filler choices are divided by nominal lineup size.
+#
+# `innocent_suspect = "auto"` treats the lineups as having a designated suspect
+# when any target-absent row is a suspect ID or the data carry a non-missing
+# `suspect_pos` column for target-absent rows. A designated suspect who is never
+# chosen is still designated, so zero suspect IDs alone is not evidence that
+# there was none. Resolved values ("designated", "estimated_from_fillers") pass
+# through unchanged, so a bootstrap can resolve once on the full data and reuse
+# the result in every replicate.
+.innocent_suspect_method <- function(ta_data, innocent_suspect = "auto") {
+  if (!is.character(innocent_suspect) || length(innocent_suspect) != 1L ||
+      !innocent_suspect %in% c("auto", "designated", "estimated",
+                               "estimated_from_fillers")) {
+    stop("innocent_suspect must be one of \"auto\", \"designated\" or ",
+         "\"estimated\".", call. = FALSE)
   }
+  if (innocent_suspect == "designated") return("designated")
+  if (innocent_suspect %in% c("estimated", "estimated_from_fillers")) {
+    return("estimated_from_fillers")
+  }
+  has_suspect_id <- any(ta_data$identification == "suspect", na.rm = TRUE)
+  has_suspect_pos <- "suspect_pos" %in% names(ta_data) &&
+    any(!is.na(ta_data$suspect_pos))
+  if (has_suspect_id || has_suspect_pos) {
+    return("designated")
+  }
+  message("No target-absent suspect IDs and no suspect_pos column; treating ",
+          "the lineups as having no designated innocent suspect and estimating ",
+          "innocent-suspect IDs as filler IDs / lineup_size. Set ",
+          "innocent_suspect = \"designated\" if a suspect was designated but ",
+          "never chosen.")
+  "estimated_from_fillers"
+}
+
+# Resolve the innocent-suspect design once on a full dataset, so that resampled
+# or subsetted analyses all use the same design.
+.resolve_innocent_suspect <- function(data, innocent_suspect = "auto") {
+  .innocent_suspect_method(
+    data[!as.logical(data$target_present), , drop = FALSE], innocent_suspect
+  )
 }
 
 .innocent_suspect_count <- function(ta_data, include, lineup_size,

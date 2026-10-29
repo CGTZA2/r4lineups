@@ -13,7 +13,8 @@ compare_pauc(
   conf_level = 0.95,
   seed = NULL,
   label1 = "Condition 1",
-  label2 = "Condition 2"
+  label2 = "Condition 2",
+  innocent_suspect = "auto"
 )
 }
 \arguments{
@@ -39,6 +40,17 @@ cover different intervals; a warning is issued in that case.}
 \item{label1}{Character. Label for first condition (default = "Condition 1")}
 
 \item{label2}{Character. Label for second condition (default = "Condition 2")}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
 }
 \value{
 An object of class "pauc_comparison" containing:

@@ -186,6 +186,7 @@ innocent_id_rate_uncorrected <- function(error_rate) {
 #'                                 correction = "effective",
 #'                                 confidence_bins = c(0, 60, 80, 100))
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @import tibble
 ppv_by_confidence <- function(data,
@@ -193,7 +194,8 @@ ppv_by_confidence <- function(data,
                                 confidence_bins = NULL,
                                 correction = c("nominal", "effective", "none"),
                                 effective_size_data = NULL,
-                                quiet = FALSE) {
+                                quiet = FALSE,
+                                innocent_suspect = "auto") {
   .validate_lineup_analysis(data)
 
   # Validate inputs
@@ -218,7 +220,7 @@ ppv_by_confidence <- function(data,
   # Separate target-present and target-absent
   tp_data <- data[data$target_present == TRUE, ]
   ta_data <- data[data$target_present == FALSE, ]
-  innocent_method <- .innocent_suspect_method(ta_data)
+  innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
 
   # With a designated innocent suspect the error count is observed directly, so
   # the branch below never consults `correction`. Say so: three "different"
@@ -423,21 +425,27 @@ ppv_by_confidence <- function(data,
 #' ppv_range$ppv_effective$overall_ppv
 #' ppv_range$ppv_none$overall_ppv
 #'
+#' @inheritParams make_rocdata
 #' @export
 ppv_range_by_confidence <- function(data,
                                      lineup_size = 6,
                                      confidence_bins = NULL,
-                                     effective_size_data = NULL) {
+                                     effective_size_data = NULL,
+                                     innocent_suspect = "auto") {
+  innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
 
   # Compute PPV with each correction method. The three calls are silenced and
   # the designated-innocent-suspect note issued once below, rather than three
   # times over.
   ppv_nominal <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                    "nominal", effective_size_data, quiet = TRUE)
+                                    "nominal", effective_size_data, quiet = TRUE,
+                                    innocent_suspect = innocent_suspect)
   ppv_effective <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                      "effective", effective_size_data, quiet = TRUE)
+                                      "effective", effective_size_data, quiet = TRUE,
+                                      innocent_suspect = innocent_suspect)
   ppv_none <- ppv_by_confidence(data, lineup_size, confidence_bins,
-                                 "none", effective_size_data, quiet = TRUE)
+                                 "none", effective_size_data, quiet = TRUE,
+                                 innocent_suspect = innocent_suspect)
 
   if (identical(ppv_nominal$innocent_suspect_method, "designated")) {
     message("Target-absent lineups contain a designated innocent suspect, so ",

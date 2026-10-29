@@ -87,6 +87,7 @@
 #' plot(comparison)
 #' }
 #'
+#' @inheritParams make_rocdata
 #' @export
 #' @importFrom stats qnorm pnorm
 compare_pauc <- function(data1,
@@ -97,7 +98,8 @@ compare_pauc <- function(data1,
                          conf_level = 0.95,
                          seed = NULL,
                          label1 = "Condition 1",
-                         label2 = "Condition 2") {
+                         label2 = "Condition 2",
+                         innocent_suspect = "auto") {
   if (!is.numeric(n_bootstrap) || length(n_bootstrap) != 1L ||
       n_bootstrap < 2 || n_bootstrap != as.integer(n_bootstrap)) {
     stop("n_bootstrap must be an integer of at least 2.", call. = FALSE)
@@ -110,8 +112,10 @@ compare_pauc <- function(data1,
   on.exit(restore_rng(), add = TRUE)
 
   # Compute ROC for both conditions
-  roc1 <- make_rocdata(data1, lineup_size = lineup_size)
-  roc2 <- make_rocdata(data2, lineup_size = lineup_size)
+  roc1 <- make_rocdata(data1, lineup_size = lineup_size,
+                       innocent_suspect = innocent_suspect)
+  roc2 <- make_rocdata(data2, lineup_size = lineup_size,
+                       innocent_suspect = innocent_suspect)
 
   # Determine max false ID rate cutoff.
   #
@@ -151,7 +155,9 @@ compare_pauc <- function(data1,
     data1, data2,
     lineup_size = lineup_size,
     max_false_id_rate = max_false_id_rate,
-    n_bootstrap = n_bootstrap
+    n_bootstrap = n_bootstrap,
+    innocent_suspect = c(roc1$innocent_suspect_method,
+                         roc2$innocent_suspect_method)
   )
 
   # Standard errors
@@ -227,11 +233,14 @@ compare_pauc <- function(data1,
 #' @param lineup_size Lineup size
 #' @param max_false_id_rate Maximum false ID rate
 #' @param n_bootstrap Number of bootstrap samples
+#' @param innocent_suspect Resolved innocent-suspect methods for the two
+#'   conditions, reused in every replicate
 #'
 #' @return List with bootstrap distributions
 #' @keywords internal
 .bootstrap_pauc_comparison <- function(data1, data2, lineup_size,
-                                       max_false_id_rate, n_bootstrap) {
+                                       max_false_id_rate, n_bootstrap,
+                                       innocent_suspect = c("auto", "auto")) {
 
   pauc1_boot <- numeric(n_bootstrap)
   pauc2_boot <- numeric(n_bootstrap)
@@ -250,8 +259,10 @@ compare_pauc <- function(data1,
 
     # Compute ROC and pAUC for bootstrap samples
     tryCatch({
-      boot_roc1 <- make_rocdata(boot_data1, lineup_size = lineup_size)
-      boot_roc2 <- make_rocdata(boot_data2, lineup_size = lineup_size)
+      boot_roc1 <- make_rocdata(boot_data1, lineup_size = lineup_size,
+                                innocent_suspect = innocent_suspect[[1]])
+      boot_roc2 <- make_rocdata(boot_data2, lineup_size = lineup_size,
+                                innocent_suspect = innocent_suspect[[2]])
 
       pauc1_boot[b] <- .compute_pauc_with_cutoff(boot_roc1$roc_data, max_false_id_rate)
       pauc2_boot[b] <- .compute_pauc_with_cutoff(boot_roc2$roc_data, max_false_id_rate)
