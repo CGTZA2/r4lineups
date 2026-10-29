@@ -116,7 +116,7 @@ test_that("Bayes, utility, and DPP wrapper exports compose", {
   dpp <- compute_dpp(x, show_plot = FALSE)
   expect_s3_class(dpp, "lineup_dpp")
   expect_s3_class(plot_dpp(dpp), "ggplot")
-  cmp_dpp <- compare_dpp(x_a, x_b)
+  cmp_dpp <- compare_dpp(x_a, x_b, n_bootstrap = 20, seed = 1)
   expect_s3_class(plot_dpp_comparison(cmp_dpp), "ggplot")
 })
 

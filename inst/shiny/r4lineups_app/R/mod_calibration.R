@@ -9,7 +9,7 @@ calibration_ui <- function(id) {
       uiOutput(ns("banner")),
       checkboxInput(ns("choosers"), "Choosers only (suspect and filler IDs)", value = TRUE),
       bslib::layout_columns(
-        numericInput(ns("n_boot"), "ANRI bootstrap R", value = 1000, min = 100, step = 100),
+        numericInput(ns("n_boot"), "ANRI and DPP bootstrap R", value = 1000, min = 100, step = 100),
         numericInput(ns("seed"), "Seed", value = 2026, step = 1)
       ),
       tags$strong("Expected utility"),
@@ -51,7 +51,7 @@ calibration_ui <- function(id) {
         "DPP",
         uiOutput(ns("dpp_notes")),
         table_card(ns, "dpp_table", "Deviation from perfect performance"),
-        plot_card(ns, "dpp_plot", "Observed and perfect ROC")
+        plot_card(ns, "dpp_plot", "DPP by operating point")
       ),
       bslib::nav_panel(
         "Expected utility",
@@ -162,10 +162,14 @@ calibration_server <- function(id, data) {
 
     dpp <- analysis(function(d) {
       if (is.null(d$groups)) {
-        list(single = r4lineups::make_dpp(d$data, lineup_size = d$lineup_size))
+        list(single = r4lineups::make_dpp(d$data, lineup_size = d$lineup_size,
+                                          innocent_suspect = d$innocent_suspect))
       } else {
         list(compare = r4lineups::compare_dpp(d$groups$data[[1]], d$groups$data[[2]],
-                                              lineup_size = d$lineup_size))
+                                              lineup_size = d$lineup_size,
+                                              innocent_suspect = d$innocent_suspect,
+                                              n_bootstrap = as.integer(input$n_boot),
+                                              seed = input$seed))
       }
     })
     output$dpp_notes <- renderUI(notes_ui(dpp()$notes))
@@ -174,13 +178,19 @@ calibration_server <- function(id, data) {
       d <- data()
       if (!is.null(v$single)) {
         s <- v$single
-        return(data.frame(quantity = c("DPP", "Observed AUC", "Perfect AUC", "AUC gap", "Max false ID rate"),
-                          value = c(fmt_num(s$dpp), fmt_num(s$auc_observed, 4), fmt_num(s$auc_perfect, 4),
-                                    fmt_num(s$auc_gap, 4), fmt_num(s$max_fa))))
+        pts <- s$dpp_by_point
+        return(data.frame(
+          quantity = c("Average DPP", paste("DPP at confidence >=", pts$confidence)),
+          value = c(fmt_num(s$dpp), vapply(pts$dpp, fmt_num, character(1)))
+        ))
       }
-      data.frame(quantity = c(paste("DPP", d$groups$labels), "Difference"),
-                 value = c(fmt_num(v$compare$dpp_a), fmt_num(v$compare$dpp_b),
-                           fmt_num(v$compare$dpp_difference)))
+      cmp <- v$compare
+      data.frame(quantity = c(paste("Average DPP", d$groups$labels), "Difference",
+                              "Bootstrap SE", sprintf("%g%% CI", 100 * cmp$conf_level)),
+                 value = c(fmt_num(cmp$dpp_a), fmt_num(cmp$dpp_b),
+                           fmt_num(cmp$dpp_difference), fmt_num(cmp$se_difference),
+                           sprintf("[%s, %s]", fmt_num(cmp$ci_difference[["lower"]]),
+                                   fmt_num(cmp$ci_difference[["upper"]]))))
     }, "dpp.csv")
     serve_plot(output, "dpp_plot", function() {
       v <- dpp()$value

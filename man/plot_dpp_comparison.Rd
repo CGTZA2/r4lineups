@@ -6,15 +6,12 @@
 \usage{
 plot_dpp_comparison(
   compare_obj,
-  layout = c("side-by-side", "overlay"),
   proc_a_label = "Procedure A",
   proc_b_label = "Procedure B"
 )
 }
 \arguments{
 \item{compare_obj}{List output from compare_dpp()}
-
-\item{layout}{Character. "side-by-side" or "overlay" (default = "side-by-side")}
 
 \item{proc_a_label}{Character. Label for procedure A (default = "Procedure A")}
 
@@ -24,12 +21,13 @@ plot_dpp_comparison(
 A ggplot2 object
 }
 \description{
-Creates side-by-side or overlaid plots comparing DPP for two procedures.
+Overlays DPP at each operating point for two procedures.
 }
 \examples{
 data(lineup_example)
 odd <- seq(1, nrow(lineup_example), by = 2)
-cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ])
+cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ],
+                   n_bootstrap = 0)
 plot_dpp_comparison(cmp)
 
 }

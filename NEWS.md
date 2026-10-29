@@ -1,5 +1,26 @@
 # r4lineups 2.3.0 (development)
 
+## Breaking changes
+
+* `make_dpp()` now computes the deviation from perfect performance as
+  Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) define it: DPP(c) =
+  1 - Culprit(c) + Innocent(c) at each ROC operating point, averaged over the
+  operating points (their Equation 2). The previous statistic,
+  1 - AUC(observed) / AUC(perfect) over the observed false-ID range, was a
+  different quantity under the same name, and it cited an unrelated paper. On
+  a single operating point with culprit rate .8 and innocent-suspect rate .1,
+  the old function returned .6; the published measure is .3. The new version
+  reproduces Smith et al.'s Table 4 (.864 and .816). The return value now has
+  `dpp`, `dpp_by_point` and `best_point` in place of `auc_observed`,
+  `auc_perfect`, `auc_gap`, `perfect_roc` and `max_fa`. Optional `alpha` and
+  `beta` arguments give their weighted Equation 3.
+* `compare_dpp()` now bootstraps the difference in average DPP (stratified by
+  target presence within each procedure) and returns its standard error and a
+  percentile interval, with a print method. `plot_dpp()` plots DPP at each
+  operating point; `plot_dpp_comparison()` overlays two procedures and loses
+  its `layout` argument. `plot_dpp()` arguments are now `show_mean`,
+  `show_chance` and `show_dpp`.
+
 ## New features
 
 * Every analysis that uses target-absent lineups gains an `innocent_suspect`

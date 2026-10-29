@@ -21,6 +21,7 @@ utils::globalVariables(c(
   "delta",
   "difference",
   "distance",
+  "dpp",
   "effective_size",
   "error_rate",
   "evidence_direction",

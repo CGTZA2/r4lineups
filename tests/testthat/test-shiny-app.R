@@ -179,6 +179,27 @@ test_that("calibration module matches make_calibration and renders every panel",
   })
 })
 
+test_that("calibration module's DPP matches make_dpp and compare_dpp", {
+  shiny::testServer(mod("calibration_server"), args = list(data = trial_data()), {
+    session$setInputs(choosers = TRUE, n_boot = 100, seed = 1, base_rate = 0.5, u_tp = 1,
+                      u_fn = -0.5, u_fp = -2, u_tn = 0.5, bayes_cat = "confidence",
+                      time_bins = "", run = 1)
+    expect_equal(session$returned$dpp()$value$single$dpp, make_dpp(lineup_example)$dpp)
+    expect_outputs_render(output, c("dpp_table", "dpp_plot"))
+  })
+  df <- mod("example_trial_data")("two_procedures")
+  g <- two_groups()
+  shiny::testServer(mod("calibration_server"), args = list(data = trial_data(df, groups = g)), {
+    session$setInputs(choosers = TRUE, n_boot = 100, seed = 1, base_rate = 0.5, u_tp = 1,
+                      u_fn = -0.5, u_fp = -2, u_tn = 0.5, bayes_cat = "confidence",
+                      time_bins = "", run = 1)
+    ref <- compare_dpp(g$data[[1]], g$data[[2]], n_bootstrap = 100, seed = 1)
+    cmp <- session$returned$dpp()$value$compare
+    expect_equal(cmp$dpp_difference, ref$dpp_difference)
+    expect_equal(cmp$ci_difference, ref$ci_difference)
+  })
+})
+
 test_that("EIG module matches make_eig", {
   shiny::testServer(mod("eig_server"), args = list(data = trial_data()), {
     session$setInputs(prior = 0.5, run = 1)

@@ -4,7 +4,15 @@
 \alias{compute_dpp}
 \title{Compute and Plot DPP}
 \usage{
-compute_dpp(data, lineup_size = 6, show_plot = TRUE, ...)
+compute_dpp(
+  data,
+  lineup_size = 6,
+  show_plot = TRUE,
+  alpha = NULL,
+  beta = NULL,
+  innocent_suspect = "auto",
+  ...
+)
 }
 \arguments{
 \item{data}{Dataframe with standard lineup format}
@@ -13,18 +21,31 @@ compute_dpp(data, lineup_size = 6, show_plot = TRUE, ...)
 
 \item{show_plot}{Logical. Whether to display plot (default = TRUE)}
 
+\item{alpha, beta}{Optional Equation 3 weights; see \code{\link{make_dpp}}.}
+
+\item{innocent_suspect}{How innocent-suspect identifications in
+target-absent lineups are obtained. \code{"designated"}: the lineups had a
+designated innocent suspect, so target-absent \code{"suspect"} rows are
+counted directly, and zero such rows means a false-ID rate of zero.
+\code{"estimated"}: there was no designated innocent suspect, so the
+innocent-suspect count is estimated as filler IDs divided by
+\code{lineup_size}. \code{"auto"} (the default) chooses
+\code{"designated"} when any target-absent row is a suspect ID or the data
+have a non-missing \code{suspect_pos} column, and \code{"estimated"}
+otherwise, with a message.}
+
 \item{...}{Additional arguments passed to plot_dpp()}
 }
 \value{
-A list containing the DPP result, raw AUC gap, AUC values, ROC data,
-  perfect-performance ROC data, maximum false-alarm rate, and plot.
+An object of class \code{"lineup_dpp"}: the \code{make_dpp()}
+  result plus the plot.
 }
 \description{
 Main wrapper function to compute and plot DPP analysis.
 }
 \examples{
 data(lineup_example)
-dpp_result <- compute_dpp(lineup_example)
+dpp_result <- compute_dpp(lineup_example, show_plot = FALSE)
 print(dpp_result)
 
 }
