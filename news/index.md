@@ -1,6 +1,6 @@
 # Changelog
 
-## r4lineups 2.3.0 (development)
+## r4lineups 2.3.0 (2026-10-29)
 
 ### Breaking changes
 
@@ -52,6 +52,20 @@
   error is a delta-method approximation. Existing results are unchanged.
 
 ### Bug fixes
+
+- [`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
+  could report non-convergence at a correctly found minimum. It chose
+  the best of its L-BFGS-B starts by value and kept that start’s
+  convergence code, so a start that stopped with a line-search code at a
+  flat minimum was reported as not converged even when the Nelder-Mead
+  polish converged to the same value. This happened with R 4.6.2 on
+  Linux, where
+  [`compare_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/compare_max_sdt.md)
+  then refused to compare two fits to identical conditions. A polish
+  that converges without being worse than the best start is now the
+  reported solution, and
+  [`compare_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/compare_max_sdt.md)
+  gives the convergence codes when it refuses. Estimates are unchanged.
 
 - [`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md)
   and

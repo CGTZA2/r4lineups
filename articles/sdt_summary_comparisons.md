@@ -385,7 +385,7 @@ cat("Goodness of fit: chi-square =", round(fit_free$chisq, 3),
 cat("Bootstrap replicates used:", fit_free$boot_n_used,
     " failed:", fit_free$boot_n_failed, "
 ")
-#> Bootstrap replicates used: 299  failed: 1
+#> Bootstrap replicates used: 298  failed: 2
 ```
 
 Unlike the exactly-identified summary estimators, this model has
