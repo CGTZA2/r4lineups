@@ -223,6 +223,10 @@
     functions' arguments and return values;
   - smaller qualifications in the RAC, pAUC, lineup-model and simulation
     vignettes.
+* The vignettes describe the package as it is: notes about earlier versions
+  and past bugs are removed (the history is in this file), and wording, reference
+  formatting (APA, hanging indent) and several explanations were revised after
+  review.
 * `plot.model_comparison()` draws its panels with a shared compact theme, so
   titles no longer overrun, and clips the 2-HT Wald intervals to [0, 1]
   instead of dropping bars that cross zero.

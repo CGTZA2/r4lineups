@@ -144,16 +144,9 @@ install_r4lineups_python(envname = "r4lineups-face-env",
 ```
 
 Requesting `python_version = "3.11"` without step 1 fails, because there is no
-3.11 interpreter to build from. Earlier versions of this package passed that
-straight through to reticulate, which reported
-
-```
-Suitable Python installation for creating a venv not found.
-Requested version constraint: 3.11
-```
-
-without saying how to obtain one. The package now checks first and reports which
-versions it did find, along with the `reticulate::install_python()` call needed.
+3.11 interpreter to build from. `install_r4lineups_python()` checks for this
+first and reports which versions it did find, along with the
+`reticulate::install_python()` call needed.
 
 The first run takes several minutes, as it downloads the deep learning models
 (ArcFace, FaceNet and others). They are cached afterwards.

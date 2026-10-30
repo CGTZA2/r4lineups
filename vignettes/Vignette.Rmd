@@ -657,8 +657,8 @@ unbiased estimator, $\sum O_i(O_i-1)/(N(N-1))$, and reports the reciprocal,
 $N(N-1)/\sum O_i(O_i-1)$. The reciprocal of an unbiased estimate is not itself
 unbiased: the corrected E′ removes most of the bias for near-fair lineups, as
 the table shows, but it is more variable, and in the concentrated two-member
-example above it overshoots further (mean 1.269). The default is unchanged, so
-nothing previously computed moves; the correction is available when wanted:
+example above it overshoots further (mean 1.269). The default is the plug-in
+estimator; the correction is available when wanted:
 
 ```{r esize_unbiased}
 c(plug_in = esize_T(lineup_tab),

@@ -110,8 +110,7 @@ the parameter recovery in `fit_winter_2ht()` is checked against it. See
 identify anyone. Raise it and witnesses reject more often; lower it and they
 choose more often.
 
-It is important to make a point of clarification here, and the guidance in
-earlier versions of this vignette got it wrong. In textbook SDT, a criterion of 0 is "neutral". **That is not true
+It is important to make a point of clarification here. In textbook SDT, a criterion of 0 is "neutral". **That is not true
 here**, because the criterion applies to the *maximum* of several members'
 strengths, not to a single item. The maximum of six draws from Normal(0, 1)
 averages about 1.27, so a criterion of 0 is passed by nearly every lineup:
@@ -234,12 +233,6 @@ the more usual question of how often two working procedures could be told apart.
 Each simulated study is tested with `compare_pauc()`, a bootstrap comparison of
 partial area under the ROC curve, and power is the proportion of studies whose
 p-value falls below `alpha`.
-
-> **Note on earlier versions.** Before r4lineups 2.1.0.9000 this function
-> computed power as the proportion of simulations in which the pAUC exceeded
-> zero. Since an area is always positive, that proportion was always 1, and the
-> power curve was a flat line at the top of the plot regardless of sample size
-> or effect size. If you have output from an earlier version, discard it.
 
 ### A worked power analysis
 
