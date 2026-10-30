@@ -78,10 +78,12 @@ to about 29 seconds. There is a real speed-accuracy relationship; there is no
 universal number.
 
 The practical consequence is worth stating plainly, because it shapes how this
-vignette proceeds. **A time boundary should be estimated from the data in hand,
-with an interval around it, rather than imported from another study.** The
-[continuous approach](#a-continuous-alternative-to-binning) below does exactly
-that.
+vignette proceeds. **A time boundary should be estimated from the data in hand
+rather than imported from another study.** The
+[continuous approach](#a-continuous-alternative-to-binning) below does that.
+It gives a point estimate of the boundary; an interval for the boundary itself
+would need a further step, such as bootstrapping the whole fit, which this
+vignette does not show.
 
 # Setup
 
@@ -172,11 +174,13 @@ knitr::kable(
 ```
 
 The correlation across all trials is close to zero; restricting to witnesses who
-identified the suspect roughly triples it. This is not a trick. Rejections are
-slow for a quite different reason than false identifications are — a witness who
-searches the lineup thoroughly and then declines to choose is being careful, not
-uncertain in the way a slow chooser is. Pooling the two mixes two different
-relationships between time and accuracy and mostly cancels them out.
+identified the suspect roughly triples it. In these simulated data that is a
+consequence of how response time was generated: it depends on confidence alone,
+and rejections and identifications relate to accuracy differently, so pooling
+them mixes two relationships that partly cancel. In real data a further reason
+is often proposed, that a witness who searches the lineup thoroughly and then
+declines to choose is being careful rather than uncertain, but this simulation
+does not model that process and cannot show it.
 
 This is why RAC, like CAC, is computed on choosers. It is also a reminder that
 the headline correlation in a response-time study depends on a decision that is
@@ -332,18 +336,30 @@ directly: **up to what response time is estimated accuracy at least 90%?**
 above <- grid$response_time[grid$accuracy >= 0.90]
 boundary <- if (length(above) > 0) max(above) else NA
 
+# The fitted curve could cross 90% more than once. Count the crossings, so a
+# single "boundary" is not reported when accuracy dips and recovers.
+n_crossings <- sum(diff(grid$accuracy >= 0.90) != 0)
+
 cat("Estimated accuracy at  3 s:", round(approx(grid$response_time, grid$accuracy, 3000)$y, 3), "\n")
 cat("Estimated accuracy at  8 s:", round(approx(grid$response_time, grid$accuracy, 8000)$y, 3), "\n")
 cat("Estimated accuracy at 15 s:", round(approx(grid$response_time, grid$accuracy, 15000)$y, 3), "\n\n")
 cat("Accuracy is at least 90% up to about", round(boundary / 1000, 1), "seconds\n")
+cat("Crossings of the 90% line:", n_crossings, "\n")
 ```
 
 For these simulated data the boundary falls near
 `r round(boundary/1000, 1)` seconds. That number is a property of *this* dataset,
 and the point of Weber et al. (2004) is precisely that it will not transfer: had
 the simulation used a different criterion or a different d′, the boundary would
-move. Reporting it with the interval around it, and refitting on new data rather
-than importing the number, is the appropriate use of the method.
+move. Refitting on new data rather than importing the number is the appropriate
+use of the method.
+
+Two cautions. The shaded band in the plot is a pointwise interval for accuracy at
+each time; it is not an interval for the boundary, which would need the whole fit
+bootstrapped. And a spline can cross the 90% line more than once, in which case
+the largest qualifying time does not mean accuracy exceeded 90% at every shorter
+time. The curve here crosses it `r if (n_crossings == 1) "once" else paste(n_crossings, "times")`;
+check this before reporting a single boundary.
 
 A note on what is being estimated. Because accuracy among suspect
 identifications is a positive predictive value, it depends on the proportion of

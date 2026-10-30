@@ -214,11 +214,14 @@ fit_started <- fit_lineup_models(
 fit_started$comparison$converged
 ```
 
-## Does the fit recover the generating model?
+## Can the fit tell the generating rules apart?
 
-The most informative check is whether fitting recovers the rule that generated
-the data. `simulate_lineup_data()` implements the same three decision rules, so
-this can be tested directly.
+An informative check is whether fitting picks out the rule that generated the
+data. `simulate_lineup_data()` implements the same three decision rules, so this
+can be explored directly. One mismatch should be kept in mind: the data below are
+simulated with unequal foils (`foil_bias`), while `fit_lineup_models()` assumes a
+fair lineup with exchangeable fillers. Every fitted model is therefore somewhat
+misspecified, even the one matching the generating rule.
 
 ```{r recovery, eval=pywitness_ready}
 simulate_under <- function(rule, seed = 404) {
@@ -262,10 +265,13 @@ with more parameters is favoured by a raw chi-square comparison purely by being
 more flexible. Ranking the models by chi-square alone is not a comparison the
 statistic licenses.
 
-With that in mind, two things emerge.
+A p-value here is the probability of a discrepancy this large if that model
+were true; it is not the probability that the model is the correct one, and
+p-values from non-nested models do not rank them on a common scale. With that in
+mind, two things emerge.
 
-The MAX and Integration rows recover their generating model decisively: the
-generating model fits well and the others are rejected outright.
+In the MAX and Integration rows the model matching the generating rule fits
+acceptably and the others are rejected outright.
 
 The Ensemble row does not. Independent Observations and Ensemble return
 essentially **identical** p-values, and neither can be rejected. This is not a

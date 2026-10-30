@@ -526,9 +526,11 @@ $$\widehat{pAUC} = \sum_{i=2}^{k} \bigl(\text{FID}_i - \text{FID}_{i-1}\bigr) \c
 
 If $f_{\max}$ falls between two observed points, the curve is linearly
 interpolated to that point. If $f_{\max}$ lies beyond the last observed point,
-**no extrapolation is performed** — the sum simply stops at the data, which is
-why supplying a cutoff beyond a curve's reach produces a warning rather than a
-number.
+**no extrapolation is performed**: the sum simply stops at the data. Supplying a
+cutoff beyond a curve's reach therefore produces a warning **and** an area
+truncated at the observed reach, which is smaller than the area up to the
+requested cutoff would be. Read the warning; it means the two areas being
+compared may not cover the same false-ID range.
 
 ### How the standard error is obtained
 

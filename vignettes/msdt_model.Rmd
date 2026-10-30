@@ -241,8 +241,14 @@ leave on the table — arguably the most informative part of the data.
 
 The estimator is also **exactly identified**: two numbers in, two
 parameters out, with nothing left over. There is no residual, so there is
-no goodness-of-fit test. The model cannot be found to fit badly, because
-it will always reproduce the two rates it was given exactly.
+no goodness-of-fit test, and for feasible rates the model reproduces the
+two rates it was given. Not every pair of rates is feasible, however. With
+\(m\) members, a target-absent rejection rate \(r_A\) fixes \(\gamma\), and
+the target-present rejection rate can then be at most
+\(r_A^{(m-1)/m}\), the limit as \(d' \to -\infty\). Rates outside that bound,
+for example `estimate_msdt_params(0.1, 0.9, 6)`, are rejected with an
+error, and rates at the edges of the scale are clipped, so the reproduction
+is exact only in the interior.
 
 Use it when the rejection rates are all you have, or as a quick starting
 point. Where the full response breakdown exists, prefer:
@@ -278,10 +284,15 @@ plot_msdt_joint(dprime = 1.2, gamma = 0.4, lineup_size = 6,
 **These plots use no dataset.** They are analytic densities drawn from the
 parameters supplied in the call — here \(d' = 1.2\), \(\gamma = 0.4\) and a
 six-person lineup — not summaries of observed data. Comparing the two
-makes the model's logic visible: in the culprit-absent plot the mass sits
-symmetrically about the diagonal, since the suspect is just another
-filler; in the culprit-present plot it is displaced by \(d'\) towards the
-suspect axis.
+makes the model's logic visible. In the culprit-absent plot the suspect is
+one innocent member, Normal(0, 1), but the other axis is the **strongest of
+the five fillers**, whose density is \(5\phi(m)\Phi(m)^4\) with mean about
+1.16. The joint density \(\phi(s) \cdot 5\phi(m)\Phi(m)^4\) is therefore not
+symmetric about the diagonal: the mass sits above it, towards the filler
+axis (at \((s, m) = (0, 1)\) the density is about eight times that at
+\((1, 0)\)). That asymmetry is why an innocent suspect is chosen less often
+than the fillers combined. In the culprit-present plot the suspect's signal
+is shifted by \(d'\), moving the mass towards the suspect axis.
 
 # Planned extensions {#planned-extensions}
 
