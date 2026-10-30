@@ -12,8 +12,8 @@ plot_utility_curves(utility_obj, show_max = TRUE, show_reject = TRUE)
 \item{show_max}{Logical. Whether to highlight maximum utility point.
 Default = TRUE.}
 
-\item{show_reject}{Logical. Whether to show reject-all utility point.
-Default = TRUE.}
+\item{show_reject}{Logical. Whether to show the reject-all utility, drawn as
+a dashed horizontal reference line. Default = TRUE.}
 }
 \value{
 A ggplot2 object

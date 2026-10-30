@@ -395,8 +395,8 @@ make_utility_difference <- function(data_proc_a,
 #' @param utility_obj List output from make_utility_curves()
 #' @param show_max Logical. Whether to highlight maximum utility point.
 #'   Default = TRUE.
-#' @param show_reject Logical. Whether to show reject-all utility point.
-#'   Default = TRUE.
+#' @param show_reject Logical. Whether to show the reject-all utility, drawn as
+#'   a dashed horizontal reference line. Default = TRUE.
 #'
 #' @return A ggplot2 object
 #'
@@ -416,17 +416,18 @@ make_utility_difference <- function(data_proc_a,
 plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE) {
 
   util_data <- utility_obj$utility_data
+  # Reject-all is a strategy, not a confidence criterion, so it is drawn as a
+  # horizontal reference line rather than as a point on the criterion axis.
+  thr_data <- util_data[util_data$strategy == "threshold", ]
+  reject_row <- util_data[util_data$strategy == "reject_all", ]
+  max_is_reject <- identical(utility_obj$max_utility$strategy, "reject_all")
 
-  # Filter out reject-all if not showing
-  if (!show_reject) {
-    util_data <- util_data[util_data$strategy != "reject_all", ]
-  }
-
-  # Create plot
-  p <- ggplot(util_data, aes(x = criterion, y = expected_utility)) +
-    geom_line(linewidth = 1, color = "darkgreen") +
+  p <- ggplot(thr_data, aes(x = criterion, y = expected_utility)) +
+    (if (nrow(thr_data) > 1) geom_line(linewidth = 1, color = "darkgreen")) +
     geom_point(size = 2, color = "darkgreen") +
     theme_bw(base_size = 14) +
+    # Room above and below for the labels.
+    scale_y_continuous(expand = ggplot2::expansion(mult = c(0.12, 0.18))) +
     labs(
       x = "Confidence Criterion",
       y = "Expected Utility",
@@ -439,17 +440,20 @@ plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE
                        utility_obj$utility_matrix["tn"])
     )
 
-  # The reject-all point sits one above the highest confidence level; label it
-  # so it is not read as an ordinary confidence criterion.
-  reject_row <- util_data[util_data$strategy == "reject_all", ]
-  if (nrow(reject_row) > 0) {
-    p <- p + annotate("text", x = reject_row$criterion,
-                      y = reject_row$expected_utility,
-                      label = "reject all", vjust = 1.8, size = 3.5)
+  if (show_reject && nrow(reject_row) > 0) {
+    reject_col <- if (show_max && max_is_reject) "red" else "gray30"
+    p <- p +
+      geom_hline(yintercept = reject_row$expected_utility, linetype = "dashed",
+                 color = reject_col, linewidth = 0.7) +
+      annotate("text", x = min(thr_data$criterion),
+               y = reject_row$expected_utility,
+               label = sprintf("Reject all: %.3f%s", reject_row$expected_utility,
+                               if (show_max && max_is_reject) " (maximum)" else ""),
+               hjust = 0, vjust = -0.5, size = 3.5, color = reject_col)
   }
 
-  # Highlight maximum utility point
-  if (show_max) {
+  # Highlight the best confidence criterion
+  if (show_max && !max_is_reject) {
     max_data <- data.frame(
       criterion = utility_obj$max_utility$criterion,
       expected_utility = utility_obj$max_utility$expected_utility
