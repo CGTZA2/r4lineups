@@ -131,7 +131,7 @@ recognise the culprit.
 The full ROC measures **investigator discriminability**: how well someone using
 the witness's response as evidence can separate guilty from innocent suspects.
 That is a different quantity from eyewitness discriminability, and it is
-arguably the one that matters for policy, since it is the investigator who acts.
+arguably the most important for policy, since it is the investigator who acts.
 
 This is also the source of the main objection to the method — that an AUC near
 0.8 may describe the investigator's inferential position rather than the
@@ -181,7 +181,7 @@ threshold on the ordered evidence categories.
 Building the curve requires the response categories — every combination of
 decision and confidence level — to be placed in order from "strongest evidence
 of guilt" to "strongest evidence of innocence". The two available orderings
-differ in where that order comes from, and the difference matters a great deal
+differ in where that order comes from, and the difference is very important
 more than it might appear.
 
 ### A-priori ordering
@@ -208,7 +208,7 @@ is optimistically biased.
 
 ### How large is the bias?
 
-Large enough to matter. The following simulates data with **no signal
+Large enough to be important. The following simulates data with **no signal
 whatsoever** — the response distribution is identical in target-present and
 target-absent lineups, so the true AUC is exactly 0.5 — and computes the AUC
 both ways.

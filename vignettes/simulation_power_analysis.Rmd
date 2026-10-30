@@ -67,7 +67,7 @@ Two quantities describe this:
   Normal(0, 1).
 - **The criterion** is how much strength the witness requires before they are
   willing to identify anybody at all. It captures willingness to choose, which
-  is a separate matter from memory quality — a witness with excellent memory may
+  is a separate question from memory quality — a witness with excellent memory may
   still be reluctant to commit.
 
 Keeping these separate is the central contribution of SDT to this area. Two
@@ -192,7 +192,7 @@ happened to fall on the suspect:
 - `identification`: `"suspect"`, `"filler"` or `"reject"`, **derived** from the
   two columns above by `classify_lineup_choices()`
 
-This matters because foils are not interchangeable. By default the simulator
+This is important because foils are not interchangeable. By default the simulator
 draws every foil from the same distribution, which makes them statistically
 equivalent even though they are simulated separately. Real lineups are not like
 that: some foils are plausible alternatives to the suspect and others are barely

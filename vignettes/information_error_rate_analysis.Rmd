@@ -181,7 +181,7 @@ happens.
 
 ### When they diverge
 
-The corrections matter when no innocent suspect is designated — the usual
+The corrections are important when no innocent suspect is designated — the usual
 situation with field data. We can create that case by relabelling the
 target-absent suspect identifications as foil identifications **and** removing
 the `suspect_pos` column, which is exactly the information loss that occurs when

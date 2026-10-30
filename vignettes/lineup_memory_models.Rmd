@@ -76,7 +76,7 @@ and the criteria rescale by the same factor, so the two produce identical fits.
 Reporting both as though they were separate model-selection evidence would be
 double counting.
 
-### Why it matters which one is right
+### Why it is important to know which one is right
 
 These are not interchangeable descriptions. They disagree about what makes a
 lineup fair. Under Independent Observations, foil quality affects how often

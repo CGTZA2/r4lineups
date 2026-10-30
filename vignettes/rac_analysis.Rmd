@@ -143,7 +143,7 @@ response time and accuracy. Accuracy is binary, so this is a **point-biserial**
 correlation — which is just Pearson's *r* with one dichotomous variable, and
 needs no special machinery.
 
-The choice of *which trials to include* turns out to matter a great deal:
+The choice of *which trials to include* turns out to be very important:
 
 ```{r point_biserial}
 # All trials: "correct" means a suspect ID when the target was present, or a
@@ -494,7 +494,7 @@ Points to watch:
 1. **Units.** Response times must all be in the same units. The package assumes
    milliseconds.
 2. **Bins.** Inspect the distribution first, as above. Four to six bins is
-   common, but the number matters far less than whether each is populated.
+   common, but the number is far less important than whether each is populated.
 3. **Extreme values.** Very long times often mean an interruption rather than
    deliberation. Consider capping rather than deleting, and report what you did.
 4. **Missing times.** Trials without a recorded time are dropped, so check how

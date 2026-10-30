@@ -123,7 +123,7 @@ df$said_old <- rbinom(
 
 Note that both participants **and items** vary. That is realistic — some faces
 are simply more memorable than others — and it is what makes the next section
-matter.
+important.
 
 ## Single-level GLM
 

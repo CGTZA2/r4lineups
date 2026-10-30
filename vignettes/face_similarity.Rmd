@@ -614,7 +614,7 @@ cat("Mean face similarity:", round(mean_similarity, 3), "\n")
 
 ### Similarity and mock-witness choices: a hypothesis to test
 
-The direction of the relationship matters here, and it is easy to state
+The direction of the relationship is important here, and it is easy to state
 backwards. Mock witnesses choose the member who best matches **the
 description**. A foil that closely resembles the suspect also resembles the
 description, so it draws choices *away* from the suspect — which is precisely
@@ -818,7 +818,7 @@ score.
    embedding distance corresponds to *human* perceived similarity is an
    empirical question, and the appropriate reference here is Tredoux (2002) on
    direct similarity measurement and its relation to human judgements.
-3. **Image conditions matter.** Pose, lighting, expression, resolution and
+3. **Image conditions are important.** Pose, lighting, expression, resolution and
    background all affect embeddings. Lineup photographs taken under different
    conditions may differ in similarity for reasons that have nothing to do with
    facial resemblance. Standardised images are essential.

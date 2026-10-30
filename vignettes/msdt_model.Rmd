@@ -85,7 +85,7 @@ A **univariate** distribution describes one quantity — how likely the
 suspect's signal is to take each value. A **joint** distribution
 describes two or more together, including how they move with one another.
 
-The distinction matters here because the witness's decision is not about
+The distinction is important here because the witness's decision is not about
 the suspect's signal in isolation. It is about whether the suspect's
 signal is the largest *and* clears the criterion. That is inherently a
 question about two quantities at once, so a joint distribution is the
@@ -141,7 +141,7 @@ to the right** of the distribution of any single filler. Each filler is
 centred at 0, but the largest of five is centred near 1.17. A culprit
 with \(d' = 1\) is therefore competing against a typical best-filler
 signal *higher than its own mean* — which is why lineup identification is
-hard, and why lineup size matters so much.
+hard, and why lineup size is so important.
 
 ## Moments
 
@@ -153,7 +153,7 @@ is; and the third standardised moment is the **skewness**, which says how
 asymmetric it is — zero for a symmetric distribution, positive when the
 right tail is longer.
 
-They matter here because the max filler distribution is **not normal**,
+They are important here because the max filler distribution is **not normal**,
 even though every filler individually is. Taking a maximum shifts the
 distribution right, compresses its spread, and makes it asymmetric. The
 moments quantify exactly that, and they are computed numerically because
@@ -303,7 +303,7 @@ bare caveat, here is what each would take.
 
 ## 1. Correlated filler signals
 
-**Why it matters.** As noted above, fillers matched to a common
+**Why it is important.** As noted above, fillers matched to a common
 description are unlikely to be independent, and the error runs in an
 unsafe direction: assuming independence overstates the competition the
 suspect faces.
@@ -333,7 +333,7 @@ simulation, and \(\rho = 0\) must reproduce the existing functions.
 
 ## 2. Unequal variances
 
-**Why it matters.** The empirical evidence in recognition memory
+**Why it is important.** The empirical evidence in recognition memory
 generally favours a culprit distribution with larger variance than the
 filler distribution, and assuming equality distorts \(d'\).
 

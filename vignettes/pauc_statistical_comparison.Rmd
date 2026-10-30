@@ -36,7 +36,7 @@ library(ggplot2)
 
 Eyewitness researchers frequently need to decide whether one identification
 procedure is better than another: whether simultaneous lineups beat sequential
-ones, whether a longer retention interval hurts, whether lineup size matters.
+ones, whether a longer retention interval hurts, whether lineup size is important.
 
 Since about 2012 the dominant way of answering such questions has been to
 compare **ROC curves**, and usually to reduce each curve to a single number —
@@ -112,7 +112,7 @@ procedure that genuinely improves memory moves the whole curve outward.
 witness identifies rarely; a willing one identifies often. Changing the
 criterion moves you *along* a curve without changing which curve you are on.
 
-The distinction matters because a procedure can change identification rates
+The distinction is important because a procedure can change identification rates
 without improving anything. If sequential lineups simply make witnesses more
 cautious, they will produce fewer false identifications *and* fewer correct
 ones, and a comparison of raw rates will make them look better or worse
@@ -159,7 +159,7 @@ way to push further to the right: doing so would require witnesses to identify
 someone more often than they are willing to, and the experiment provides no
 lever for that.
 
-Two consequences follow, and both matter:
+Two consequences follow, and both are important:
 
 1. **The full area under the curve cannot be computed** without inventing the
    part of the curve that was never observed. Anything that extrapolates to
@@ -263,7 +263,7 @@ whichever curve stopped sooner. That default has been corrected.
 Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) go further and argue
 that pAUC does not measure what researchers want it to measure. Their claim is
 that pAUC fails to track the **diagnostic utility** of a lineup — the thing that
-actually matters for deciding which procedure a police force should adopt — and
+is actually important for deciding which procedure a police force should adopt — and
 that neither choice of region repairs this. They propose *deviation from perfect
 performance* (DPP) instead, which is implemented in this package and covered in
 `vignette("calibration_decision_analysis")`.
@@ -380,7 +380,7 @@ ggplot(data.frame(diff = boot_diff), aes(x = diff)) +
 Typically the distribution is close to normal but not exactly so — mild skew is
 common, because pAUC is bounded and the region is data-determined. With several
 hundred resamples a formal normality test will often reject even when the
-departure is too small to matter. The practical question is not whether
+departure is too small to be important. The practical question is not whether
 normality holds exactly but whether it holds well enough that the interval is
 about right, and that is best answered by comparing the two intervals directly:
 

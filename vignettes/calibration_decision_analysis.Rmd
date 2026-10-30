@@ -111,7 +111,7 @@ head(classify_lineup_choices(
 ))
 ```
 
-This matters because **foils are not interchangeable**. They differ in how
+This is important because **foils are not interchangeable**. They differ in how
 plausible they are, and a foil that nobody ever chooses is not a functioning
 alternative to the suspect at all — it is precisely what makes a lineup unfair.
 Recording only "filler" throws that information away. In `lineup_example` the
@@ -470,7 +470,7 @@ absolute value of a correct identification's benefit. That is a moral and legal
 judgement, not a statistical one, and it is the natural place for disagreement.
 Someone who set `fp = -10` would be expressing Blackstone's ratio; the analysis
 below would then recommend a considerably stricter confidence threshold. Because
-the choice matters this much, it is worth reporting the sensitivity of the
+the choice is this important, it is worth reporting the sensitivity of the
 conclusion to it, which is what the base-rate section does for the other key
 assumption.
 
@@ -578,7 +578,7 @@ knitr::kable(
 )
 ```
 
-Base rate matters a great deal. When guilty suspects are rare, any given
+Base rate is very important. When guilty suspects are rare, any given
 identification is more likely to be a false one, so the optimal criterion
 becomes stricter: here "`r tolower(sensitivity[["Optimal rule"]][1])`" at a
 base rate of `r sensitivity[["Base rate"]][1]`, against
@@ -712,7 +712,7 @@ Resolution is the third of the properties confidence can have, alongside
 calibration and over/underconfidence. A witness could be poorly calibrated —
 systematically over- or underconfident — and yet have excellent resolution, if
 their confidence still ranked correct identifications above incorrect ones.
-Resolution is arguably the property that matters most in practice, since a
+Resolution is arguably the most important property in practice, since a
 systematic bias can be corrected for once known, whereas an inability to
 discriminate cannot.
 

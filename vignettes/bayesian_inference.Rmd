@@ -71,7 +71,7 @@ distribution. Three steps:
 no tidy closed form for its posterior. Instead the functions sample `S` draws
 from the posterior of the probabilities and transform each draw. The resulting
 collection of `S` values *is* the posterior of E′, and any summary is computed
-from it. This is why `S` matters: too few draws and the summaries are noisy.
+from it. This is why `S` is important: too few draws and the summaries are noisy.
 Note that these are independent Monte Carlo draws, not MCMC, so there is no
 chain to check for convergence.
 
@@ -325,7 +325,7 @@ and should be reported rather than resolved by picking a prior.
 | `sdt_compare()` | Beta posteriors on hit and false-alarm rates | \(\Delta d' = d'_A - d'_B\) |
 
 In each case the posterior of the *transformed* quantity is obtained by
-transforming draws, not by approximating the transformation. This matters for
+transforming draws, not by approximating the transformation. This is important for
 quantities like \(DR\), a ratio whose sampling distribution is markedly skewed:
 the posterior inherits that skew correctly, where a symmetric normal-theory
 interval would not.
