@@ -280,7 +280,7 @@ target-absent) witnesses per condition, that is between `r 4 * cross_lo` and
 `r 4 * cross_hi` witnesses in the whole simulated experiment. With only 30
 simulations per point the crossing is itself uncertain (see the standard errors). And `mean_effect` — the
 average observed difference in pAUC — stays roughly constant across sample
-sizes, which is the sanity check: sample size does not change the size of an
+sizes, which is a check: sample size does not change the size of an
 effect, only how precisely it is measured, and `sd_effect` duly shrinks.
 
 ### Plotting, and adjusting the plot
