@@ -583,9 +583,10 @@ print.simulated_lineup_data <- function(x, ...) {
 #' between two lineup conditions, by simulating both conditions at a range of
 #' sample sizes and recording how often the difference is detected.
 #'
-#' @param sample_sizes Integer vector. Sample sizes per condition to test
-#'   (e.g., c(50, 100, 200)). Each is used for both target-present and
-#'   target-absent lineups in each condition.
+#' @param sample_sizes Integer vector of sizes to test (e.g., c(50, 100, 200)).
+#'   A size n means n target-present \emph{and} n target-absent witnesses in
+#'   each of the two simulated conditions: 2n witnesses per condition and 4n
+#'   in the whole simulated experiment.
 #' @param d_prime Numeric. Discriminability of the condition of interest.
 #' @param d_prime_null Numeric. Discriminability of the comparison condition.
 #'   Defaults to 0, which asks how often the procedure can be shown to
@@ -618,7 +619,9 @@ print.simulated_lineup_data <- function(x, ...) {
 #'
 #' @return A dataframe of class \code{power_analysis} with columns:
 #'   \itemize{
-#'     \item sample_size: N per condition
+#'     \item sample_size: n, the number of target-present (and, separately,
+#'       target-absent) witnesses per condition
+#'     \item n_total: Witnesses in the whole simulated experiment, 4n
 #'     \item power: Proportion of simulated studies reaching significance
 #'     \item power_se: Standard error of that proportion
 #'     \item mean_effect: Mean observed difference in pAUC
@@ -730,6 +733,7 @@ simulate_power_analysis <- function(sample_sizes,
 
     results[[length(results) + 1]] <- data.frame(
       sample_size = n,
+      n_total     = 4 * n,
       power       = power,
       # Binomial standard error of the estimated proportion, so readers can see
       # how much of any non-monotonicity is simulation noise.
@@ -796,7 +800,7 @@ plot.power_analysis <- function(x, ...) {
     ggplot2::geom_point(size = 3, color = "steelblue") +
     ggplot2::theme_bw(base_size = 12) +
     ggplot2::labs(
-      x = "Sample size (per condition)",
+      x = "Target-present (= target-absent) witnesses per condition",
       y = "Power",
       title = "Power to detect a difference in discriminability",
       subtitle = subtitle,

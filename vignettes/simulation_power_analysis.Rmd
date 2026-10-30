@@ -136,28 +136,33 @@ knitr::kable(
 )
 ```
 
-A criterion of 0 rejects almost nothing. The roughly neutral value — where
-target-absent lineups are rejected about half the time — is near 1.27, which is
-exactly the expected maximum of six standard normal draws.
+A criterion of 0 rejects almost nothing. The neutral value, where target-absent
+lineups are rejected half the time, is the **median** of the maximum of six
+standard normal draws. In a fair target-absent lineup every member's strength is
+Normal(0, 1), so the maximum is below \(x\) with probability \(\Phi(x)^6\), and
+the median is \(\Phi^{-1}(0.5^{1/6}) \approx\) `r round(qnorm(0.5^(1/6)), 3)`.
+The mean of the maximum, about 1.27, is close but not the same: used as the
+criterion it gives a rejection rate of about
+`r round(100 * pnorm(1.2672)^6, 1)`%.
 
 That value therefore **depends on lineup size**, which is why no fixed table of
 "liberal / neutral / conservative" values can be given:
 
 ```{r criterion-by-size}
 sizes <- c(4, 6, 8, 10, 12)
-set.seed(1)
-expected_max <- vapply(sizes, function(k) {
-  mean(replicate(20000, max(stats::rnorm(k))))
-}, numeric(1))
 
 knitr::kable(
   data.frame(`Lineup size` = sizes,
-             `Roughly neutral criterion` = round(expected_max, 2),
+             `Neutral criterion` = round(qnorm(0.5^(1 / sizes)), 3),
              check.names = FALSE),
   row.names = FALSE,
-  caption = "Approximately neutral criterion by lineup size: the expected maximum of k standard normal draws."
+  caption = "Criterion giving 50% target-absent rejections in a fair lineup: the median of the maximum of k standard normal draws."
 )
 ```
+
+The same formula gives any other target rejection rate \(r\):
+\(\Phi^{-1}(r^{1/k})\). It assumes a fair lineup with `foil_bias` at its default,
+so treat it as a starting point when foils are unequal.
 
 A practical approach is to choose the criterion by the rejection rate it
 produces, rather than by its nominal value: simulate, look at the rejection
@@ -239,8 +244,13 @@ p-value falls below `alpha`.
 
 ### A worked power analysis
 
-The question: how many participants per condition are needed to show that a
-procedure with d′ = 1.0 discriminates better than chance?
+The question: how many witnesses are needed to show that a procedure with
+d′ = 1.0 discriminates better than chance?
+
+Be clear about the unit first. A `sample_size` of n simulates n target-present
+**and** n target-absent witnesses in each of the two conditions being compared,
+so 2n witnesses per condition and 4n in all; the `n_total` column gives the
+total.
 
 ```{r power_analysis, cache = FALSE}
 power_result <- simulate_power_analysis(
@@ -256,15 +266,27 @@ power_result <- simulate_power_analysis(
 )
 
 knitr::kable(
-  as.data.frame(power_result)[, c("sample_size", "power", "power_se",
-                                  "mean_effect")],
+  setNames(as.data.frame(power_result)[, c("sample_size", "n_total", "power",
+                                           "power_se", "mean_effect")],
+           c("TP (= TA) per condition", "Total witnesses", "Power",
+             "Power SE", "Mean effect")),
   digits = 3, row.names = FALSE,
   caption = "Power to detect d' = 1.0 against chance, 30 simulated studies per sample size."
 )
 ```
 
+```{r power_crossing, include = FALSE}
+pr <- as.data.frame(power_result)
+first80 <- which(pr$power >= 0.8)[1]
+cross_lo <- pr$sample_size[first80 - 1]
+cross_hi <- pr$sample_size[first80]
+```
+
 Two things to read off. Power rises with sample size, as it must, crossing 80%
-somewhere between 25 and 50 participants per condition. And `mean_effect` — the
+between `r cross_lo` and `r cross_hi` target-present (and as many
+target-absent) witnesses per condition, that is between `r 4 * cross_lo` and
+`r 4 * cross_hi` witnesses in the whole simulated experiment. With only 30
+simulations per point the crossing is itself uncertain (see the standard errors). And `mean_effect` — the
 average observed difference in pAUC — stays roughly constant across sample
 sizes, which is the sanity check: sample size does not change the size of an
 effect, only how precisely it is measured, and `sd_effect` duly shrinks.
@@ -296,11 +318,13 @@ remedy is more simulations, not a different interpretation.** For planning a rea
 study, 500 to 1000 simulations per sample size is a more reasonable setting, at
 proportionately greater cost.
 
-## Method Validation: Parameter Recovery
+## Method Check: Sensitivity to d′
 
 A different use of simulation: generate data with a known d′, fit a model, and
 check that the model's parameters move as they should. Here the 2-high-threshold
-model of Winter et al. is fitted to data simulated across a range of d′.
+model of Winter et al. is fitted to data simulated across a range of d′. The data
+come from a signal detection (MAX) model, so there are no true 2-HT parameter
+values; this checks sensitivity, not recovery.
 
 ```{r parameter_recovery}
 true_dprimes <- c(0.5, 1.0, 1.5, 2.0, 2.5, 3.0)
@@ -321,16 +345,17 @@ recovery <- do.call(rbind, lapply(true_dprimes, function(dp) {
 
 knitr::kable(
   recovery, row.names = FALSE,
-  caption = "2HT detection parameters recovered from data simulated at known d', 500 lineups per condition."
+  caption = "2-HT detection parameters fitted to data simulated from a signal detection model at known d', 500 lineups per condition."
 )
 ```
 
 The detection parameter `dP` increases monotonically with the d′ used to
-generate the data, from about 0.11 to about 0.92. That is the result the
-exercise is looking for. Note that `dP` is not on the same scale as d′ and
-should not be expected to equal it — the two models parameterise memory
-differently, and what validates the analysis is that the ordering and the
-spacing are recovered, not that the numbers coincide.
+generate the data, from about 0.11 to about 0.92. That shows `dP` is
+sensitive to memory strength. It does not validate the 2-HT model: `dP` is not
+on the same scale as d′, the generating model is a different model, and the
+exercise says nothing about bias, interval coverage or the process
+interpretation. Parameter recovery in the strict sense would simulate from the
+2-HT equations themselves and check that the known parameters come back.
 
 The model fits without difficulty on data of this kind. If a fit does fail,
 resist the temptation to wrap it in `tryCatch()` and report "did not converge",

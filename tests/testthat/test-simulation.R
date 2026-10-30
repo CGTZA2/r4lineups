@@ -253,6 +253,8 @@ test_that("simulate_power_analysis returns the documented structure", {
   expect_true(all(c("sample_size", "power", "power_se", "mean_effect",
                     "sd_effect", "n_valid") %in% names(power_result)))
   expect_true(power_result$power >= 0 && power_result$power <= 1)
+  # A size n is n TP and n TA witnesses in each of two conditions.
+  expect_equal(power_result$n_total, 4 * power_result$sample_size)
 })
 
 test_that("power is not trivially 1 when there is no effect to detect", {
