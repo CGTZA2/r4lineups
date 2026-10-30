@@ -2,63 +2,53 @@
 
 ## Release summary
 
-r4lineups 2.1.0 is a major update from the 0.1.x series. It expands the
-package from a lineup-fairness toolkit into a full analysis suite for
+r4lineups 2.3.0 is a major update from the 0.1.x series on CRAN. It expands
+the package from a lineup-fairness toolkit into a full analysis suite for
 eyewitness identification research: ROC/CAC/RAC analysis, full ROC
 (Smith & Yang, 2020), expected information gain, PPV ranges, calibration and
-ANRI, expected-utility analysis, the Winter et al. (2022) 2-HT model,
-multi-item signal detection (mSDT and a restricted aggregate MAX fit), Bayesian beta-binomial inference
-for the core fairness measures, model comparison, pAUC comparison, data
-simulation and power analysis, optional deep-learning face similarity via
-reticulate/Python, and an optional interface to a pinned pyWitness revision for
-fitting Independent Observations, Ensemble, and Integration lineup-memory
-models. See NEWS.md for the full changelog, including fixes from a
-component-by-component statistical audit.
+ANRI, expected-utility analysis and deviation from perfect performance, the
+Winter et al. (2022) 2-HT model, multi-item signal detection, Lee and
+Penrod's (2019) Multi-d' model, Bayesian beta-binomial inference for the core
+fairness measures, model and pAUC comparison, data simulation and power
+analysis, a Shiny application, optional deep-learning face similarity via
+reticulate/Python, and an optional interface to a pinned pyWitness revision
+for fitting lineup-memory models. Versions 2.1.0 to 2.2.0 were never
+submitted; 2.3.0 supersedes them and adds the corrections from two
+independent statistical reviews. See NEWS.md for the full changelog.
 
 ## Test environments
 
-* local macOS Tahoe 26.6 (Darwin 25.6.0, arm64), R 4.6.1
+* local macOS 27.0.1 (Darwin 27.0.0, arm64), R 4.6.1
 * GitHub Actions macOS, R release
 * GitHub Actions Windows, R release
 * GitHub Actions Ubuntu, R devel, release, and oldrel-1
 
-All jobs passed on the final `main` revision in GitHub Actions run
-`31405897556`. The TeX-equipped job in that run also built the PDF reference
-manual successfully. The separate pinned-pyWitness parity suite passed on
-Linux, macOS, and Windows in run `31405924004`.
+All five jobs passed on the release revision in GitHub Actions run
+`40967586729`, and the TeX-equipped job in that run built the PDF reference
+manual. The separate pinned-pyWitness parity suite passed on Linux, macOS, and
+Windows in run `40962145807`.
 
 ## R CMD check results
 
-Local source-tarball check (`R CMD check --as-cran --no-manual`):
+Local source-tarball check (`R CMD check --as-cran --no-manual --run-donttest`),
+with network access, including the CRAN incoming feasibility checks:
 
 0 errors | 0 warnings | 0 notes
 
-The built tarball's tests, ordinary examples, `\donttest{}` examples, package
-installation, and all vignettes completed successfully. A PDF manual was not
-built locally because a TeX installation is unavailable; it was built
-successfully by the TeX-equipped GitHub Actions job described above.
+The tests, ordinary and `\donttest{}` examples, installation, and all 16
+vignettes completed successfully. A PDF manual was not built locally because
+a TeX installation is unavailable; it was built by the TeX-equipped GitHub
+Actions job above.
 
-The final network-enabled run completed CRAN incoming feasibility checks. A
-separate URL/DOI audit returned zero failures.
-
-The archive was rebuilt on 27 October 2026 from the unchanged 2.1.0 sources,
-only to refresh the build time stamp (the August build triggered the "build
-time stamp is over a month old" NOTE). R code, documentation, tests and
-NAMESPACE are byte-identical to the August candidate. The rebuilt archive
-passes `R CMD check --as-cran --no-manual` on macOS/R 4.6.1 with 0 errors, 0
-warnings and 0 notes, both with CRAN purrr 1.2.2 and with development purrr
-1.2.2.9000. `urlchecker::url_check()` again returned no problems.
-
-The submitted archive is `r4lineups_2.1.0.tar.gz` (1,494,050 bytes), SHA-256
-`910a58c38c23eccbcb8a29e8491c6776fd2d1cdb6ea21dde15435f0004efa7d5`.
+The submitted archive is `r4lineups_2.3.0.tar.gz` (2,080,831 bytes), SHA-256
+`b44dbc9badea79cb0b5508c135f35fced55abadbe3b88640fdfb7819cf1227ec`.
 
 ## purrr::rerun() notice
 
 On 27 October 2026 the purrr maintainers warned that `rerun()` becomes defunct
 in the next purrr release, and that r4lineups 0.1.1 on CRAN imports it. This
 release no longer uses or imports `rerun()` (it was replaced by
-`purrr::map()`), and it passes its checks against the development version of
-purrr.
+`purrr::map()`).
 
 ## Notes for CRAN reviewers
 
@@ -70,6 +60,8 @@ purrr.
   installed Python environment containing a pinned pyWitness revision. Package
   loading and ordinary CRAN checks neither initialize Python nor install that
   environment. Its live parity tests run only in a separate opt-in workflow.
+* The Shiny application in inst/shiny is launched only on request; shiny and
+  bslib are suggested, not imported.
 * Evaluated vignette bootstrap/simulation settings are deliberately modest for
   check-time reliability; publication-grade settings are shown in unevaluated
   examples.

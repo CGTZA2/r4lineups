@@ -15,7 +15,7 @@ authors:
 affiliations:
   - name: Department of Psychology, University of Cape Town, South Africa
     index: 1
-date: 28 October 2026
+date: 29 October 2026
 bibliography: paper.bib
 ---
 
@@ -65,7 +65,7 @@ article supplements, small bespoke scripts, and general statistical packages.
 That fragmentation made input conventions, denominators, base-rate
 assumptions, continuity corrections, and uncertainty procedures difficult to
 audit consistently. `r4lineups` supplies lineup-specific validation and common
-data conventions together with worked examples. Version 2.2.0 is a major
+data conventions together with worked examples. Version 2.3.0 is a major
 extension of the original package, first released on CRAN as version 0.1.1 in
 2018 [@r4lineups].
 
@@ -130,14 +130,18 @@ ROC/CAC/RAC and full ROC, calibration and decision measures, expected
 information gain and error-rate ranges, Winter's two-high-threshold model,
 summary and regression-based signal-detection methods, the Multi-d′, mSDT and
 Wixted models, simulation and power, and optional face similarity.
-Mathematical corrections in versions 2.1.0 and 2.2.0 were checked against primary publications, small independent
-calculations, invariance identities, and simulation recovery.
+Corrections made in versions 2.1.0 to 2.3.0 after independent statistical
+reviews were each checked in a specific way: against worked examples in the
+primary publications (for example, Lee and Penrod's Multi-d′ indices
+[@lee2019]), against a pinned pyWitness revision for the lineup-memory models
+[@mickes2024], and against hand calculations, invariance identities and
+simulation recovery, with each check kept as a regression test.
 
 # Research impact statement
 
 `r4lineups` has been publicly available through CRAN since 2018 and has been
 used in published eyewitness research, including analyses of eyewitness
-decision processes [@mansour2024; @mansour2025]. Version 2.2.0 substantially
+decision processes [@mansour2024; @mansour2025]. Version 2.3.0 substantially
 extends that established research tool while preserving the classical
 fairness functions used by earlier work. Its immediate scholarly contribution
 is a tested R workflow spanning lineup construction, identification outcomes,
