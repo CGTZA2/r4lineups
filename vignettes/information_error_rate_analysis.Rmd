@@ -219,10 +219,9 @@ knitr::kable(
 )
 ```
 
-The spread is large — from about
+The spread is large, from about
 `r round(ppv_estimated$ppv_none$overall_ppv, 2)` to about
-`r round(ppv_estimated$ppv_nominal$overall_ppv, 2)` — and that spread is the
-finding. An analysis reporting only the nominal-size figure would be asserting
+`r round(ppv_estimated$ppv_nominal$overall_ppv, 2)`. An analysis reporting only the nominal-size figure would be asserting
 that the lineup was perfectly fair, which is precisely what is unknown.
 
 The effective-size correction sits between the two because the lineup's members
