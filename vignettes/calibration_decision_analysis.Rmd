@@ -621,8 +621,7 @@ robust to ROC truncation — that is, to witnesses not using the full confidence
 scale.
 
 It was proposed by Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) as a
-replacement for partial area under the ROC curve, and the reason is worth
-stating because it is contested. Lineup ROC curves cannot be traced over their
+replacement for partial area under the ROC curve, but it is contested. Lineup ROC curves cannot be traced over their
 full range: the observed false-alarm rate only extends as far as witnesses'
 willingness to choose takes it, and that endpoint differs between procedures.
 pAUC handles this by integrating over a restricted region, but the choice of
