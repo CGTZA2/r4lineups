@@ -39,11 +39,10 @@ This vignette demonstrates five statistical methods for analyzing eyewitness ide
 5. **ANRI** - Bias-corrected resolution index with bootstrap inference
 
 These methods complement the traditional lineup fairness measures by providing
-sophisticated analyses of identification accuracy, confidence calibration, and
+analyses of identification accuracy, confidence calibration, and
 decision-making utility.
 
-They answer different questions, and it is worth being clear which is which
-before working through them.
+They answer different questions.
 
 **Calibration analysis** asks whether a witness's confidence *means* what it
 appears to mean: when witnesses say they are 90% sure, are they right 90% of the
@@ -61,7 +60,7 @@ witness.
 **Expected utility analysis** goes one step further and asks what a policy
 *should* be. Given the costs of a wrongful identification and the benefits of a
 correct one, at what confidence level should an identification be acted upon?
-Lampinen, Smith and Wells (2019) set out the framework and, importantly, show
+Lampinen, Smith and Wells (2019) set out the framework and show
 that it can disagree with ROC-based conclusions about which procedure is better.
 
 **Deviation from perfect performance (DPP)** is a discriminability measure,
