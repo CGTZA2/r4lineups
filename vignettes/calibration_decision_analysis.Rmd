@@ -791,6 +791,14 @@ knitr::kable(
 )
 ```
 
+No interval is given for NRI because it would add nothing. ANRI is a linear
+rescaling of NRI, \(ANRI = (N \cdot NRI - J + 1)/(N - J + 1)\), so with
+\(N =\) `r anri_boot$n_total` suspect identifications and \(J =\)
+`r anri_boot$n_bins` bins the two differ only by the bias correction
+(`r round(anri_boot$nri, 3)` against `r round(anri_boot$anri, 3)` here). An
+interval for NRI would be the ANRI interval shifted upward by that bias, so
+it is ANRI and its interval that should be reported and compared.
+
 ### Compare Groups
 
 The comparison uses the two simulated procedures, which differ in the strength
