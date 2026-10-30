@@ -183,19 +183,24 @@ happens.
 
 The corrections matter when no innocent suspect is designated — the usual
 situation with field data. We can create that case by relabelling the
-target-absent suspect identifications as foil identifications, which is exactly
-the information loss that occurs when the lineup did not nominate a suspect in
-advance:
+target-absent suspect identifications as foil identifications **and** removing
+the `suspect_pos` column, which is exactly the information loss that occurs when
+the lineup did not nominate a suspect in advance. Both steps are needed: a
+non-missing `suspect_pos` tells `make_ppv_range()` that a suspect was designated,
+and the design would then stay designated with zero innocent-suspect
+identifications, giving PPV = 1 under every correction.
 
 ```{r ppv_estimated}
 no_designation <- lineup_example
 ta_suspect <- !no_designation$target_present &
                no_designation$identification == "suspect"
 no_designation$identification[ta_suspect] <- "filler"
+no_designation$suspect_pos <- NULL
 
 ppv_estimated <- make_ppv_range(
   no_designation,
   lineup_size = 6,
+  innocent_suspect = "estimated",  # state the design rather than rely on "auto"
   show_plots = FALSE
 )
 
@@ -298,10 +303,11 @@ as hits / (hits + estimated innocent-suspect identifications).
    not an estimate.
 3. Effective size is estimated per confidence bin, so bins with few observations
    give unstable corrections — check the counts before relying on a bin.
-4. Effective size is itself a plug-in estimate and is biased downward at small
-   samples; see the "Small-sample bias" section of `?esize_T`. A downward-biased
-   effective size makes the correction *more* conservative, so the effect is in
-   the safe direction, but it is not negligible.
+4. Effective size is itself a plug-in estimate with small-sample bias; see the
+   "Small-sample bias" section of `?esize_T`. In near-fair lineups the bias is
+   downward, which makes the correction more conservative, but its direction is
+   not guaranteed: with strongly unequal choices the plug-in estimate can be
+   biased upward. Bins with few target-absent choices deserve particular care.
 
 ## References
 
