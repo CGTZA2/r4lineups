@@ -49,9 +49,11 @@ similarity measurement rather than identity verification. In lineup research,
 we typically want to measure how similar foils are to the target, not whether
 they are the same person.
 
-The 'verified' field indicates whether the faces would be considered
-"the same person" by the model, which in lineup research context means
-the foil is too similar to the target (potential lineup bias).
+The 'verified' field is the model's identity decision: whether the
+distance falls inside the model's threshold for "same person". In a lineup
+it is a prompt to inspect the two photographs, not a finding. Face
+recognition systems make false matches, and a match does not show that a
+foil is nonfunctioning for witnesses.
 }
 \examples{
 \dontrun{
