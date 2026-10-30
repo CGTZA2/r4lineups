@@ -296,7 +296,7 @@ is shifted by \(d'\), moving the mass towards the suspect axis.
 The functions here implement the **core** mSDT assumptions: equal
 variance and independent filler signals. Yang et al. (2025) discuss
 extensions that are not yet implemented. Rather than leave that as a
-bare caveat, here is what each would take.
+caveat, here is what each would take.
 
 ## 1. Correlated filler signals
 
