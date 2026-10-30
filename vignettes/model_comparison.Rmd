@@ -123,8 +123,8 @@ lineup_data <- as.data.frame(simulate_lineup_data(
 head(lineup_data)
 ```
 
-The `c_criterion = 0.9` is not incidental, and it is worth explaining because
-getting it wrong makes one of the three models impossible to fit.
+The `c_criterion = 0.9` is not incidental: getting it wrong makes one of the
+three models impossible to fit.
 
 `c_criterion` is a threshold on the **maximum** of the lineup members' memory
 strengths, not a textbook signal-detection criterion. The maximum of six draws
@@ -607,7 +607,7 @@ cat("  • What each model's estimates say about the procedure\n")
 summary(comparison$fitted_models$`2ht`)
 ```
 
-The summary's identification note is the point here. With one target-present
+The summary's identification note is the part to read. With one target-present
 and one target-absent condition the 2-HT model has zero residual degrees of
 freedom, so it reproduces the counts exactly and there is no goodness-of-fit
 test to read. Convergence, identifiability (enough rejections to estimate `dA`)

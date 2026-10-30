@@ -67,8 +67,8 @@ The full ROC method uses all six.
 
 ### Why the partial ROC curve does not span the full range
 
-This is worth being concrete about, because it is the practical reason full ROC
-was proposed.
+A concrete example follows, because this is the practical reason full ROC was
+proposed.
 
 An ROC curve is traced by progressively relaxing the criterion for accepting
 evidence. In conventional lineup ROC analysis, the only lever is confidence

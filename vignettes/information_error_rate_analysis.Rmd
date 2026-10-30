@@ -85,7 +85,7 @@ EIG is the average of those, weighted by how often each response occurs:
 \mathrm{EIG} = \sum_x P(x)\,\Bigl[H\bigl(P(G)\bigr) - H\bigl(P(G \mid x)\bigr)\Bigr]
 \]
 
-Two consequences are worth noting. Individual responses can have **negative**
+Two consequences follow. Individual responses can have **negative**
 information gain — a response that moves belief towards 0.5 increases
 uncertainty — but the expectation over all responses cannot be negative. And EIG
 depends on the prior \(P(G)\), which is set by `prior_guilt` and is a property

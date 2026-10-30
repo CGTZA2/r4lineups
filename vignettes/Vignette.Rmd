@@ -312,8 +312,7 @@ Other choices include `"perc"` (percentile), `"norm"` (normal approximation) and
 
 #### Comparing against a normal-theory interval
 
-It is worth seeing how the bootstrap interval compares with the classical
-interval, which is what the earlier literature used. There is no r4lineups
+The bootstrap interval can be compared with the classical interval, which is what the earlier literature used. There is no r4lineups
 function for this, because base R already provides it: a lineup proportion is
 just a binomial proportion, so `stats::binom.test()` (exact) and
 `stats::prop.test()` (normal approximation with continuity correction) apply
@@ -584,7 +583,7 @@ esize_boot_ci
 ```
 
 Calling `boot.ci()` without a `type` argument asks for *all* interval types, and
-produces two warnings that are worth understanding rather than ignoring:
+produces two warnings that should be understood rather than ignored:
 
 * _"bootstrap variances needed for studentized intervals"_. The studentized
   (bootstrap-t) interval needs an estimate of the variance of the statistic at
@@ -676,7 +675,7 @@ better. Either way, state which was used.
 #### Getting the choice distribution without mock witnesses
 
 E' needs a distribution of choices across lineup members, which normally means
-running a mock-witness study. There is an alternative worth knowing about:
+running a mock-witness study. There is an alternative:
 **target-absent lineups from an identification experiment supply a choice
 distribution too**. Its effective size is a *resultant* measure of how choices
 spread in practice, and Fitzgerald, Tredoux and Juncu (2023) use it this way. It
@@ -832,9 +831,9 @@ degrees of freedom, and calculate its significance.
 All these calculations are built into `homog_diag()`, and so do not need to be
 calculated separately.
 
-**Two different questions.** Before running anything it is worth being explicit
-about what this test does and does not tell you, because its output is easy to
-misread. The chi-square is Cochran's _Q_,
+**Two different questions.** It is important to make a point of clarification
+here about what this test does and does not tell you, because its output is easy
+to misread. The chi-square is Cochran's _Q_,
 
 $$Q = \sum_{i=1}^{k} w_i \left( \ln d_i - \ln \bar{d} \right)^2 ,$$
 
@@ -974,7 +973,7 @@ replications. It also requires suspect positions: they cannot be inferred from
 the observed choices.
 
 The percentile interval it reports for the mean is an interval on the **pooled**
-ratio, so the same caution applies: it is only worth interpreting when the
+ratio, so the same caution applies: interpret it only when the
 chi-square has not rejected homogeneity.
 
 ```{r, warning=FALSE}
@@ -1062,8 +1061,7 @@ pander::pandoc.table(lineup_example[1:8, ],
 
 ### Computing and plotting the ROC
 
-Each ROC and CAC analysis comes in two forms, and it is worth being clear about
-the difference:
+Each ROC and CAC analysis comes in two forms:
 
 * `make_rocdata()`, `make_cacdata()` and `make_fullroc_data()` compute and return
   the **data only**.

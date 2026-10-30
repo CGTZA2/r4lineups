@@ -108,7 +108,7 @@ roughly a third of the independent value. Treating correlated fillers as
 independent therefore **overstates how often a filler out-competes the
 suspect**, and so understates the suspect's exposure. The
 [implementation plan](#planned-extensions) below treats this as the first
-extension worth building.
+extension to build.
 
 # Max filler distribution
 
@@ -231,7 +231,7 @@ pnorm(params$gamma)^6
 
 ## What this estimator gives up
 
-The closed form comes at a price, and it is worth stating plainly.
+The closed form comes at a price.
 
 `estimate_msdt_params()` uses **only the two rejection rates**. It never
 looks at whether the witnesses who *did* choose picked the suspect or a

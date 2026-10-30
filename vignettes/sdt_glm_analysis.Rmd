@@ -69,7 +69,7 @@ probit regression, so nothing is lost by doing it this way.
 
 ### Why a probit regression gives you d′
 
-The connection is exact rather than approximate, and worth seeing.
+The connection is exact rather than approximate.
 
 Signal detection theory says the witness's evidence is normally distributed with
 mean 0 for new items and mean d′ for old ones, with a criterion at some point
@@ -302,7 +302,7 @@ under 0/1 coding the intercept is not \(c\).
    vary across participants is often the more realistic model and requires more
    data to fit.
 
-### A limitation worth naming
+### A limitation
 
 This treats the response as binary — "old" or "new". Recognition data usually
 carry confidence as well, and reducing a confidence rating to a binary response

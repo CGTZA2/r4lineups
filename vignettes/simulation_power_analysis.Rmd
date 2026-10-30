@@ -30,8 +30,7 @@ knitr::opts_chunk$set(
 ## Introduction
 
 Simulation is useful in lineup research for four rather different purposes, and
-it is worth separating them because they make different demands on the
-simulation.
+they make different demands on the simulation.
 
 - **Planning a study.** How many participants are needed to detect the effect
   you expect? This is power analysis, and it needs a hypothesis to test.
@@ -48,8 +47,8 @@ library(r4lineups)
 
 ## Signal Detection Theory, briefly
 
-Signal detection theory (SDT) is the framework the simulator uses, so it is
-worth stating what it assumes.
+Signal detection theory (SDT) is the framework the simulator uses. Its
+assumptions are as follows.
 
 The idea is that a witness viewing a lineup member experiences some degree of
 **memory strength** — a sense of familiarity or match to their memory of the
@@ -111,8 +110,8 @@ the parameter recovery in `fit_winter_2ht()` is checked against it. See
 identify anyone. Raise it and witnesses reject more often; lower it and they
 choose more often.
 
-One point trips people up, and the guidance in earlier versions of this vignette
-got it wrong. In textbook SDT, a criterion of 0 is "neutral". **That is not true
+It is important to make a point of clarification here, and the guidance in
+earlier versions of this vignette got it wrong. In textbook SDT, a criterion of 0 is "neutral". **That is not true
 here**, because the criterion applies to the *maximum* of several members'
 strengths, not to a single item. The maximum of six draws from Normal(0, 1)
 averages about 1.27, so a criterion of 0 is passed by nearly every lineup:
@@ -489,7 +488,7 @@ print(rac_result)
 
 The fastest responders are the most accurate, at about 90% against roughly 82%
 for everyone else, after which the relationship flattens. That is a weaker and
-less orderly pattern than the CAC above, and the reason is worth noting: the
+less orderly pattern than the CAC above, because the
 simulator's response-time model is deliberately simple, and the noise it adds is
 of comparable size to the systematic component. Do not read this as evidence
 about response times in real witnesses — it demonstrates the mechanics of the
@@ -517,8 +516,8 @@ the argument behind it.
 
 ## Choosing Parameter Values
 
-These are starting points rather than rules, and they are worth revisiting
-against whatever literature is closest to your own design.
+These are starting points rather than rules; revisit them against whatever
+literature is closest to your own design.
 
 **Discriminability (d′).** Values around 1.0 are weak, 1.5 moderate, and 2.0 to
 2.5 strong. Values above 3.0 are rarely observed in eyewitness studies, and a
@@ -551,7 +550,7 @@ Key functions:
 - `simulate_power_analysis()`: power to detect a difference in discriminability
 - `classify_lineup_choices()`: derive identification outcomes from raw choices
 
-Points worth carrying away:
+In summary:
 
 1. Power analysis needs a hypothesis test, and therefore two conditions.
 2. The criterion is a threshold on the maximum of several strengths, so its

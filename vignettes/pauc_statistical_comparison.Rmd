@@ -194,8 +194,8 @@ ggplot(roc_df, aes(x = false_id_rate, y = correct_id_rate)) +
   theme_minimal(base_size = 12)
 ```
 
-Partial AUC is defended on four grounds, which are worth separating because they
-are not equally strong:
+Partial AUC is defended on four grounds, which are taken separately here because
+they are not equally strong:
 
 1. **It is computable.** Unlike full AUC, it requires no extrapolation into
    territory the data never reached. This is the serious argument.
@@ -306,8 +306,8 @@ $$Z = \frac{\widehat{pAUC}_1 - \widehat{pAUC}_2}{\widehat{SE}(\widehat{pAUC}_1 -
 
 and refers $Z$ to a standard normal distribution.
 
-It is worth being precise about what kind of test this is, because it is easy to
-assume it is something it is not. **It is a Wald test**: an estimate divided by
+It is important to make a point of clarification here about what kind of test
+this is, because it is easy to assume it is something it is not. **It is a Wald test**: an estimate divided by
 an estimate of its own standard error. It is *not* a comparison of two standard
 normal deviates, and it is not a test on transformed proportions. The normal
 reference distribution comes from the asymptotic normality of the estimator, not
@@ -329,7 +329,7 @@ directly and makes no distributional assumption in doing so.
 ### Is normality reasonable?
 
 The Wald test assumes the *difference in pAUC* is approximately normally
-distributed. That is checkable, and worth checking rather than assuming:
+distributed. That can be checked, rather than assumed:
 
 ```{r bootstrap_normality}
 comparison <- compare_pauc(

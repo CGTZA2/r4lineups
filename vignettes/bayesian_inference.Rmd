@@ -35,7 +35,7 @@ vignette runs quickly during package checks; increase `S` for final analyses.
 ## If you have only used frequentist methods
 
 Most readers of this package will have been trained in the frequentist
-tradition, so it is worth setting out plainly what is different here. Nothing in
+tradition, so this section sets out what is different here. Nothing in
 what follows requires accepting a philosophical position; it is mainly about
 what question the interval answers.
 

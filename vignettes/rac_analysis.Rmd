@@ -77,8 +77,7 @@ best separated them varied enormously between experiments — from about 5 secon
 to about 29 seconds. There is a real speed-accuracy relationship; there is no
 universal number.
 
-The practical consequence is worth stating plainly, because it shapes how this
-vignette proceeds. **A time boundary should be estimated from the data in hand
+The practical consequence shapes how this vignette proceeds. **A time boundary should be estimated from the data in hand
 rather than imported from another study.** The
 [continuous approach](#a-continuous-alternative-to-binning) below does that.
 It gives a point estimate of the boundary; an interval for the boundary itself
@@ -138,7 +137,7 @@ cor(lineup_data$response_time, lineup_data$confidence)
 
 # Response Time and Accuracy: the simplest analysis
 
-Before any binning, it is worth looking at the plain correlation between
+Before any binning, look at the plain correlation between
 response time and accuracy. Accuracy is binary, so this is a **point-biserial**
 correlation — which is just Pearson's *r* with one dichotomous variable, and
 needs no special machinery.
@@ -519,7 +518,7 @@ knitr::kable(rac_result$rac_data, digits = 3,
 # Summary
 
 RAC analysis puts response time on the same footing as the CAC plot puts
-confidence. Points worth carrying away:
+confidence. In summary:
 
 1. The idea is old (Sporer, 1993); the plot is new.
 2. Compute it on choosers. Pooling choosers with rejections mixes two different
@@ -530,8 +529,8 @@ confidence. Points worth carrying away:
 4. Binning is conventional, not necessary. A logistic regression with a spline
    uses every observation, needs no boundaries, and gives an honest confidence
    band.
-5. Response time is a weaker indicator of accuracy than confidence, and worth
-   reporting alongside it rather than instead of it.
+5. Response time is a weaker indicator of accuracy than confidence, and should
+   be reported alongside it rather than instead of it.
 
 # References
 

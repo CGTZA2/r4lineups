@@ -101,8 +101,8 @@ Not covered, and what each would require:
 | Reaction-time models | Would require a decision process with a time dimension, e.g. a drift-diffusion account |
 | Hierarchical participant/item effects | Fitting is by minimum Pearson chi-square on aggregate cell counts, which discards the participant and item structure entirely. Random effects would need a trial-level likelihood |
 
-The first two are the ones most likely to bite in practice, since real lineups
-are rarely perfectly fair. If your lineup has null foils — members nobody ever
+The first two are the most common in practice, since real lineups are rarely
+perfectly fair. If your lineup has null foils — members nobody ever
 chooses — see `lineup_table()` and the effective-size measures in the main
 vignette before fitting anything here.
 
@@ -336,7 +336,7 @@ where applicable, a shared-variance term.
 
 ### Why AIC and BIC are NA
 
-This is the point most likely to cause trouble, so it is worth being explicit.
+It is important to make a point of clarification here.
 `loglik_at_estimate` is the multinomial log likelihood **evaluated at the
 minimum-Pearson estimate**. It is not a maximised likelihood. AIC and BIC are
 defined in terms of the maximum of the likelihood, so computing them from this

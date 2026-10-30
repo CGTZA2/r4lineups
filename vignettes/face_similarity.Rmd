@@ -121,8 +121,8 @@ check_python_deps()
 
 If you don't have the required dependencies, install them:
 
-The setup has one requirement that catches most people out, so it is worth
-doing in the right order.
+The setup has one requirement that must be met first, so do it in the order
+below.
 
 **TensorFlow, which DeepFace depends on, does not publish wheels for every
 Python version.** At the time of writing it supports Python 3.9 to 3.12. If your
@@ -222,7 +222,7 @@ There is deliberately no table of bands here, because — as set out above — t
 literature does not establish what level of similarity a lineup foil ought to
 have. Compare scores against each other, not against a standard.
 
-`verified` is different, and it is worth separating clearly. It is not a
+`verified` is a different kind of output. It is not a
 judgement about fairness; it is the model's **identity** decision, whether the
 distance falls inside its threshold for "same person". A `TRUE` is a reason to
 look at the two photographs, nothing more. Face recognition systems make false
@@ -273,8 +273,8 @@ lineup_result
 # Summary statistics
 summary(lineup_result)
 
-# Foils the model judges to be the same identity as the suspect. These are
-# worth inspecting by eye; the model can be wrong.
+# Foils the model judges to be the same identity as the suspect. Inspect
+# them by eye; the model can be wrong.
 same_identity <- lineup_result[which(lineup_result$verified), ]
 if (nrow(same_identity) > 0) {
   cat("Model judges these foils to be the same person as the target:\n")
@@ -296,7 +296,7 @@ describe is the **similarity profile** of the lineup — where the foils sit
 relative to the suspect and to each other. Turning that into a verdict would
 require knowing what profile is desirable, which is exactly what is unsettled.
 
-Three quantities are worth reporting:
+Report three quantities:
 
 - **Mean similarity** — how close the foils are to the suspect on average.
 - **Spread of similarity** — whether the foils are homogeneous, or whether one
@@ -318,7 +318,7 @@ cat("  SD of similarity:", round(sd_sim, 3), "\n")
 cat("  Range:", round(range(lineup_result$similarity), 3), "\n")
 cat("  Foils judged same identity:", n_verified, "\n\n")
 
-# The one flag worth raising automatically, because it is an identity decision
+# The one flag raised automatically, because it is an identity decision
 # rather than a fairness judgement
 if (n_verified > 0) {
   cat("Note:", n_verified, "foil(s) judged the same person as the target.\n")

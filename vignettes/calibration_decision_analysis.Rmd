@@ -94,8 +94,8 @@ head(lineup_example)
 
 ### Why there is a `lineup_member` column
 
-`lineup_example` records two further columns, and the reason is worth stating
-because it applies to any lineup data you collect or simulate yourself.
+`lineup_example` records two further columns, for a reason that applies to any
+lineup data you collect or simulate yourself.
 
 `identification` collapses a witness's decision into three categories. That is
 what the analysis functions consume, but it is *not* what should be recorded.
@@ -493,7 +493,7 @@ absolute value of a correct identification's benefit. That is a moral and legal
 judgement, not a statistical one, and it is the natural place for disagreement.
 Someone who set `fp = -10` would be expressing Blackstone's ratio; the analysis
 below would then recommend a considerably stricter confidence threshold. Because
-the choice is this important, it is worth reporting the sensitivity of the
+the choice is this important, report the sensitivity of the
 conclusion to it, which is what the base-rate section does for the other key
 assumption.
 
@@ -828,7 +828,7 @@ The comparison provides:
 
 The bootstrap difference distribution is available as
 `plot_anri_difference_distribution(anri_comparison)` if you want to inspect its
-shape — worth doing when an interval looks surprising, since a heavily skewed or
+shape. Inspect it when an interval looks surprising: a heavily skewed or
 multimodal distribution is a sign the bins are too thin somewhere.
 
 ### When to Use ANRI vs NRI
@@ -898,7 +898,7 @@ knitr::kable(
 
 Every number below is computed from the objects created above rather than typed
 in, so this passage cannot drift out of step with the analysis it describes. The
-same discipline is worth adopting in a manuscript.
+same practice suits a manuscript.
 
 ```{r writeup-values, include = FALSE}
 hi <- lik[lik$response == "suspect_(80,100]", ]

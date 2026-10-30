@@ -41,7 +41,7 @@ package's data conventions. No code was reused.
 ### The general approach
 
 The model is a **multinomial processing tree** (MPT). The idea behind that
-family is worth stating, because it is different from signal detection theory
+family is set out here, because it is different from signal detection theory
 and the two are easily confused.
 
 Signal detection theory posits a continuous evidence variable and a criterion
