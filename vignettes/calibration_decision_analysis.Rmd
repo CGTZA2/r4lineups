@@ -317,21 +317,28 @@ The plot shows how each response type updates prior belief:
 
 - **Lines above diagonal**: Evidence increases guilt belief (diagnostic of guilt)
 - **Lines below diagonal**: Evidence decreases guilt belief (diagnostic of innocence)
-- **Steeper slopes**: More diagnostic evidence
+- **Distance from the diagonal**: at a given prior, the further a curve lies from
+  the diagonal, the larger the likelihood ratio of that response. Compare curves
+  at the same prior, not by their local slopes.
 
 The prior-posterior curve is due to Wells, Yang and Smalarz (2015), who
 introduced it along with the base-rate effect-equivalency curve used later in
 this vignette. The implementation here is written directly from that paper; it
 is not adapted from another package.
 
-**On the shape of these curves.** They are strongly curved, and that curvature
-is not an artefact of any smoothing — no loess or spline is fitted anywhere in
-these plots. The curve is the exact plot of the equation above as \(P(G)\) varies
-from 0 to 1, and Bayes' theorem is nonlinear in the prior. The characteristic
-S-shape is the substantive point of the display: the same identification moves
-belief a great deal when the prior is middling, and very little when the prior is
-already near 0 or near 1. Evidence that would transform a genuinely uncertain
-case can do almost nothing to a case that is already close to settled.
+**On the shape of these curves.** They are curved, and that curvature is not an
+artefact of any smoothing: no loess or spline is fitted anywhere in these plots.
+For a response with likelihood ratio \(L\), the posterior as a function of the
+prior \(p\) is
+\[
+q(p) = \frac{Lp}{1 + (L - 1)p}, \qquad
+q''(p) = \frac{-2L(L - 1)}{[1 + (L - 1)p]^3}.
+\]
+The curvature has one sign throughout: the curve is concave (bowed above the
+diagonal) when \(L > 1\), convex (bowed below it) when \(L < 1\), and the
+diagonal itself when \(L = 1\). It is not S-shaped. What the display shows is
+that the same response moves belief most, in absolute terms, at middling priors,
+and very little when the prior is already near 0 or near 1.
 
 ### Information Gain
 
@@ -390,9 +397,13 @@ prior Procedure B would need in order to reach that same posterior. If B needs a
 the base rate — and a doubling of the base rate is something an investigator has
 an intuition about, in a way that a difference in pAUC is not.
 
-Plotting that correspondence for every prior gives the BREE curve. The diagonal
-is the null result of no difference; the further the curve departs from it, the
-larger the advantage.
+Plotting that correspondence for every prior gives the BREE curve. `plot_bree()`
+draws the base-rate shift \(\Delta\) = prior needed by B − prior used by A,
+against A's prior. The dashed horizontal line at \(\Delta = 0\) is the null
+result of no difference; positive \(\Delta\) means B needs the larger prior, so
+A's suspect identification is the more diagnostic, and the further the curve
+lies above zero, the larger A's advantage. (Plotting B's prior directly against
+A's would put the reference on the diagonal instead, with A's advantage above it.)
 
 ```{r bree}
 bree_result <- make_bree_curve(
@@ -404,12 +415,21 @@ bree_result <- make_bree_curve(
 plot_bree(bree_result)
 ```
 
-The curve lies below the diagonal throughout, meaning Procedure B requires a
-*higher* prior probability of guilt to reach any given posterior — which is
-simply to say that a suspect identification from Procedure A is worth more. The
-gap is widest at low base rates, which is the practically important region: it is
-exactly where cases are most uncertain that the difference between the two
-procedures matters most.
+```{r bree-summary, include = FALSE}
+bc <- bree_result$bree_curve
+bc <- bc[is.finite(bc$delta), ]
+at20 <- bc[which.min(abs(bc$prior_a - 0.2)), ]
+peak <- bc[which.max(bc$delta), ]
+```
+
+The shift is positive throughout, from `r round(min(bc$delta), 3)` to
+`r round(max(bc$delta), 3)`, so Procedure B always needs a *higher* prior
+probability of guilt to reach the posterior that A reaches — which is to say
+that a suspect identification from Procedure A is worth more. At a prior of
+`r round(at20$prior_a, 2)` for A, B needs `r round(at20$prior_b, 3)`. The shift is
+largest, `r round(peak$delta, 3)`, near a prior of `r round(peak$prior_a, 2)`,
+and shrinks towards both ends of the scale, where neither procedure's evidence
+can move belief much.
 
 ## 3. Expected Utility Analysis
 
@@ -496,6 +516,17 @@ not depend on locating the maximum precisely.
 expected utility together with the criterion that achieves it, and the hit and
 false-alarm rates at that criterion. Ask for the element you want.
 
+The optimum can be a confidence criterion or the decision to reject every
+identification. `max_utility$strategy` says which, so a small helper turns the
+result into a rule that can be stated:
+
+```{r utility-rule}
+utility_rule <- function(m) {
+  if (m$strategy == "reject_all") "Act on no identification"
+  else paste0("Act on confidence >= ", m$criterion)
+}
+```
+
 ```{r utility-comparison}
 # Compare the two procedures simulated in the BREE section above
 util_proc_a <- make_utility_curves(data_proc_a, base_rate = 0.5,
@@ -508,8 +539,8 @@ knitr::kable(
     Procedure = c("A (d' = 1.8)", "B (d' = 1.1)"),
     `Max expected utility` = round(c(util_proc_a$max_utility$expected_utility,
                                      util_proc_b$max_utility$expected_utility), 3),
-    `Optimal criterion` = c(util_proc_a$max_utility$criterion,
-                            util_proc_b$max_utility$criterion),
+    `Optimal rule` = c(utility_rule(util_proc_a$max_utility),
+                       utility_rule(util_proc_b$max_utility)),
     check.names = FALSE
   ),
   caption = "Expected utility at the optimal confidence criterion, simulated data (200 target-present and 200 target-absent lineups per procedure)."
@@ -535,7 +566,7 @@ sensitivity <- do.call(rbind, lapply(base_rates, function(br) {
   data.frame(
     `Base rate` = br,
     `Max expected utility` = round(util$max_utility$expected_utility, 3),
-    `Optimal criterion` = util$max_utility$criterion,
+    `Optimal rule` = utility_rule(util$max_utility),
     check.names = FALSE
   )
 }))
@@ -547,10 +578,18 @@ knitr::kable(
 )
 ```
 
-Base rate matters a great deal. When guilty suspects are rare, a false
-identification is both more likely and more costly relative to the benefit of a
-correct one, so the optimal criterion becomes stricter and the attainable
-utility falls.
+Base rate matters a great deal. When guilty suspects are rare, any given
+identification is more likely to be a false one, so the optimal criterion
+becomes stricter: here "`r tolower(sensitivity[["Optimal rule"]][1])`" at a
+base rate of `r sensitivity[["Base rate"]][1]`, against
+"`r tolower(sensitivity[["Optimal rule"]][3])`" at
+`r sensitivity[["Base rate"]][3]`. The attainable utility is not ordered by
+base rate in any simple way, because it also depends on how the cost matrix
+values the outcomes that become more common; here it is
+`r sensitivity[["Max expected utility"]][1]`,
+`r sensitivity[["Max expected utility"]][2]` and
+`r sensitivity[["Max expected utility"]][3]` at the three base rates. Compare
+utilities across procedures at the same base rate, not across base rates.
 
 ## 4. Deviation from Perfect Performance (DPP)
 
@@ -860,8 +899,8 @@ ou_dir <- if (cal$OU < 0) "underconfident" else "overconfident"
 > u(innocent suspect ID) = `r utility_matrix[["fp"]]`,
 > u(correct rejection) = `r utility_matrix[["tn"]]`; that is, a wrongful
 > identification was weighted four times as heavily as a missed one. Under those
-> assumptions a confidence criterion of
-> `r util$max_utility$criterion` maximised expected utility
+> assumptions the rule "`r tolower(utility_rule(util$max_utility))`" maximised
+> expected utility
 > (EU = `r round(util$max_utility$expected_utility, 3)`).
 >
 > Bayesian analysis showed that high-confidence suspect identifications were the
