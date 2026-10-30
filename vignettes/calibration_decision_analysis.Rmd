@@ -226,13 +226,21 @@ procedures <- rbind(
 ```{r calibration-by-condition}
 cal_by_cond <- make_calibration_by_condition(
   procedures,
-  condition_var = "procedure",
+  condition_vars = "procedure",
   confidence_bins = c(0, 60, 80, 100)
 )
 
-print(cal_by_cond)
+knitr::kable(
+  cal_by_cond$condition_summary, digits = 3,
+  caption = "Calibration statistics by procedure, simulated data (choosers only)."
+)
+```
 
-cal_by_cond$plot
+The per-bin detail for each procedure is in `cal_by_cond$by_condition`. The
+object does not carry a plot; draw one with `make_calibration_by_condition_gg()`:
+
+```{r calibration-by-condition-plot}
+make_calibration_by_condition_gg(cal_by_cond)
 ```
 
 ## 2. Bayesian Information-Gain Analysis

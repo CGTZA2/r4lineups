@@ -552,8 +552,11 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
       )
       p <- p + geom_text(
         data = stats_df,
-        aes(x = 0.2, y = 0.85, label = stats_label),
-        hjust = 0,
+        # Bottom-right corner: calibration points rarely fall there, whereas
+        # the old top-left position sat on the low-confidence bin.
+        aes(x = 1, y = 0.02, label = stats_label),
+        hjust = 1,
+        vjust = 0,
         size = 3,
         color = "black",
         inherit.aes = FALSE
