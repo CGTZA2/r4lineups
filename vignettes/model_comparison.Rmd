@@ -174,9 +174,9 @@ summary(comparison)
 
 ### Visualizing Model Comparisons
 
-```{r visualize_models, fig.width=8, fig.height=6}
+```{r visualize_models, fig.width=10, fig.height=4.5}
 # Side-by-side plots
-plot(comparison, ncol = 2)
+plot(comparison, ncol = 3)
 ```
 
 ## Individual Model Access
