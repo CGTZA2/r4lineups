@@ -133,8 +133,12 @@ null_foil_vec <- rep(c(5, 3, 2, 1, 8, 6, 7), each = 4)
 table(null_foil_vec)
 ```
 
-Null foils matter, because they are exactly the members that make a lineup
-unfair: a foil nobody ever picks is not a functioning alternative to the suspect.
+Null foils matter, because a foil nobody would pick is not a functioning
+alternative to the suspect, and such members make a lineup unfair. A zero in a
+sample is weaker evidence than that, however. Even in a perfectly fair
+six-person lineup, a given member receives no choices from ten mock witnesses
+with probability \((5/6)^{10} \approx .16\). Treat an unchosen member as a
+prompt to look at that photograph, not as proof that it fails as a foil.
 Use `lineup_table()` instead, which tabulates over all `k` positions, keeps
 unchosen members as explicit zeroes, and says so:
 
@@ -262,8 +266,10 @@ strongly warrant this approach, since it assumes approximation to a normal
 distribution, and the size of the lineup places hard limits that are often not
 observed by computed confidence intervals.
 
-We therefore recommend computing bootstrapped estimates of all lineup measures,
-and especially the sampling variability around estimates.
+The bootstrap is a useful alternative for the sampling variability of most
+lineup measures, especially the nonlinear ones such as effective size. For a
+single member's proportion, though, an exact binomial interval is usually the
+better choice, for the reason shown at the end of this section.
 
 To calculate a bootstrapped lineup proportion for a single lineup member, we pass
 the `lineup_prop_boot()` function as an argument to the `boot()` function
@@ -315,9 +321,25 @@ prop.test(n_chose_3, n_total)$conf.int
 ```
 
 Compare these with the BCa interval above. For a proportion near the middle of
-its range and a reasonable sample size the three tend to agree closely; they
+its range and a reasonable sample size the three tend to agree closely. They
 diverge when the proportion is near 0 or 1, or when the sample of mock witnesses
-is small, which is precisely the situation the bootstrap handles better.
+is small, and there the ordinary bootstrap is **not** the safer choice. A
+resample can only contain choices that occurred in the sample, so a member nobody
+chose is never chosen in any resample:
+
+```{r boot_boundary}
+never_chosen <- rep(2:6, 6)   # 30 mock witnesses; member 1 never chosen
+b0 <- boot::boot(never_chosen, lineup_prop_boot, target_pos = 1, R = 1000)
+range(b0$t)                              # every resample gives 0
+binom.test(0, length(never_chosen))$conf.int
+```
+
+The percentile interval is \([0, 0]\), which claims certainty that the member is
+never chosen, and the BCa interval cannot be computed at all. More resamples do
+not help, because the bootstrap cannot generate an outcome the sample lacks. The
+exact Clopper–Pearson interval, \([0, .116]\) here, is the appropriate summary
+for a member proportion at or near a boundary, and a Bayesian posterior
+(`vignette("bayesian_inference")`) is another option.
 
 ### Calculating proportion for each lineup member
 
@@ -575,11 +597,14 @@ plot_esize_distribution(esize_dist, metric = "E' (Tredoux, 1998)")
 ```
 
 
-#### E' is biased downward in small samples
+#### E' has small-sample bias, downward for fair lineups
 
 The estimator above is a **plug-in**: sample proportions are substituted for the
-unknown choice probabilities. Plug-in estimators of $\sum p_i^2$ are biased
-upward, so E' — its reciprocal — is biased **downward**. For $N$ choices spread
+unknown choice probabilities. The plug-in estimate of the concentration
+$\sum p_i^2$ is biased upward. That does not by itself fix the direction of the
+bias in its reciprocal, E', because the expectation of a nonlinear function is
+not the function of the expectation. For fair and near-fair lineups, where the
+question usually matters, E' is biased **downward**. For $N$ choices spread
 evenly over $k$ members the bias is approximately
 
 $$E[\hat{E}'] \approx \frac{Nk}{N + k - 1}, \qquad
@@ -613,8 +638,17 @@ knitr::kable(
 )
 ```
 
-`esize_T()` accepts `unbiased = TRUE`, which substitutes the unbiased estimator
-of $\sum p_i^2$, namely $N(N-1)/\sum O_i(O_i-1)$. The default is unchanged, so
+The downward bias is not universal. When one member draws most choices it can
+reverse: for two members chosen with probabilities .9 and .1 and $N = 10$, exact
+enumeration over all binomial outcomes gives a mean plug-in E′ of 1.230 against a
+true value of 1.220.
+
+`esize_T()` accepts `unbiased = TRUE`, which replaces the concentration with its
+unbiased estimator, $\sum O_i(O_i-1)/(N(N-1))$, and reports the reciprocal,
+$N(N-1)/\sum O_i(O_i-1)$. The reciprocal of an unbiased estimate is not itself
+unbiased: the corrected E′ removes most of the bias for near-fair lineups, as
+the table shows, but it is more variable, and in the concentrated two-member
+example above it overshoots further (mean 1.269). The default is unchanged, so
 nothing previously computed moves; the correction is available when wanted:
 
 ```{r esize_unbiased}
@@ -624,18 +658,22 @@ c(plug_in = esize_T(lineup_tab),
 
 Which to report depends on the question. For **describing** the choice
 distribution actually observed, the plug-in value is the quantity of interest.
-For **inference** about the lineup that produced those choices — which is the
-framing of Tredoux (1998) — the corrected form is the better estimator. Either
-way, state which was used.
+For **inference** about the lineup that produced those choices, which is the
+framing of Tredoux (1998), the corrected form usually has less bias when choices
+are spread across members, at the cost of more variance. Neither is uniformly
+better. Either way, state which was used.
 
 #### Getting the choice distribution without mock witnesses
 
 E' needs a distribution of choices across lineup members, which normally means
 running a mock-witness study. There is an alternative worth knowing about:
-**target-absent lineups from an identification experiment supply the same
-thing**. A witness viewing a target-absent lineup has no culprit to recognise,
-so their choice reflects how the members compare to their memory and to the
-description — functionally what a mock witness provides.
+**target-absent lineups from an identification experiment supply a choice
+distribution too**. Its effective size is a *resultant* measure of how choices
+spread in practice, and Fitzgerald, Tredoux and Juncu (2023) use it this way. It
+is not the same measurement as a mock-witness E′: a witness viewing a
+target-absent lineup has a memory of the culprit and may reject the lineup,
+whereas a mock witness chooses from a description, and the two families of
+measures can disagree (Lee, Mansour & Penrod, 2024).
 
 If your data record which member was chosen, E' follows directly:
 
@@ -1060,7 +1098,10 @@ interactive `face_sim()` function, which prompted for image files and reported
 factor loadings — is **no longer supported**.
 
 It has been superseded by an approach based on modern face embeddings, which is
-both more accurate and reproducible from a script rather than a dialog box. See
+reproducible from a script rather than a dialog box. Embedding similarity is a
+property of the photographs as a face-recognition model sees them; it is not the
+same as resemblance judged by people, nor a measure of lineup fairness, and no
+validated cut-off links the two. See
 the [Face similarity](face_similarity.html) vignette for the current methods, and
 note that these require the Python dependencies installed by
 `install_r4lineups_python()`.
@@ -1084,7 +1125,9 @@ note that these require the Python dependencies installed by
 Three different counts appear throughout and are easily confused.
 
 **Nominal size** $k$ is how many people stand in the lineup. **Adjusted nominal
-size** $k_a$ is $k$ less the null foils — members nobody chose. **Effective
+size** $k_a$ is $k$ less the null foils — members nobody chose in this sample,
+which, as noted above, may include functioning foils that happened to draw no
+choices. **Effective
 size** is an estimate of how many members function as genuine alternatives, and
 is generally not a whole number.
 
@@ -1102,16 +1145,20 @@ Three routes are available, and they answer slightly different questions:
   adequate when counts are large and the estimate is away from a boundary.
 - **Bootstrap intervals** (`esize_T_boot()` with `boot::boot.ci()`,
   `lineup_prop_boot()`) make no distributional assumption about the transformed
-  statistic. Prefer them when a proportion is near 0 or 1, or when the sample is
-  small — which for these measures is usual.
+  statistic, which helps for nonlinear measures such as effective size. They
+  fail at a boundary, though: a member nobody chose gets a \([0, 0]\) interval
+  however many resamples are drawn. For a member proportion near 0 or 1 use the
+  exact `binom.test()` interval or a posterior.
 - **Bayesian posteriors** (`esize_T_bayes()`, `func_size_bayes()`) give credible
-  intervals and direct probability statements such as $P(E' < 6 \mid \text{data})$.
+  intervals and direct probability statements such as $P(E' < 4.5 \mid \text{data})$.
+  A threshold at the nominal size is uninformative, because $P(E' < k) = 1$ under
+  any continuous posterior.
   See `vignette("bayesian_inference")`.
 
 Bounded quantities are the recurring difficulty: E' cannot exceed $k$ and a
 proportion cannot leave $[0, 1]$, but a normal-theory interval can and does
-cross those limits in small samples. That is the main reason to prefer the
-bootstrap or the posterior here.
+cross those limits in small samples. That is the main reason to prefer an exact
+interval, the posterior or, away from a boundary, the bootstrap.
 
 ### Assumptions common to the fairness measures
 

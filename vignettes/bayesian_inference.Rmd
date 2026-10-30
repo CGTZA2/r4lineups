@@ -28,7 +28,7 @@ This vignette shows the Bayesian posterior summaries in **r4lineups** for
 lineup fairness and confidence-based eyewitness measures.
 
 Use these functions when you want credible intervals or direct probability
-statements such as \(P(E' < 6 \mid data)\), \(P(F < 6 \mid data)\), or
+statements such as \(P(E' < 4.5 \mid data)\), \(P(F < 6 \mid data)\), or
 \(P(DR > 1 \mid data)\). The examples use small posterior samples so that the
 vignette runs quickly during package checks; increase `S` for final analyses.
 
@@ -40,11 +40,13 @@ what follows requires accepting a philosophical position; it is mainly about
 what question the interval answers.
 
 **The question you probably want to ask.** Having measured a six-person lineup
-and obtained an effective size of 4.8, the natural question is: *what is the
-probability that this lineup's effective size is below 6?* A frequentist
+and obtained an effective size of 4.8, a natural question is: *what is the
+probability that this lineup's effective size is below 4.5,* a tolerance chosen
+before looking at the data? (Why not "below 6" is explained below: for effective
+size that question has the same answer, 1, whatever the data.) A frequentist
 confidence interval cannot answer that. It is a statement about the procedure —
 that intervals constructed this way contain the true value 95% of the time — not
-about this lineup. The true effective size either is or is not below 6, and
+about this lineup. The true effective size either is or is not below 4.5, and
 frequentist probability does not attach to it.
 
 A Bayesian **credible interval** does answer it. "There is a 95% probability
@@ -62,7 +64,7 @@ distribution. Three steps:
 2. The **data** update it through the likelihood.
 3. The result is the **posterior**, a full distribution for the quantity, from
    which any summary can be read: a median, an interval, or a direct probability
-   such as \(P(E' < 6)\).
+   such as \(P(E' < 4.5)\).
 
 **Why the functions return draws rather than formulas.** Effective size is
 \(1/\sum p_i^2\) — a nonlinear function of the choice probabilities. There is
@@ -117,12 +119,16 @@ lineup_vec <- nortje2012$lineup_1
 k <- max(lineup_vec, na.rm = TRUE)
 lineup_tab <- table(factor(lineup_vec, levels = seq_len(k)))
 
+# An illustrative tolerance. In a real analysis choose and justify it in
+# advance; the software cannot supply one.
+tolerance <- 0.75 * k
+
 set.seed(1)
 esize_post <- esize_T_bayes(
   lineup_tab,
   alpha = 0.5,
   S = 1000,
-  threshold = k
+  threshold = tolerance
 )
 
 esize_post
@@ -132,9 +138,34 @@ esize_post
 plot(esize_post)
 ```
 
-The threshold argument makes the posterior useful for fairness benchmarks. For
-example, with a six-person lineup one might inspect \(P(E' < 6 \mid data)\) as a
-posterior probability that the effective size falls below nominal size.
+**Why the threshold is not the nominal size.** For any choice probabilities
+over \(k\) members, \(E' = 1/\sum p_i^2 \le k\), with equality only when all
+\(k\) probabilities are exactly equal. A continuous posterior gives that single
+point probability zero, so \(P(E' < k \mid data) = 1\) for any data at all,
+including perfectly balanced counts; `esize_T_bayes()` warns if asked for it.
+Useful summaries are the credible interval for \(E'\), the interval for the
+deficit \(k - E'\), or the probability below a tolerance chosen in advance:
+
+```{r esize_deficit}
+deficit <- k - esize_post$E_draws
+knitr::kable(
+  data.frame(
+    Summary  = c(sprintf("95%% interval for E' (k = %d)", k),
+                 "95% interval for the deficit k - E'",
+                 sprintf("P(E' < %.1f | data)", tolerance)),
+    Value    = c(sprintf("[%.2f, %.2f]", esize_post$credible_interval[["lower"]],
+                         esize_post$credible_interval[["upper"]]),
+                 sprintf("[%.2f, %.2f]", quantile(deficit, .025),
+                         quantile(deficit, .975)),
+                 sprintf("%.3f", esize_post$threshold_probs$P_below))
+  ),
+  row.names = FALSE,
+  caption = "Posterior summaries of effective size, nortje2012 lineup 1."
+)
+```
+
+Functional size does not have this problem: it is not bounded above by \(k\),
+so \(P(F < k \mid data)\) is informative.
 
 # Functional Size
 
@@ -260,7 +291,7 @@ and `1`.
 ```{r prior_sensitivity}
 sensitivity <- do.call(rbind, lapply(c(0.1, 0.5, 1.0), function(a) {
   set.seed(11)
-  post <- esize_T_bayes(lineup_tab, alpha = a, S = 2000, threshold = k)
+  post <- esize_T_bayes(lineup_tab, alpha = a, S = 2000)
   data.frame(
     `Prior alpha`      = a,
     `Posterior median` = round(post$posterior_median, 3),

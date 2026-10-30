@@ -21,10 +21,13 @@
 #'
 #' @section Small-sample bias:
 #' The expression above is a \emph{plug-in} estimator: sample proportions are
-#' substituted for the unknown \eqn{p_i}. Plug-in estimators of
-#' \eqn{\sum_i p_i^2} are biased upward, so \eqn{E'} is biased
-#' \strong{downward}. For \eqn{N} choices spread evenly over \eqn{k} members
-#' the bias is approximately
+#' substituted for the unknown \eqn{p_i}. The plug-in concentration
+#' \eqn{\sum_i \hat p_i^2} is biased upward. Its reciprocal \eqn{E'} is biased
+#' \strong{downward} for fair and near-fair lineups, but the direction is not
+#' guaranteed: when one member draws most choices the bias can be upward (two
+#' members, \eqn{p = (.9, .1)}, \eqn{N = 10}: mean 1.230 against a true 1.220,
+#' by exact enumeration). For \eqn{N} choices spread evenly over \eqn{k}
+#' members the bias is approximately
 #' \deqn{E[\hat{E}'] \approx \frac{Nk}{N + k - 1}, \qquad
 #'       \mathrm{bias} = -\frac{k(k-1)}{N + k - 1}.}
 #' A perfectly fair six-person lineup assessed with 50 choices therefore returns
@@ -32,15 +35,19 @@
 #' negligible above a few hundred choices.
 #'
 #' With \code{unbiased = TRUE} the function substitutes the unbiased estimator
-#' of \eqn{\sum_i p_i^2}, giving
+#' of the concentration, \eqn{\sum_i o_i(o_i - 1) / (N(N-1))}, and returns its
+#' reciprocal,
 #' \deqn{\hat{E}'_{\mathrm{corr}} = \frac{N(N-1)}{\sum_i o_i(o_i - 1)}.}
-#' In simulation this removes essentially all of the bias, at a modest increase
-#' in variance that disappears by \eqn{N \approx 100}.
+#' The reciprocal of an unbiased estimate is not itself unbiased. For
+#' near-fair lineups this removes most of the bias, at a modest increase in
+#' variance that disappears by \eqn{N \approx 100}; in concentrated
+#' distributions it can overshoot (mean 1.269 in the two-member example).
 #'
 #' Which to use depends on what is being reported. For a description of the
 #' choice distribution actually observed, the plug-in value is the quantity of
-#' interest. For inference about the lineup that produced those choices — which
-#' is the framing of Tredoux (1998) — the corrected form is the better estimator.
+#' interest. For inference about the lineup that produced those choices, the
+#' framing of Tredoux (1998), the corrected form usually has less bias when
+#' choices are spread across members. Neither is uniformly better.
 #' Note that the other functions in this family (\code{\link{esize_T_boot}},
 #' \code{\link{esize_T_ci_n}}, \code{\link{i_esize_T}}) use the plug-in form.
 #' @references Malpass, R. S. (1981). Effective size and defendant bias in eyewitness
