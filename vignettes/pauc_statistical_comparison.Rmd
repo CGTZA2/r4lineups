@@ -253,11 +253,6 @@ knitr::kable(
 )
 ```
 
-Earlier versions of this package defaulted to the *larger* of the two maxima,
-which silently integrated each curve only as far as its own data went — so the
-two areas covered different intervals and the comparison was biased against
-whichever curve stopped sooner. That default has been corrected.
-
 ### The deeper objection
 
 Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) go further and argue
