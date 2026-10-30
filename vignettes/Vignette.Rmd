@@ -559,6 +559,13 @@ E' = $\frac{1}{1-I}$, where I = $1-\sum_{i=1}^k(\frac{O_i}{N})^2$
 
 and where k, N, and $O_i$ are all as defined earlier.
 
+Substituting for I gives $E' = 1/\sum_{i=1}^k (O_i/N)^2$. This is the reciprocal
+of Simpson's (1949) concentration index, known in ecology as the inverse Simpson
+index and in economics as the inverse Herfindahl index, and it can be read as the
+effective number of members drawing choices: if all k members are chosen equally
+often, E' = k, and if one member draws every choice, E' = 1. The other vignettes
+use this $1/\sum p_i^2$ form; it is the same quantity as Tredoux's E'.
+
 To compute Tredoux's measure of effective size, E', use the function `esize_T()`.
 We can compute confidence intervals around the measure of E' using normal
 distribution theory, and using bootstrap intervals, with the function

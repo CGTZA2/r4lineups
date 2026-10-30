@@ -64,8 +64,8 @@ awkward properties:
    consequential.
 
 The GLM formulation avoids all four by modelling the individual response rather
-than the per-participant summary. It turns out that d′ falls straight out of a
-probit regression, so nothing is lost by doing it this way.
+than the per-participant summary. d′ follows directly from a probit regression,
+so nothing is lost by doing it this way.
 
 ### Why a probit regression gives you d′
 
@@ -151,8 +151,8 @@ extract_sdt_metrics(glmm_fit)
 
 ## Participants, items, or both
 
-This is the substantive reason to prefer the multilevel formulation, and it is
-an old argument: Clark (1973) pointed out that treating stimulus items as fixed
+This is the main reason to prefer the multilevel formulation, and it is an old
+argument: Clark (1973) pointed out that treating stimulus items as fixed
 means any conclusion strictly applies only to the particular items used. In
 recognition memory the items are faces or words, and they differ in
 memorability. If your analysis treats them as fixed, you are entitled to

@@ -89,7 +89,7 @@ to check (see Technical Details).
 - **Direct probabilities.** \(P(DR > 1)\) is often exactly what a report needs,
   and is awkward to extract from a p-value.
 - **Small samples degrade gracefully.** With few mock witnesses the posterior
-  becomes wide, which is the honest result, rather than producing a narrow
+  becomes wide, which reflects the real uncertainty, rather than producing a narrow
   interval resting on an asymptotic approximation that does not hold.
 
 **What it does not give you.** It is not a way of getting a decisive answer from

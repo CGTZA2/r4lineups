@@ -90,7 +90,7 @@ four answers to it, following Wixted, Vul, Mickes and Wilson (2018):
 
 These are equal-variance, independent-signal versions of those models.
 
-To be clear about a point that has caused confusion: **you are not obliged to
+**You are not obliged to
 adopt one of these models to plan a lineup study.** They are how this simulator
 generates data, so if you use it for power analysis you are assuming one of them
 holds. That assumption is no different in kind from assuming a normal
@@ -274,7 +274,7 @@ cross_lo <- pr$sample_size[first80 - 1]
 cross_hi <- pr$sample_size[first80]
 ```
 
-Two things to read off. Power rises with sample size, as it must, crossing 80%
+Two things to read off. Power rises with sample size, crossing 80%
 between `r cross_lo` and `r cross_hi` target-present (and as many
 target-absent) witnesses per condition, that is between `r 4 * cross_lo` and
 `r 4 * cross_hi` witnesses in the whole simulated experiment. With only 30

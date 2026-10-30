@@ -40,9 +40,8 @@ package's data conventions. No code was reused.
 
 ### The general approach
 
-The model is a **multinomial processing tree** (MPT). The idea behind that
-family is set out here, because it is different from signal detection theory
-and the two are easily confused.
+The model is a **multinomial processing tree** (MPT). MPT models differ from
+signal detection theory, and the two are easily confused.
 
 Signal detection theory posits a continuous evidence variable and a criterion
 placed on it. An MPT instead posits a small number of **discrete latent
@@ -183,8 +182,7 @@ For larger datasets, increase `nboot` to 1000 or more for stable intervals.
 
 ## 4. What `b` tells you about lineup fairness {#what-b-tells-you-about-lineup-fairness}
 
-This is arguably the most useful thing the model does, and it deserves more than
-a line.
+This is arguably the most useful thing the model does.
 
 Classical lineup fairness measures — Tredoux's E′, functional size, the
 proportion of mock witnesses choosing the suspect — are computed from
@@ -204,12 +202,11 @@ on a probability scale, with a confidence interval.
 
 ### Does it work?
 
-That is a checkable claim rather than a promise, so here it is checked against
-two established measures computed from the same data:
+The claim can be checked against Tredoux's (1998) E′, computed with `esize_T()`
+as \(1/\sum p_i^2\) over choices across all six members (it is defined in the
+main vignette). E′ measures the **effective number of functioning
+alternatives**.
 
-- **E′ (Tredoux, 1998)**, `esize_T()`, the inverse-Simpson index
-  \(1/\sum p_i^2\) over choices across all six members. It measures the
-  **effective number of functioning alternatives**.
 Note where E′ comes from here: the **target-absent lineups**. Their choice
 distribution across members gives a *resultant* effective size, as used by
 Fitzgerald, Tredoux and Juncu (2023), without running a separate mock-witness

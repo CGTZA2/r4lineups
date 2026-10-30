@@ -142,7 +142,7 @@ response time and accuracy. Accuracy is binary, so this is a **point-biserial**
 correlation — which is just Pearson's *r* with one dichotomous variable, and
 needs no special machinery.
 
-The choice of *which trials to include* turns out to be very important:
+The choice of *which trials to include* is very important:
 
 ```{r point_biserial}
 # All trials: "correct" means a suspect ID when the target was present, or a
@@ -323,7 +323,7 @@ ggplot(grid, aes(x = response_time / 1000, y = accuracy)) +
 ```
 
 This uses every observation, requires no arbitrary boundaries, and comes with a
-confidence band that widens honestly where the data thin out — visible in the
+confidence band that widens where the data thin out — visible in the
 rug along the bottom.
 
 ## Estimating a time boundary

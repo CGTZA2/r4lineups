@@ -211,8 +211,7 @@ result$threshold   # e.g., 0.68 for ArcFace + cosine
 
 **Reading the output.** `similarity` is a continuous score on the model's own
 scale; higher means the two images are closer in the model's embedding space.
-There is deliberately no table of bands here, because — as set out above — the
-literature does not establish what level of similarity a lineup foil ought to
+There is no table of bands here, because the literature does not establish what level of similarity a lineup foil ought to
 have. Compare scores against each other, not against a standard.
 
 `verified` is a different kind of output. It is not a
@@ -284,8 +283,7 @@ cat("Range:", range(lineup_result$similarity), "\n")
 
 ### Describing the similarity profile
 
-The heading here is deliberately not "fairness assessment". What these numbers
-describe is the **similarity profile** of the lineup — where the foils sit
+These numbers describe the **similarity profile** of the lineup — where the foils sit
 relative to the suspect and to each other. Turning that into a verdict would
 require knowing what profile is desirable, which is exactly what is unsettled.
 

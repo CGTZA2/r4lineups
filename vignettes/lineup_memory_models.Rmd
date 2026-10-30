@@ -278,7 +278,7 @@ essentially **identical** p-values, and neither can be rejected. This is not a
 case of the wrong model winning; it is a case of the two models being
 **indistinguishable** on these data.
 
-That is the substantive finding rather than a defect in the fitting. Independent
+Independent
 Observations and Ensemble make very similar predictions for a *fair* lineup.
 Separating them requires either much larger samples or a design built to
 separate them — most obviously one that manipulates foil quality, since it is

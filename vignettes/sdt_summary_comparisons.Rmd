@@ -133,7 +133,6 @@ compare_sdt_summary(hits_a, fas_a, misses_a, cr_a,
 
 # The compound-model alternative
 
-The caution above is only useful if it names an alternative, so here it is.
 `fit_max_sdt()` fits the compound (MAX SDT) model of Duncan (2006) directly to
 lineup counts, estimating d' and a criterion together, and gives the sampling
 distribution by parametric bootstrap. It is the lineup-appropriate counterpart
