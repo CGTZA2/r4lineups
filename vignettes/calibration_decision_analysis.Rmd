@@ -944,49 +944,23 @@ allows a reader to judge how much weight it will bear.
 
 ## References
 
-**Calibration:**
+::: {.hanging-indent}
 
-- Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity of
-  confidence in eyewitness identification: Comments on what can be inferred from
-  the low confidence-accuracy correlation. *Journal of Experimental Psychology:
-  Learning, Memory, and Cognition, 22*(5), 1304-1316.
-- Brewer, N., & Wells, G. L. (2006). The confidence-accuracy relationship in
-  eyewitness identification: Effects of lineup instructions, foil similarity, and
-  target-absent base rates. *Journal of Experimental Psychology: Applied, 12*(1),
-  11-30.
+Brewer, N., & Wells, G. L. (2006). The confidence-accuracy relationship in eyewitness identification: Effects of lineup instructions, foil similarity, and target-absent base rates. *Journal of Experimental Psychology: Applied, 12*(1), 11-30.
 
-**Bayesian information gain and BREE:**
+Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity of confidence in eyewitness identification: Comments on what can be inferred from the low confidence-accuracy correlation. *Journal of Experimental Psychology: Learning, Memory, and Cognition, 22*(5), 1304-1316.
 
-- Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
-  Bayesian information gain, base-rate effect-equivalency curves, and reasonable
-  suspicion. *Law and Human Behavior, 39*(2), 99-122.
+Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in eyewitness identification practice: Dissociations between receiver operating characteristic (ROC) analysis and expected utility analysis. *Law and Human Behavior, 43*(1), 26-44.
 
-**Expected Utility:**
+Mickes, L. (2015). Receiver operating characteristic analysis and confidence-accuracy characteristic analysis in investigations of system variables and estimator variables that affect eyewitness memory. *Journal of Applied Research in Memory and Cognition, 4*(2), 93-102.
 
-- Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
-  eyewitness identification practice: Dissociations between receiver operating
-  characteristic (ROC) analysis and expected utility analysis. *Law and Human
-  Behavior, 43*(1), 26-44.
+Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova, S. (2019). Deviation from perfect performance measures the diagnostic utility of eyewitness lineups but partial area under the ROC curve does not. *Journal of Applied Research in Memory and Cognition, 8*(1), 50-59. https://doi.org/10.1016/j.jarmac.2018.09.003
 
-**DPP:**
+Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect-equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
 
-- Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova, S.
-  (2019). Deviation from perfect performance measures the diagnostic utility of
-  eyewitness lineups but partial area under the ROC curve does not. *Journal of
-  Applied Research in Memory and Cognition, 8*(1), 50-59.
-  https://doi.org/10.1016/j.jarmac.2018.09.003
+Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of discrimination skill in probabilistic judgment. *Psychological Bulletin, 110*(3), 611-617.
 
-**ANRI:**
-
-- Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of discrimination
-  skill in probabilistic judgment. *Psychological Bulletin, 110*(3), 611-617.
-
-**Related, on CAC analysis:**
-
-- Mickes, L. (2015). Receiver operating characteristic analysis and
-  confidence-accuracy characteristic analysis in investigations of system
-  variables and estimator variables that affect eyewitness memory. *Journal of
-  Applied Research in Memory and Cognition, 4*(2), 93-102.
+:::
 
 ## Session Info
 

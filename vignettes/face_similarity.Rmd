@@ -774,20 +774,21 @@ write.csv(lineup_sim, "lineup_001_similarity.csv", row.names = FALSE)
 
 ## References
 
-**Deep Learning Face Recognition:**
-- Deng, J., Guo, J., Xue, N., & Zafeiriou, S. (2019). ArcFace: Additive angular margin loss for deep face recognition. *CVPR 2019*.
+::: {.hanging-indent}
 
-- Schroff, F., Kalenichenko, D., & Philbin, J. (2015). FaceNet: A unified embedding for face recognition and clustering. *CVPR 2015*.
+Colloff, M. F., Wade, K. A., & Strange, D. (2016). Unfair lineups make witnesses more likely to confuse innocent and guilty suspects. *Psychological Science, 27*(9), 1227-1239.
 
-**DeepFace Library:**
-- Serengil, S. I., & Ozpinar, A. (2020). LightFace: A hybrid deep face recognition framework. *ASYU 2020*.
+Deng, J., Guo, J., Xue, N., & Zafeiriou, S. (2019). ArcFace: Additive angular margin loss for deep face recognition. *CVPR 2019*.
 
-**Lineup Research Applications:**
-- Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup fairness: Concurrent and predictive validity of lineup-fairness measures. *Psychology, Crime & Law*. https://doi.org/10.1080/1068316X.2024.2307358
+Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup fairness: Concurrent and predictive validity of lineup-fairness measures. *Psychology, Crime & Law*. https://doi.org/10.1080/1068316X.2024.2307358
 
-- Tredoux, C. G. (2002). A direct measure of facial similarity and its relation to human similarity perceptions. *Journal of Experimental Psychology: Applied, 8*(3), 180-193.
+Schroff, F., Kalenichenko, D., & Philbin, J. (2015). FaceNet: A unified embedding for face recognition and clustering. *CVPR 2015*.
 
-- Colloff, M. F., Wade, K. A., & Strange, D. (2016). Unfair lineups make witnesses more likely to confuse innocent and guilty suspects. *Psychological Science, 27*(9), 1227-1239.
+Serengil, S. I., & Ozpinar, A. (2020). LightFace: A hybrid deep face recognition framework. *ASYU 2020*.
+
+Tredoux, C. G. (2002). A direct measure of facial similarity and its relation to human similarity perceptions. *Journal of Experimental Psychology: Applied, 8*(3), 180-193.
+
+:::
 
 ## Technical Details
 

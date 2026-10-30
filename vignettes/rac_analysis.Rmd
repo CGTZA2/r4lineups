@@ -535,35 +535,23 @@ confidence. Points worth carrying away:
 
 # References
 
-Dunning, D., & Perretta, S. (2002). Automaticity and eyewitness accuracy: A 10-
-to 12-second rule for distinguishing accurate from inaccurate positive
-identifications. *Journal of Applied Psychology, 87*(5), 951-962.
+::: {.hanging-indent}
 
-Mickes, L. (2015). Receiver operating characteristic analysis and
-confidence-accuracy characteristic analysis in investigations of system
-variables and estimator variables that affect eyewitness memory. *Journal of
-Applied Research in Memory and Cognition, 4*(2), 93-102.
+Dunning, D., & Perretta, S. (2002). Automaticity and eyewitness accuracy: A 10- to 12-second rule for distinguishing accurate from inaccurate positive identifications. *Journal of Applied Psychology, 87*(5), 951-962.
 
-Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness
-1.0: A python eyewitness identification analysis toolkit. *Behavior Research
-Methods, 56*, 1533-1550.
+Mickes, L. (2015). Receiver operating characteristic analysis and confidence-accuracy characteristic analysis in investigations of system variables and estimator variables that affect eyewitness memory. *Journal of Applied Research in Memory and Cognition, 4*(2), 93-102.
 
-Seale-Carlisle, T. M., Colloff, M. F., Flowe, H. D., Wells, W., Wixted, J. T., &
-Mickes, L. (2019). Confidence and response time as indicators of eyewitness
-identification accuracy in the lab and in the real world. *Journal of Applied
-Research in Memory and Cognition, 8*(4), 420-428.
+Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0: A python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
 
-Sporer, S. L. (1993). Eyewitness identification accuracy, confidence, and
-decision times in simultaneous and sequential lineups. *Journal of Applied
-Psychology, 78*(1), 22-33.
+Seale-Carlisle, T. M., Colloff, M. F., Flowe, H. D., Wells, W., Wixted, J. T., & Mickes, L. (2019). Confidence and response time as indicators of eyewitness identification accuracy in the lab and in the real world. *Journal of Applied Research in Memory and Cognition, 8*(4), 420-428.
 
-Weber, N., Brewer, N., Wells, G. L., Semmler, C., & Keast, A. (2004). Eyewitness
-identification accuracy and response latency: The unruly 10-12 second rule.
-*Journal of Experimental Psychology: Applied, 10*(3), 139-147.
+Sporer, S. L. (1993). Eyewitness identification accuracy, confidence, and decision times in simultaneous and sequential lineups. *Journal of Applied Psychology, 78*(1), 22-33.
 
-Wixted, J. T., & Wells, G. L. (2017). The relationship between eyewitness
-confidence and identification accuracy: A new synthesis. *Psychological Science
-in the Public Interest, 18*(1), 10-65.
+Weber, N., Brewer, N., Wells, G. L., Semmler, C., & Keast, A. (2004). Eyewitness identification accuracy and response latency: The unruly 10-12 second rule. *Journal of Experimental Psychology: Applied, 10*(3), 139-147.
+
+Wixted, J. T., & Wells, G. L. (2017). The relationship between eyewitness confidence and identification accuracy: A new synthesis. *Psychological Science in the Public Interest, 18*(1), 10-65.
+
+:::
 
 ---
 

@@ -297,26 +297,21 @@ any writeup: with small counts it moves d′ appreciably.
 
 # References
 
-Duncan, M. (2006). *A signal detection model of compound decision tasks*
-(Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
+::: {.hanging-indent}
 
-Reisberg, D., & Pezdek, K. (2024). Data analysed with the MAX SDT model in
-scripts supplied by A. M. Smith (personal communication, 4 April 2024).
+Duncan, M. (2006). *A signal detection model of compound decision tasks* (Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
 
-Gourevitch, V., & Galanter, E. (1967). A significance test for one parameter
-isosensitivity functions. *Psychometrika, 32*(1), 25-33.
+Gourevitch, V., & Galanter, E. (1967). A significance test for one parameter isosensitivity functions. *Psychometrika, 32*(1), 25-33.
 
-Miller, J. (1996). The sampling distribution of d'. *Perception &
-Psychophysics, 58*(1), 65-72.
+Miller, J. (1996). The sampling distribution of d'. *Perception & Psychophysics, 58*(1), 65-72.
 
-Suero, M., Privado, J., & Botella, J. (2017). Estimating the variances and
-covariance of the parameters of signal detection theory. *Psicothema, 29*(3),
-432-437.
+Reisberg, D., & Pezdek, K. (2024). Data analysed with the MAX SDT model in scripts supplied by A. M. Smith (personal communication, 4 April 2024).
 
-Tredoux, C. G., Sporer, S. L., Vredeveldt, A., Kempen, K., & Nortje, A. (2021).
-Does constructing a facial composite affect eyewitness memory? A research
-synthesis and meta-analysis. *Journal of Experimental Criminology, 17*(4),
-713-741. \doi{10.1007/s11292-020-09432-z}
+Suero, M., Privado, J., & Botella, J. (2017). Estimating the variances and covariance of the parameters of signal detection theory. *Psicothema, 29*(3), 432-437.
+
+Tredoux, C. G., Sporer, S. L., Vredeveldt, A., Kempen, K., & Nortje, A. (2021). Does constructing a facial composite affect eyewitness memory? A research synthesis and meta-analysis. *Journal of Experimental Criminology, 17*(4), 713-741. https://doi.org/10.1007/s11292-020-09432-z
+
+:::
 
 # Further Reading
 

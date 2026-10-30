@@ -368,13 +368,13 @@ of parameters requires attention to `df`, which the comparison table reports.
 
 ## References
 
-Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness
-1.0: A Python eyewitness identification analysis toolkit. *Behavior Research
-Methods, 56*, 1533-1550.
+::: {.hanging-indent}
 
-Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup
-memory. *Cognitive Psychology, 105*, 81-114.
-\doi{10.1016/j.cogpsych.2018.06.001}
+Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0: A Python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
+
+Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup memory. *Cognitive Psychology, 105*, 81-114. https://doi.org/10.1016/j.cogpsych.2018.06.001
+
+:::
 
 ## Further Reading
 

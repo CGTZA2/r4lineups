@@ -394,16 +394,15 @@ parameter would be worse than not shipping it.
 
 # References
 
-Duncan, M. (2006). *A signal detection model of compound decision tasks*
-(Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
+::: {.hanging-indent}
 
-Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
-lineup memory. *Cognitive Psychology, 105*, 81-114.
+Duncan, M. (2006). *A signal detection model of compound decision tasks* (Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
 
-Yang, Y., Burke, J. L., & Healy, J. (2025). A multi-item signal detection
-theory model for eyewitness identification. *Cognitive Research:
-Principles and Implications, 10*, 54.
-\doi{10.1186/s41235-025-00652-3}
+Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup memory. *Cognitive Psychology, 105*, 81-114.
+
+Yang, Y., Burke, J. L., & Healy, J. (2025). A multi-item signal detection theory model for eyewitness identification. *Cognitive Research: Principles and Implications, 10*, 54. https://doi.org/10.1186/s41235-025-00652-3
+
+:::
 
 # Further Reading
 

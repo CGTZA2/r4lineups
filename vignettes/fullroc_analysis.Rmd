@@ -467,23 +467,17 @@ fixed.
 
 ## References
 
-Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
-eyewitness identification practice: Dissociations between receiver operating
-characteristic (ROC) analysis and expected utility analysis. *Law and Human
-Behavior, 43*(1), 26-44.
+::: {.hanging-indent}
 
-National Research Council. (2014). *Identifying the culprit: Assessing eyewitness
-identification*. Washington, DC: The National Academies Press.
+Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in eyewitness identification practice: Dissociations between receiver operating characteristic (ROC) analysis and expected utility analysis. *Law and Human Behavior, 43*(1), 26-44.
 
-Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between
-investigator discriminability and eyewitness discriminability: A method for
-creating full receiver operating characteristic curves of lineup identification
-performance. *Perspectives on Psychological Science, 15*(3), 589-607.
-\doi{10.1177/1745691620902426}
+National Research Council. (2014). *Identifying the culprit: Assessing eyewitness identification*. Washington, DC: The National Academies Press.
 
-Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
-Bayesian information gain, base-rate effect equivalency curves, and reasonable
-suspicion. *Law and Human Behavior, 39*(1), 99-122.
+Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability: A method for creating full receiver operating characteristic curves of lineup identification performance. *Perspectives on Psychological Science, 15*(3), 589-607. https://doi.org/10.1177/1745691620902426
+
+Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(1), 99-122.
+
+:::
 
 ## Further Reading
 

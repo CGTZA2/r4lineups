@@ -562,16 +562,15 @@ Points worth carrying away:
 
 ## References
 
-Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness
-1.0: A python eyewitness identification analysis toolkit. *Behavior Research
-Methods, 56*, 1533-1550.
+::: {.hanging-indent}
 
-Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should
-abandon probative value and embrace receiver operating characteristic analysis.
-*Perspectives on Psychological Science, 7*(3), 275-278.
+Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0: A python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
 
-Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup
-memory. *Cognitive Psychology, 105*, 81-114.
+Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should abandon probative value and embrace receiver operating characteristic analysis. *Perspectives on Psychological Science, 7*(3), 275-278.
+
+Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup memory. *Cognitive Psychology, 105*, 81-114.
+
+:::
 
 ## Further Reading
 

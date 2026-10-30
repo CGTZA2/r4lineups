@@ -339,24 +339,19 @@ function uses whichever it is given.
 
 ## References
 
-Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of eyewitness
-error rates in fair and biased lineups. *Law and Human Behavior, 47*(4),
-463-483.
+::: {.hanging-indent}
 
-Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup
-fairness: Concurrent and predictive validity of lineup-fairness measures.
-*Psychology, Crime & Law*. https://doi.org/10.1080/1068316X.2024.2307358
+Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of eyewitness error rates in fair and biased lineups. *Law and Human Behavior, 47*(4), 463-483.
 
-Malpass, R. S. (1981). Effective size and defendant bias in eyewitness
-identification lineups. *Law and Human Behavior, 5*(4), 299-309.
+Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup fairness: Concurrent and predictive validity of lineup-fairness measures. *Psychology, Crime & Law*. https://doi.org/10.1080/1068316X.2024.2307358
 
-Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness.
-*Law and Human Behavior, 22*(2), 217-237.
+Malpass, R. S. (1981). Effective size and defendant bias in eyewitness identification lineups. *Law and Human Behavior, 5*(4), 299-309.
 
+Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness. *Law and Human Behavior, 22*(2), 217-237.
 
-Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental
-validation of a multinomial processing tree model for analyzing eyewitness
-identification decisions. *Scientific Reports, 12*, 15571.
+Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental validation of a multinomial processing tree model for analyzing eyewitness identification decisions. *Scientific Reports, 12*, 15571.
+
+:::
 
 ## Further Reading
 

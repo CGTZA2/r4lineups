@@ -311,13 +311,13 @@ as hits / (hits + estimated innocent-suspect identifications).
 
 ## References
 
-Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of eyewitness
-error rates in fair and biased lineups. *Law and Human Behavior, 47*(4),
-463-483.
+::: {.hanging-indent}
 
-Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
-assessing the effectiveness of eyewitness identification procedures: Expected
-information gain. *Psychological Review, 130*(3), 677-719.
+Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of eyewitness error rates in fair and biased lineups. *Law and Human Behavior, 47*(4), 463-483.
+
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for assessing the effectiveness of eyewitness identification procedures: Expected information gain. *Psychological Review, 130*(3), 677-719.
+
+:::
 
 ## Further Reading
 

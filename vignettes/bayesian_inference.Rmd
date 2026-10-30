@@ -414,11 +414,13 @@ non-conjugate priors or hierarchical extensions would bring MCMC back.
 
 ## References
 
-Agresti, A., & Agresti, B. F. (1978). Statistical analysis of qualitative
-variation. *Sociological Methodology, 9*, 204-237.
+::: {.hanging-indent}
 
-Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness.
-*Law and Human Behavior, 22*(2), 217-237.
+Agresti, A., & Agresti, B. F. (1978). Statistical analysis of qualitative variation. *Sociological Methodology, 9*, 204-237.
+
+Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness. *Law and Human Behavior, 22*(2), 217-237.
+
+:::
 
 ## Further Reading
 
