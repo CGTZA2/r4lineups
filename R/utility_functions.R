@@ -36,9 +36,13 @@
 #'
 #' @return A list containing:
 #'   \itemize{
-#'     \item utility_data: Dataframe with criterion, hit rate, false alarm rate,
-#'       and expected utility
-#'     \item max_utility: Maximum expected utility and corresponding criterion
+#'     \item utility_data: Dataframe with criterion, strategy, hit rate,
+#'       false alarm rate, and expected utility. Each row is the rule "accept
+#'       suspect IDs with confidence >= criterion". The \code{"reject_all"}
+#'       row has a criterion one above the highest confidence level, so that
+#'       applying it accepts no identification.
+#'     \item max_utility: Maximum expected utility, with the corresponding
+#'       criterion and strategy
 #'     \item avg_utility: Average expected utility across all criteria
 #'     \item utility_all_ids: Expected utility if all IDs are accepted
 #'     \item base_rate: Base rate used
@@ -136,6 +140,7 @@ make_utility_curves <- function(data,
   # Initialize results
   utility_results <- tibble::tibble(
     criterion = numeric(),
+    strategy = character(),
     hit_rate = numeric(),
     false_alarm_rate = numeric(),
     expected_utility = numeric(),
@@ -163,6 +168,7 @@ make_utility_curves <- function(data,
 
     utility_results <- rbind(utility_results, tibble::tibble(
       criterion = conf,
+      strategy = "threshold",
       hit_rate = hit_rate,
       false_alarm_rate = fa_rate,
       expected_utility = expected_utility,
@@ -171,13 +177,16 @@ make_utility_curves <- function(data,
     ))
   }
 
-  # Add "reject all" criterion (0 hit rate, 0 false alarm rate)
+  # Add "reject all" (0 hit rate, 0 false alarm rate). Its criterion sits above
+  # the highest confidence level: the rule is "accept IDs at or above the
+  # criterion", so a criterion below the lowest level would accept them all.
   eu_reject_guilty <- 0 * utility_matrix["tp"] + 1 * utility_matrix["fn"]
   eu_reject_innocent <- 0 * utility_matrix["fp"] + 1 * utility_matrix["tn"]
   eu_reject_all <- base_rate * eu_reject_guilty + (1 - base_rate) * eu_reject_innocent
 
   utility_results <- rbind(utility_results, tibble::tibble(
-    criterion = min(conf_levels) - 1,
+    criterion = max(conf_levels) + 1,
+    strategy = "reject_all",
     hit_rate = 0,
     false_alarm_rate = 0,
     expected_utility = eu_reject_all,
@@ -190,6 +199,7 @@ make_utility_curves <- function(data,
   max_utility <- list(
     expected_utility = utility_results$expected_utility[max_idx],
     criterion = utility_results$criterion[max_idx],
+    strategy = utility_results$strategy[max_idx],
     hit_rate = utility_results$hit_rate[max_idx],
     false_alarm_rate = utility_results$false_alarm_rate[max_idx]
   )
@@ -207,6 +217,7 @@ make_utility_curves <- function(data,
     max_utility <- list(
       expected_utility = utility_results$expected_utility[max_idx],
       criterion = utility_results$criterion[max_idx],
+      strategy = utility_results$strategy[max_idx],
       hit_rate = utility_results$hit_rate[max_idx],
       false_alarm_rate = utility_results$false_alarm_rate[max_idx]
     )
@@ -408,7 +419,7 @@ plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE
 
   # Filter out reject-all if not showing
   if (!show_reject) {
-    util_data <- util_data[util_data$hit_rate > 0, ]
+    util_data <- util_data[util_data$strategy != "reject_all", ]
   }
 
   # Create plot
@@ -427,6 +438,15 @@ plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE
                        utility_obj$utility_matrix["fp"],
                        utility_obj$utility_matrix["tn"])
     )
+
+  # The reject-all point sits one above the highest confidence level; label it
+  # so it is not read as an ordinary confidence criterion.
+  reject_row <- util_data[util_data$strategy == "reject_all", ]
+  if (nrow(reject_row) > 0) {
+    p <- p + annotate("text", x = reject_row$criterion,
+                      y = reject_row$expected_utility,
+                      label = "reject all", vjust = 1.8, size = 3.5)
+  }
 
   # Highlight maximum utility point
   if (show_max) {

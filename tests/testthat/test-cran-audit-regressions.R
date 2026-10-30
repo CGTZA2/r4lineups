@@ -169,3 +169,27 @@ test_that("legacy proportion and quantile helpers reject silent truncation", {
   expect_error(gen_esize_m_ci(draws, 1.1), "between 0 and 1")
   expect_error(gen_esize_m_ci(numeric(), 0.5), "non-empty")
 })
+
+test_that("every utility criterion, reject-all included, reproduces its rates", {
+  # Third review, finding 4: reject-all was stored at min(confidence) - 1, and
+  # applying "confidence >= criterion" there accepted every identification.
+  dat <- data.frame(
+    target_present = rep(c(TRUE, FALSE), each = 20),
+    identification = c(rep("suspect", 16), rep("reject", 4),
+                       rep("suspect", 2), rep("reject", 18)),
+    confidence = 80
+  )
+  util <- make_utility_curves(dat, base_rate = .01)
+  expect_equal(util$max_utility$strategy, "reject_all")
+  expect_equal(unname(util$max_utility$expected_utility), .49)
+
+  tp <- dat[dat$target_present, ]
+  ta <- dat[!dat$target_present, ]
+  for (i in seq_len(nrow(util$utility_data))) {
+    crit <- util$utility_data$criterion[i]
+    expect_equal(util$utility_data$hit_rate[i],
+                 mean(tp$identification == "suspect" & tp$confidence >= crit))
+    expect_equal(util$utility_data$false_alarm_rate[i],
+                 mean(ta$identification == "suspect" & ta$confidence >= crit))
+  }
+})
