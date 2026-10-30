@@ -96,8 +96,8 @@ Not covered, and what each would require:
 | Not supported | What it would need |
 |---|---|
 | Designated-suspect target-absent distributions | Target-absent suspect choices are currently pooled with target-absent filler choices. Separating them needs the upstream processor to accept a designated innocent suspect, which the audited revision does not expose |
-| Unfair lineups | The models assume every foil is a functioning alternative. An unfair lineup has a smaller effective than nominal size, so `lineup_size` is misspecified. Fitting with effective rather than nominal size is a workaround, not a solution |
-| Sequential lineups | The decision variable is defined over simultaneously available members. Sequential viewing needs a different model, not a different parameterisation |
+| Unfair lineups | The models assume every foil is a functioning alternative. An unfair lineup has a smaller effective than nominal size, so `lineup_size` is misspecified. Fitting with effective rather than nominal size is a workaround |
+| Sequential lineups | The decision variable is defined over simultaneously available members. Sequential viewing needs a different model |
 | Reaction-time models | Would require a decision process with a time dimension, e.g. a drift-diffusion account |
 | Hierarchical participant/item effects | Fitting is by minimum Pearson chi-square on aggregate cell counts, which discards the participant and item structure entirely. Random effects would need a trial-level likelihood |
 
