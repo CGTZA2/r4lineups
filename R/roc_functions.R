@@ -233,14 +233,20 @@ make_roc_gg <- function(rocobj_list, show_pauc = TRUE, point_labels = TRUE,
     fill = "steelblue"
   )
 
-  # Add pAUC annotation
+  # Add pAUC annotation. A partial area is bounded by the false-ID range it
+  # covers, so give that range, the perfect value and chance with it; readers
+  # used to the full AUC otherwise expect a value above .5.
   if (show_pauc) {
+    max_far <- max(roc_data$false_id_rate)
     p <- p + annotate(
       "text",
-      x = max(roc_data$false_id_rate) * 0.7,
-      y = 0.1,
-      label = paste0("pAUC = ", round(pauc, 3)),
-      size = 5
+      x = 0,
+      y = 0.95,
+      hjust = 0,
+      vjust = 1,
+      label = sprintf("pAUC = %.3f over false-ID rates 0 to %.3f\n(perfect %.3f, chance %.3f)",
+                      pauc, max_far, max_far, max_far^2 / 2),
+      size = 3.5
     )
   }
 

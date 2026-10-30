@@ -133,9 +133,11 @@ null_foil_vec <- rep(c(5, 3, 2, 1, 8, 6, 7), each = 4)
 table(null_foil_vec)
 ```
 
-Null foils matter, because a foil nobody would pick is not a functioning
-alternative to the suspect, and such members make a lineup unfair. A zero in a
-sample is weaker evidence than that, however. Even in a perfectly fair
+Null foils are important, because a foil nobody would pick is not a functioning
+alternative to the suspect. They are one of several things that can make a
+lineup unfair: poor foils that draw only a few choices weaken it in the same
+way, and a suspect who stands out does so whatever the foils are like. A zero in
+a sample is also weaker evidence than it looks. Even in a perfectly fair
 six-person lineup, a given member receives no choices from ten mock witnesses
 with probability \((5/6)^{10} \approx .16\). Treat an unchosen member as a
 prompt to look at that photograph, not as proof that it fails as a foil.
@@ -212,6 +214,14 @@ This package contains several sample datasets, listed below:
 Each dataset is loaded by name, e.g. `data(nortje2012)` or
 `data(lineup_example)`. Further details can be found in the documentation for
 each dataset, e.g. `?nortje2012`.
+
+The package can also generate data. `simulate_lineup_data()` simulates
+target-present and target-absent lineups with confidence ratings from a signal
+detection model, with control over discriminability, decision criterion, lineup
+size and the quality of each foil, and returns data in the format the ROC, CAC
+and model-fitting functions expect. It is useful for trying out an analysis
+before data are collected and for power analysis; see
+`vignette("simulation_power_analysis")`.
 
 ---
 
@@ -604,7 +614,7 @@ unknown choice probabilities. The plug-in estimate of the concentration
 $\sum p_i^2$ is biased upward. That does not by itself fix the direction of the
 bias in its reciprocal, E', because the expectation of a nonlinear function is
 not the function of the expectation. For fair and near-fair lineups, where the
-question usually matters, E' is biased **downward**. For $N$ choices spread
+question is usually important, E' is biased **downward**. For $N$ choices spread
 evenly over $k$ members the bias is approximately
 
 $$E[\hat{E}'] \approx \frac{Nk}{N + k - 1}, \qquad
@@ -692,7 +702,8 @@ collapsed `identification` label: a dataset that stores just
 suspect/filler/reject cannot support this calculation, because it no longer
 knows *which* filler was chosen. Note that the bias above applies here too, and
 target-absent choosers are often fewer than mock witnesses would be, so the
-correction matters more rather than less.
+correction is more important rather than less.
+
 ### 3. Effective Size Per Foils
 
 Malpass (1981) proposed an additional method for computing effective size, based
@@ -716,8 +727,17 @@ chance.
 
 Note that the value returned is a **count of members**, not a continuous
 quantity, so it moves only in whole steps as `conf` is varied, and it stays flat
-across any range of `conf` in which no member's interval crosses 1/k. Widening
-the interval can only ever increase the count.
+across any range of `conf` in which no member's interval crosses 1/k.
+
+The direction of the change with `conf` can look backwards at first. A member is
+counted when its interval **contains** chance, that is, when its choice rate
+cannot be distinguished from 1/k. A higher `conf` gives wider intervals, which
+makes it harder to show that any member departs from chance, so more members are
+counted and the effective size rises. A higher confidence level is a stricter
+test of *unfairness*, and so a more lenient test of each foil. The same logic
+means the measure rises when there are few mock witnesses, because every
+interval is then wide: with a small sample, a large count can reflect low power
+rather than a fair lineup.
 
 ```{r}
 for (conf in c(0.5, 0.7, 0.95, 0.99)) {
@@ -970,7 +990,7 @@ Both routes agree, as they should. Note that the bootstrap interval on the mean,
 [2.06, 3.70], excludes 1 — the set of lineups is diagnostic on average — while
 the chi-square still says the three ratios are not interchangeable.
 
-Running the same call on the cautionary data makes the trap concrete:
+Running the same call on the cautionary data illustrates the problem:
 
 ```{r, warning=FALSE}
 homog_diag_boot(lineup_pres_list = mixed_pres,
@@ -1064,6 +1084,15 @@ roc_result <- make_roc(lineup_example, lineup_size = 6, show_plot = FALSE)
 roc_result
 ```
 
+The pAUC is a **partial** area, so it is not on the familiar 0.5-to-1 scale of
+the full AUC. It covers false-ID rates from 0 up to the largest observed,
+`r round(max(roc1$roc_data$false_id_rate), 3)` here, so a perfect procedure would
+score `r round(max(roc1$roc_data$false_id_rate), 3)` and chance (the diagonal)
+`r round(max(roc1$roc_data$false_id_rate)^2 / 2, 3)`. The observed
+`r round(roc1$pauc, 3)` is therefore well above chance. pAUC values are
+comparable only between curves integrated over the same false-ID range, which is
+what `compare_pauc()` enforces (`vignette("pauc_statistical_comparison")`).
+
 The value returned by `plot()` is an ordinary **ggplot2** object, so you can
 adjust it with the usual `+` syntax rather than being limited to the arguments of
 the plotting function:
@@ -1131,7 +1160,7 @@ choices. **Effective
 size** is an estimate of how many members function as genuine alternatives, and
 is generally not a whole number.
 
-The distinction matters because most functions here take $k$ as an argument and
+The distinction is important because most functions here take $k$ as an argument and
 will not detect that it is wrong. `lineup_table()` exists to make null foils
 visible before that happens: `table()` silently omits members with zero counts,
 so a lineup of eight with one null foil produces a seven-entry table and nothing
