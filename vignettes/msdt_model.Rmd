@@ -97,8 +97,7 @@ max-filler distribution a simple power of the normal CDF — but it is not
 obviously true. Fillers in a real lineup are chosen to match a
 description, so they resemble each other. A witness whose memory happens
 to align with that description may find *all* of them somewhat familiar,
-and one whose memory does not may find none of them familiar. That is
-precisely what correlation means.
+and one whose memory does not may find none of them familiar.
 
 The consequence is not small. Under independence the largest of five
 standard normal fillers has an expected value of about 1.17. If the
@@ -106,9 +105,7 @@ fillers are strongly correlated the shared component dominates and the
 *maximum* is much less extreme — around 0.37 at a correlation of 0.9,
 roughly a third of the independent value. Treating correlated fillers as
 independent therefore **overstates how often a filler out-competes the
-suspect**, and so understates the suspect's exposure. The
-[implementation plan](#planned-extensions) below treats this as the first
-extension to build.
+suspect**, and so understates the suspect's exposure.
 
 # Max filler distribution
 
