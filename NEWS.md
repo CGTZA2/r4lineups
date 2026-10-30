@@ -177,6 +177,56 @@
   crosses the cutoff, and their results agree. The `compare_pauc()` bootstrap
   and `simulate_power_analysis()` use the same integrator.
 
+* `make_utility_curves()` stored the reject-all strategy at a criterion of
+  `min(confidence) - 1`. Read as "act on suspect IDs with confidence at or
+  above the criterion", that value accepts every identification, the opposite
+  of the strategy. With 16/20 target-present and 2/20 target-absent suspect
+  IDs at confidence 80 and a base rate of .01, the optimum was reject-all
+  (expected utility .49) but was reported as criterion 79. Reject-all now sits
+  at `max(confidence) + 1`, every row of `utility_data` and `max_utility`
+  carries a `strategy` (`"threshold"` or `"reject_all"`), and the plot labels
+  the reject-all point. Expected utilities are unchanged.
+
+* `esize_T_bayes()` now warns when `threshold` is at or above the number of
+  lineup members. Because E' cannot exceed k and equals it only at exact
+  uniformity, P(E' < k | data) is 1 for any data, so such a threshold carries
+  no information.
+
+* `simulate_power_analysis()` returns an `n_total` column. A sample size of
+  n simulates n target-present and n target-absent witnesses in each of the
+  two conditions, 4n in all; the documentation and plot axis now say so.
+
+## Documentation
+
+* A third independent review of the vignettes (30 October 2026) found
+  interpretations that the code or its output contradicted. Corrected:
+  - a single-condition 2-HT fit has zero residual degrees of freedom, not
+    one, so it has no goodness-of-fit test (`winter_2ht_model`,
+    `model_comparison`);
+  - the ordinary bootstrap gives a degenerate [0, 0] interval for a member
+    nobody chose, so the main vignette now recommends the exact binomial
+    interval near 0 or 1;
+  - the plug-in E' is biased downward for near-fair lineups but not always,
+    and `unbiased = TRUE` uses the unbiased estimator of the concentration,
+    not of E' (`Vignette`, `?esize_T`);
+  - the Bayesian vignette no longer offers P(E' < k | data) as a fairness
+    benchmark;
+  - the power vignette states its sample-size unit, and its 80% crossing
+    is computed from the results;
+  - the "undesignated" PPV example kept `suspect_pos`, so all three
+    corrections gave 1; it now gives .83, .77 and .45;
+  - the BREE and prior-posterior explanations describe the plots as drawn;
+  - the mSDT target-absent joint density is not symmetric, and the
+    rejection-rate inversion has a feasibility bound;
+  - unvalidated grade bands are removed from the model-comparison and
+    face-similarity vignettes, and the face-similarity examples now match the
+    functions' arguments and return values;
+  - smaller qualifications in the RAC, pAUC, lineup-model and simulation
+    vignettes.
+* `plot.model_comparison()` draws its panels with a shared compact theme, so
+  titles no longer overrun, and clips the 2-HT Wald intervals to [0, 1]
+  instead of dropping bars that cross zero.
+
 # r4lineups 2.2.0 (2026-10-28)
 
 ## Breaking changes
