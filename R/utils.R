@@ -69,6 +69,7 @@ utils::globalVariables(c(
   "component",
   "end",
   "estimate",
+  "label_y",
   "kind",
   "pos",
   "start",

@@ -75,7 +75,8 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
   # Create plot
   p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = parameter, y = estimate)) +
     ggplot2::geom_col(fill = "steelblue", alpha = 0.7, width = 0.6) +
-    ggplot2::ylim(0, 1) +
+    # Headroom above 1 for the value labels, which sit above the intervals.
+    ggplot2::scale_y_continuous(limits = c(0, 1.1), breaks = seq(0, 1, 0.25)) +
     ggplot2::labs(
       title = "2-HT Model Parameter Estimates",
       x = NULL,
@@ -98,10 +99,13 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
     )
   }
 
-  # Add value labels
+  # Add value labels above the interval, where the whisker cannot cover them
+  show_bars <- show_ci && !any(is.na(se))
+  plot_data$label_y <- if (show_bars) pmin(plot_data$upper, 1) else plot_data$estimate
   p <- p + ggplot2::geom_text(
-    ggplot2::aes(label = sprintf("%.3f", estimate)),
-    vjust = -0.5,
+    data = plot_data,
+    ggplot2::aes(y = label_y, label = sprintf("%.3f", estimate)),
+    vjust = -0.6,
     size = 3.5
   )
 
