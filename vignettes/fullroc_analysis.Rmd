@@ -113,7 +113,7 @@ rates must reach 1 in both arms.
 in competition; they are computed over different ranges from different subsets of
 the data. Never report one as though it were the other.
 
-## The key insight: two signal detection tasks
+## The key idea: two signal detection tasks
 
 Smith et al. (2020) argue that a lineup involves **two** signal detection
 problems, and that the conventional analysis conflates them.

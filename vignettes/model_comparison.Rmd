@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-Eyewitness identification data can be analyzed using multiple theoretical frameworks, each providing unique insights. This vignette demonstrates how to use r4lineups' model comparison framework to fit and compare:
+Eyewitness identification data can be analyzed using multiple theoretical frameworks, each providing different information. This vignette demonstrates how to use r4lineups' model comparison framework to fit and compare:
 
 1. **2-HT Model** (Winter et al., 2022): Multinomial Processing Tree model
 2. **EIG** (Starns et al., 2023): Expected Information Gain
@@ -44,17 +44,20 @@ The `compare_models()` function provides a unified interface for fitting all mod
 The Two-High Threshold (2-HT) model is a multinomial processing tree (MPT) that separates identification decisions into distinct latent processes:
 
 **Parameters:**
+
 - **dP**: Detection of culprit presence (0-1)
 - **dA**: Detection of culprit absence (0-1)
 - **b**: Biased suspect selection (0-1)
 - **g**: Guessing-based selection (0-1)
 
 **Model equations** (target-present):
+
 - P(suspect ID) = dP + (1-dP) × [b + (1-b) × g × (1/L)]
 - P(filler ID) = (1-dP) × (1-b) × g × ((L-1)/L)
 - P(reject) = (1-dP) × (1-b) × (1-g)
 
 **Use when:**
+
 - You want to understand underlying cognitive mechanisms
 - Testing theories about detection vs. guessing
 - Comparing conditions with different bias levels
@@ -69,6 +72,7 @@ EIG = Σ p(x) × [H(prior) - H(p(guilty|x))]
 where x = response category (e.g., "suspect_high_confidence")
 
 **Interpretation:**
+
 - EIG = 0: No information (responses don't distinguish guilty/innocent)
 - The maximum is the prior entropy, reached when every response resolves guilt
   completely. That is 1 bit only when the prior probability of guilt is .5; at a
@@ -76,6 +80,7 @@ where x = response category (e.g., "suspect_high_confidence")
 - Higher EIG = more diagnostic procedure
 
 **Use when:**
+
 - Evaluating overall diagnosticity of procedures
 - Comparing different identification methods
 - Assessing policy-relevant cutoffs
@@ -85,12 +90,14 @@ where x = response category (e.g., "suspect_high_confidence")
 Full ROC uses ALL witness responses (suspect IDs, filler IDs, rejections) to compute a threshold-free measure of discriminability:
 
 **Measure:**
+
 - AUC (Area Under the Curve)
 - Range: 0 to 1. A value of .5 is the no-discrimination reference, not a lower
   bound: with the a-priori ordering a procedure that does worse than chance gives
   an AUC below .5.
 
 **Use when:**
+
 - Measuring investigator discriminability
 - Comparing system variables (lineup procedures)
 - Need threshold-free performance measure
@@ -148,10 +155,7 @@ knitr::kable(
 The 2-HT model's detect-absence parameter `dA` is identified almost entirely by
 rejections — it is the probability of correctly concluding the culprit is
 absent. With half a percent of witnesses rejecting, the likelihood is nearly
-flat in `dA` and the fit fails. `fit_winter_2ht()` now detects this and says so;
-earlier versions failed with an opaque message about non-finite differences, and
-`compare_models()` simply omitted the model from its results, so every
-downstream section that referred to it silently produced nothing.
+flat in `dA` and the fit fails. `fit_winter_2ht()` detects this and says so.
 
 ### Comparing All Models
 
@@ -264,18 +268,21 @@ common model-selection scale and the wrapper does not declare a “best model.�
 ### When to Use Each Model
 
 **Use 2-HT when:**
+
 - Testing cognitive theories (detection, guessing, bias)
 - Need to separate memory from response bias
 - Comparing procedures that might differ in bias
 - Want to understand latent psychological processes
 
 **Use EIG when:**
+
 - Evaluating overall diagnosticity
 - Comparing identification procedures
 - Need a single summary measure
 - Want information-theoretic interpretation
 
 **Use Full ROC when:**
+
 - Need threshold-free discriminability measure
 - Comparing system variables
 - Want to use all available information
@@ -542,6 +549,7 @@ cat("Recommend: n ≥ 100 per condition for reliable model fitting\n")
 ### 2. Model Convergence Issues
 
 If 2-HT model fails to converge:
+
 - Check data quality (sufficient variability)
 - Try different starting parameters
 - Ensure adequate sample size
@@ -562,7 +570,11 @@ cat("  → Compare each measure with itself across conditions\n")
 
 ### 1. Fit Multiple Models
 
-Don't rely on a single model, as each provides unique insights:
+Don't rely on a single model: each answers a different question, as set out in
+[The Three Models](#the-three-models) above. The 2-HT model separates detection
+from guessing and bias, EIG summarises how much the responses tell an
+investigator about guilt, and the full ROC measures investigator
+discriminability.
 
 ```{r best_practice_multiple}
 # Always fit at least 2-3 models
@@ -586,7 +598,7 @@ cat("In your paper, report:\n")
 cat("  • 2-HT: Parameters with SE, AIC/BIC, convergence\n")
 cat("  • EIG: Value in bits, efficiency percentage\n")
 cat("  • Full ROC: AUC, number of operating points\n")
-cat("  • Interpretation of each model's insights\n")
+cat("  • What each model's estimates say about the procedure\n")
 ```
 
 ### 3. Check Model Assumptions
@@ -624,8 +636,13 @@ the six observed cell counts (three responses by two lineup types). The
 target-present and target-absent totals are fixed, so the data have
 2 × (3 − 1) = 4 degrees of freedom, the same as the number of parameters: a
 single-condition fit is saturated, with zero residual degrees of freedom
-(Winter et al., 2022, Figure 1). Standard errors come from the numerically
-differentiated Hessian at the optimum.
+(Winter et al., 2022, Figure 1). The standard errors measure how sharply the
+data pin each parameter down. At the best-fitting values, the log-likelihood
+falls away steeply in some directions and gently in others; that curvature,
+the *Hessian* matrix of second derivatives, is computed numerically, and its
+inverse gives the sampling variances of the estimates. A flat likelihood (little
+curvature) means a large standard error. Winter et al. (2022) describe the
+model and its estimation in full.
 
 **Identifiability.** The detect-absence parameter `dA` is identified almost
 entirely by rejections. If very few witnesses reject, the likelihood is close to
@@ -659,11 +676,15 @@ estimate, and refit with `order = "apriori"` for anything inferential.
    than the nominal `lineup_size` passed here, and all three models will be
    misspecified in the same direction. A member nobody chose in the sample is not
    necessarily such a foil: in a fair six-person lineup, a given member receives
-   no choices from ten witnesses with probability (5/6)^10 ≈ .16.
+   no choices from ten witnesses with probability (5/6)^10 ≈ .16. Fitzgerald,
+   Tredoux and Juncu (2023) discuss correcting error-rate estimates for unequal
+   foil choices by using effective rather than nominal size; passing an
+   effective size to these models is planned for a future version.
 
 ## Summary
 
 **Key Functions:**
+
 - `compare_models()`: Fit multiple models
 - `print.model_comparison()`: View comparison table
 - `summary.model_comparison()`: Detailed results
@@ -671,20 +692,24 @@ estimate, and refit with `order = "apriori"` for anything inferential.
 - `format_comparison_table()`: Publication tables
 
 **When to Use Each Model:**
+
 - **2-HT**: Understanding cognitive processes
 - **EIG**: Overall diagnosticity assessment
 - **Full ROC**: Threshold-free discriminability
 
 **Best Practices:**
+
 - Fit multiple models for comprehensive analysis
 - Report all model results
 - Check convergence and identifiability; test fit only across constrained conditions
 - Use adequate sample sizes (n ≥ 100 per condition)
-- Interpret each model's unique insights
+- Interpret each model's estimates on their own scale
 
 ## References
 
 ::: {.hanging-indent}
+
+Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of eyewitness error rates in fair and biased lineups. *Law and Human Behavior, 47*(4), 463-483.
 
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability: A method for creating full receiver operating characteristic curves of lineup identification performance. *Perspectives on Psychological Science, 15*(3), 589-607.
 

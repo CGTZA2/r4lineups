@@ -236,6 +236,7 @@ These wrappers combine data creation, analysis, and plotting:
 - Showup‑specific handling.
 - Expanded unit tests + edge‑case validation for recent additions.
 - Benjamini–Hochberg (false discovery rate) option for the k member intervals in `lineup_boot_allprop()` / `eff_size_per_foils()`, as a less conservative alternative to the Bonferroni-style `conf = 1 - 0.05 / k` the main vignette suggests (Colin, 30 Oct 2026).
+- Option to pass an effective lineup size (rather than nominal `lineup_size`) to the 2-HT, EIG and full-ROC models, following Fitzgerald, Tredoux & Juncu (2023) (Colin, 30 Oct 2026).
 - Lee & Penrod's d'(IFa) lineup-bias index: develop a rescaled version with sensible minimum and maximum values (a fair lineup does not give 0 because the filler rate pools all fillers; see `make_multid()`'s fair reference) (Colin, 30 Oct 2026).
 
 ## Notes for agents

@@ -391,6 +391,7 @@ print(comparison_df)
 ```
 
 **Interpretation:**
+
 - Models give different absolute scores, which are not comparable across models
 - Check whether the ordering of foils agrees across models; do not assume it
 - Use the same model consistently within a study
@@ -701,21 +702,25 @@ mock-witness and outcome data for claims about fairness.
 ### Troubleshooting
 
 **"No face detected"**
+
 - Image quality too poor
 - Face not front-facing enough
 - Try different detector: `detector = "opencv"` is more lenient
 
 **Embeddings fail**
+
 - Check image file paths are correct
 - Ensure images are standard formats (jpg, png)
 - Verify Python environment is activated
 
 **Inconsistent results**
+
 - Deep learning models are deterministic
 - If results change, check if images were modified
 - Verify same model/metric used
 
 **Very high/low similarities**
+
 - Check image quality
 - Verify correct target-foil pairing
 - Look at the photographs before drawing any conclusion
