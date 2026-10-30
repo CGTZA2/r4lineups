@@ -422,6 +422,12 @@ A's suspect identification is the more diagnostic, and the further the curve
 lies above zero, the larger A's advantage. (Plotting B's prior directly against
 A's would put the reference on the diagonal instead, with A's advantage above it.)
 
+The two procedures are the ones simulated in the
+[Calibration by Condition](#calibration-by-condition) section: `data_proc_a`
+and `data_proc_b` are data frames of target-present and target-absent
+identifications with confidence, one row per witness (not lineup vectors).
+Procedure A has the stronger memory evidence (d′ = 1.8 against 1.1).
+
 ```{r bree}
 bree_result <- make_bree_curve(
   data_proc_a,
@@ -545,7 +551,7 @@ utility_rule <- function(m) {
 ```
 
 ```{r utility-comparison}
-# Compare the two procedures simulated in the BREE section above
+# Compare the two procedures simulated in the Calibration by Condition section
 util_proc_a <- make_utility_curves(data_proc_a, base_rate = 0.5,
                                    utility_matrix = utility_matrix)
 util_proc_b <- make_utility_curves(data_proc_b, base_rate = 0.5,
