@@ -330,8 +330,7 @@ The plot shows how each response type updates prior belief:
 
 The prior-posterior curve is due to Wells, Yang and Smalarz (2015), who
 introduced it along with the base-rate effect-equivalency curve used later in
-this vignette. The implementation here is written directly from that paper; it
-is not adapted from another package.
+this vignette. The implementation here is written directly from that paper.
 
 **On the shape of these curves.** They are curved, and that curvature is not an
 artefact of any smoothing: no loess or spline is fitted anywhere in these plots.
@@ -349,9 +348,10 @@ and very little when the prior is already near 0 or near 1.
 
 ### Information Gain
 
-Information gain quantifies uncertainty reduction, measured in bits. Where the
-posterior curve says *where belief ends up*, information gain says *how much was
-learned*, which is greatest when the prior leaves most room for revision:
+Information gain quantifies uncertainty reduction, measured in bits: the
+entropy of the prior minus the entropy of the posterior. Where the posterior
+curve says *where belief ends up*, information gain says *how much uncertainty
+was removed*:
 
 ```{r bayes-information-gain}
 plot_bayes_information_gain(bayes_result)
@@ -359,9 +359,19 @@ plot_bayes_information_gain(bayes_result)
 
 Interpretation:
 
-- **Positive values**: Response reduces uncertainty (diagnostic)
-- **Negative values**: Response increases uncertainty (misleading)
-- **Higher magnitude**: Stronger diagnostic value
+- **Positive values**: the response moves belief towards certainty (towards 0
+  or 1), so uncertainty falls.
+- **Negative values**: the response moves belief towards 50/50, so uncertainty
+  rises. That is not a sign of misleading evidence: a suspect identification
+  given a low prior raises the probability of guilt towards .5, which is the
+  correct update and also the most uncertain state.
+- **Where each curve peaks** depends on the direction of the evidence. Responses
+  that point to guilt (suspect identifications) gain most at priors above .5,
+  where they push belief towards 1; responses that point to innocence
+  (rejections, filler identifications) gain most at priors below .5.
+
+The curves bend sharply because binary entropy changes fastest near 0 and 1.
+That shape is a property of the measure, not of these data or of any smoothing.
 
 ### Confidence-Based Bayesian Analysis
 

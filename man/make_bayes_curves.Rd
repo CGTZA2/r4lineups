@@ -80,7 +80,9 @@ response type x (e.g., high-confidence suspect ID, rejection, etc.), it computes
 where H(p) is binary entropy.
 
 The information gain quantifies how much uncertainty is reduced by observing
-response x. Positive values indicate the response is diagnostic.
+response x. It is negative when the response moves belief towards 0.5, as a
+suspect identification does at a low prior; that is a correct update that
+leaves more uncertainty, not misleading evidence.
 }
 \examples{
 data(lineup_example)
