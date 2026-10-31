@@ -235,6 +235,8 @@ These wrappers combine data creation, analysis, and plotting:
 - Standardized data‑format helper for confidence‑based analyses.
 - Showup‑specific handling.
 - Expanded unit tests + edge‑case validation for recent additions.
+- EIG uncertainty: 95% credible intervals for expected information gain (and for differences between procedures) from a Bayesian multinomial model of the response proportions, following Tuttle, Starns & Cohen (2025, *Journal of Memory and Language*, 140, 104581) (Colin, 31 Oct 2026).
+- Standardised pAUC (McClish, 1989) on the .5–1 scale as an option in `make_rocdata()` / `compare_pauc()`; readers expect AUC-like values above .5 (Colin, 31 Oct 2026).
 - mSDT extensions (correlated fillers via a one-factor model; unequal variance, which needs `fit_max_sdt()` and a recovery study): plan in `notes/plans/msdt_extensions.md` (Colin, 30 Oct 2026).
 - Benjamini–Hochberg (false discovery rate) option for the k member intervals in `lineup_boot_allprop()` / `eff_size_per_foils()`, as a less conservative alternative to the Bonferroni-style `conf = 1 - 0.05 / k` the main vignette suggests (Colin, 30 Oct 2026).
 - Option to pass an effective lineup size (rather than nominal `lineup_size`) to the 2-HT, EIG and full-ROC models, following Fitzgerald, Tredoux & Juncu (2023) (Colin, 30 Oct 2026).

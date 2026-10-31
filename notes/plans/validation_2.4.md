@@ -38,6 +38,10 @@ The plug-in E′ bootstrap cannot reach k, so it cannot test exact fairness. Inv
 
 Face similarity across models, detectors and thresholds; the dense MediaPipe mesh on a machine with GPU access; and the live browser app (Shinylive) version identity after each deployment.
 
-## 10. Process
+## 10. EIG inference and a standardised pAUC
+
+Implement 95% credible intervals for EIG and for the difference between two procedures, using a Bayesian multinomial (Dirichlet) model of the response proportions as in Tuttle, Starns and Cohen (2025, *Journal of Memory and Language*, 140, 104581), and check their calibration by simulation. Add a McClish (1989) standardised pAUC, on the .5–1 scale, as an option in `make_rocdata()` and `compare_pauc()`.
+
+## 11. Process
 
 Each study follows the audit's ADEMP layout (Morris, White & Crowther, 2019): an independent reference implementation, at least 5,000 replicates, MCSE of .003 or less for coverage, and all attempts and failures retained. Finished studies become regression tests where practical, and the limitation text in the help and vignettes is removed once the evidence supports it.

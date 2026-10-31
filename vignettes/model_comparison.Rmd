@@ -627,7 +627,7 @@ ranked against each other directly.
 | Model | Estimand | Scale | Inference available |
 |---|---|---|---|
 | 2-HT | Latent probabilities of detection, bias and guessing | Four probabilities in [0, 1] | Standard errors from the observed information matrix; bootstrap intervals via `boot_winter_2ht()`. No fit test for a single condition (zero residual df) |
-| EIG | Expected reduction in uncertainty about guilt | Bits, 0 to the prior entropy | None in this package |
+| EIG | Expected reduction in uncertainty about guilt | Bits, 0 to the prior entropy | None in this package. Tuttle, Starns and Cohen (2025) give 95% credible intervals for EIG from a Bayesian multinomial model of the response proportions; adding this is planned |
 | Full ROC | Investigator discriminability | AUC in [0, 1], .5 = no discrimination | None in this package; see the note on ordering bias below |
 
 ### 2-HT estimation
@@ -716,6 +716,8 @@ Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of eyewitness 
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability: A method for creating full receiver operating characteristic curves of lineup identification performance. *Perspectives on Psychological Science, 15*(3), 589-607.
 
 Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for assessing the effectiveness of eyewitness identification procedures: Expected information gain. *Psychological Review, 130*(3), 677–719. https://doi.org/10.1037/rev0000332
+
+Tuttle, M. D., Starns, J. J., & Cohen, A. L. (2025). Protecting the innocent in eyewitness identification: An analysis of simultaneous and ranking lineups. *Journal of Memory and Language, 140*, 104581. https://doi.org/10.1016/j.jml.2024.104581
 
 Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental validation of a multinomial processing tree model for analyzing eyewitness identification decisions. *Scientific Reports, 12*, 15571.
 

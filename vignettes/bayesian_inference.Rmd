@@ -340,10 +340,9 @@ and should be reported rather than resolved by picking a prior.
 
 ### What is being sampled
 
-**One definition of E′.** Tredoux (1998) defined effective size through Agresti
-and Agresti's (1978) index of qualitative variation,
-\(I = 1 - \sum_i p_i^2\), transformed back to a count of members:
-\(E' = 1/(1 - I)\). Substituting \(I\) gives \(E' = 1/\sum_i p_i^2\), the
+**One definition of E′.** Tredoux (1998) defined effective size through an
+index of diversity, \(I = 1 - \sum_i p_i^2\), transformed back to a count of
+members: \(E' = 1/(1 - I)\). Substituting \(I\) gives \(E' = 1/\sum_i p_i^2\), the
 reciprocal of Simpson's concentration index, also known as the inverse Simpson
 or inverse Herfindahl index. The two forms are algebraically identical; they
 differ only in notation, and this package uses \(1/\sum_i p_i^2\) throughout.
@@ -423,8 +422,6 @@ non-conjugate priors or hierarchical extensions would bring MCMC back.
 ## References
 
 ::: {.hanging-indent}
-
-Agresti, A., & Agresti, B. F. (1978). Statistical analysis of qualitative variation. *Sociological Methodology, 9*, 204-237.
 
 Tredoux, C. G. (1998). Statistical inference on measures of lineup fairness. *Law and Human Behavior, 22*(2), 217-237.
 
