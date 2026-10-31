@@ -378,7 +378,7 @@ summary.model_comparison <- function(object, ...) {
   cat("  - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes\n")
   cat("  - EIG: Higher values = more informative procedure\n")
   cat("  - Full ROC: Higher AUC = better investigator discriminability\n")
-  cat("\nEach model provides different insights -- consider using multiple models.\n")
+  cat("\nEach model provides different information; consider reporting more than one.\n")
 
   invisible(object)
 }
