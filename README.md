@@ -44,8 +44,14 @@ package, not in the cited work. Please report suspected errors through the
 
 ## Installation
 
-Until version 2.3.0 is on CRAN, install it from r-universe. CRAN still carries
-0.1.1 (2018), which lacks almost everything described here.
+From CRAN:
+
+```r
+install.packages("r4lineups")
+```
+
+The current release is also available from r-universe, which is updated sooner
+than CRAN:
 
 ```r
 install.packages("r4lineups",

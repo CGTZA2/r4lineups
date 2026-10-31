@@ -30,8 +30,8 @@ knitr::opts_chunk$set(
 set.seed(2026)
 ```
 
-Until version 2.3.0 is on CRAN, which carries only 0.1.1 from 2018, install the
-package from r-universe:
+The current release is also available from r-universe, which is updated sooner
+than CRAN:
 
 ```{r install, eval = FALSE}
 install.packages("r4lineups",
