@@ -98,6 +98,9 @@ utils::globalVariables(c(
   }
   if (innocent_suspect == "designated") return("designated")
   if (innocent_suspect %in% c("estimated", "estimated_from_fillers")) {
+    if (any(ta_data$identification == "suspect", na.rm = TRUE)) {
+      stop("Estimated innocent-suspect IDs require target-absent choices coded as filler IDs, not suspect IDs. Recode the undesignated data explicitly before requesting estimated mode.", call. = FALSE)
+    }
     return("estimated_from_fillers")
   }
   has_suspect_id <- any(ta_data$identification == "suspect", na.rm = TRUE)
@@ -184,6 +187,38 @@ utils::globalVariables(c(
   sort(unique(conf), decreasing = TRUE)
 }
 
+# A confidence rule that really accepts no observed relevant identification,
+# regardless of a caller's restricted criterion grid. Inf also handles rounding
+# at very large finite confidence values.
+.reject_all_criterion <- function(tp_data, ta_data, method, thresholds = NULL) {
+  ta_type <- if (method == "designated") "suspect" else "filler"
+  conf <- c(tp_data$confidence[tp_data$identification == "suspect"],
+            ta_data$confidence[ta_data$identification == ta_type], thresholds)
+  if (!length(conf)) conf <- c(tp_data$confidence, ta_data$confidence)
+  top <- max(conf)
+  cutoff <- top + 1
+  if (!is.finite(cutoff) || cutoff <= top) Inf else cutoff
+}
+
+.validate_bins <- function(values, breaks, label = "confidence_bins") {
+  if (is.null(breaks)) return(invisible(TRUE))
+  if (!is.numeric(breaks) || length(breaks) < 2L || anyNA(breaks) ||
+      is.unsorted(breaks, strictly = TRUE)) {
+    stop(label, " must contain strictly increasing numeric boundaries.", call. = FALSE)
+  }
+  if (anyNA(values) || any(!is.finite(values)) ||
+      any(values < breaks[1L] | values > utils::tail(breaks, 1L))) {
+    stop(label, " must cover every observation; subset the data explicitly before analysis if observations are to be excluded.", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+# sample(x, ...) treats a single positive integer as 1:x. Bootstrap draws must
+# always sample observed elements, including when a stratum has one member.
+.resample_values <- function(x) {
+  x[sample.int(length(x), length(x), replace = TRUE)]
+}
+
 .innocent_suspect_count <- function(ta_data, include, lineup_size,
                                     method = .innocent_suspect_method(ta_data)) {
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
@@ -204,7 +239,13 @@ utils::globalVariables(c(
 # Shared validation for analytical entry points. This intentionally avoids the
 # sample-size warnings produced by strict validation.
 .validate_lineup_analysis <- function(data, require_confidence = TRUE,
-                                      require_response_time = FALSE) {
+                                      require_response_time = FALSE,
+                                      lineup_size = NULL) {
+  if (!is.null(lineup_size) && (!is.numeric(lineup_size) ||
+      length(lineup_size) != 1L || !is.finite(lineup_size) ||
+      lineup_size < 1 || lineup_size != floor(lineup_size))) {
+    stop("lineup_size must be a positive integer.", call. = FALSE)
+  }
   checked <- validate_lineup_data(
     data,
     require_confidence = require_confidence,

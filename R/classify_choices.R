@@ -104,6 +104,9 @@ classify_lineup_choices <- function(data,
   }
   # NA and 0 both denote "chose nobody"; normalising here keeps the comparison
   # against suspect positions free of NA propagation.
+  if (any(!is.na(members) & (!is.finite(members) | members != floor(members)))) {
+    stop("Chosen positions must be whole finite member positions or NA.", call. = FALSE)
+  }
   members <- ifelse(is.na(members), 0L, as.integer(members))
   if (any(members < 0L)) {
     stop("Column '", member_col, "' contains negative positions.", call. = FALSE)
@@ -121,16 +124,16 @@ classify_lineup_choices <- function(data,
     if (!is.numeric(suspects)) {
       stop("Column '", suspect_col, "' must be numeric.", call. = FALSE)
     }
-    suspects <- as.integer(suspects)
   } else if (is.numeric(suspect_col) && length(suspect_col) == 1L &&
              is.finite(suspect_col)) {
-    suspects <- rep(as.integer(suspect_col), nrow(data))
+    suspects <- rep(suspect_col, nrow(data))
   } else {
     stop("suspect_col must be a single column name or a single suspect position.",
          call. = FALSE)
   }
 
-  if (anyNA(suspects) || any(suspects < 1L)) {
+  if (anyNA(suspects) || any(!is.finite(suspects)) ||
+      any(suspects != floor(suspects)) || any(suspects < 1L)) {
     stop("Suspect positions must be present and at least 1.", call. = FALSE)
   }
 

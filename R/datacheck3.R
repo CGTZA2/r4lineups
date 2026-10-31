@@ -24,8 +24,10 @@ datacheck3 <- function(lineup_tab, k){
     stop("lineup_tab must contain at most k finite non-negative counts.", call. = FALSE)
   }
   if (!is.null(names(lineup_tab))) {
-    positions <- suppressWarnings(as.integer(names(lineup_tab)))
-    if (anyNA(positions) || any(positions < 1L | positions > k)) {
+    positions <- suppressWarnings(as.numeric(names(lineup_tab)))
+    if (anyNA(positions) || any(!is.finite(positions)) ||
+        any(positions != floor(positions)) || anyDuplicated(positions) ||
+        any(positions < 1L | positions > k)) {
       stop("Named lineup-table positions must be integers between 1 and k.", call. = FALSE)
     }
   } else if (length(counts) != k) {

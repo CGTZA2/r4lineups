@@ -34,9 +34,7 @@ gen_boot_samples_list <- function(lineup_list, bootno){
 
     names_a <- rep("sample_",bootno)
     names_b <- as.character(seq_len(bootno))
-    x <- purrr::map(seq_len(bootno), ~ sample(
-      lineup_list[[i]], length(lineup_list[[i]]), replace = TRUE
-    ))
+    x <- purrr::map(seq_len(bootno), ~ .resample_values(lineup_list[[i]]))
     names(x) <- paste(names_a,names_b,sep = "")
     lineup_boot_samples[[i]] <- map_df(x, magrittr::extract, seq_along(lineup_list[[i]]))
   }
