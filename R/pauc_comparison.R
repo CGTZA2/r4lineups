@@ -38,7 +38,7 @@
 #'   }
 #'
 #' @details
-#' This function implements a rigorous statistical test for comparing ROC curves
+#' This function implements an approximate statistical test for comparing ROC curves
 #' between two conditions (e.g., simultaneous vs. sequential lineups, different
 #' retention intervals, etc.).
 #'
@@ -90,6 +90,11 @@
 #' @inheritParams make_rocdata
 #' @export
 #' @importFrom stats qnorm pnorm
+#' @details The independent-sample bootstrap estimates uncertainty in an empirical
+#'   partial-area functional; the final comparison uses a normal/Wald interval.
+#'   It is approximate and can be liberal in finite samples. A data-selected
+#'   cutoff, sparse high-confidence cells, or resamples that do not reach the
+#'   cutoff require additional caution. It is not an exact discrimination test.
 compare_pauc <- function(data1,
                          data2,
                          lineup_size = 6,
@@ -251,8 +256,7 @@ compare_pauc <- function(data1,
     resample_condition <- function(dat) {
       tp <- which(as.logical(dat$target_present))
       ta <- which(!as.logical(dat$target_present))
-      dat[c(sample(tp, length(tp), replace = TRUE),
-            sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
+      dat[c(.resample_values(tp), .resample_values(ta)), , drop = FALSE]
     }
     boot_data1 <- resample_condition(data1)
     boot_data2 <- resample_condition(data2)
@@ -304,7 +308,7 @@ print.pauc_comparison <- function(x, ...) {
   cat("\n")
 
   cat("Difference: ", round(x$pauc_diff, 4), "\n", sep = "")
-  cat("  95% CI: [", round(x$ci_diff["lower"], 4), ", ", round(x$ci_diff["upper"], 4), "]\n", sep = "")
+  cat(paste0("  ", 100 * x$conf_level, "% CI: ["), round(x$ci_diff["lower"], 4), ", ", round(x$ci_diff["upper"], 4), "]\n", sep = "")
   cat("\n")
 
   cat("Statistical Test:\n")
@@ -357,8 +361,8 @@ summary.pauc_comparison <- function(object, ...) {
   cat("  Target-absent:", object$roc1$n_target_absent, "\n")
   cat("  pAUC:", round(object$pauc1, 4), "\n")
   cat("  SE(pAUC):", round(object$se_pauc1, 4), "\n")
-  cat("  95% CI: [", round(object$pauc1 - 1.96*object$se_pauc1, 4), ", ",
-      round(object$pauc1 + 1.96*object$se_pauc1, 4), "]\n\n", sep = "")
+  cat(paste0("  ", 100 * object$conf_level, "% CI: ["), round(object$pauc1 - stats::qnorm((1 + object$conf_level)/2)*object$se_pauc1, 4), ", ",
+      round(object$pauc1 + stats::qnorm((1 + object$conf_level)/2)*object$se_pauc1, 4), "]\n\n", sep = "")
 
   cat("Condition 2:", object$label2, "\n")
   cat("  Sample size:", object$roc2$n_target_present + object$roc2$n_target_absent, "\n")
@@ -366,14 +370,14 @@ summary.pauc_comparison <- function(object, ...) {
   cat("  Target-absent:", object$roc2$n_target_absent, "\n")
   cat("  pAUC:", round(object$pauc2, 4), "\n")
   cat("  SE(pAUC):", round(object$se_pauc2, 4), "\n")
-  cat("  95% CI: [", round(object$pauc2 - 1.96*object$se_pauc2, 4), ", ",
-      round(object$pauc2 + 1.96*object$se_pauc2, 4), "]\n\n", sep = "")
+  cat(paste0("  ", 100 * object$conf_level, "% CI: ["), round(object$pauc2 - stats::qnorm((1 + object$conf_level)/2)*object$se_pauc2, 4), ", ",
+      round(object$pauc2 + stats::qnorm((1 + object$conf_level)/2)*object$se_pauc2, 4), "]\n\n", sep = "")
 
   # Comparison
   cat("Difference (", object$label1, " - ", object$label2, "):\n", sep = "")
   cat("  Estimate:", round(object$pauc_diff, 4), "\n")
   cat("  SE(diff):", round(object$se_diff, 4), "\n")
-  cat("  95% CI: [", round(object$ci_diff["lower"], 4), ", ",
+  cat(paste0("  ", 100 * object$conf_level, "% CI: ["), round(object$ci_diff["lower"], 4), ", ",
       round(object$ci_diff["upper"], 4), "]\n", sep = "")
   cat("  Z-score:", round(object$z_score, 3), "\n")
   cat("  p-value:", format.pval(object$p_value, digits = 4), "\n\n")
@@ -381,7 +385,7 @@ summary.pauc_comparison <- function(object, ...) {
   # Effect size (Cohen's d equivalent for pAUC)
   pooled_se <- sqrt((object$se_pauc1^2 + object$se_pauc2^2) / 2)
   effect_size <- object$pauc_diff / pooled_se
-  cat("Effect size (d):", round(effect_size, 3), "\n")
+  cat("SE-standardized difference (depends on sample size; not Cohen d):", round(effect_size, 3), "\n")
 
   # Power calculation (approximate)
   cat("\nAnalysis Details:\n")

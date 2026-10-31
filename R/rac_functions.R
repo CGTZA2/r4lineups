@@ -34,6 +34,11 @@ utils::globalVariables("time_numeric")
 #' Explicit target-absent suspect IDs are used when present. Otherwise,
 #' target-absent filler IDs are divided by lineup size to estimate incorrect
 #' suspect IDs. The two estimators are never added together.
+#' The bin mean time uses the same suspect-ID observations as accuracy;
+#' estimated-mode TA filler times receive weight \eqn{1/k}. Bin edges must
+#' cover all supplied observations. Count accuracy depends on TP/TA sampling
+#' fractions and does not adjust to a different population base rate. The
+#' displayed binomial SE is approximate, especially for estimated counts.
 #'
 #' RAC analysis is useful for examining the speed-accuracy tradeoff in
 #' eyewitness identifications. Faster responses typically indicate stronger
@@ -62,7 +67,8 @@ utils::globalVariables("time_numeric")
 make_racdata <- function(data, lineup_size = 6, time_bins = NULL,
                          innocent_suspect = "auto") {
   .validate_lineup_analysis(data, require_confidence = FALSE,
-                            require_response_time = TRUE)
+                            require_response_time = TRUE, lineup_size = lineup_size)
+  .validate_bins(data$response_time, time_bins, "time_bins")
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "response_time")
@@ -122,9 +128,15 @@ make_racdata <- function(data, lineup_size = 6, time_bins = NULL,
       n_correct <- sum(tp_data$identification == "suspect" &
                       tp_data$time_binned == time_level, na.rm = TRUE)
       # Calculate mean time in this bin
-      mean_time <- mean(tp_data$response_time[
-        tp_data$identification == "suspect" &
-        tp_data$time_binned == time_level], na.rm = TRUE)
+      tp_times <- tp_data$response_time[tp_data$time_binned == time_level &
+                                         tp_data$identification == "suspect"]
+      ta_category <- if (innocent_method == "designated") "suspect" else "filler"
+      ta_times <- ta_data$response_time[ta_data$time_binned == time_level &
+                                         ta_data$identification == ta_category]
+      ta_weight <- if (innocent_method == "designated") 1 else 1 / lineup_size
+      weight_total <- length(tp_times) + ta_weight * length(ta_times)
+      mean_time <- if (weight_total > 0)
+        (sum(tp_times) + ta_weight * sum(ta_times)) / weight_total else NA_real_
     } else {
       n_correct <- sum(tp_data$identification == "suspect" &
                       tp_data$response_time == time_level, na.rm = TRUE)

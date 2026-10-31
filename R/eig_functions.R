@@ -69,7 +69,8 @@ entropy <- function(p, base = 2) {
 #' @import tibble
 make_eig_data <- function(data, confidence_bins = NULL, lineup_size = 6,
                           innocent_suspect = "auto") {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
+  .validate_bins(data$confidence, confidence_bins)
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
       !is.finite(lineup_size) || lineup_size < 2) {
     stop("lineup_size must be a finite number of at least 2.", call. = FALSE)
@@ -202,7 +203,7 @@ make_eig_data <- function(data, confidence_bins = NULL, lineup_size = 6,
 #'
 #' Higher EIG values indicate more diagnostic procedures. EIG = 0 means no
 #' information gain (responses don't distinguish guilty from innocent).
-#' EIG = 1 means perfect information (complete resolution of uncertainty).
+#' The maximum EIG is the prior entropy; it is 1 bit only at prior guilt 0.5.
 #'
 #' @references
 #' Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
@@ -511,11 +512,13 @@ plot_eig_posteriors <- function(eig_obj, max_responses = 15, show_prior = TRUE) 
   plot_data$response_label <- factor(plot_data$response_label,
                                       levels = plot_data$response_label[order(plot_data$posterior_guilty)])
 
-  # Color by direction of evidence
+  # A likelihood ratio of one leaves prior odds unchanged. Compare likelihoods
+  # directly so very small prior/posterior probabilities do not hide direction.
   plot_data$evidence_direction <- ifelse(
-    plot_data$posterior_guilty > eig_obj$prior_guilt,
+    plot_data$p_x_given_guilty > plot_data$p_x_given_innocent,
     "Evidence for guilt",
-    "Evidence for innocence"
+    ifelse(plot_data$p_x_given_guilty < plot_data$p_x_given_innocent,
+           "Evidence for innocence", "No directional evidence")
   )
 
   p <- ggplot(plot_data, aes(x = response_label, y = posterior_guilty,
@@ -523,7 +526,8 @@ plot_eig_posteriors <- function(eig_obj, max_responses = 15, show_prior = TRUE) 
     geom_col() +
     coord_flip() +
     scale_fill_manual(
-      values = c("Evidence for guilt" = "#d7301f", "Evidence for innocence" = "#2171b5"),
+      values = c("Evidence for guilt" = "#d7301f", "Evidence for innocence" = "#2171b5",
+                 "No directional evidence" = "#777777"),
       name = ""
     ) +
     scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +

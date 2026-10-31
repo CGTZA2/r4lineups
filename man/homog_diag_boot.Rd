@@ -39,7 +39,9 @@ heterogeneity is declared. Defaults to 0.95.}
 Invisibly returns a list containing the observed mean diagnosticity,
  chi-square statistic with degrees of freedom and asymptotic p-value,
  percentile intervals, a \code{heterogeneous} flag, a \code{parameters} data
- frame of per-pair ratios and intervals, the bootstrap draws, and \code{R}.
+ frame of per-pair ratios and intervals, all attempted bootstrap draws
+ (failed rows retained as NA), \code{n_successful}, \code{n_failed}, and
+ \code{R}. Intervals are conditional on successful draws when failures occur.
 }
 \description{
 Function for computing bootstrapped estimates of homogeneity of diagnosticity ratio

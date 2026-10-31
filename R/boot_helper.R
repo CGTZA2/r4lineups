@@ -29,8 +29,7 @@ makevec_prop <- function(prop, n) {
 }
 
 bp <- function(lineup_vec){
-    (sum(sample(lineup_vec, length(lineup_vec),
-                replace = TRUE) == TRUE))/length(lineup_vec)
+    mean(.resample_values(lineup_vec) == TRUE)
 }
 
 boot025 <- function(prop,n){

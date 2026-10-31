@@ -583,9 +583,10 @@ print.simulated_lineup_data <- function(x, ...) {
 #' between two lineup conditions, by simulating both conditions at a range of
 #' sample sizes and recording how often the difference is detected.
 #'
-#' @param sample_sizes Integer vector. Sample sizes per condition to test
-#'   (e.g., c(50, 100, 200)). Each is used for both target-present and
-#'   target-absent lineups in each condition.
+#' @param sample_sizes Integer vector of sizes to test (e.g., c(50, 100, 200)).
+#'   A size n means n target-present \emph{and} n target-absent witnesses in
+#'   each of the two simulated conditions: 2n witnesses per condition and 4n
+#'   in the whole simulated experiment.
 #' @param d_prime Numeric. Discriminability of the condition of interest.
 #' @param d_prime_null Numeric. Discriminability of the comparison condition.
 #'   Defaults to 0, which asks how often the procedure can be shown to
@@ -618,13 +619,20 @@ print.simulated_lineup_data <- function(x, ...) {
 #'
 #' @return A dataframe of class \code{power_analysis} with columns:
 #'   \itemize{
-#'     \item sample_size: N per condition
+#'     \item sample_size: n, the number of target-present (and, separately,
+#'       target-absent) witnesses per condition
+#'     \item n_total: Witnesses in the whole simulated experiment, 4n
 #'     \item power: Proportion of simulated studies reaching significance
 #'     \item power_se: Standard error of that proportion
 #'     \item mean_effect: Mean observed difference in pAUC
 #'     \item sd_effect: Standard deviation of the observed difference
 #'     \item n_valid: Simulations that produced a usable test
+#'     \item n_failed: Attempted simulations without a usable test
+#'     \item n_attempted: All attempted simulations
 #'   }
+#' Power and its Monte Carlo standard error are conditional on usable tests.
+#' Failures are retained in the attempted count and trigger a warning; compare
+#' failure rates as well as conditional power when assessing a design.
 #'
 #' @seealso \code{\link{compare_pauc}}, \code{\link{simulate_lineup_data}}
 #'
@@ -667,9 +675,13 @@ simulate_power_analysis <- function(sample_sizes,
       !is.finite(d_prime_null) || d_prime_null < 0) {
     stop("d_prime_null must be a finite non-negative scalar.", call. = FALSE)
   }
-  if (d_prime_null >= d_prime) {
-    warning("d_prime_null is not smaller than d_prime, so there is no effect ",
-            "to detect. Power will approximate alpha.", call. = FALSE)
+  if (!is.numeric(n_simulations) || length(n_simulations) != 1L ||
+      !is.finite(n_simulations) || n_simulations < 1 ||
+      n_simulations != floor(n_simulations)) {
+    stop("n_simulations must be a positive integer.", call. = FALSE)
+  }
+  if (d_prime_null == d_prime) {
+    warning("The generating d_prime values are equal; this evaluates the test's null rejection rate, which need not equal alpha in small or sparse samples.", call. = FALSE)
   }
 
   if (!is.null(seed)) {
@@ -722,21 +734,32 @@ simulate_power_analysis <- function(sample_sizes,
       } else {
         p_values[sim] <- out[[1]]
       }
+      if (!is.na(p_values[sim]) && (!is.finite(p_values[sim]) ||
+          p_values[sim] < 0 || p_values[sim] > 1)) {
+        stop("test_function must return a p-value in [0, 1] or NA for a failed analysis.", call. = FALSE)
+      }
     }
 
     valid <- !is.na(p_values)
     n_valid <- sum(valid)
     power <- if (n_valid > 0) mean(p_values[valid] < alpha) else NA_real_
+    if (n_valid < n_simulations) {
+      warning(n_simulations - n_valid, " of ", n_simulations,
+              " analyses failed; power is conditional on successful analyses.", call. = FALSE)
+    }
 
     results[[length(results) + 1]] <- data.frame(
       sample_size = n,
+      n_total     = 4 * n,
       power       = power,
       # Binomial standard error of the estimated proportion, so readers can see
       # how much of any non-monotonicity is simulation noise.
       power_se    = if (n_valid > 0) sqrt(power * (1 - power) / n_valid) else NA_real_,
       mean_effect = mean(effects, na.rm = TRUE),
       sd_effect   = stats::sd(effects, na.rm = TRUE),
-      n_valid     = n_valid
+      n_valid     = n_valid,
+      n_failed    = n_simulations - n_valid,
+      n_attempted = n_simulations
     )
   }
 
@@ -796,7 +819,7 @@ plot.power_analysis <- function(x, ...) {
     ggplot2::geom_point(size = 3, color = "steelblue") +
     ggplot2::theme_bw(base_size = 12) +
     ggplot2::labs(
-      x = "Sample size (per condition)",
+      x = "Target-present (= target-absent) witnesses per condition",
       y = "Power",
       title = "Power to detect a difference in discriminability",
       subtitle = subtitle,

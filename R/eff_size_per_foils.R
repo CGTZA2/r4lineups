@@ -1,7 +1,7 @@
 #'Effective Size per Foils
 #'
-#'Function for computing effective size (Malpass, 1981) counting foils who fall
-#'within the CI for chance guessing
+#'A package-specific count of members whose choice-proportion intervals include
+#'chance guessing. This is distinct from Malpass' continuous effective size.
 #'@param lineup_vec A numeric vector of lineup choices
 #'@param target_pos A numeric vector indexing all lineup members
 #'@param k Number of members in lineup. Must be specified by user (scalar).

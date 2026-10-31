@@ -253,6 +253,8 @@ test_that("simulate_power_analysis returns the documented structure", {
   expect_true(all(c("sample_size", "power", "power_se", "mean_effect",
                     "sd_effect", "n_valid") %in% names(power_result)))
   expect_true(power_result$power >= 0 && power_result$power <= 1)
+  # A size n is n TP and n TA witnesses in each of two conditions.
+  expect_equal(power_result$n_total, 4 * power_result$sample_size)
 })
 
 test_that("power is not trivially 1 when there is no effect to detect", {
@@ -293,8 +295,8 @@ test_that("simulate_power_analysis validates its inputs", {
   # No detectable effect is a user error worth flagging, not a silent result
   expect_warning(
     simulate_power_analysis(sample_sizes = c(30), d_prime = 1,
-                            d_prime_null = 1.5, n_simulations = 2,
+                            d_prime_null = 1, n_simulations = 2,
                             n_bootstrap = 20, conf_levels = 5, verbose = FALSE),
-    "no effect to detect"
+    "null rejection rate"
   )
 })

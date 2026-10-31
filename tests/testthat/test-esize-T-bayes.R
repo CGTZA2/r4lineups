@@ -142,3 +142,13 @@ test_that("plot.esize_T_bayes_compare returns a ggplot", {
   p <- plot(cmp)
   expect_s3_class(p, "ggplot")
 })
+
+test_that("a threshold at the nominal size warns that P(E' < k) is 1", {
+  # Third review, finding 8: E' <= k, with equality only at exact uniformity,
+  # so P(E' < k | data) = 1 even for perfectly balanced counts.
+  tab <- as.table(setNames(rep(1000, 6), 1:6))
+  expect_warning(res <- esize_T_bayes(tab, S = 500, threshold = 6),
+                 "cannot exceed the nominal size")
+  expect_equal(res$threshold_probs$P_below, 1)
+  expect_silent(esize_T_bayes(tab, S = 500, threshold = 4.8))
+})

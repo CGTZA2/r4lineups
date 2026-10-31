@@ -22,6 +22,12 @@ Function for comparing effective size of two independent lineups (Tredoux, 1998)
 \details{
 This function is a master function, calling other functions
         it needs, and reporting results in some detail
+        Each lineup is resampled independently; row alignment has no sampling
+        meaning. Confidence intervals are bootstrap approximations and can be
+        unreliable for small or nearly uniform empirical choice distributions.
+        Normal and BCa intervals can under-cover in finite concentrated samples;
+        percentile intervals can be conservative near uniformity. None provides
+        a distribution-free level-.05 test of equal population effective sizes.
 }
 \examples{
 #Data:

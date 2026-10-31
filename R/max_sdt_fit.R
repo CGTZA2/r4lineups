@@ -488,7 +488,7 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
     result$boot_n_failed <- n_failed
     result$boot_n_used <- sum(good)
     rownames(result$boot_ci) <- c("lower", "upper")
-    if (n_failed > 0.1 * nboot) {
+    if (n_failed > 0) {
       warning(n_failed, " of ", nboot, " bootstrap replicates failed to ",
               "converge and were dropped. Intervals rest on ", sum(good),
               " replicates and may be unreliable.", call. = FALSE)

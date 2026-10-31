@@ -36,9 +36,14 @@
 #'
 #' @return A list containing:
 #'   \itemize{
-#'     \item utility_data: Dataframe with criterion, hit rate, false alarm rate,
-#'       and expected utility
-#'     \item max_utility: Maximum expected utility and corresponding criterion
+#'     \item utility_data: Dataframe with criterion, strategy, hit rate,
+#'       false alarm rate, and expected utility. Each row is the rule "accept
+#'       suspect IDs with confidence >= criterion". The \code{"reject_all"}
+#'       row has a criterion above the observed identification confidences
+#'       and supplied grid (possibly \code{Inf}), so that
+#'       applying it accepts no identification.
+#'     \item max_utility: Maximum expected utility, with the corresponding
+#'       criterion and strategy
 #'     \item avg_utility: Average expected utility across all criteria
 #'     \item utility_all_ids: Expected utility if all IDs are accepted
 #'     \item base_rate: Base rate used
@@ -96,7 +101,7 @@ make_utility_curves <- function(data,
                                 criteria = c("confidence", "all"),
                                 innocent_suspect = "auto",
                                 thresholds = NULL) {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
 
   # Validate inputs
   required_cols <- c("target_present", "identification", "confidence")
@@ -136,6 +141,7 @@ make_utility_curves <- function(data,
   # Initialize results
   utility_results <- tibble::tibble(
     criterion = numeric(),
+    strategy = character(),
     hit_rate = numeric(),
     false_alarm_rate = numeric(),
     expected_utility = numeric(),
@@ -163,6 +169,7 @@ make_utility_curves <- function(data,
 
     utility_results <- rbind(utility_results, tibble::tibble(
       criterion = conf,
+      strategy = "threshold",
       hit_rate = hit_rate,
       false_alarm_rate = fa_rate,
       expected_utility = expected_utility,
@@ -171,13 +178,16 @@ make_utility_curves <- function(data,
     ))
   }
 
-  # Add "reject all" criterion (0 hit rate, 0 false alarm rate)
+  # Add "reject all" (0 hit rate, 0 false alarm rate). Its criterion sits above
+  # the highest confidence level: the rule is "accept IDs at or above the
+  # criterion", so a criterion below the lowest level would accept them all.
   eu_reject_guilty <- 0 * utility_matrix["tp"] + 1 * utility_matrix["fn"]
   eu_reject_innocent <- 0 * utility_matrix["fp"] + 1 * utility_matrix["tn"]
   eu_reject_all <- base_rate * eu_reject_guilty + (1 - base_rate) * eu_reject_innocent
 
   utility_results <- rbind(utility_results, tibble::tibble(
-    criterion = min(conf_levels) - 1,
+    criterion = .reject_all_criterion(tp_data, ta_data, innocent_method, conf_levels),
+    strategy = "reject_all",
     hit_rate = 0,
     false_alarm_rate = 0,
     expected_utility = eu_reject_all,
@@ -190,6 +200,7 @@ make_utility_curves <- function(data,
   max_utility <- list(
     expected_utility = utility_results$expected_utility[max_idx],
     criterion = utility_results$criterion[max_idx],
+    strategy = utility_results$strategy[max_idx],
     hit_rate = utility_results$hit_rate[max_idx],
     false_alarm_rate = utility_results$false_alarm_rate[max_idx]
   )
@@ -198,15 +209,27 @@ make_utility_curves <- function(data,
   confidence_rows <- seq_along(conf_levels)
   avg_utility <- mean(utility_results$expected_utility[confidence_rows])
 
-  # Utility if all IDs are accepted uses the lowest confidence threshold.
-  utility_all_ids <- utility_results$expected_utility[utils::tail(confidence_rows, 1)]
+  # The all-ID rule is independent of a restricted caller-supplied grid.
+  all_hits <- sum(tp_data$identification == "suspect")
+  all_false <- .innocent_suspect_count(ta_data, rep(TRUE, n_ta),
+                                      lineup_size, innocent_method)
+  all_hr <- all_hits / n_tp
+  all_far <- all_false / n_ta
+  utility_all_ids <- base_rate * (all_hr * utility_matrix["tp"] +
+    (1 - all_hr) * utility_matrix["fn"]) + (1 - base_rate) *
+    (all_far * utility_matrix["fp"] + (1 - all_far) * utility_matrix["tn"])
 
   if (criteria == "all") {
-    utility_results <- utility_results[c(utils::tail(confidence_rows, 1), nrow(utility_results)), ]
+    all_rule <- tibble::tibble(criterion = -Inf, strategy = "threshold",
+      hit_rate = all_hr, false_alarm_rate = all_far,
+      expected_utility = unname(utility_all_ids), n_ids_tp = all_hits,
+      n_ids_ta = all_false)
+    utility_results <- rbind(all_rule, utility_results[nrow(utility_results), ])
     max_idx <- which.max(utility_results$expected_utility)
     max_utility <- list(
       expected_utility = utility_results$expected_utility[max_idx],
       criterion = utility_results$criterion[max_idx],
+      strategy = utility_results$strategy[max_idx],
       hit_rate = utility_results$hit_rate[max_idx],
       false_alarm_rate = utility_results$false_alarm_rate[max_idx]
     )
@@ -303,6 +326,12 @@ make_utility_difference <- function(data_proc_a,
                                     innocent_suspect = "auto") {
 
   utility_type <- match.arg(utility_type)
+  if (!is.numeric(base_rate_grid) || length(base_rate_grid) == 0L ||
+      anyNA(base_rate_grid) || any(!is.finite(base_rate_grid)) ||
+      any(base_rate_grid < 0 | base_rate_grid > 1)) {
+    stop("base_rate_grid must be a nonempty finite numeric vector in [0, 1].",
+         call. = FALSE)
+  }
 
   # Initialize results
   difference_results <- tibble::tibble(
@@ -355,7 +384,8 @@ make_utility_difference <- function(data_proc_a,
 
   # Find crossover points (where difference changes sign)
   crossover_points <- numeric()
-  for (i in 2:nrow(difference_results)) {
+  for (i in if (nrow(difference_results) > 1L)
+    seq.int(2L, nrow(difference_results)) else integer()) {
     if (sign(difference_results$difference[i]) != sign(difference_results$difference[i-1])) {
       # Linear interpolation to find approximate crossover
       br1 <- difference_results$base_rate[i-1]
@@ -384,8 +414,8 @@ make_utility_difference <- function(data_proc_a,
 #' @param utility_obj List output from make_utility_curves()
 #' @param show_max Logical. Whether to highlight maximum utility point.
 #'   Default = TRUE.
-#' @param show_reject Logical. Whether to show reject-all utility point.
-#'   Default = TRUE.
+#' @param show_reject Logical. Whether to show the reject-all utility, drawn as
+#'   a dashed horizontal reference line. Default = TRUE.
 #'
 #' @return A ggplot2 object
 #'
@@ -405,17 +435,18 @@ make_utility_difference <- function(data_proc_a,
 plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE) {
 
   util_data <- utility_obj$utility_data
+  # Reject-all is a strategy, not a confidence criterion, so it is drawn as a
+  # horizontal reference line rather than as a point on the criterion axis.
+  thr_data <- util_data[util_data$strategy == "threshold", ]
+  reject_row <- util_data[util_data$strategy == "reject_all", ]
+  max_is_reject <- identical(utility_obj$max_utility$strategy, "reject_all")
 
-  # Filter out reject-all if not showing
-  if (!show_reject) {
-    util_data <- util_data[util_data$hit_rate > 0, ]
-  }
-
-  # Create plot
-  p <- ggplot(util_data, aes(x = criterion, y = expected_utility)) +
-    geom_line(linewidth = 1, color = "darkgreen") +
+  p <- ggplot(thr_data, aes(x = criterion, y = expected_utility)) +
+    (if (nrow(thr_data) > 1) geom_line(linewidth = 1, color = "darkgreen")) +
     geom_point(size = 2, color = "darkgreen") +
     theme_bw(base_size = 14) +
+    # Room above and below for the labels.
+    scale_y_continuous(expand = ggplot2::expansion(mult = c(0.12, 0.18))) +
     labs(
       x = "Confidence Criterion",
       y = "Expected Utility",
@@ -428,8 +459,20 @@ plot_utility_curves <- function(utility_obj, show_max = TRUE, show_reject = TRUE
                        utility_obj$utility_matrix["tn"])
     )
 
-  # Highlight maximum utility point
-  if (show_max) {
+  if (show_reject && nrow(reject_row) > 0) {
+    reject_col <- if (show_max && max_is_reject) "red" else "gray30"
+    p <- p +
+      geom_hline(yintercept = reject_row$expected_utility, linetype = "dashed",
+                 color = reject_col, linewidth = 0.7) +
+      annotate("text", x = min(thr_data$criterion),
+               y = reject_row$expected_utility,
+               label = sprintf("Reject all: %.3f%s", reject_row$expected_utility,
+                               if (show_max && max_is_reject) " (maximum)" else ""),
+               hjust = 0, vjust = -0.5, size = 3.5, color = reject_col)
+  }
+
+  # Highlight the best confidence criterion
+  if (show_max && !max_is_reject) {
     max_data <- data.frame(
       criterion = utility_obj$max_utility$criterion,
       expected_utility = utility_obj$max_utility$expected_utility

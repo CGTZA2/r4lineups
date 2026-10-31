@@ -98,8 +98,9 @@ test_that("plot_2ht_parameters accepts a bootstrap object and uses its intervals
   expect_s3_class(p_boot, "ggplot")
 
   # Intervals must stay inside the parameter space in both cases
-  expect_true(all(p_fit$data$lower >= 0), info = "normal interval clamped at 0")
-  expect_true(all(p_fit$data$upper <= 1), info = "normal interval clamped at 1")
+  expect_true(all(is.na(p_fit$data$lower) | p_fit$data$lower >= 0))
+  expect_true(all(is.na(p_fit$data$upper) | p_fit$data$upper <= 1))
+  expect_true(any(is.na(p_fit$data$lower)), info = "regular intervals unavailable at boundary")
   expect_true(all(p_boot$data$lower >= 0))
   expect_true(all(p_boot$data$upper <= 1))
 
@@ -133,7 +134,12 @@ test_that("the weighted jackknife equals brute-force leave-one-out", {
     fit_winter_2ht(stats::setNames(as.numeric(loo), names(cnt)))$parameters
   }, numeric(4)))
   brute <- apply(theta, 2, function(th) {
-    d <- mean(th) - th
+    group <- startsWith(cells, "n_tp")
+    d <- numeric(length(th))
+    for (g in c(TRUE, FALSE)) {
+      ix <- which(group == g); ns <- length(ix)
+      d[ix] <- (ns - 1) / ns * (mean(th[ix]) - th[ix])
+    }
     sum(d^3) / (6 * sum(d^2)^1.5)
   })
   expect_equal(unname(accel), unname(brute), tolerance = 1e-8)

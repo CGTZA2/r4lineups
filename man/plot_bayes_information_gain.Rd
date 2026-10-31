@@ -20,9 +20,11 @@ Creates a plot showing how much uncertainty is reduced by different lineup respo
 }
 \details{
 Information gain curves show the reduction in uncertainty (measured in bits)
-for each response type across different prior probabilities. Higher values
-indicate more diagnostic responses. Information gain is maximized when the
-prior is near 0.5 (maximum uncertainty).
+for each response type across different prior probabilities. A response that
+points to guilt gains most at priors above 0.5 and one that points to
+innocence at priors below 0.5; either can be negative where it moves belief
+towards 0.5. The legend lists responses from the most to the least
+indicative of guilt.
 }
 \examples{
 data(lineup_example)

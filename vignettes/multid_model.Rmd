@@ -199,25 +199,19 @@ proportions.
 
 # References
 
-Lee, J., & Penrod, S. D. (2019). New signal detection theory-based
-framework for eyewitness performance in lineups. *Law and Human
-Behavior*. \doi{10.1037/lhb0000343}
+::: {.hanging-indent}
 
-Lee, J., Mansour, J. K., & Penrod, S. D. (2022). Validity of mock-witness
-measures for assessing lineup fairness. *Psychology, Crime & Law*.
-\doi{10.1080/1068316X.2021.1905811}
+Lee, J., Mansour, J. K., & Penrod, S. D. (2022). Validity of mock-witness measures for assessing lineup fairness. *Psychology, Crime & Law*. https://doi.org/10.1080/1068316X.2021.1905811
 
-Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup
-fairness: Concurrent and predictive validity of lineup-fairness measures.
-*Psychology, Crime & Law*. \doi{10.1080/1068316X.2024.2307358}
+Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup fairness: Concurrent and predictive validity of lineup-fairness measures. *Psychology, Crime & Law*. https://doi.org/10.1080/1068316X.2024.2307358
 
-Steblay, N., Dysart, J., Fulero, S., & Lindsay, R. C. L. (2003).
-Eyewitness accuracy rates in police showup and lineup presentations: A
-meta-analytic comparison. *Law and Human Behavior, 27*, 523-540.
+Lee, J., & Penrod, S. D. (2019). New signal detection theory-based framework for eyewitness performance in lineups. *Law and Human Behavior*. https://doi.org/10.1037/lhb0000343
 
-Steblay, N. K., Dysart, J. E., & Wells, G. L. (2011). Seventy-two tests
-of the sequential lineup superiority effect: A meta-analysis and policy
-discussion. *Psychology, Public Policy, and Law, 17*, 99-139.
+Steblay, N., Dysart, J., Fulero, S., & Lindsay, R. C. L. (2003). Eyewitness accuracy rates in police showup and lineup presentations: A meta-analytic comparison. *Law and Human Behavior, 27*, 523-540.
+
+Steblay, N. K., Dysart, J. E., & Wells, G. L. (2011). Seventy-two tests of the sequential lineup superiority effect: A meta-analysis and policy discussion. *Psychology, Public Policy, and Law, 17*, 99-139.
+
+:::
 
 # Further Reading
 

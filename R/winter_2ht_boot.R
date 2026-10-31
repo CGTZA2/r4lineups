@@ -22,8 +22,8 @@
 #'   \item{conf_level}{Confidence level used}
 #'
 #' @details
-#' The bootstrap procedure resamples observations from the original data with replacement
-#' to create bootstrap datasets. For each bootstrap sample, the 2-HT model is re-fitted,
+#' The bootstrap procedure resamples within TP and TA strata with replacement
+#' to keep both experimental totals fixed. For each bootstrap sample, the 2-HT model is re-fitted,
 #' and the distribution of parameter estimates across bootstrap samples is used to
 #' construct confidence intervals.
 #'
@@ -33,8 +33,8 @@
 #'   \item \strong{bca}: Bias-corrected and accelerated intervals (Efron,
 #'     1987). The bias correction counts bootstrap ties with the estimate as
 #'     half, and the acceleration comes from the jackknife over individual
-#'     observations, which needs at most six refits because the data are six
-#'     response counts.
+#'     observations, centered and scaled within TP/TA strata, using at most six
+#'     distinct leave-one-out response-count fits.
 #' }
 #'
 #' @references
@@ -86,11 +86,16 @@ boot_winter_2ht <- function(x,
   }
 
   n_total <- nrow(raw_data)
+  if (!is.numeric(nboot) || length(nboot) != 1L || !is.finite(nboot) ||
+      nboot < 2 || nboot != floor(nboot)) stop("nboot must be an integer of at least 2.", call. = FALSE)
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      !is.finite(conf_level) || conf_level <= 0 || conf_level >= 1) stop("conf_level must be in (0, 1).", call. = FALSE)
 
   # Bootstrap function
   boot_func <- function(i) {
     # Resample with replacement
-    boot_indices <- sample(1:n_total, n_total, replace = TRUE)
+    strata <- split(seq_len(n_total), raw_data$target_present)
+    boot_indices <- unlist(lapply(strata, .resample_values), use.names = FALSE)
     boot_data <- raw_data[boot_indices, ]
 
     # Extract counts from bootstrap sample
@@ -102,11 +107,12 @@ boot_winter_2ht <- function(x,
 
     # Fit model to bootstrap sample
     tryCatch({
-      boot_fit <- fit_winter_2ht(
+      boot_fit <- suppressWarnings(fit_winter_2ht(
         boot_counts,
         lineup_size = original_fit$lineup_size,
         ...
-      )
+      ))
+      if (boot_fit$convergence != 0L) return(rep(NA_real_, 4))
       return(boot_fit$parameters)
     }, error = function(e) {
       return(rep(NA, 4))
@@ -117,11 +123,18 @@ boot_winter_2ht <- function(x,
   if (parallel) {
     # Parallel bootstrap
     cl <- parallel::makeCluster(ncpus)
-    on.exit(parallel::stopCluster(cl))
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+    parallel::clusterCall(cl, function(paths) {
+      .libPaths(paths)
+      loadNamespace("r4lineups")
+      NULL
+    }, .libPaths())
+    parallel::clusterSetRNGStream(cl, iseed = if (is.null(seed))
+      sample.int(.Machine$integer.max, 1L) else seed)
 
     # Export necessary functions and data
     parallel::clusterExport(cl, varlist = c("fit_winter_2ht", ".compute_2ht_probs",
-                                           ".extract_counts_from_df"),
+                                           ".extract_counts_from_df", ".resample_values"),
                            envir = environment())
 
     boot_results <- parallel::parLapply(cl, 1:nboot, boot_func)
@@ -144,7 +157,6 @@ boot_winter_2ht <- function(x,
   if (sum(valid_rows) < nboot) {
     warning(sprintf("%d bootstrap samples failed to converge and were excluded",
                     nboot - sum(valid_rows)))
-    boot_estimates <- boot_estimates[valid_rows, , drop = FALSE]
   }
 
   # Compute confidence intervals: one row per parameter, Lower and Upper
@@ -166,6 +178,8 @@ boot_winter_2ht <- function(x,
     ci = ci,
     original_fit = original_fit,
     nboot = sum(valid_rows),
+    nboot_requested = nboot,
+    n_failed = sum(!valid_rows),
     conf_level = conf_level,
     method = method
   )
@@ -181,6 +195,8 @@ boot_winter_2ht <- function(x,
 #' @return Data frame with individual observations
 #' @keywords internal
 .reconstruct_raw_data <- function(x) {
+  counts <- unlist(x$observed_counts)
+  if (any(counts != floor(counts))) stop("Nonparametric bootstrap requires whole observed response counts.", call. = FALSE)
 
   # Target-present data
   tp_data <- data.frame(
@@ -243,7 +259,14 @@ boot_winter_2ht <- function(x,
   w <- counts[cells]
   accel <- vapply(seq_len(4), function(k) {
     th <- theta[, k]
-    d <- sum(w * th) / sum(w) - th
+    group <- ifelse(cells <= 3L, "TP", "TA")
+    d <- numeric(length(th))
+    for (g in unique(group)) {
+      ix <- which(group == g)
+      # Center within fixed-size strata; scale influences by the arm size.
+      ns <- sum(w[ix])
+      d[ix] <- (ns - 1) / ns * (sum(w[ix] * th[ix]) / ns - th[ix])
+    }
     denom <- 6 * sum(w * d^2)^1.5
     if (!is.finite(denom) || denom <= 0) NaN else sum(w * d^3) / denom
   }, numeric(1))
@@ -399,7 +422,7 @@ plot.winter_2ht_boot <- function(x, ...) {
     ) +
     ggplot2::labs(
       title = sprintf("Bootstrap Distributions (n = %d)", x$nboot),
-      subtitle = "Red dashed = original estimate; Green dotted = 95% CI",
+      subtitle = paste0("Red dashed = original estimate; Green dotted = ", 100 * x$conf_level, "% CI"),
       x = "Parameter Value",
       y = "Frequency"
     ) +

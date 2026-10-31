@@ -10,6 +10,8 @@
 #'   lineup choices; \code{d} resamples mock witnesses rather than count-table cells.
 #'   For a higher-level interface that accepts raw lineup vectors, see
 #'   \code{\link{esize_boot_dist}}.
+#'   Percentile and BCa intervals from this plug-in statistic cannot be used to
+#'   test exact fairness E'=k; see the boundary warning in \code{\link{esize_boot_dist}}.
 #' @seealso \code{\link[boot:boot]{boot}}: https://cran.r-project.org/web/packages/boot/boot.pdf
 #' @references Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their
 #'             application}. Cambridge University Press.

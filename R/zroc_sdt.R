@@ -25,7 +25,8 @@ utils::globalVariables(c("z_far", "z_hr", "Criterion"))
 #'   \itemize{
 #'     \item dprime: Overall discriminability (d')
 #'     \item criteria: Decision criterion for each confidence level (c values)
-#'     \item variance_ratio: Ratio of target SD to lure SD (if unequal_variance)
+#'     \item variance_ratio: Ratio of lure SD to target SD, the z-ROC slope
+#'       (if unequal_variance)
 #'     \item slope: Slope of z-ROC
 #'     \item intercept: Intercept of z-ROC
 #'     \item roc_data: Original ROC data with z-transforms
@@ -130,7 +131,8 @@ fit_sdt_roc <- function(data,
   n_ta <- roc_obj$n_target_absent
 
   # Apply z-transformations and fit model
-  zroc_data <- .compute_zroc(roc_data, n_tp, n_ta)
+  zroc_data <- .compute_zroc(roc_data, n_tp, n_ta,
+                            synthetic_origin = roc_obj$synthetic_origin)
   fit_results <- .fit_zroc_line(zroc_data, model = model)
 
   # Extract parameters
@@ -177,7 +179,7 @@ fit_sdt_roc <- function(data,
 
 #' Compute z-ROC Transformations
 #' @keywords internal
-.compute_zroc <- function(roc_data, n_tp, n_ta) {
+.compute_zroc <- function(roc_data, n_tp, n_ta, synthetic_origin = NULL) {
   # Transform hit rates and false alarm rates to z-scores
   # Handle extreme values (0 and 1) using log-linear correction
 
@@ -189,9 +191,17 @@ fit_sdt_roc <- function(data,
   }
 
   # Exclude the artificial reject-all origin before fitting the z-ROC line.
-  if (all(c("n_correct_ids", "n_false_ids") %in% names(roc_data))) {
-    roc_data <- roc_data[!(roc_data$n_correct_ids == 0 & roc_data$n_false_ids == 0), ]
+  origin <- if (is.null(synthetic_origin)) NULL else seq_len(nrow(roc_data)) %in% synthetic_origin
+  if (is.null(origin)) {
+    # Legacy make_rocdata() placed an all-zero synthetic row below the grid.
+    # Do not mistake a genuine, high fixed criterion with zero IDs for it.
+    origin <- rep(FALSE, nrow(roc_data))
+    if (nrow(roc_data) > 1L &&
+        all(c("n_correct_ids", "n_false_ids") %in% names(roc_data)) &&
+        roc_data$n_correct_ids[1L] == 0 && roc_data$n_false_ids[1L] == 0 &&
+        roc_data$confidence[1L] < min(roc_data$confidence[-1L])) origin[1L] <- TRUE
   }
+  roc_data <- roc_data[!origin, , drop = FALSE]
   if (nrow(roc_data) < 2L) {
     stop("At least two non-origin ROC points are required for z-ROC fitting.", call. = FALSE)
   }
@@ -298,13 +308,13 @@ fit_sdt_roc <- function(data,
     tryCatch({
       tp <- which(is_tp)
       ta <- which(!is_tp)
-      boot_data <- raw_data[c(sample(tp, length(tp), replace = TRUE),
-                              sample(ta, length(ta), replace = TRUE)), , drop = FALSE]
+      boot_data <- raw_data[c(.resample_values(tp), .resample_values(ta)), , drop = FALSE]
       boot_obj <- make_rocdata(boot_data, lineup_size = lineup_size,
                                innocent_suspect = innocent_suspect,
                                thresholds = thresholds)
       zroc_boot <- .compute_zroc(
-        boot_obj$roc_data, boot_obj$n_target_present, boot_obj$n_target_absent
+        boot_obj$roc_data, boot_obj$n_target_present, boot_obj$n_target_absent,
+        synthetic_origin = boot_obj$synthetic_origin
       )
       fit_boot <- .fit_zroc_line(zroc_boot, model)
       params_boot <- .extract_sdt_parameters(fit_boot, zroc_boot, model)
@@ -319,9 +329,10 @@ fit_sdt_roc <- function(data,
   }
 
   # Remove failed bootstraps, and say so
-  boot_dprime <- boot_dprime[!is.na(boot_dprime)]
-  boot_variance_ratio <- boot_variance_ratio[!is.na(boot_variance_ratio)]
-  n_failed <- n_bootstrap - length(boot_dprime)
+  valid <- is.finite(boot_dprime) & is.finite(boot_variance_ratio)
+  n_failed <- sum(!valid)
+  boot_dprime[!valid] <- NA_real_
+  boot_variance_ratio[!valid] <- NA_real_
   if (n_failed == n_bootstrap) {
     warning("All ", n_bootstrap, " bootstrap samples failed, so the bootstrap ",
             "intervals are NA",
@@ -329,7 +340,7 @@ fit_sdt_roc <- function(data,
             ".", call. = FALSE)
   } else if (n_failed > 0) {
     warning(n_failed, " of ", n_bootstrap, " bootstrap samples failed and were ",
-            "dropped", if (!is.null(first_error)) paste0(" (first error: ", first_error, ")"),
+            "excluded from conditional intervals", if (!is.null(first_error)) paste0(" (first error: ", first_error, ")"),
             ".", call. = FALSE)
   }
 
@@ -344,7 +355,9 @@ fit_sdt_roc <- function(data,
     dprime_se = sd(boot_dprime, na.rm = TRUE),
     variance_ratio_ci = variance_ci,
     variance_ratio_se = sd(boot_variance_ratio, na.rm = TRUE),
-    n_successful = length(boot_dprime),
+    n_successful = sum(valid),
+    n_failed = n_failed,
+    draws = data.frame(dprime = boot_dprime, variance_ratio = boot_variance_ratio),
     n_bootstrap = n_bootstrap,
     conf_level = conf_level
   ))
@@ -364,7 +377,7 @@ print.sdt_roc_fit <- function(x, ...) {
   cat("  d' (discriminability):", round(x$dprime, 3), "\n")
 
   if (!is.null(x$bootstrap_ci)) {
-    cat("    95% CI: [", round(x$bootstrap_ci$dprime_ci[1], 3), ",",
+    cat(paste0("    ", 100 * x$bootstrap_ci$conf_level, "% CI: ["), round(x$bootstrap_ci$dprime_ci[1], 3), ",",
         round(x$bootstrap_ci$dprime_ci[2], 3), "]\n")
     cat("    SE:", round(x$bootstrap_ci$dprime_se, 3), "\n")
   }
@@ -372,7 +385,7 @@ print.sdt_roc_fit <- function(x, ...) {
   if (x$model_type == "unequal_variance") {
     cat("\n  Variance Ratio (SD_lure / SD_target):", round(x$variance_ratio, 3), "\n")
     if (!is.null(x$bootstrap_ci)) {
-      cat("    95% CI: [", round(x$bootstrap_ci$variance_ratio_ci[1], 3), ",",
+      cat(paste0("    ", 100 * x$bootstrap_ci$conf_level, "% CI: ["), round(x$bootstrap_ci$variance_ratio_ci[1], 3), ",",
           round(x$bootstrap_ci$variance_ratio_ci[2], 3), "]\n")
     }
   }
@@ -473,7 +486,7 @@ summary.sdt_roc_fit <- function(object, ...) {
 
   if (!is.null(object$bootstrap_ci)) {
     cat("  SE =", round(object$bootstrap_ci$dprime_se, 4), "\n")
-    cat("  95% CI: [", round(object$bootstrap_ci$dprime_ci[1], 4), ",",
+    cat(paste0("  ", 100 * object$bootstrap_ci$conf_level, "% CI: ["), round(object$bootstrap_ci$dprime_ci[1], 4), ",",
         round(object$bootstrap_ci$dprime_ci[2], 4), "]\n")
     cat("  Bootstrap samples:", object$bootstrap_ci$n_successful, "/",
         object$bootstrap_ci$n_bootstrap, "\n")
@@ -483,7 +496,7 @@ summary.sdt_roc_fit <- function(object, ...) {
     cat("\nVariance Ratio =", round(object$variance_ratio, 4), "\n")
     if (!is.null(object$bootstrap_ci)) {
       cat("  SE =", round(object$bootstrap_ci$variance_ratio_se, 4), "\n")
-      cat("  95% CI: [", round(object$bootstrap_ci$variance_ratio_ci[1], 4), ",",
+      cat(paste0("  ", 100 * object$bootstrap_ci$conf_level, "% CI: ["), round(object$bootstrap_ci$variance_ratio_ci[1], 4), ",",
           round(object$bootstrap_ci$variance_ratio_ci[2], 4), "]\n")
     }
   }

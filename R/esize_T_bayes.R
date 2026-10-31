@@ -15,7 +15,13 @@
 #' @param threshold Optional finite scalar. When supplied, the function
 #'   also reports P(E' < threshold | data) and P(E' > threshold | data),
 #'   enabling direct probability statements about whether the lineup is
-#'   functioning below or above a fairness benchmark.
+#'   functioning below or above a fairness benchmark. Because E' <= k for
+#'   every choice-probability vector, with equality only when all k
+#'   probabilities are exactly equal, P(E' < k | data) is 1 under any
+#'   continuous posterior, however uniform the data. A threshold of k or more
+#'   therefore carries no information, and the function warns. Use a tolerance
+#'   below k that you choose and justify in advance (for example 0.8 k), or
+#'   report the credible interval for E' or for the deficit k - E'.
 #'
 #' @details
 #'   Effective size E' = 1/sum(p_i^2) (Tredoux, 1998) is mathematically identical
@@ -112,6 +118,10 @@ esize_T_bayes <- function(lineup_tab,
     stop("credible_mass must be strictly between 0 and 1.", call. = FALSE)
   if (!is.null(threshold) && (length(threshold) != 1 || !is.finite(threshold)))
     stop("threshold must be a finite scalar.", call. = FALSE)
+  if (!is.null(threshold) && threshold >= k)
+    warning("E' cannot exceed the nominal size (", k, "), so P(E' < ", threshold,
+            " | data) is 1 whatever the data. Use a tolerance below ", k,
+            " or report the interval for E'.", call. = FALSE)
 
   if (length(alpha) == 1) {
     alpha_vec <- rep(as.numeric(alpha), k)

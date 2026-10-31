@@ -85,7 +85,7 @@ A **univariate** distribution describes one quantity — how likely the
 suspect's signal is to take each value. A **joint** distribution
 describes two or more together, including how they move with one another.
 
-The distinction matters here because the witness's decision is not about
+The distinction is important here because the witness's decision is not about
 the suspect's signal in isolation. It is about whether the suspect's
 signal is the largest *and* clears the criterion. That is inherently a
 question about two quantities at once, so a joint distribution is the
@@ -97,8 +97,7 @@ max-filler distribution a simple power of the normal CDF — but it is not
 obviously true. Fillers in a real lineup are chosen to match a
 description, so they resemble each other. A witness whose memory happens
 to align with that description may find *all* of them somewhat familiar,
-and one whose memory does not may find none of them familiar. That is
-precisely what correlation means.
+and one whose memory does not may find none of them familiar.
 
 The consequence is not small. Under independence the largest of five
 standard normal fillers has an expected value of about 1.17. If the
@@ -106,9 +105,7 @@ fillers are strongly correlated the shared component dominates and the
 *maximum* is much less extreme — around 0.37 at a correlation of 0.9,
 roughly a third of the independent value. Treating correlated fillers as
 independent therefore **overstates how often a filler out-competes the
-suspect**, and so understates the suspect's exposure. The
-[implementation plan](#planned-extensions) below treats this as the first
-extension worth building.
+suspect**, and so understates the suspect's exposure.
 
 # Max filler distribution
 
@@ -141,7 +138,7 @@ to the right** of the distribution of any single filler. Each filler is
 centred at 0, but the largest of five is centred near 1.17. A culprit
 with \(d' = 1\) is therefore competing against a typical best-filler
 signal *higher than its own mean* — which is why lineup identification is
-hard, and why lineup size matters so much.
+hard, and why lineup size is so important.
 
 ## Moments
 
@@ -153,7 +150,7 @@ is; and the third standardised moment is the **skewness**, which says how
 asymmetric it is — zero for a symmetric distribution, positive when the
 right tail is longer.
 
-They matter here because the max filler distribution is **not normal**,
+They are important here because the max filler distribution is **not normal**,
 even though every filler individually is. Taking a maximum shifts the
 distribution right, compresses its spread, and makes it asymmetric. The
 moments quantify exactly that, and they are computed numerically because
@@ -231,7 +228,7 @@ pnorm(params$gamma)^6
 
 ## What this estimator gives up
 
-The closed form comes at a price, and it is worth stating plainly.
+The closed form comes at a price.
 
 `estimate_msdt_params()` uses **only the two rejection rates**. It never
 looks at whether the witnesses who *did* choose picked the suspect or a
@@ -241,8 +238,14 @@ leave on the table — arguably the most informative part of the data.
 
 The estimator is also **exactly identified**: two numbers in, two
 parameters out, with nothing left over. There is no residual, so there is
-no goodness-of-fit test. The model cannot be found to fit badly, because
-it will always reproduce the two rates it was given exactly.
+no goodness-of-fit test, and for feasible rates the model reproduces the
+two rates it was given. Not every pair of rates is feasible, however. With
+\(m\) members, a target-absent rejection rate \(r_A\) fixes \(\gamma\), and
+the target-present rejection rate can then be at most
+\(r_A^{(m-1)/m}\), the limit as \(d' \to -\infty\). Rates outside that bound,
+for example `estimate_msdt_params(0.1, 0.9, 6)`, are rejected with an
+error, and rates at the edges of the scale are clipped, so the reproduction
+is exact only in the interior.
 
 Use it when the rejection rates are all you have, or as a quick starting
 point. Where the full response breakdown exists, prefer:
@@ -278,81 +281,15 @@ plot_msdt_joint(dprime = 1.2, gamma = 0.4, lineup_size = 6,
 **These plots use no dataset.** They are analytic densities drawn from the
 parameters supplied in the call — here \(d' = 1.2\), \(\gamma = 0.4\) and a
 six-person lineup — not summaries of observed data. Comparing the two
-makes the model's logic visible: in the culprit-absent plot the mass sits
-symmetrically about the diagonal, since the suspect is just another
-filler; in the culprit-present plot it is displaced by \(d'\) towards the
-suspect axis.
-
-# Planned extensions {#planned-extensions}
-
-The functions here implement the **core** mSDT assumptions: equal
-variance and independent filler signals. Yang et al. (2025) discuss
-extensions that are not yet implemented. Rather than leave that as a
-bare caveat, here is what each would take.
-
-## 1. Correlated filler signals
-
-**Why it matters.** As noted above, fillers matched to a common
-description are unlikely to be independent, and the error runs in an
-unsafe direction: assuming independence overstates the competition the
-suspect faces.
-
-**How to implement it.** Equicorrelated fillers admit a one-factor
-representation. Writing \(\rho\) for the common correlation,
-
-\[
-f_i = \sqrt{\rho}\,Z + \sqrt{1-\rho}\,e_i
-\]
-
-with \(Z\) and the \(e_i\) independent standard normals. Conditional on
-\(Z\) the fillers *are* independent, so the existing power-of-\(\Phi\)
-result applies inside an expectation over \(Z\):
-
-\[
-P(\max < x) = \int \phi(z)\,
-\Phi\!\left(\frac{x - \sqrt{\rho}\,z}{\sqrt{1-\rho}}\right)^{m-1} dz
-\]
-
-a one-dimensional integral, evaluable with `stats::integrate()`. This
-extends `dmax_filler()` and friends by a single `rho` argument
-defaulting to 0, which reduces exactly to the current behaviour.
-
-**Effort:** small. **Risk:** low — the formula is checkable against
-simulation, and \(\rho = 0\) must reproduce the existing functions.
-
-## 2. Unequal variances
-
-**Why it matters.** The empirical evidence in recognition memory
-generally favours a culprit distribution with larger variance than the
-filler distribution, and assuming equality distorts \(d'\).
-
-**The obstacle is identifiability, not arithmetic.** With a culprit
-signal \(N(d', \sigma^2)\) the rejection rates become
-
-\[
-\Pr(\mathrm{REJ}\mid I) = \Phi(\gamma)^m, \qquad
-\Pr(\mathrm{REJ}\mid G) = \Phi\!\left(\frac{\gamma - d'}{\sigma}\right)\Phi(\gamma)^{m-1}
-\]
-
-which is **two equations in three unknowns**. \(\sigma\) is simply not
-identified from rejection rates, so `estimate_msdt_params()` cannot be
-extended to cover it. The extension belongs in `fit_max_sdt()`, which
-uses the full response breakdown, or requires confidence data and the
-z-ROC slope (`fit_sdt_roc()`).
-
-**Effort:** moderate. **Risk:** higher — the third parameter must be shown
-to be recoverable before the option is offered, which means a simulation
-study sweeping \(\sigma\) and sample size and checking recovery, on the
-model of the identifiability concerns raised in
-`vignette("lineup_memory_models")`.
-
-## 3. Order of work
-
-Correlated fillers first: it is self-contained, verifiable against
-simulation, and backwards compatible. Unequal variance second, and only
-after a recovery study establishes that the parameter can be estimated at
-realistic sample sizes. Shipping an option that returns an unidentified
-parameter would be worse than not shipping it.
+makes the model's logic visible. In the culprit-absent plot the suspect is
+one innocent member, Normal(0, 1), but the other axis is the **strongest of
+the five fillers**, whose density is \(5\phi(m)\Phi(m)^4\) with mean about
+1.16. The joint density \(\phi(s) \cdot 5\phi(m)\Phi(m)^4\) is therefore not
+symmetric about the diagonal: the mass sits above it, towards the filler
+axis (at \((s, m) = (0, 1)\) the density is about eight times that at
+\((1, 0)\)). That asymmetry is why an innocent suspect is chosen less often
+than the fillers combined. In the culprit-present plot the suspect's signal
+is shifted by \(d'\), moving the mass towards the suspect axis.
 
 # Technical Details
 
@@ -369,7 +306,7 @@ parameter would be worse than not shipping it.
 ## Assumptions
 
 1. Filler signals are independent and identically distributed
-   \(N(0, 1)\). See the planned extension above for the correlated case.
+   \(N(0, 1)\).
 2. The culprit signal is \(N(d', 1)\) — equal variance.
 3. A single criterion \(\gamma\) is applied to the largest signal, with no
    confidence criteria.
@@ -383,16 +320,15 @@ parameter would be worse than not shipping it.
 
 # References
 
-Duncan, M. (2006). *A signal detection model of compound decision tasks*
-(Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
+::: {.hanging-indent}
 
-Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
-lineup memory. *Cognitive Psychology, 105*, 81-114.
+Duncan, M. (2006). *A signal detection model of compound decision tasks* (Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
 
-Yang, Y., Burke, J. L., & Healy, J. (2025). A multi-item signal detection
-theory model for eyewitness identification. *Cognitive Research:
-Principles and Implications, 10*, 54.
-\doi{10.1186/s41235-025-00652-3}
+Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of lineup memory. *Cognitive Psychology, 105*, 81-114.
+
+Yang, Y., Burke, J. L., & Healy, J. (2025). A multi-item signal detection theory model for eyewitness identification. *Cognitive Research: Principles and Implications, 10*, 54. https://doi.org/10.1186/s41235-025-00652-3
+
+:::
 
 # Further Reading
 

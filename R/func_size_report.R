@@ -21,6 +21,10 @@
 #'  (\code{Inf}) upper limit. The normal interval is the normal-theory interval
 #'  for p, inverted. The exact interval inverts the Clopper-Pearson interval for
 #'  p (\code{\link[stats]{binom.test}}).
+#'  Near zero or one, empirical bootstrap intervals can have severe undercoverage,
+#'  including a degenerate interval when the suspect was never chosen. Prefer
+#'  the exact interval in these cases; retaining infinite limits alone does not
+#'  guarantee nominal bootstrap coverage.
 #'
 #'  Function depends on functions from package 'boot'
 #'@seealso \code{\link[boot:boot]{boot}}: https://cran.r-project.org/web/packages/boot/boot.pdf

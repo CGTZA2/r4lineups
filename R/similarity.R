@@ -28,9 +28,11 @@
 #' we typically want to measure how similar foils are to the target, not whether
 #' they are the same person.
 #'
-#' The 'verified' field indicates whether the faces would be considered
-#' "the same person" by the model, which in lineup research context means
-#' the foil is too similar to the target (potential lineup bias).
+#' The 'verified' field is the model's identity decision: whether the
+#' distance falls inside the model's threshold for "same person". In a lineup
+#' it is a prompt to inspect the two photographs, not a finding. Face
+#' recognition systems make false matches, and a match does not show that a
+#' foil is nonfunctioning for witnesses.
 #'
 #' @examples
 #' \dontrun{
@@ -40,7 +42,7 @@
 #' # Check similarity score
 #' result$similarity  # 0.85 would mean very similar
 #' 
-#' # Check if they'd be identified as same person (too similar for fair lineup)
+#' # Inspect the model's same-identity flag; this is not a fairness judgment.
 #' result$verified  # TRUE would indicate problematic similarity
 #' }
 #'
@@ -137,14 +139,15 @@ face_similarity <- function(img1_path,
 #' }
 #'
 #' @details
-#' This is the primary function for assessing lineup fairness from a
-#' face similarity perspective. Foils that are too similar to the target
-#' (low distance, high similarity, verified=TRUE) may bias the lineup.
-#' Foils that are too dissimilar may make the target stand out.
-#'
-#' For a fair lineup, foils should have moderate similarity to the target,
-#' ideally within a range that makes them plausible alternatives without
-#' being too close to the target.
+#' This function describes how similar each foil is to the target in a face
+#' recognition model's embedding space. It does not assess fairness: no
+#' validated similarity range defines a fair lineup, and embedding similarity
+#' is not the same as resemblance judged by people or as mock-witness choice.
+#' Foils very dissimilar to the target may make the target stand out; foils
+#' the model judges to be the same identity (verified = TRUE) deserve
+#' inspection. Rows are ordered by rank (most similar first), and the model's
+#' distance threshold is stored in \code{attr(x, "threshold")}. For cosine,
+#' similarity = 1 - distance, which ranges from -1 to 1.
 #'
 #' @examples
 #' \dontrun{

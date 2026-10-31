@@ -52,12 +52,14 @@ The embedding dimension depends on the model:
   \item VGG-Face: 4096 dimensions
 }
 
-For best results in research applications, use:
+One example configuration used in the package is:
 \itemize{
-  \item model = "ArcFace" (best accuracy)
-  \item detector = "retinaface" (best detection)
+  \item model = "ArcFace"
+  \item detector = "retinaface"
   \item align = TRUE
 }
+These defaults do not establish superior accuracy for every population,
+image source or research question, or validate lineup fairness.
 }
 \examples{
 \dontrun{

@@ -133,7 +133,6 @@ compare_sdt_summary(hits_a, fas_a, misses_a, cr_a,
 
 # The compound-model alternative
 
-The caution above is only useful if it names an alternative, so here it is.
 `fit_max_sdt()` fits the compound (MAX SDT) model of Duncan (2006) directly to
 lineup counts, estimating d' and a criterion together, and gives the sampling
 distribution by parametric bootstrap. It is the lineup-appropriate counterpart
@@ -260,8 +259,15 @@ differ in what they assume:
 | Method | Basis | When to prefer it |
 |---|---|---|
 | `"gourevitch"` | Delta-method approximation (Gourevitch & Galanter, 1967) | Quick, and adequate with large counts away from the extremes |
-| `"miller"` | Exact binomial treatment (Miller, 1996) | The default recommendation; better coverage at small counts and extreme rates |
-| `"bootstrap"` | Resampling the binomial counts | No distributional assumption about the transformed statistic; useful when rates are near 0 or 1, and the approach used in the meta-analysis cited above |
+| `"miller"` | Binomial moment sums evaluated at estimated rates (Miller, 1996) | The package default; its plug-in Wald test is approximate and can be liberal with sparse false alarms |
+| `"bootstrap"` | Parametric resampling of independent binomial counts at estimated rates | Avoids a normal approximation for the transformed draws, but still assumes the binomial sampling model; boundary behaviour needs assessment |
+
+Exact binomial moment summation does not make the resulting plug-in comparison
+an exact test. In an independent audit scenario with 200 signal and 200 noise
+trials per condition, true hit rate .15 and false-alarm rate .01, nominal 5%
+Miller Wald tests rejected equal conditions about 8% of the time for d' and 9%
+for ln-beta (12,000 datasets). These are limits of the approximation, rather
+than evidence that one variance option is uniformly preferable.
 
 The comparison is a Wald test, with
 \(\mathrm{Var}(\Delta) = \mathrm{Var}_A + \mathrm{Var}_B\), valid because the two
@@ -297,26 +303,21 @@ any writeup: with small counts it moves d′ appreciably.
 
 # References
 
-Duncan, M. (2006). *A signal detection model of compound decision tasks*
-(Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
+::: {.hanging-indent}
 
-Reisberg, D., & Pezdek, K. (2024). Data analysed with the MAX SDT model in
-scripts supplied by A. M. Smith (personal communication, 4 April 2024).
+Duncan, M. (2006). *A signal detection model of compound decision tasks* (Technical Note DRDC TR 2006-256). Defence R&D Canada, Toronto.
 
-Gourevitch, V., & Galanter, E. (1967). A significance test for one parameter
-isosensitivity functions. *Psychometrika, 32*(1), 25-33.
+Gourevitch, V., & Galanter, E. (1967). A significance test for one parameter isosensitivity functions. *Psychometrika, 32*(1), 25-33.
 
-Miller, J. (1996). The sampling distribution of d'. *Perception &
-Psychophysics, 58*(1), 65-72.
+Miller, J. (1996). The sampling distribution of d'. *Perception & Psychophysics, 58*(1), 65-72.
 
-Suero, M., Privado, J., & Botella, J. (2017). Estimating the variances and
-covariance of the parameters of signal detection theory. *Psicothema, 29*(3),
-432-437.
+Reisberg, D., & Pezdek, K. (2024). Data analysed with the MAX SDT model in scripts supplied by A. M. Smith (personal communication, 4 April 2024).
 
-Tredoux, C. G., Sporer, S. L., Vredeveldt, A., Kempen, K., & Nortje, A. (2021).
-Does constructing a facial composite affect eyewitness memory? A research
-synthesis and meta-analysis. *Journal of Experimental Criminology, 17*(4),
-713-741. \doi{10.1007/s11292-020-09432-z}
+Suero, M., Privado, J., & Botella, J. (2017). Estimating the variances and covariance of the parameters of signal detection theory. *Psicothema, 29*(3), 432-437.
+
+Tredoux, C. G., Sporer, S. L., Vredeveldt, A., Kempen, K., & Nortje, A. (2021). Does constructing a facial composite affect eyewitness memory? A research synthesis and meta-analysis. *Journal of Experimental Criminology, 17*(4), 713-741. https://doi.org/10.1007/s11292-020-09432-z
+
+:::
 
 # Further Reading
 

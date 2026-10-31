@@ -77,7 +77,7 @@ two lineup conditions using bootstrap-based standard errors and z-tests.
 Follows the methodology from pyWitness (Mickes et al., 2024).
 }
 \details{
-This function implements a rigorous statistical test for comparing ROC curves
+This function implements an approximate statistical test for comparing ROC curves
 between two conditions (e.g., simultaneous vs. sequential lineups, different
 retention intervals, etc.).
 
@@ -98,6 +98,12 @@ not implement a paired or clustered bootstrap.
   \item Negative pAUC difference: Condition 2 has better discriminability
   \item p < 0.05: Significant difference between conditions
 }
+
+The independent-sample bootstrap estimates uncertainty in an empirical
+  partial-area functional; the final comparison uses a normal/Wald interval.
+  It is approximate and can be liberal in finite samples. A data-selected
+  cutoff, sparse high-confidence cells, or resamples that do not reach the
+  cutoff require additional caution. It is not an exact discrimination test.
 }
 \examples{
 \donttest{

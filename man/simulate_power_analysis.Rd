@@ -19,9 +19,10 @@ simulate_power_analysis(
 )
 }
 \arguments{
-\item{sample_sizes}{Integer vector. Sample sizes per condition to test
-(e.g., c(50, 100, 200)). Each is used for both target-present and
-target-absent lineups in each condition.}
+\item{sample_sizes}{Integer vector of sizes to test (e.g., c(50, 100, 200)).
+A size n means n target-present \emph{and} n target-absent witnesses in
+each of the two simulated conditions: 2n witnesses per condition and 4n
+in the whole simulated experiment.}
 
 \item{d_prime}{Numeric. Discriminability of the condition of interest.}
 
@@ -55,13 +56,20 @@ to a bootstrap comparison of partial AUC via \code{\link{compare_pauc}}.}
 \value{
 A dataframe of class \code{power_analysis} with columns:
   \itemize{
-    \item sample_size: N per condition
+    \item sample_size: n, the number of target-present (and, separately,
+      target-absent) witnesses per condition
+    \item n_total: Witnesses in the whole simulated experiment, 4n
     \item power: Proportion of simulated studies reaching significance
     \item power_se: Standard error of that proportion
     \item mean_effect: Mean observed difference in pAUC
     \item sd_effect: Standard deviation of the observed difference
     \item n_valid: Simulations that produced a usable test
+    \item n_failed: Attempted simulations without a usable test
+    \item n_attempted: All attempted simulations
   }
+Power and its Monte Carlo standard error are conditional on usable tests.
+Failures are retained in the attempted count and trigger a warning; compare
+failure rates as well as conditional power when assessing a design.
 }
 \description{
 Estimates statistical power to detect a difference in discriminability

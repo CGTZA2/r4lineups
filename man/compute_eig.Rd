@@ -66,7 +66,7 @@ where:
 
 Higher EIG values indicate more diagnostic procedures. EIG = 0 means no
 information gain (responses don't distinguish guilty from innocent).
-EIG = 1 means perfect information (complete resolution of uncertainty).
+The maximum EIG is the prior entropy; it is 1 bit only at prior guilt 0.5.
 }
 \examples{
 # Compute EIG with binned confidence

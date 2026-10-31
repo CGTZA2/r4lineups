@@ -2,7 +2,8 @@
 #'
 #' @description
 #' Creates a visual display of the parameter estimates from a fitted 2-HT model,
-#' with error bars showing 95\% confidence intervals.
+#' with error bars showing the supplied bootstrap intervals, or regular 95\%
+#' normal intervals where available.
 #'
 #' @param x A \code{winter_2ht} object, or a \code{winter_2ht_boot} object
 #'   from \code{\link{boot_winter_2ht}}. Given the latter, the plotted intervals
@@ -75,7 +76,8 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
   # Create plot
   p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = parameter, y = estimate)) +
     ggplot2::geom_col(fill = "steelblue", alpha = 0.7, width = 0.6) +
-    ggplot2::ylim(0, 1) +
+    # Headroom above 1 for the value labels, which sit above the intervals.
+    ggplot2::scale_y_continuous(limits = c(0, 1.1), breaks = seq(0, 1, 0.25)) +
     ggplot2::labs(
       title = "2-HT Model Parameter Estimates",
       x = NULL,
@@ -90,18 +92,28 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
     ggplot2::scale_x_discrete(labels = param_labels[which])
 
   # Add error bars if requested
-  if (show_ci && !any(is.na(se))) {
+  available <- is.finite(plot_data$lower) & is.finite(plot_data$upper)
+  if (show_ci && any(available)) {
     p <- p + ggplot2::geom_errorbar(
+      data = plot_data[available, , drop = FALSE],
       ggplot2::aes(ymin = pmax(lower, 0), ymax = pmin(upper, 1)),
       width = 0.2,
       linewidth = 0.8
     )
   }
 
-  # Add value labels
+  # Add value labels above the interval, where the whisker cannot cover them
+  plot_data$label_y <- ifelse(show_ci & available,
+                              pmin(plot_data$upper, 1), plot_data$estimate)
+  p <- p + ggplot2::labs(caption = if (!is.null(boot_ci))
+    "Bootstrap intervals are approximate; parameter boundaries require caution."
+    else if (show_ci && any(!available))
+      "Regular normal intervals unavailable for this boundary or singular fit."
+    else "95% normal approximation; bounds clipped for display.")
   p <- p + ggplot2::geom_text(
-    ggplot2::aes(label = sprintf("%.3f", estimate)),
-    vjust = -0.5,
+    data = plot_data,
+    ggplot2::aes(y = label_y, label = sprintf("%.3f", estimate)),
+    vjust = -0.6,
     size = 3.5
   )
 

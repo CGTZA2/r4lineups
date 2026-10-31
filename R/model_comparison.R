@@ -378,7 +378,7 @@ summary.model_comparison <- function(object, ...) {
   cat("  - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes\n")
   cat("  - EIG: Higher values = more informative procedure\n")
   cat("  - Full ROC: Higher AUC = better investigator discriminability\n")
-  cat("\nEach model provides different insights -- consider using multiple models.\n")
+  cat("\nEach model provides different information; consider reporting more than one.\n")
 
   invisible(object)
 }
@@ -429,13 +429,15 @@ plot.model_comparison <- function(x, which = "all", ncol = 2, ...) {
       Parameter = c("dP", "dA", "b", "g"),
       Estimate = model_2ht$parameters,
       SE = model_2ht$se,
-      Lower = model_2ht$parameters - 1.96 * model_2ht$se,
-      Upper = model_2ht$parameters + 1.96 * model_2ht$se
+      # The parameters are probabilities, so clip the Wald interval to [0, 1].
+      # ylim() would instead drop any bar that crosses 0 or 1.
+      Lower = pmax(0, model_2ht$parameters - 1.96 * model_2ht$se),
+      Upper = pmin(1, model_2ht$parameters + 1.96 * model_2ht$se)
     )
     param_df$Parameter <- factor(param_df$Parameter,
                                   levels = c("dP", "dA", "b", "g"),
-                                  labels = c("dP\n(detect presence)",
-                                           "dA\n(detect absence)",
+                                  labels = c("dP\n(presence)",
+                                           "dA\n(absence)",
                                            "b\n(bias)",
                                            "g\n(guessing)"))
 
@@ -443,13 +445,11 @@ plot.model_comparison <- function(x, which = "all", ncol = 2, ...) {
       geom_point(size = 3, color = "darkblue") +
       geom_errorbar(aes(ymin = Lower, ymax = Upper), width = 0.2) +
       geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-      ylim(0, 1) +
-      theme_bw(base_size = 12) +
-      labs(title = "2-HT Model Parameters",
+      coord_cartesian(ylim = c(0, 1)) +
+      labs(title = "2-HT parameters",
            subtitle = paste0("AIC = ", round(model_2ht$aic, 1)),
-           y = "Parameter Estimate",
-           x = "") +
-      theme(axis.text.x = element_text(size = 9))
+           y = "Parameter estimate",
+           x = NULL)
 
     plots[["2ht"]] <- p_2ht
   }
@@ -457,14 +457,34 @@ plot.model_comparison <- function(x, which = "all", ncol = 2, ...) {
   # EIG information gain plot
   if ("eig" %in% which && "eig" %in% x$models_fit) {
     model_eig <- x$fitted_models[["eig"]]
-    plots[["eig_ig"]] <- plot_eig(model_eig, max_responses = 10)
+    plots[["eig_ig"]] <- plot_eig(model_eig, max_responses = 10) +
+      labs(title = "EIG by response", x = NULL, y = "Information gain (bits)")
   }
 
   # Full ROC plot
   if ("fullroc" %in% which && "fullroc" %in% x$models_fit) {
     model_fullroc <- x$fitted_models[["fullroc"]]
-    plots[["fullroc"]] <- plot_fullroc(model_fullroc, show_auc = TRUE, ...)
+    # The AUC goes in the subtitle; plot_fullroc()'s large in-panel label
+    # crowds a small panel.
+    plots[["fullroc"]] <- plot_fullroc(model_fullroc, show_auc = FALSE, ...) +
+      labs(title = "Full ROC", caption = NULL,
+           subtitle = paste0("AUC = ", round(model_fullroc$auc, 3),
+                             " (ordering: ", model_fullroc$summary$order_method,
+                             ")"),
+           x = "False alarm rate (innocent suspect)",
+           y = "Hit rate (guilty suspect)")
   }
+
+  # The standalone plots are sized to fill a figure on their own. Side by side
+  # their titles, legends and captions overrun, so give every panel the same
+  # compact theme. theme_bw() replaces each panel's theme, so the legend and
+  # title settings come after it.
+  plots <- lapply(plots, function(p) {
+    p + theme_bw(base_size = 10) +
+      theme(legend.position = "bottom",
+            plot.title = element_text(size = 11, face = "bold"),
+            plot.subtitle = element_text(size = 9))
+  })
 
   # Arrange plots
   if (length(plots) == 0) {

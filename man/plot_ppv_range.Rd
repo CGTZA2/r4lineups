@@ -27,13 +27,13 @@ Fitzgerald et al. (2023).
 The plot shows three curves:
 \itemize{
   \item \strong{Nominal} (blue, dashed): Best-case estimate assuming fair lineup
-  \item \strong{Effective} (red, solid): Realistic estimate accounting for bias
+  \item \strong{Effective} (red, solid): Size-based approximation accounting for uneven choices
   \item \strong{None} (gray, dashed): Worst-case estimate (no correction)
 }
 
 The shaded band between nominal and none represents the PPV uncertainty range
 due to unknown lineup fairness conditions. The effective size estimate typically
-falls within this range and provides a more realistic middle ground.
+falls within this range and is a size-based approximation, not a validated best estimate.
 }
 \examples{
 data(lineup_example)

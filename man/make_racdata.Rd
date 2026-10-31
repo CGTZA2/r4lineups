@@ -58,6 +58,11 @@ RAC analysis computes, for each response time bin:
 Explicit target-absent suspect IDs are used when present. Otherwise,
 target-absent filler IDs are divided by lineup size to estimate incorrect
 suspect IDs. The two estimators are never added together.
+The bin mean time uses the same suspect-ID observations as accuracy;
+estimated-mode TA filler times receive weight \eqn{1/k}. Bin edges must
+cover all supplied observations. Count accuracy depends on TP/TA sampling
+fractions and does not adjust to a different population base rate. The
+displayed binomial SE is approximate, especially for estimated counts.
 
 RAC analysis is useful for examining the speed-accuracy tradeoff in
 eyewitness identifications. Faster responses typically indicate stronger

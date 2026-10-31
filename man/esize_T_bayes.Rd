@@ -29,7 +29,13 @@ Default 0.95.}
 \item{threshold}{Optional finite scalar. When supplied, the function
 also reports P(E' < threshold | data) and P(E' > threshold | data),
 enabling direct probability statements about whether the lineup is
-functioning below or above a fairness benchmark.}
+functioning below or above a fairness benchmark. Because E' <= k for
+every choice-probability vector, with equality only when all k
+probabilities are exactly equal, P(E' < k | data) is 1 under any
+continuous posterior, however uniform the data. A threshold of k or more
+therefore carries no information, and the function warns. Use a tolerance
+below k that you choose and justify in advance (for example 0.8 k), or
+report the credible interval for E' or for the deficit k - E'.}
 }
 \value{
 An object of class \code{"esize_T_bayes"} containing:

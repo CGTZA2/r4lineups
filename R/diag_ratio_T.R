@@ -55,6 +55,13 @@ diag_ratio_T <- function(lineup_pres, lineup_abs, pos_pres, pos_abs, k1, k2){
     lineup_abs <- typecheck(lineup_abs)
 
     datacheck2(lineup_pres, lineup_abs, k1, k2)
+    if (length(pos_pres) != 1L || length(pos_abs) != 1L ||
+        !is.numeric(pos_pres) || !is.numeric(pos_abs) ||
+        !is.finite(pos_pres) || !is.finite(pos_abs) ||
+        pos_pres != floor(pos_pres) || pos_abs != floor(pos_abs) ||
+        pos_pres < 1 || pos_pres > k1 || pos_abs < 1 || pos_abs > k2) {
+      stop("Suspect positions must be integer positions within their lineups.", call. = FALSE)
+    }
 
     a <- (sum(lineup_pres == pos_pres) + 0.5)/(length(lineup_pres) + 0.5)
     b <- (sum(lineup_abs == pos_abs) + 0.5)/(length(lineup_abs) + 0.5)

@@ -26,7 +26,9 @@
 #'@return Invisibly returns a list containing the observed mean diagnosticity,
 #'  chi-square statistic with degrees of freedom and asymptotic p-value,
 #'  percentile intervals, a \code{heterogeneous} flag, a \code{parameters} data
-#'  frame of per-pair ratios and intervals, the bootstrap draws, and \code{R}.
+#'  frame of per-pair ratios and intervals, all attempted bootstrap draws
+#'  (failed rows retained as NA), \code{n_successful}, \code{n_failed}, and
+#'  \code{R}. Intervals are conditional on successful draws when failures occur.
 #'@references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'
@@ -88,8 +90,8 @@ homog_diag_boot <- function(lineup_pres_list, lineup_abs_list, k, R = 100,
   observed_chi <- chi_diag(observed_parts)
 
   draws <- replicate(R, {
-    tp_boot <- lapply(lineup_pres_list, function(x) sample(x, length(x), replace = TRUE))
-    ta_boot <- lapply(lineup_abs_list, function(x) sample(x, length(x), replace = TRUE))
+    tp_boot <- lapply(lineup_pres_list, .resample_values)
+    ta_boot <- lapply(lineup_abs_list, .resample_values)
     params <- diag_param(tp_boot, ta_boot, pos_list, k)
     tryCatch({
       parts <- t(cbind(var_lnd(params),
@@ -103,10 +105,14 @@ homog_diag_boot <- function(lineup_pres_list, lineup_abs_list, k, R = 100,
     stop("Fewer than half of bootstrap samples had positive suspect-ID cells; intervals are not reliable.",
          call. = FALSE)
   }
-  draws <- draws[, valid_draws, drop = FALSE]
+  n_successful <- sum(valid_draws)
+  if (any(!valid_draws)) {
+    warning(sum(!valid_draws), " of ", R, " bootstrap samples failed; intervals are conditional on successful samples.", call. = FALSE)
+  }
+  successful_draws <- draws[, valid_draws, drop = FALSE]
   alpha <- (1 - conf.level) / 2
-  mean_ci <- stats::quantile(draws["mean", ], c(alpha, 1 - alpha), na.rm = TRUE)
-  chi_ci <- stats::quantile(draws["chi_square", ], c(alpha, 1 - alpha), na.rm = TRUE)
+  mean_ci <- stats::quantile(successful_draws["mean", ], c(alpha, 1 - alpha))
+  chi_ci <- stats::quantile(successful_draws["chi_square", ], c(alpha, 1 - alpha))
 
   observed_df <- nrow(observed) - 1L
   observed_p <- stats::pchisq(observed_chi, df = observed_df, lower.tail = FALSE)
@@ -135,6 +141,7 @@ homog_diag_boot <- function(lineup_pres_list, lineup_abs_list, k, R = 100,
     parameters = pairs,
     draws = t(draws),
     R = as.integer(R),
-    n_successful = ncol(draws)
+    n_successful = n_successful,
+    n_failed = as.integer(R) - n_successful
   ))
 }

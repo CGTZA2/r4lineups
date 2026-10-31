@@ -2,7 +2,7 @@
 #'
 #'Function to compute ci high for each foil in a lineup
 #'@param linetabprops A dataframe of bootstrapped lineup proportions
-#'@param sumlineup Number of members in a lineup
+#'@param sumlineup Number of mock-witness observations used to estimate each proportion.
 #'@references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'@examples

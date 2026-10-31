@@ -9,6 +9,12 @@
 #'         normal theory, percentile & bias-corrected)
 #'@details This function is a master function, calling other functions
 #'         it needs, and reporting results in some detail
+#'         Each lineup is resampled independently; row alignment has no sampling
+#'         meaning. Confidence intervals are bootstrap approximations and can be
+#'         unreliable for small or nearly uniform empirical choice distributions.
+#'         Normal and BCa intervals can under-cover in finite concentrated samples;
+#'         percentile intervals can be conservative near uniformity. None provides
+#'         a distribution-free level-.05 test of equal population effective sizes.
 #'@seealso \code{\link[boot:boot]{boot}}: https://cran.r-project.org/web/packages/boot/boot.pdf
 #'@references Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their
 #'                  application}. Cambridge University Press.
@@ -51,8 +57,25 @@ effsize_compare <- function(linedf, R = 1000){
       stop("R must be an integer of at least 2.", call. = FALSE)
     }
     cat ("\n")
-    temp1 <- boot(linedf, compare_eff_sizes.boot, R = R)
-    temp2 <- suppressWarnings(boot.ci(temp1, type = c("norm","bca","perc")))
+    if (anyNA(linedf)) stop("Independent lineup samples must not contain missing choices.", call. = FALSE)
+    long <- data.frame(choice = c(as.character(linedf[[1]]), as.character(linedf[[2]])),
+                       sample = rep(1:2, each = nrow(linedf)))
+    statistic <- function(data, indices) {
+      x <- data[indices, , drop = FALSE]
+      esize_T(table(x$choice[x$sample == 1L])) -
+        esize_T(table(x$choice[x$sample == 2L]))
+    }
+    temp1 <- boot(long, statistic, R = R, strata = long$sample)
+    # Exact within-sample jackknife influences. Arbitrary pairing of independent
+    # rows must enter neither the bootstrap nor the BCa acceleration.
+    influences <- unlist(lapply(1:2, function(group) {
+      ix <- which(long$sample == group)
+      loo <- vapply(ix, function(j) statistic(long[-j, , drop = FALSE],
+                                             seq_len(nrow(long) - 1L)), numeric(1))
+      (length(ix) - 1L) * (mean(loo) - loo)
+    }))
+    temp2 <- suppressWarnings(boot.ci(temp1, type = c("norm","bca","perc"),
+                                    L = influences))
     estimates <- c(esize_T(table(linedf[[1]])), esize_T(table(linedf[[2]])))
     normal <- if (!is.null(temp2$normal)) temp2$normal[2:3] else c(NA_real_, NA_real_)
     percentile <- if (!is.null(temp2$percent)) temp2$percent[4:5] else c(NA_real_, NA_real_)

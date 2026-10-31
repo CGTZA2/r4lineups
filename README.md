@@ -44,7 +44,22 @@ package, not in the cited work. Please report suspected errors through the
 
 ## Installation
 
-This repository is an R package. From R:
+From CRAN:
+
+```r
+install.packages("r4lineups")
+```
+
+The current release is also available from r-universe, which is updated sooner
+than CRAN:
+
+```r
+install.packages("r4lineups",
+                 repos = c("https://cgtza2.r-universe.dev",
+                           "https://cloud.r-project.org"))
+```
+
+Or from the source:
 
 ```r
 # from GitHub

@@ -21,6 +21,8 @@ This is the statistic function passed to \code{boot::boot()} for
   lineup choices; \code{d} resamples mock witnesses rather than count-table cells.
   For a higher-level interface that accepts raw lineup vectors, see
   \code{\link{esize_boot_dist}}.
+  Percentile and BCa intervals from this plug-in statistic cannot be used to
+  test exact fairness E'=k; see the boundary warning in \code{\link{esize_boot_dist}}.
 }
 \examples{
 # Choices from 50 mock witnesses to a 6-member lineup

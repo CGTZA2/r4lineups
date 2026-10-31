@@ -89,6 +89,11 @@
 #'   identification = "identification"
 #' )
 #'
+#' @details A feasible inverse of the published tree supplies the saturated
+#'   interior solution; otherwise bounded optimization uses multiple starts.
+#'   Regular Hessian SEs are returned only for interior fits. Boundary fits
+#'   retain their estimates but have unavailable regular SEs. A low rejection
+#'   percentage alone is not used as a criterion for refusing a fit.
 #' @export
 fit_winter_2ht <- function(data,
                            lineup_size = 6,
@@ -97,6 +102,11 @@ fit_winter_2ht <- function(data,
                            start_params = NULL,
                            method = "L-BFGS-B",
                            ...) {
+  if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
+      !is.finite(lineup_size) || lineup_size < 2 ||
+      lineup_size != floor(lineup_size)) {
+    stop("lineup_size must be an integer of at least 2.", call. = FALSE)
+  }
 
   # Process input data
   if (is.data.frame(data)) {
@@ -115,6 +125,9 @@ fit_winter_2ht <- function(data,
   if (!all(required_names %in% names(counts))) {
     stop("Count data must contain: ", paste(required_names, collapse = ", "))
   }
+  counts <- counts[required_names]
+  if (!is.numeric(counts) || anyNA(counts) || any(!is.finite(counts)) ||
+      any(counts < 0)) stop("Response counts must be finite and non-negative.", call. = FALSE)
 
   # Extract counts
   n_tp <- c(counts["n_tp_suspect"], counts["n_tp_filler"], counts["n_tp_reject"])
@@ -124,24 +137,7 @@ fit_winter_2ht <- function(data,
   N_tp <- sum(n_tp)
   N_ta <- sum(n_ta)
   N_total <- N_tp + N_ta
-
-  # The detect-absence parameter dA is identified almost entirely by rejections:
-  # it is the probability of correctly concluding the culprit is not present.
-  # With very few rejections the likelihood is close to flat in dA and the
-  # optimiser fails with an opaque message about non-finite differences. Say
-  # what is actually wrong instead.
-  n_reject <- counts[["n_tp_reject"]] + counts[["n_ta_reject"]]
-  reject_rate <- n_reject / N_total
-  if (reject_rate < 0.02) {
-    stop("Too few lineup rejections to fit the 2-HT model: ", n_reject,
-         " of ", N_total, " responses (", round(100 * reject_rate, 1), "%). ",
-         "The detect-absence parameter dA is identified by rejections, so the ",
-         "likelihood is nearly flat without them. If these are simulated data, ",
-         "the decision criterion is probably too liberal: c_criterion applies ",
-         "to the maximum of the lineup members' strengths, so 0 is not a ",
-         "neutral value and produces almost no rejections. See ",
-         "vignette(\"simulation_power_analysis\").", call. = FALSE)
-  }
+  if (N_tp <= 0 || N_ta <= 0) stop("Both TP and TA totals must be positive.", call. = FALSE)
 
   # Set starting parameters if not provided
   if (is.null(start_params)) {
@@ -152,9 +148,15 @@ fit_winter_2ht <- function(data,
       g = 0.5    # Guessing
     )
   }
+  if (!is.null(names(start_params))) start_params <- start_params[c("dP", "dA", "b", "g")]
+  if (length(start_params) != 4L || anyNA(start_params) ||
+      any(!is.finite(start_params)) || any(start_params < 0 | start_params > 1)) {
+    stop("start_params must give four probabilities dP, dA, b and g.", call. = FALSE)
+  }
 
   # Negative log-likelihood function
   negloglik <- function(params) {
+    if (any(!is.finite(params)) || any(params < 0 | params > 1)) return(Inf)
     dP <- params[1]
     dA <- params[2]
     b <- params[3]
@@ -164,8 +166,12 @@ fit_winter_2ht <- function(data,
     probs <- .compute_2ht_probs(dP, dA, b, g, lineup_size)
 
     # Log-likelihood (multinomial)
-    ll_tp <- sum(n_tp * log(probs$tp + 1e-10))  # Add small constant to avoid log(0)
-    ll_ta <- sum(n_ta * log(probs$ta + 1e-10))
+    # 0*log(0) contributes zero; positive counts at zero probability are
+    # impossible. Adding epsilon to probabilities changes the likelihood.
+    positive_tp <- n_tp > 0
+    positive_ta <- n_ta > 0
+    ll_tp <- sum(n_tp[positive_tp] * log(probs$tp[positive_tp]))
+    ll_ta <- sum(n_ta[positive_ta] * log(probs$ta[positive_ta]))
 
     ll_total <- ll_tp + ll_ta
 
@@ -173,23 +179,72 @@ fit_winter_2ht <- function(data,
     return(-ll_total)
   }
 
-  # Optimize with bounded parameters [0, 1]
-  opt_result <- stats::optim(
-    par = start_params,
-    fn = negloglik,
-    method = method,
-    lower = c(0, 0, 0, 0),
-    upper = c(1, 1, 1, 1),
-    hessian = TRUE,
-    ...
-  )
+  # Interior inverse of the published tree: nondetection response ratios are
+  # s/f = TA_s/TA_f and r/f = TP_r/TP_f. A feasible inverse fits each observed
+  # multinomial exactly and is a global saturated likelihood solution.
+  starts <- list(start_params, c(.6, .4, .2, .7), c(.2, .05, .1, .9))
+  saturated_inverse <- NULL
+  if (n_tp[2] > 0 && n_ta[2] > 0) {
+    qs_qf <- n_ta[1] / n_ta[2]
+    qr_qf <- n_tp[3] / n_tp[2]
+    qf <- 1 / (1 + qs_qf + qr_qf)
+    bias <- qf * (qs_qf - 1 / (lineup_size - 1))
+    inverse <- c(1 - (n_tp[2] / N_tp) / qf,
+                 1 - (n_ta[2] / N_ta) / qf,
+                 bias, qf * lineup_size / ((lineup_size - 1) * (1 - bias)))
+    if (all(is.finite(inverse)) && all(inverse >= 0 & inverse <= 1)) saturated_inverse <- inverse
+  }
+  dots <- list(...)
+  defaults <- list(maxit = 2000L, ndeps = rep(1e-5, 4))
+  if (identical(method, "L-BFGS-B")) defaults <- c(defaults, list(factr = 1e4, pgtol = 1e-8))
+  dots$control <- utils::modifyList(defaults, if (is.null(dots$control)) list() else dots$control)
+  # Exclude only faces with positive observations but zero model probability.
+  # This keeps L-BFGS-B finite differences finite without modifying likelihoods.
+  lower <- rep(0, 4)
+  upper <- rep(1, 4)
+  eps <- 1e-12
+  if (n_tp[2] + n_tp[3] > 0) upper[1] <- 1 - eps
+  if (n_ta[1] + n_ta[2] > 0) upper[2] <- 1 - eps
+  if (sum(n_tp[2:3]) + sum(n_ta[2:3]) > 0) upper[3] <- 1 - eps
+  if (n_tp[2] + n_ta[2] > 0) lower[4] <- eps
+  if (n_tp[3] > 0) upper[4] <- 1 - eps
+  fits <- if (!is.null(saturated_inverse)) {
+    # Each fitted multinomial equals its empirical distribution: this attains
+    # the unconstrained likelihood upper bound, so no numerical search is needed.
+    list(list(par = saturated_inverse, value = negloglik(saturated_inverse),
+              convergence = 0L, message = "Feasible saturated inverse"))
+  } else lapply(starts, function(start) tryCatch(do.call(stats::optim,
+    c(list(par = pmax(lower, pmin(upper, start)), fn = negloglik, method = method,
+           lower = lower, upper = upper, hessian = FALSE), dots)),
+    error = function(e) NULL))
+  usable <- vapply(fits, function(f) !is.null(f) && is.finite(f$value), logical(1))
+  if (!any(usable)) {
+    # The usual cause is a near-empty rejection cell: dA is identified almost
+    # entirely by rejections, so say so rather than leave the user guessing.
+    n_rej <- n_tp[3] + n_ta[3]
+    hint <- if (n_rej < 10) sprintf(paste0(
+      " Only %d of %d witnesses rejected the lineup, which leaves dA (detection",
+      " of culprit absence) with almost no information; a more conservative",
+      " decision criterion or more data is needed."), n_rej, sum(n_tp) + sum(n_ta))
+    else " Inspect sparse response cells and starting values."
+    stop("No finite 2-HT optimization result.", hint, call. = FALSE)
+  }
+  fits <- fits[usable]
+  opt_result <- fits[[which.min(vapply(fits, function(f) f$value, numeric(1)))]]
+  if (opt_result$convergence != 0L) warning("2-HT optimizer did not converge; do not interpret its uncertainty as a regular fit.", call. = FALSE)
+  boundary <- any(opt_result$par <= 1e-7 | opt_result$par >= 1 - 1e-7)
+  opt_result$hessian <- if (boundary) matrix(NA_real_, 4, 4) else
+    stats::optimHess(opt_result$par, negloglik, control = list(ndeps = rep(1e-5, 4)))
 
   # Extract estimates
   estimates <- opt_result$par
   names(estimates) <- c("dP", "dA", "b", "g")
 
   # Compute standard errors from Hessian
-  se <- tryCatch({
+  se <- if (boundary) {
+    warning("2-HT estimate is on a parameter boundary; regular Hessian standard errors are unavailable. Bootstrap intervals also need boundary qualification.", call. = FALSE)
+    rep(NA_real_, 4)
+  } else tryCatch({
     sqrt(diag(solve(opt_result$hessian)))
   }, error = function(e) {
     warning("Could not compute standard errors from Hessian")
@@ -232,6 +287,7 @@ fit_winter_2ht <- function(data,
     expected_counts = expected_counts,
     lineup_size = lineup_size,
     convergence = opt_result$convergence,
+    boundary = boundary,
     n_total = N_total,
     n_tp = N_tp,
     n_ta = N_ta
@@ -287,6 +343,12 @@ fit_winter_2ht <- function(data,
   }
   if (!identification %in% names(data)) {
     stop("Column '", identification, "' not found in data")
+  }
+  tp <- data[[target_present]]
+  ids <- tolower(as.character(data[[identification]]))
+  if (anyNA(tp) || !all(tp %in% c(FALSE, TRUE)) || anyNA(ids) ||
+      !all(ids %in% c("suspect", "filler", "reject"))) {
+    stop("Trials must have binary target presence and suspect/filler/reject responses, with no missing outcomes.", call. = FALSE)
   }
 
   # Split by target presence

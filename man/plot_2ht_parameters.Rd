@@ -24,7 +24,8 @@ A ggplot object
 }
 \description{
 Creates a visual display of the parameter estimates from a fitted 2-HT model,
-with error bars showing 95\% confidence intervals.
+with error bars showing the supplied bootstrap intervals, or regular 95\%
+normal intervals where available.
 }
 \examples{
 counts <- c(

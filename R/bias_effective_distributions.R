@@ -24,11 +24,12 @@ lineup_bias_boot_dist <- function(lineup_input,
                                   input_type = c("vector", "table"),
                                   R = 1000) {
   input_type <- match.arg(input_type)
-  if (length(target_pos) != 1 || !is.finite(target_pos)) {
-    stop("target_pos must be a finite scalar.", call. = FALSE)
+  if (!is.numeric(target_pos) || length(target_pos) != 1 || !is.finite(target_pos) ||
+      target_pos != floor(target_pos)) {
+    stop("target_pos must be a finite integer position.", call. = FALSE)
   }
-  if (length(k) != 1 || !is.finite(k) || k < 2) {
-    stop("k must be a finite scalar >= 2.", call. = FALSE)
+  if (!is.numeric(k) || length(k) != 1 || !is.finite(k) || k < 2 || k != floor(k)) {
+    stop("k must be a finite integer >= 2.", call. = FALSE)
   }
   k <- as.integer(k)
   target_pos <- as.integer(target_pos)
@@ -110,9 +111,14 @@ plot_lineup_bias_distribution <- function(boot_values, target_pos = NULL,
 #' @return A numeric vector of bootstrap estimates, carrying an \code{"n"}
 #'   attribute equal to the number of lineup choices resampled. With
 #'   \code{unbiased = TRUE}, resamples in which every choice fell on a
-#'   different member have an unbounded corrected estimate; they are dropped,
-#'   with a warning, and their number is recorded in an \code{"n_undefined"}
+#'   different member have an unbounded corrected estimate; they are retained
+#'   as \code{Inf}, with a warning, and their number is recorded in an \code{"n_undefined"}
 #'   attribute.
+#' @details Percentile or BCa intervals from the plug-in E' bootstrap are not
+#'   valid tests of exact uniform fairness. The population maximum E'=k is a
+#'   nonregular boundary. If the sample size is not a multiple of k, even the
+#'   largest attainable empirical E' is below k, so those intervals have zero
+#'   coverage at exact fairness. More bootstrap replicates cannot fix this.
 #' @export
 #'
 #' @examples
@@ -133,8 +139,8 @@ esize_boot_dist <- function(lineup_input,
   if (unbiased && metric == "malpass") {
     stop("unbiased applies only to metric = \"tredoux\".", call. = FALSE)
   }
-  if (length(k) != 1 || !is.finite(k) || k < 2) {
-    stop("k must be a finite scalar >= 2.", call. = FALSE)
+  if (!is.numeric(k) || length(k) != 1 || !is.finite(k) || k < 2 || k != floor(k)) {
+    stop("k must be a finite integer >= 2.", call. = FALSE)
   }
   k <- as.integer(k)
 
@@ -144,13 +150,12 @@ esize_boot_dist <- function(lineup_input,
   }
 
   if (metric == "tredoux" && unbiased) {
-    # The corrected estimator directly, so that an unbounded resample gives NA
-    # rather than a per-resample warning and the plug-in value
+    # Preserve unbounded resamples as Inf without repeated per-draw warnings.
     boot_fun <- function(lineup_vec, d) {
       counts <- as.numeric(table(factor(lineup_vec[d], levels = seq_len(k))))
       n <- sum(counts)
       concentration <- sum(counts * (counts - 1))
-      if (concentration > 0) n * (n - 1) / concentration else NA_real_
+      if (concentration > 0) n * (n - 1) / concentration else Inf
     }
   } else if (metric == "tredoux") {
     boot_fun <- function(lineup_vec, d) {
@@ -166,14 +171,14 @@ esize_boot_dist <- function(lineup_input,
 
   out <- as.vector(boot::boot(vec, boot_fun, R = R)$t)
   if (unbiased) {
-    undefined <- sum(is.na(out))
+    undefined <- sum(is.infinite(out))
     if (undefined > 0) {
       warning(undefined, " of ", R, " resamples had every choice on a different ",
-              "member, so the corrected estimate is unbounded; they are excluded.",
+              "member, so the corrected estimate is unbounded; they are retained as Inf.",
               call. = FALSE)
-      out <- out[!is.na(out)]
     }
     attr(out, "n_undefined") <- undefined
+    attr(out, "n_infinite") <- undefined
   }
   attr(out, "n") <- length(vec)
   out
@@ -206,13 +211,18 @@ esize_boot_dist <- function(lineup_input,
 plot_esize_distribution <- function(boot_values, metric = "Effective size",
                                     bins = NULL, binwidth = NULL) {
   values <- as.vector(boot_values)
+  n_infinite <- sum(is.infinite(values))
+  values <- values[is.finite(values)]
+  if (!length(values)) stop("There are no finite effective-size estimates to plot; the bootstrap distribution is unbounded or undefined.", call. = FALSE)
   df <- data.frame(value = values)
   hist_layer <- boot_hist_layer(values, bins = bins, binwidth = binwidth)
   ggplot2::ggplot(df, ggplot2::aes(x = value)) +
     hist_layer +
     ggplot2::geom_density(color = "#1f2d3d", linewidth = 1) +
     ggplot2::labs(x = metric, y = "Density",
-                  title = "Bootstrap distribution of effective size") +
+                  title = "Bootstrap distribution of effective size",
+                  caption = if (n_infinite > 0) paste(n_infinite,
+                    "unbounded estimates (Inf) retained in numerical summaries; histogram shows finite values.") else NULL) +
     ggplot2::theme_minimal(base_size = 12)
 }
 
@@ -278,7 +288,8 @@ boot_hist_layer <- function(values, bins = NULL, binwidth = NULL, n = NULL) {
 msdt_make_lineup_vector <- function(lineup_input, k, input_type) {
   if (input_type == "vector") {
     if (is.data.frame(lineup_input) || is.matrix(lineup_input)) {
-      vec <- lineup_input[[1]]
+      if (ncol(lineup_input) != 1L) stop("Vector input must have one column.", call. = FALSE)
+      vec <- if (is.matrix(lineup_input)) lineup_input[, 1L] else lineup_input[[1L]]
     } else {
       vec <- lineup_input
     }
@@ -294,12 +305,5 @@ msdt_make_lineup_vector <- function(lineup_input, k, input_type) {
     }
     return(as.integer(vec))
   }
-  tab <- as.numeric(lineup_input)
-  if (length(tab) != k) {
-    stop("Lineup table length must equal k.", call. = FALSE)
-  }
-  if (any(tab < 0)) {
-    stop("Lineup table cannot include negative counts.", call. = FALSE)
-  }
-  rep(seq_len(k), tab)
+  gen_linevec(lineup_input, k)
 }

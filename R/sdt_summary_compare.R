@@ -70,6 +70,10 @@ sdt_summary_from_counts <- function(hits,
 #' @param seed Optional random seed for bootstrap variance.
 #'
 #' @return A list with variance estimates for zH, zF, d', and c.
+#' @details Miller enumeration is exact for a binomial distribution at its
+#'   supplied probability. Here that probability is estimated from the observed
+#'   counts. The resulting variance and downstream Wald test are plug-in
+#'   approximations, not exact finite-sample inference.
 #' @examples
 #' v <- sdt_summary_variance(hits = 70, fas = 20, misses = 30, cr = 80,
 #'                           method = "miller")
@@ -182,6 +186,9 @@ compare_sdt_summary <- function(hits_a, fas_a, misses_a, cr_a,
   metric <- match.arg(metric)
   method <- match.arg(method)
   correction <- match.arg(correction)
+  if (min(hits_a, fas_a, misses_a, cr_a, hits_b, fas_b, misses_b, cr_b) < 5) {
+    warning("Sparse response cells: this is a large-sample Wald comparison, including with Miller plug-in variances; its false-positive rate need not equal the nominal level.", call. = FALSE)
+  }
 
   summ_a <- sdt_summary_from_counts(hits_a, fas_a, misses_a, cr_a, correction = correction)
   summ_b <- sdt_summary_from_counts(hits_b, fas_b, misses_b, cr_b, correction = correction)

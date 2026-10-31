@@ -84,7 +84,8 @@ make_fullroc_data <- function(data,
                                lineup_size = 6,
                                epsilon = 0.001,
                                innocent_suspect = "auto") {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
+  .validate_bins(data$confidence, conf_bins, "conf_bins")
 
   order <- match.arg(order)
 

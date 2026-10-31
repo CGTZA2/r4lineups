@@ -36,7 +36,7 @@ library(ggplot2)
 
 Eyewitness researchers frequently need to decide whether one identification
 procedure is better than another: whether simultaneous lineups beat sequential
-ones, whether a longer retention interval hurts, whether lineup size matters.
+ones, whether a longer retention interval hurts, whether lineup size is important.
 
 Since about 2012 the dominant way of answering such questions has been to
 compare **ROC curves**, and usually to reduce each curve to a single number —
@@ -112,7 +112,7 @@ procedure that genuinely improves memory moves the whole curve outward.
 witness identifies rarely; a willing one identifies often. Changing the
 criterion moves you *along* a curve without changing which curve you are on.
 
-The distinction matters because a procedure can change identification rates
+The distinction is important because a procedure can change identification rates
 without improving anything. If sequential lineups simply make witnesses more
 cautious, they will produce fewer false identifications *and* fewer correct
 ones, and a comparison of raw rates will make them look better or worse
@@ -159,7 +159,7 @@ way to push further to the right: doing so would require witnesses to identify
 someone more often than they are willing to, and the experiment provides no
 lever for that.
 
-Two consequences follow, and both matter:
+Two consequences follow, and both are important:
 
 1. **The full area under the curve cannot be computed** without inventing the
    part of the curve that was never observed. Anything that extrapolates to
@@ -194,8 +194,8 @@ ggplot(roc_df, aes(x = false_id_rate, y = correct_id_rate)) +
   theme_minimal(base_size = 12)
 ```
 
-Partial AUC is defended on four grounds, which are worth separating because they
-are not equally strong:
+Partial AUC is defended on four grounds, which are taken separately here because
+they are not equally strong:
 
 1. **It is computable.** Unlike full AUC, it requires no extrapolation into
    territory the data never reached. This is the serious argument.
@@ -253,17 +253,12 @@ knitr::kable(
 )
 ```
 
-Earlier versions of this package defaulted to the *larger* of the two maxima,
-which silently integrated each curve only as far as its own data went — so the
-two areas covered different intervals and the comparison was biased against
-whichever curve stopped sooner. That default has been corrected.
-
 ### The deeper objection
 
 Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) go further and argue
 that pAUC does not measure what researchers want it to measure. Their claim is
 that pAUC fails to track the **diagnostic utility** of a lineup — the thing that
-actually matters for deciding which procedure a police force should adopt — and
+is actually important for deciding which procedure a police force should adopt — and
 that neither choice of region repairs this. They propose *deviation from perfect
 performance* (DPP) instead, which is implemented in this package and covered in
 `vignette("calibration_decision_analysis")`.
@@ -306,8 +301,8 @@ $$Z = \frac{\widehat{pAUC}_1 - \widehat{pAUC}_2}{\widehat{SE}(\widehat{pAUC}_1 -
 
 and refers $Z$ to a standard normal distribution.
 
-It is worth being precise about what kind of test this is, because it is easy to
-assume it is something it is not. **It is a Wald test**: an estimate divided by
+It is important to make a point of clarification here about what kind of test
+this is, because it is easy to assume it is something it is not. **It is a Wald test**: an estimate divided by
 an estimate of its own standard error. It is *not* a comparison of two standard
 normal deviates, and it is not a test on transformed proportions. The normal
 reference distribution comes from the asymptotic normality of the estimator, not
@@ -329,7 +324,7 @@ directly and makes no distributional assumption in doing so.
 ### Is normality reasonable?
 
 The Wald test assumes the *difference in pAUC* is approximately normally
-distributed. That is checkable, and worth checking rather than assuming:
+distributed. That can be checked, rather than assumed:
 
 ```{r bootstrap_normality}
 comparison <- compare_pauc(
@@ -380,7 +375,7 @@ ggplot(data.frame(diff = boot_diff), aes(x = diff)) +
 Typically the distribution is close to normal but not exactly so — mild skew is
 common, because pAUC is bounded and the region is data-determined. With several
 hundred resamples a formal normality test will often reject even when the
-departure is too small to matter. The practical question is not whether
+departure is too small to be important. The practical question is not whether
 normality holds exactly but whether it holds well enough that the interval is
 about right, and that is best answered by comparing the two intervals directly:
 
@@ -526,9 +521,11 @@ $$\widehat{pAUC} = \sum_{i=2}^{k} \bigl(\text{FID}_i - \text{FID}_{i-1}\bigr) \c
 
 If $f_{\max}$ falls between two observed points, the curve is linearly
 interpolated to that point. If $f_{\max}$ lies beyond the last observed point,
-**no extrapolation is performed** — the sum simply stops at the data, which is
-why supplying a cutoff beyond a curve's reach produces a warning rather than a
-number.
+**no extrapolation is performed**: the sum simply stops at the data. Supplying a
+cutoff beyond a curve's reach therefore produces a warning **and** an area
+truncated at the observed reach, which is smaller than the area up to the
+requested cutoff would be. Read the warning; it means the two areas being
+compared may not cover the same false-ID range.
 
 ### How the standard error is obtained
 
@@ -581,22 +578,17 @@ and the two are not on comparable footings.
 
 ## References
 
-Gronlund, S. D., Wixted, J. T., & Mickes, L. (2014). Evaluating eyewitness
-identification procedures using receiver operating characteristic analysis.
-*Current Directions in Psychological Science, 23*(1), 3-10.
+::: {.hanging-indent}
 
-Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness
-1.0: A python eyewitness identification analysis toolkit. *Behavior Research
-Methods, 56*, 1533-1550.
+Gronlund, S. D., Wixted, J. T., & Mickes, L. (2014). Evaluating eyewitness identification procedures using receiver operating characteristic analysis. *Current Directions in Psychological Science, 23*(1), 3-10.
 
-Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova, S.
-(2019). Deviation from perfect performance measures the diagnostic utility of
-eyewitness lineups but partial area under the ROC curve does not. *Journal of
-Applied Research in Memory and Cognition, 8*(1), 50-59.
+Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024). pyWitness 1.0: A python eyewitness identification analysis toolkit. *Behavior Research Methods, 56*, 1533-1550.
 
-Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should
-abandon probative value and embrace receiver operating characteristic analysis.
-*Perspectives on Psychological Science, 7*(3), 275-278.
+Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova, S. (2019). Deviation from perfect performance measures the diagnostic utility of eyewitness lineups but partial area under the ROC curve does not. *Journal of Applied Research in Memory and Cognition, 8*(1), 50-59.
+
+Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory should abandon probative value and embrace receiver operating characteristic analysis. *Perspectives on Psychological Science, 7*(3), 275-278.
+
+:::
 
 ## Further Reading
 

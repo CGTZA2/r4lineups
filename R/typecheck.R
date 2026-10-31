@@ -11,7 +11,7 @@ typecheck <- function(df) {
     if (ncol(df) != 1L) {
       stop("Lineup data must be a vector or a one-column object.", call. = FALSE)
     }
-    df <- df[[1L]]
+    df <- if (is.matrix(df)) df[, 1L] else df[[1L]]
   }
 
   if (is.factor(df)) {

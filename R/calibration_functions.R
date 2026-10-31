@@ -51,6 +51,9 @@
 #' When \code{choosers_only = TRUE}, only suspect identifications are included (standard
 #' for eyewitness calibration analysis). When \code{choosers_only = FALSE}, all responses
 #' are included with fillers and rejections counted as incorrect.
+#' Consequently that option measures correct-suspect identification across all
+#' responses, not general decision accuracy: a correct TA rejection still scores
+#' zero. Do not interpret it as calibration of the correctness of every decision.
 #'
 #' If target-absent data contain designated innocent-suspect identifications,
 #' those observations are used directly. Otherwise, each target-absent filler
@@ -91,7 +94,8 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
                                    lineup_size = 6,
                                    confidence_scale = c("auto", "0-1", "0-100"),
                                    innocent_suspect = "auto") {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
+  .validate_bins(data$confidence, confidence_bins)
 
   confidence_scale <- match.arg(confidence_scale)
 
@@ -211,6 +215,9 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
   }
   calibration_results$mean_confidence_prop <- calibration_results$mean_confidence / conf_scale
   data_filtered$confidence_prop <- data_filtered$confidence / conf_scale
+  if (any(data_filtered$confidence_prop < 0 | data_filtered$confidence_prop > 1)) {
+    stop("Calibration confidence must lie within the declared probability scale.", call. = FALSE)
+  }
 
   # Compute overall statistics
   N <- sum(data_filtered$.weight)
@@ -327,10 +334,6 @@ make_calibration_by_condition <- function(data, condition_vars,
   }
 
   condition_levels <- unique(data$condition_combo)
-  if (choosers_only) {
-    innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
-  }
-
   # Compute calibration for each condition
   results_by_condition <- list()
   summary_rows <- list()
@@ -552,8 +555,11 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
       )
       p <- p + geom_text(
         data = stats_df,
-        aes(x = 0.2, y = 0.85, label = stats_label),
-        hjust = 0,
+        # Bottom-right corner: calibration points rarely fall there, whereas
+        # the old top-left position sat on the low-confidence bin.
+        aes(x = 1, y = 0.02, label = stats_label),
+        hjust = 1,
+        vjust = 0,
         size = 3,
         color = "black",
         inherit.aes = FALSE

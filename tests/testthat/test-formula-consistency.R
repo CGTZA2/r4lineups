@@ -142,12 +142,12 @@ test_that("esize_T(unbiased = TRUE) removes the small-sample downward bias", {
 test_that("esize_T bias correction degrades gracefully", {
   # Fewer than two choices: correction undefined
   expect_warning(one <- esize_T(c(1, 0, 0), unbiased = TRUE), "undefined")
-  expect_equal(one, esize_T(c(1, 0, 0)))
+  expect_true(is.na(one))
 
   # Every choice on a different member: sum(o(o-1)) is 0, correction unbounded
   expect_warning(distinct <- esize_T(c(1, 1, 1, 1), unbiased = TRUE),
                  "different lineup member")
-  expect_equal(distinct, esize_T(c(1, 1, 1, 1)))
+  expect_true(is.infinite(distinct))
 
   expect_error(esize_T(c(5, 5), unbiased = "yes"), "TRUE or FALSE")
 })

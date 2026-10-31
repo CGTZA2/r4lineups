@@ -53,14 +53,15 @@ returning a comprehensive similarity analysis useful for lineup fairness
 assessment.
 }
 \details{
-This is the primary function for assessing lineup fairness from a
-face similarity perspective. Foils that are too similar to the target
-(low distance, high similarity, verified=TRUE) may bias the lineup.
-Foils that are too dissimilar may make the target stand out.
-
-For a fair lineup, foils should have moderate similarity to the target,
-ideally within a range that makes them plausible alternatives without
-being too close to the target.
+This function describes how similar each foil is to the target in a face
+recognition model's embedding space. It does not assess fairness: no
+validated similarity range defines a fair lineup, and embedding similarity
+is not the same as resemblance judged by people or as mock-witness choice.
+Foils very dissimilar to the target may make the target stand out; foils
+the model judges to be the same identity (verified = TRUE) deserve
+inspection. Rows are ordered by rank (most similar first), and the model's
+distance threshold is stored in \code{attr(x, "threshold")}. For cosine,
+similarity = 1 - distance, which ranges from -1 to 1.
 }
 \examples{
 \dontrun{

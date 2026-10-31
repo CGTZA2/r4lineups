@@ -107,7 +107,7 @@ fmt_ci <- function(x, digits = 3) {
 }
 
 fmt_num <- function(x, digits = 3) {
-  if (is.null(x) || length(x) == 0 || !is.finite(x)) {
+  if (is.null(x) || length(x) == 0 || is.na(x)) {
     return("—")
   }
   format(round(x, digits), nsmall = digits)

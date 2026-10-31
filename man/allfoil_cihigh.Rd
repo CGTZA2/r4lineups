@@ -9,7 +9,7 @@ allfoil_cihigh(linetabprops, sumlineup)
 \arguments{
 \item{linetabprops}{A dataframe of bootstrapped lineup proportions}
 
-\item{sumlineup}{Number of members in a lineup}
+\item{sumlineup}{Number of mock-witness observations used to estimate each proportion.}
 }
 \description{
 Function to compute ci high for each foil in a lineup

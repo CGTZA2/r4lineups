@@ -47,7 +47,8 @@ An S3 object of class "sdt_roc_fit" containing:
   \itemize{
     \item dprime: Overall discriminability (d')
     \item criteria: Decision criterion for each confidence level (c values)
-    \item variance_ratio: Ratio of target SD to lure SD (if unequal_variance)
+    \item variance_ratio: Ratio of lure SD to target SD, the z-ROC slope
+      (if unequal_variance)
     \item slope: Slope of z-ROC
     \item intercept: Intercept of z-ROC
     \item roc_data: Original ROC data with z-transforms

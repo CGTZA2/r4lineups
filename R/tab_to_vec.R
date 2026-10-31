@@ -13,11 +13,14 @@
 #'lineup_tab <- table(lineup_vec)
 #'
 #'#Call:
-#'lineup_vec <- gen_linevec(lineup_tab, 3)
+#'lineup_vec <- gen_linevec(lineup_tab, 6)
 #'@importFrom purrr map2
 #'@export
 
 gen_linevec <- function (lineup_tab, k){
-  line_index <- 1:(length(lineup_tab))
-  map2(line_index, lineup_tab, rep_index) %>% unlist
+  datacheck3(lineup_tab, k)
+  counts <- as.numeric(lineup_tab)
+  if (any(counts != floor(counts))) stop("Choice counts must be whole numbers.", call. = FALSE)
+  positions <- if (is.null(names(lineup_tab))) seq_len(k) else as.integer(names(lineup_tab))
+  sort(rep(positions, counts))
 }

@@ -25,8 +25,8 @@ A single integer: the number of lineup members whose bootstrapped
        chose at a rate not distinguishable from guessing.
 }
 \description{
-Function for computing effective size (Malpass, 1981) counting foils who fall
-within the CI for chance guessing
+A package-specific count of members whose choice-proportion intervals include
+chance guessing. This is distinct from Malpass' continuous effective size.
 }
 \details{
 Because the result is a count of members rather than a continuous

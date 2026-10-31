@@ -32,7 +32,10 @@
 
 gen_boot_propmean_se <- function (lineuprops){
     lineuprops <- as.numeric(lineuprops)
-    valid <- lineuprops[is.finite(lineuprops)]
+    if (any(!is.finite(lineuprops))) {
+      stop("Bootstrap estimates must all be finite; failed draws must be reported explicitly.", call. = FALSE)
+    }
+    valid <- lineuprops
     if (length(valid) < 2L) {
       stop("lineuprops must contain at least two finite bootstrap estimates.", call. = FALSE)
     }

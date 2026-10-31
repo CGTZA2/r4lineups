@@ -64,12 +64,12 @@ awkward properties:
    consequential.
 
 The GLM formulation avoids all four by modelling the individual response rather
-than the per-participant summary. It turns out that d′ falls straight out of a
-probit regression, so nothing is lost by doing it this way.
+than the per-participant summary. d′ follows directly from a probit regression,
+so nothing is lost by doing it this way.
 
 ### Why a probit regression gives you d′
 
-The connection is exact rather than approximate, and worth seeing.
+The connection is exact rather than approximate.
 
 Signal detection theory says the witness's evidence is normally distributed with
 mean 0 for new items and mean d′ for old ones, with a criterion at some point
@@ -123,7 +123,7 @@ df$said_old <- rbinom(
 
 Note that both participants **and items** vary. That is realistic — some faces
 are simply more memorable than others — and it is what makes the next section
-matter.
+important.
 
 ## Single-level GLM
 
@@ -151,8 +151,8 @@ extract_sdt_metrics(glmm_fit)
 
 ## Participants, items, or both
 
-This is the substantive reason to prefer the multilevel formulation, and it is
-an old argument: Clark (1973) pointed out that treating stimulus items as fixed
+This is the main reason to prefer the multilevel formulation, and it is an old
+argument: Clark (1973) pointed out that treating stimulus items as fixed
 means any conclusion strictly applies only to the particular items used. In
 recognition memory the items are faces or words, and they differ in
 memorability. If your analysis treats them as fixed, you are entitled to
@@ -302,7 +302,7 @@ under 0/1 coding the intercept is not \(c\).
    vary across participants is often the more realistic model and requires more
    data to fit.
 
-### A limitation worth naming
+### A limitation
 
 This treats the response as binary — "old" or "new". Recognition data usually
 carry confidence as well, and reducing a confidence rating to a binary response
@@ -313,16 +313,15 @@ condition then gives the unequal-variance model. That is not implemented here.
 
 ## References
 
-Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting linear
-mixed-effects models using lme4. *Journal of Statistical Software, 67*(1), 1-48.
+::: {.hanging-indent}
 
-Clark, H. H. (1973). The language-as-fixed-effect fallacy: A critique of
-language statistics in psychological research. *Journal of Verbal Learning and
-Verbal Behavior, 12*(4), 335-359.
+Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software, 67*(1), 1-48.
 
-Wright, D. B., Horry, R., & Skagerberg, E. M. (2009). Functions for traditional
-and multilevel approaches to signal detection theory. *Behavior Research
-Methods, 41*(2), 257-267.
+Clark, H. H. (1973). The language-as-fixed-effect fallacy: A critique of language statistics in psychological research. *Journal of Verbal Learning and Verbal Behavior, 12*(4), 335-359.
+
+Wright, D. B., Horry, R., & Skagerberg, E. M. (2009). Functions for traditional and multilevel approaches to signal detection theory. *Behavior Research Methods, 41*(2), 257-267.
+
+:::
 
 ## Further Reading
 

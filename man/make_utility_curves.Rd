@@ -64,9 +64,14 @@ average utility.}
 \value{
 A list containing:
   \itemize{
-    \item utility_data: Dataframe with criterion, hit rate, false alarm rate,
-      and expected utility
-    \item max_utility: Maximum expected utility and corresponding criterion
+    \item utility_data: Dataframe with criterion, strategy, hit rate,
+      false alarm rate, and expected utility. Each row is the rule "accept
+      suspect IDs with confidence >= criterion". The \code{"reject_all"}
+      row has a criterion above the observed identification confidences
+      and supplied grid (possibly \code{Inf}), so that
+      applying it accepts no identification.
+    \item max_utility: Maximum expected utility, with the corresponding
+      criterion and strategy
     \item avg_utility: Average expected utility across all criteria
     \item utility_all_ids: Expected utility if all IDs are accepted
     \item base_rate: Base rate used

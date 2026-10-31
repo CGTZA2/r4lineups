@@ -225,22 +225,23 @@ bootstrap_anri <- function(data,
   # Generate bootstrap samples
   n_obs <- nrow(data)
   bootstrap_values <- replicate(n_bootstrap, {
-    indices <- sample(1:n_obs, n_obs, replace = TRUE)
+    # TP and TA totals are fixed by the experimental design.
+    strata <- split(seq_len(n_obs), as.logical(data$target_present))
+    indices <- unlist(lapply(strata, .resample_values),
+                      use.names = FALSE)
     bootstrap_anri_once(indices)
   })
 
-  # Remove NA values (from failed bootstrap samples)
-  bootstrap_values <- bootstrap_values[!is.na(bootstrap_values)]
-
-  if (length(bootstrap_values) < n_bootstrap * 0.9) {
-    warning(sprintf("More than 10%% of bootstrap samples failed. Only %d/%d successful.",
-                   length(bootstrap_values), n_bootstrap))
+  valid <- is.finite(bootstrap_values)
+  if (any(!valid)) {
+    warning(sprintf("%d/%d bootstrap samples were undefined or failed; reported intervals condition on the %d successful fits.",
+                    sum(!valid), n_bootstrap, sum(valid)), call. = FALSE)
   }
 
   # Compute percentile CIs
   alpha <- 1 - conf_level
-  ci_lower <- quantile(bootstrap_values, alpha / 2)
-  ci_upper <- quantile(bootstrap_values, 1 - alpha / 2)
+  ci_lower <- if (sum(valid) >= 2L) quantile(bootstrap_values[valid], alpha / 2) else NA_real_
+  ci_upper <- if (sum(valid) >= 2L) quantile(bootstrap_values[valid], 1 - alpha / 2) else NA_real_
 
   list(
     anri = anri_point$anri,
@@ -248,7 +249,9 @@ bootstrap_anri <- function(data,
     ci_lower = as.numeric(ci_lower),
     ci_upper = as.numeric(ci_upper),
     conf_level = conf_level,
-    n_bootstrap = length(bootstrap_values),
+    n_bootstrap = sum(valid),
+    n_bootstrap_requested = n_bootstrap,
+    n_failed = sum(!valid),
     n_total = anri_point$n_total,
     n_bins = anri_point$n_bins,
     bootstrap_distribution = bootstrap_values
@@ -332,9 +335,6 @@ compare_anri <- function(data,
                         innocent_suspect = "auto") {
 
   confidence_scale <- match.arg(confidence_scale)
-  if (choosers_only) {
-    innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
-  }
 
   # Validate group variable
   if (!group_var %in% names(data)) {
@@ -353,6 +353,8 @@ compare_anri <- function(data,
   # Split data by group
   data_group1 <- data[data[[group_var]] == groups[1], ]
   data_group2 <- data[data[[group_var]] == groups[2], ]
+  method1 <- if (choosers_only) .resolve_innocent_suspect(data_group1, innocent_suspect) else innocent_suspect
+  method2 <- if (choosers_only) .resolve_innocent_suspect(data_group2, innocent_suspect) else innocent_suspect
 
   # Bootstrap each group
   boot_group1 <- bootstrap_anri(
@@ -364,7 +366,7 @@ compare_anri <- function(data,
     conf_level = conf_level,
     seed = if (!is.null(seed)) seed else NULL,
     confidence_scale = confidence_scale,
-    innocent_suspect = innocent_suspect
+    innocent_suspect = method1
   )
 
   boot_group2 <- bootstrap_anri(
@@ -376,7 +378,7 @@ compare_anri <- function(data,
     conf_level = conf_level,
     seed = if (!is.null(seed)) seed + 1 else NULL,
     confidence_scale = confidence_scale,
-    innocent_suspect = innocent_suspect
+    innocent_suspect = method2
   )
 
   # Compute bootstrap distribution of difference
@@ -386,12 +388,14 @@ compare_anri <- function(data,
 
   diff_distribution <- boot_group1$bootstrap_distribution[1:n_boot] -
                        boot_group2$bootstrap_distribution[1:n_boot]
+  valid_diff <- is.finite(diff_distribution)
+  if (sum(valid_diff) < 2L) stop("Fewer than two valid ANRI comparison replicates; no interval can be estimated.", call. = FALSE)
 
   # Point estimate and CI for difference
   diff_point <- boot_group1$anri - boot_group2$anri
   alpha <- 1 - conf_level
-  ci_lower <- quantile(diff_distribution, alpha / 2)
-  ci_upper <- quantile(diff_distribution, 1 - alpha / 2)
+  ci_lower <- quantile(diff_distribution[valid_diff], alpha / 2)
+  ci_upper <- quantile(diff_distribution[valid_diff], 1 - alpha / 2)
 
   # Check if significant (CI excludes 0)
   significant <- (ci_lower > 0 & ci_upper > 0) | (ci_lower < 0 & ci_upper < 0)
@@ -407,7 +411,9 @@ compare_anri <- function(data,
     conf_level = conf_level,
     significant = significant,
     group_names = c(as.character(groups[1]), as.character(groups[2])),
-    n_bootstrap = n_boot,
+    n_bootstrap = sum(valid_diff),
+    n_bootstrap_requested = n_boot,
+    n_failed = sum(!valid_diff),
     bootstrap_results_group1 = boot_group1,
     bootstrap_results_group2 = boot_group2,
     difference_distribution = diff_distribution
