@@ -2,7 +2,8 @@
 #'
 #' @description
 #' Creates a visual display of the parameter estimates from a fitted 2-HT model,
-#' with error bars showing 95\% confidence intervals.
+#' with error bars showing the supplied bootstrap intervals, or regular 95\%
+#' normal intervals where available.
 #'
 #' @param x A \code{winter_2ht} object, or a \code{winter_2ht_boot} object
 #'   from \code{\link{boot_winter_2ht}}. Given the latter, the plotted intervals
@@ -91,8 +92,10 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
     ggplot2::scale_x_discrete(labels = param_labels[which])
 
   # Add error bars if requested
-  if (show_ci && !any(is.na(se))) {
+  available <- is.finite(plot_data$lower) & is.finite(plot_data$upper)
+  if (show_ci && any(available)) {
     p <- p + ggplot2::geom_errorbar(
+      data = plot_data[available, , drop = FALSE],
       ggplot2::aes(ymin = pmax(lower, 0), ymax = pmin(upper, 1)),
       width = 0.2,
       linewidth = 0.8
@@ -100,8 +103,13 @@ plot_2ht_parameters <- function(x, ..., which = c("dP", "dA", "b", "g"), show_ci
   }
 
   # Add value labels above the interval, where the whisker cannot cover them
-  show_bars <- show_ci && !any(is.na(se))
-  plot_data$label_y <- if (show_bars) pmin(plot_data$upper, 1) else plot_data$estimate
+  plot_data$label_y <- ifelse(show_ci & available,
+                              pmin(plot_data$upper, 1), plot_data$estimate)
+  p <- p + ggplot2::labs(caption = if (!is.null(boot_ci))
+    "Bootstrap intervals are approximate; parameter boundaries require caution."
+    else if (show_ci && any(!available))
+      "Regular normal intervals unavailable for this boundary or singular fit."
+    else "95% normal approximation; bounds clipped for display.")
   p <- p + ggplot2::geom_text(
     data = plot_data,
     ggplot2::aes(y = label_y, label = sprintf("%.3f", estimate)),

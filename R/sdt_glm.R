@@ -199,6 +199,10 @@ fit_sdt_glmm <- function(data,
 #'
 #' Extracts d' (probit) or ln(OR) (logit) from SDT GLM/GLMM fits.
 #' Criterion is reported only when is_old was centered to -0.5/+0.5.
+#' With covariates these quantities are evaluated at zero/reference covariates;
+#' interactions can change them at other covariate values. GLMM coefficients
+#' are conditional latent-scale effects, not marginal population SDT measures.
+#' A logit coefficient is log odds ratio rather than normal-theory d-prime.
 #'
 #' @param model A glm or glmerMod object produced by fit_sdt_glm/fit_sdt_glmm.
 #' @param link Optional. If NULL, inferred from the model family.

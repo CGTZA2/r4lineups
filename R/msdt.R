@@ -22,7 +22,9 @@ dmax_filler <- function(x, lineup_size, log = FALSE) {
   m <- msdt_check_lineup_size(lineup_size)
   n <- m - 1
   if (log) {
-    return(log(n) + stats::dnorm(x, log = TRUE) + (n - 1) * log(stats::pnorm(x)))
+    if (n == 1) return(stats::dnorm(x, log = TRUE))
+    return(log(n) + stats::dnorm(x, log = TRUE) +
+             (n - 1) * stats::pnorm(x, log.p = TRUE))
   }
   n * stats::dnorm(x) * stats::pnorm(x)^(n - 1)
 }
@@ -32,14 +34,14 @@ dmax_filler <- function(x, lineup_size, log = FALSE) {
 pmax_filler <- function(q, lineup_size, lower.tail = TRUE, log.p = FALSE) {
   m <- msdt_check_lineup_size(lineup_size)
   n <- m - 1
-  cdf <- stats::pnorm(q)^n
-  if (!lower.tail) {
-    cdf <- 1 - cdf
-  }
-  if (log.p) {
-    return(log(cdf))
-  }
-  cdf
+  log_cdf <- n * stats::pnorm(q, log.p = TRUE)
+  if (lower.tail) return(if (log.p) log_cdf else exp(log_cdf))
+  log_single_tail <- stats::pnorm(q, lower.tail = FALSE, log.p = TRUE)
+  # At very small tails log(1 - Phi(q)^n) = log(n) + log(1-Phi(q))
+  # to machine precision; taking 1 - exp(log_cdf) would round to zero.
+  log_tail <- ifelse(log_single_tail < -36,
+                     log(n) + log_single_tail, log(-expm1(log_cdf)))
+  if (log.p) log_tail else exp(log_tail)
 }
 
 #' @rdname dmax_filler
@@ -47,20 +49,19 @@ pmax_filler <- function(q, lineup_size, lower.tail = TRUE, log.p = FALSE) {
 qmax_filler <- function(p, lineup_size, lower.tail = TRUE, log.p = FALSE) {
   m <- msdt_check_lineup_size(lineup_size)
   n <- m - 1
-  if (log.p) {
-    p <- exp(p)
-  }
-  if (!lower.tail) {
-    p <- 1 - p
-  }
-  stats::qnorm(p^(1 / n))
+  lp <- if (log.p) p else log(p)
+  if (lower.tail) return(stats::qnorm(lp / n, log.p = TRUE))
+  log_single_tail <- ifelse(lp < -36, lp - log(n),
+    log(-expm1(log1p(-exp(lp)) / n)))
+  stats::qnorm(log_single_tail, lower.tail = FALSE, log.p = TRUE)
 }
 
 #' @rdname dmax_filler
 #' @export
 rmax_filler <- function(n, lineup_size) {
-  if (length(n) != 1 || n < 0) {
-    stop("n must be a non-negative scalar.", call. = FALSE)
+  if (!is.numeric(n) || length(n) != 1 || !is.finite(n) ||
+      n < 0 || n != floor(n)) {
+    stop("n must be a non-negative integer.", call. = FALSE)
   }
   u <- stats::runif(n)
   qmax_filler(u, lineup_size = lineup_size)

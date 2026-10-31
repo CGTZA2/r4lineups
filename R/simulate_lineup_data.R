@@ -627,7 +627,12 @@ print.simulated_lineup_data <- function(x, ...) {
 #'     \item mean_effect: Mean observed difference in pAUC
 #'     \item sd_effect: Standard deviation of the observed difference
 #'     \item n_valid: Simulations that produced a usable test
+#'     \item n_failed: Attempted simulations without a usable test
+#'     \item n_attempted: All attempted simulations
 #'   }
+#' Power and its Monte Carlo standard error are conditional on usable tests.
+#' Failures are retained in the attempted count and trigger a warning; compare
+#' failure rates as well as conditional power when assessing a design.
 #'
 #' @seealso \code{\link{compare_pauc}}, \code{\link{simulate_lineup_data}}
 #'
@@ -670,9 +675,13 @@ simulate_power_analysis <- function(sample_sizes,
       !is.finite(d_prime_null) || d_prime_null < 0) {
     stop("d_prime_null must be a finite non-negative scalar.", call. = FALSE)
   }
-  if (d_prime_null >= d_prime) {
-    warning("d_prime_null is not smaller than d_prime, so there is no effect ",
-            "to detect. Power will approximate alpha.", call. = FALSE)
+  if (!is.numeric(n_simulations) || length(n_simulations) != 1L ||
+      !is.finite(n_simulations) || n_simulations < 1 ||
+      n_simulations != floor(n_simulations)) {
+    stop("n_simulations must be a positive integer.", call. = FALSE)
+  }
+  if (d_prime_null == d_prime) {
+    warning("The generating d_prime values are equal; this evaluates the test's null rejection rate, which need not equal alpha in small or sparse samples.", call. = FALSE)
   }
 
   if (!is.null(seed)) {
@@ -725,11 +734,19 @@ simulate_power_analysis <- function(sample_sizes,
       } else {
         p_values[sim] <- out[[1]]
       }
+      if (!is.na(p_values[sim]) && (!is.finite(p_values[sim]) ||
+          p_values[sim] < 0 || p_values[sim] > 1)) {
+        stop("test_function must return a p-value in [0, 1] or NA for a failed analysis.", call. = FALSE)
+      }
     }
 
     valid <- !is.na(p_values)
     n_valid <- sum(valid)
     power <- if (n_valid > 0) mean(p_values[valid] < alpha) else NA_real_
+    if (n_valid < n_simulations) {
+      warning(n_simulations - n_valid, " of ", n_simulations,
+              " analyses failed; power is conditional on successful analyses.", call. = FALSE)
+    }
 
     results[[length(results) + 1]] <- data.frame(
       sample_size = n,
@@ -740,7 +757,9 @@ simulate_power_analysis <- function(sample_sizes,
       power_se    = if (n_valid > 0) sqrt(power * (1 - power) / n_valid) else NA_real_,
       mean_effect = mean(effects, na.rm = TRUE),
       sd_effect   = stats::sd(effects, na.rm = TRUE),
-      n_valid     = n_valid
+      n_valid     = n_valid,
+      n_failed    = n_simulations - n_valid,
+      n_attempted = n_simulations
     )
   }
 

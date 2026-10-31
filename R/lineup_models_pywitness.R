@@ -187,13 +187,15 @@ check_pywitness_deps <- function(envname = .pywitness_default_env,
     method = "Nelder-Mead",
     integration_sigma = 8,
     chi2_variance = "expected",
+    objective = "corrected",
     verbose = FALSE
   )
   if (is.null(control)) return(defaults)
   if (!is.list(control) || is.null(names(control)) ||
       any(!names(control) %in% names(defaults))) {
     stop("control must be a named list containing only maxiter, method, ",
-         "integration_sigma, chi2_variance, or verbose.", call. = FALSE)
+         "integration_sigma, chi2_variance, objective, or verbose.",
+         call. = FALSE)
   }
   out <- utils::modifyList(defaults, control)
   if (!is.numeric(out$maxiter) || length(out$maxiter) != 1L ||
@@ -215,6 +217,7 @@ check_pywitness_deps <- function(envname = .pywitness_default_env,
   }
   out$chi2_variance <- match.arg(out$chi2_variance,
                                  c("expected", "observed"))
+  out$objective <- match.arg(out$objective, c("corrected", "pywitness"))
   if (!is.logical(out$verbose) || length(out$verbose) != 1L ||
       is.na(out$verbose)) {
     stop("control$verbose must be TRUE or FALSE.", call. = FALSE)
@@ -555,12 +558,23 @@ check_pywitness_deps <- function(envname = .pywitness_default_env,
 
 .pywitness_fit_one <- function(pyw, processed, model, prepared, observed,
                                variance, shared_variance, starts, control) {
+  if (identical(control$chi2_variance, "observed") && any(observed$observed <= 0)) {
+    stop("Observed-denominator chi-squared requires positive observed cells; use expected denominators for sparse cells.", call. = FALSE)
+  }
   constructor <- pyw[[.lineup_model_class(model, shared_variance)]]
   fit <- constructor(
     processed,
     integrationSigma = as.numeric(control$integration_sigma),
     chi2Var = control$chi2_variance
   )
+  # objective = "pywitness" leaves the engine untouched, to reproduce its own
+  # results (e.g. published fits); the default corrects its rejection cells.
+  if (identical(control$objective, "corrected")) {
+    adapter <- new.env(parent = baseenv())
+    reticulate::source_python(system.file("python", "chi_square_adapter.py",
+                                         package = "r4lineups"), envir = adapter)
+    fit <- adapter$correct_chi_square_objective(fit)
+  }
   if (variance == "equal") fit$setEqualVariance() else fit$setUnequalVariance()
 
   if (model %in% c("ensemble", "best_rest") ||
@@ -630,7 +644,11 @@ check_pywitness_deps <- function(envname = .pywitness_default_env,
 #'   or a named list of such vectors indexed by model.
 #' @param control Named list controlling \code{maxiter}, optimizer
 #'   \code{method}, numerical \code{integration_sigma},
-#'   \code{chi2_variance}, and \code{verbose}.
+#'   \code{chi2_variance}, \code{objective}, and \code{verbose}.
+#'   \code{objective = "corrected"} (the default) applies the per-fit
+#'   correction described in Details; \code{objective = "pywitness"} leaves the
+#'   engine's own objective and optimizer untouched, which reproduces results
+#'   from pyWitness itself, including published fits.
 #' @param envname Name or path of the isolated pyWitness virtual environment.
 #'
 #' @return An R-native \code{"lineup_model_comparison"} object containing
@@ -648,8 +666,13 @@ check_pywitness_deps <- function(envname = .pywitness_default_env,
 #' contain only one non-missing value; otherwise the data must be subset before
 #' fitting.
 #'
-#' The audited pyWitness revision estimates parameters by minimizing Pearson
-#' chi-squared. Thus, \code{loglik_at_estimate} is a multinomial likelihood
+#' By default the bridge corrects the pinned engine's reversed observed/expected
+#' rejection-cell variance denominators in memory for each fit, without changing
+#' its installed environment; \code{control = list(objective = "pywitness")}
+#' turns the correction off. With the default \code{chi2_variance = "expected"},
+#' every cell therefore uses the Pearson denominator. With \code{"observed"},
+#' every cell uses the observed denominator (the Neyman discrepancy), requiring
+#' positive observed cells. Thus, \code{loglik_at_estimate} is a multinomial likelihood
 #' evaluated at the minimum-Pearson estimate, not a maximized likelihood. AIC
 #' and BIC are returned as \code{NA}; computing them from a non-likelihood
 #' optimum would be invalid.
@@ -826,7 +849,9 @@ fit_lineup_models <- function(
       target_absent_suspect_ids_collapsed = prepared$ta_suspect_collapsed,
       fair_simultaneous_lineup = TRUE,
       best_rest_ensemble_duplicate = duplicated_parameterization,
-      estimator = "minimum Pearson chi-squared"
+      estimator = if (identical(control$objective, "pywitness")) "pyWitness chi-squared objective (uncorrected)"
+                  else if (control$chi2_variance == "expected") "minimum Pearson chi-squared" else "minimum Neyman chi-squared",
+      chi2_variance = control$chi2_variance
     ),
     engine = list(
       name = "pyWitness",
@@ -835,6 +860,9 @@ fit_lineup_models <- function(
       audited_revision = .pywitness_audited_revision,
       installation_source = .pywitness_archive,
       environment = envname,
+      objective_correction = if (identical(control$objective, "corrected"))
+        "Rejection-cell variance denominators corrected per fit; installed engine unchanged"
+      else "None: pyWitness objective and optimizer used as installed",
       durable_python_object = FALSE
     ),
     information_criteria = list(
