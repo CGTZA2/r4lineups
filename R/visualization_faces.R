@@ -1,7 +1,8 @@
 #' Plot Lineup Similarity Results
 #'
 #' Creates a bar plot showing the similarity of each foil to the target face,
-#' useful for visualizing lineup fairness.
+#' describing scores in a recognition model's embedding space, not measuring
+#' or certifying lineup fairness.
 #'
 #' @param lineup A lineup_similarity object from \code{\link{lineup_similarity}}.
 #' @param show_threshold Logical. If TRUE, adds a horizontal line at the
@@ -89,7 +90,7 @@ plot_lineup_similarity <- function(lineup,
     p <- p + ggplot2::scale_fill_gradient(
       low = "#3498db",   # blue = less similar
       high = "#e74c3c",  # red = more similar
-      limits = c(0, 1)
+      limits = c(-1, 1)
     )
   } else {
     p <- p + ggplot2::scale_fill_gradient(

@@ -42,7 +42,7 @@
 #' # Check similarity score
 #' result$similarity  # 0.85 would mean very similar
 #' 
-#' # Check if they'd be identified as same person (too similar for fair lineup)
+#' # Inspect the model's same-identity flag; this is not a fairness judgment.
 #' result$verified  # TRUE would indicate problematic similarity
 #' }
 #'
