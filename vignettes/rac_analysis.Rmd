@@ -203,7 +203,7 @@ two hundred.
 # What is the actual range?
 round(quantile(choosers$response_time, c(0, 0.25, 0.5, 0.75, 1)))
 
-time_bins <- c(0, 5000, 7500, 10000, 20000)
+time_bins <- c(0, 5000, 7500, 10000, Inf)
 ```
 
 ## Compute and plot
@@ -250,7 +250,7 @@ cac$plot + ggtitle("CAC: confidence and accuracy") +
 | **X-axis** | Response time | Confidence |
 | **Measure** | Recorded automatically | Self-reported |
 | **Interpretation** | Faster is taken to indicate stronger memory | Higher confidence is taken to indicate stronger memory |
-| **Robustness** | Not affected by feedback or post-event information | Can be inflated by confirming feedback |
+| **Robustness** | A recorded decision time cannot be changed by later feedback; earlier information, procedures and timing conventions can still affect it | Can be inflated by confirming feedback |
 | **Typical strength** | Weaker relationship with accuracy | Stronger relationship with accuracy |
 
 The two are related but not redundant: in these data the correlation between
@@ -262,7 +262,7 @@ which leaves a good deal of independent variation.
 Finer bins reveal more structure, at the cost of stability:
 
 ```{r fine_bins}
-fine_bins <- seq(0, 20000, by = 2500)
+fine_bins <- c(seq(0, 20000, by = 2500), Inf)
 
 rac_fine <- make_rac(lineup_data, time_bins = fine_bins, show_plot = FALSE,
                      show_errorbars = TRUE, show_n = TRUE)
@@ -270,7 +270,7 @@ rac_fine <- make_rac(lineup_data, time_bins = fine_bins, show_plot = FALSE,
 knitr::kable(
   as.data.frame(rac_fine$rac_data)[, c("response_time", "n_total", "accuracy")],
   digits = 3, row.names = FALSE,
-  caption = "RAC with 2.5-second bins, simulated data. Note the small n in the extreme bins."
+  caption = "RAC with 2.5-second bins plus an overflow bin, simulated data. Note the small n in the extreme bins."
 )
 ```
 

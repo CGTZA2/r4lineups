@@ -67,7 +67,8 @@ A list containing:
     \item utility_data: Dataframe with criterion, strategy, hit rate,
       false alarm rate, and expected utility. Each row is the rule "accept
       suspect IDs with confidence >= criterion". The \code{"reject_all"}
-      row has a criterion one above the highest confidence level, so that
+      row has a criterion above the observed identification confidences
+      and supplied grid (possibly \code{Inf}), so that
       applying it accepts no identification.
     \item max_utility: Maximum expected utility, with the corresponding
       criterion and strategy

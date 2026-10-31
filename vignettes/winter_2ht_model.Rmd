@@ -167,16 +167,17 @@ boot_fit <- boot_winter_2ht(
 boot_fit$ci
 ```
 
-The bootstrap intervals are preferable to the normal approximation for these
-parameters, and `plot_2ht_parameters()` uses them when given a bootstrap object:
+The percentile intervals stay inside the parameter space, and
+`plot_2ht_parameters()` uses them when given a bootstrap object:
 
 ```{r plot_boot}
 plot_2ht_parameters(boot_fit)
 ```
 
-All four parameters are probabilities bounded in [0, 1], so an estimate close to
-a boundary — `b` here — has a normal interval that runs outside the parameter
-space. The percentile interval cannot.
+All four parameters are probabilities bounded in [0, 1]. At a boundary —
+`b` here — regular Hessian standard errors are unavailable. Percentile intervals
+respect the parameter space, but this alone does not establish nominal coverage
+at a boundary.
 
 For larger datasets, increase `nboot` to 1000 or more for stable intervals.
 
@@ -307,19 +308,20 @@ as `NA`. The two should not be compared by information criteria.
 
 `dA` is identified almost entirely by rejections: it is the probability of
 correctly concluding the culprit is absent, and a witness in that state rejects.
-If very few witnesses reject, the likelihood is close to flat in `dA` and the fit
-fails. `fit_winter_2ht()` checks for this and stops with a message naming the
-cause. In simulated data the usual reason is a decision criterion set too
-liberally — see `vignette("simulation_power_analysis")` on why
+The amount of information depends on both the response probabilities and sample
+size. A low rejection percentage alone does not establish nonidentifiability.
+Inspect sparse cells, boundary estimates and convergence; regular Hessian
+uncertainty is not available at a boundary. In simulated data a liberal criterion
+can produce few rejections — see `vignette("simulation_power_analysis")` on why
 `c_criterion = 0` is not a neutral value.
 
 ### Confidence intervals
 
-`fit_winter_2ht()` returns standard errors, from which normal intervals can be
-formed, but all four parameters are probabilities bounded in [0, 1] and a normal
-interval around an estimate near a boundary runs outside that range. Prefer
-`boot_winter_2ht()`, which gives percentile intervals that cannot. The plotting
-function uses whichever it is given.
+`fit_winter_2ht()` returns regular Hessian standard errors for interior fits;
+they are unavailable at a parameter boundary. `boot_winter_2ht()` gives
+approximate percentile or BCa intervals while keeping TP and TA totals fixed.
+Respecting the parameter space is useful, but does not establish coverage near
+a boundary. The plotting function uses the supplied intervals.
 
 ### Assumptions
 

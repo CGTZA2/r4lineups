@@ -64,7 +64,12 @@ A dataframe of class \code{power_analysis} with columns:
     \item mean_effect: Mean observed difference in pAUC
     \item sd_effect: Standard deviation of the observed difference
     \item n_valid: Simulations that produced a usable test
+    \item n_failed: Attempted simulations without a usable test
+    \item n_attempted: All attempted simulations
   }
+Power and its Monte Carlo standard error are conditional on usable tests.
+Failures are retained in the attempted count and trigger a warning; compare
+failure rates as well as conditional power when assessing a design.
 }
 \description{
 Estimates statistical power to detect a difference in discriminability

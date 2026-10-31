@@ -154,8 +154,10 @@ knitr::kable(
 
 The 2-HT model's detect-absence parameter `dA` is identified almost entirely by
 rejections — it is the probability of correctly concluding the culprit is
-absent. With half a percent of witnesses rejecting, the likelihood is nearly
-flat in `dA` and the fit fails. `fit_winter_2ht()` detects this and says so.
+absent. Here only one witness in 600 rejects, so the likelihood carries almost
+no information about `dA` and the fit fails; `fit_winter_2ht()` stops with a
+message naming that cause. A low rejection percentage is not by itself fatal in
+a large sample; the information about `dA` depends on the number of rejections.
 
 ### Comparing All Models
 
@@ -211,7 +213,7 @@ cat("AIC:", round(model_2ht$aic, 2),
 **Interpreting 2-HT parameters (when available):**
 
 - **dP**: Probability of detecting guilty suspect
-- **dA**: Probability of detecting innocent suspect
+- **dA**: Probability of detecting the culprit's absence
 - **b**: Bias toward suspect
 - **g**: Tendency to guess vs. reject
 

@@ -39,7 +39,11 @@ or a named list of such vectors indexed by model.}
 
 \item{control}{Named list controlling \code{maxiter}, optimizer
 \code{method}, numerical \code{integration_sigma},
-\code{chi2_variance}, and \code{verbose}.}
+\code{chi2_variance}, \code{objective}, and \code{verbose}.
+\code{objective = "corrected"} (the default) applies the per-fit
+correction described in Details; \code{objective = "pywitness"} leaves the
+engine's own objective and optimizer untouched, which reproduces results
+from pyWitness itself, including published fits.}
 
 \item{envname}{Name or path of the isolated pyWitness virtual environment.}
 }
@@ -63,8 +67,13 @@ If the input includes a \code{condition} or \code{procedure} column, it must
 contain only one non-missing value; otherwise the data must be subset before
 fitting.
 
-The audited pyWitness revision estimates parameters by minimizing Pearson
-chi-squared. Thus, \code{loglik_at_estimate} is a multinomial likelihood
+By default the bridge corrects the pinned engine's reversed observed/expected
+rejection-cell variance denominators in memory for each fit, without changing
+its installed environment; \code{control = list(objective = "pywitness")}
+turns the correction off. With the default \code{chi2_variance = "expected"},
+every cell therefore uses the Pearson denominator. With \code{"observed"},
+every cell uses the observed denominator (the Neyman discrepancy), requiring
+positive observed cells. Thus, \code{loglik_at_estimate} is a multinomial likelihood
 evaluated at the minimum-Pearson estimate, not a maximized likelihood. AIC
 and BIC are returned as \code{NA}; computing them from a non-likelihood
 optimum would be invalid.

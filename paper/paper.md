@@ -130,12 +130,16 @@ ROC/CAC/RAC and full ROC, calibration and decision measures, expected
 information gain and error-rate ranges, Winter's two-high-threshold model,
 summary and regression-based signal-detection methods, the Multi-d′, mSDT and
 Wixted models, simulation and power, and optional face similarity.
-Corrections made in versions 2.1.0 to 2.3.0 after independent statistical
-reviews were each checked in a specific way: against worked examples in the
-primary publications (for example, Lee and Penrod's Multi-d′ indices
-[@lee2019]), against a pinned pyWitness revision for the lineup-memory models
-[@mickes2024], and against hand calculations, invariance identities and
-simulation recovery, with each check kept as a regression test.
+Validation of selected methods combines published definitions, independent
+hand calculations, invariance identities, numerical integration and simulation
+recovery. The lineup-memory bridge also checks its interface against a pinned
+pyWitness revision [@mickes2024]. An independent statistical audit records the conditions
+examined, evidence gaps and limitations of approximate inference; selected
+counterexamples are retained as regression tests. The pyWitness bridge applies
+a per-fit correction to the pinned engine's rejection-cell variance denominators
+so its default objective is consistently Pearson chi-squared, without modifying
+the installed Python environment; an option reproduces the engine's own
+objective for comparison with published fits.
 
 # Research impact statement
 
@@ -146,7 +150,7 @@ extends that established research tool while preserving the classical
 fairness functions used by earlier work. Its immediate scholarly contribution
 is a tested R workflow spanning lineup construction, identification outcomes,
 confidence, evidence, and competing process models. The package website,
-sixteen reproducible vignettes, example datasets, and the browser-based
+sixteen vignettes, example datasets, and the browser-based
 application also support teaching, method comparison, and applied review.
 
 # AI usage disclosure

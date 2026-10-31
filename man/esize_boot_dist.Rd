@@ -32,13 +32,20 @@ instead of the plug-in estimate. Default \code{FALSE}.}
 A numeric vector of bootstrap estimates, carrying an \code{"n"}
   attribute equal to the number of lineup choices resampled. With
   \code{unbiased = TRUE}, resamples in which every choice fell on a
-  different member have an unbounded corrected estimate; they are dropped,
-  with a warning, and their number is recorded in an \code{"n_undefined"}
+  different member have an unbounded corrected estimate; they are retained
+  as \code{Inf}, with a warning, and their number is recorded in an \code{"n_undefined"}
   attribute.
 }
 \description{
 Computes a bootstrap distribution for effective size using either
 Tredoux's E' or Malpass's adjusted E.
+}
+\details{
+Percentile or BCa intervals from the plug-in E' bootstrap are not
+  valid tests of exact uniform fairness. The population maximum E'=k is a
+  nonregular boundary. If the sample size is not a multiple of k, even the
+  largest attainable empirical E' is below k, so those intervals have zero
+  coverage at exact fairness. More bootstrap replicates cannot fix this.
 }
 \examples{
 vec <- round(runif(200, 1, 6))

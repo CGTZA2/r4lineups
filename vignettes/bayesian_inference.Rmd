@@ -241,6 +241,14 @@ target-absent lineup.
 
 # Calibration
 
+The Bayesian calibration model conditions on bin frequencies and treats
+correctness within each bin as exchangeable Bernoulli observations. Fixed
+target-present and target-absent trial totals do not generally imply that
+conditional binomial likelihood. Interpret these intervals as working-model
+summaries for that assumption, rather than automatically exact inference for
+a fixed-arm experiment. Filler-derived fractional counts add another
+approximation; see `?calibration_bayes`.
+
 `calibration_bayes()` places beta posteriors on accuracy within confidence bins
 and propagates uncertainty into calibration \(C\), over/underconfidence
 \(O/U\), and normalized resolution \(NRI\).

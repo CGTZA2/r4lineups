@@ -231,6 +231,56 @@
   titles no longer overrun, and clips the 2-HT Wald intervals to [0, 1]
   instead of dropping bars that cross zero.
 
+## Statistical audit corrections
+
+* Independent-lineup effective-size comparisons now resample samples separately
+  and use within-sample BCa influences. The legacy row-statistic help now
+  distinguishes paired from independent resampling.
+* Numerical utility cutoffs reproduce reject-all and all-ID operating points on
+  custom confidence grids. Single-point base-rate comparisons return their
+  value without attempting crossover interpolation. ROC origins carry a separate marker; z-ROC retains
+  genuine zero-count criteria and reports the requested confidence level and
+  the lure/target SD-ratio convention.
+* Grouped calibration and ANRI resolve innocent-suspect design within groups.
+  Explicit estimated-mode inputs containing TA suspect IDs are rejected.
+  Confidence/time bins must cover observations rather than silently omit them.
+* Named table conversion retains member labels; one-column matrices retain all
+  observations; singleton empirical samples no longer generate unseen choices.
+  Fractional/duplicate position labels and invalid lineup sizes are rejected.
+* Corrected effective-size estimates retain legitimate infinity and undefined
+  N=1 results. Bootstrap distributions preserve infinite draws; plots explain
+  the finite subset displayed. Nonfinite generic proportion summaries fail
+  explicitly. Application formatting preserves infinity.
+* Normal and bootstrap effective-size intervals are explicitly qualified near
+  uniformity and at small samples; percentile/BCa intervals do not provide a
+  test of exact fairness. Functional-size percentile and sparse-cell SDT Wald
+  intervals carry corresponding approximation cautions. Estimated fractional
+  Bayesian counts are described as an approximation. Bayesian calibration
+  states its conditional Bernoulli model and fixed-arm design limitation.
+* mSDT log CDF/density and extreme log-tail quantiles avoid premature underflow.
+* Winter 2-HT fitting validates counts, removes the arbitrary 2% rejection gate,
+  uses an independently derived feasible inverse solution or constrained multiple starts,
+  and avoids regular Hessian SEs on boundaries. TP/TA bootstrap totals remain
+  fixed; BCa influences match that design. Unsuccessful attempts are retained.
+* The pinned pyWitness engine reverses rejection-cell denominators in its
+  configured chi-squared statistic. A packaged per-instance adapter repairs
+  that objective, tightens optimization, and retains the returned minimum.
+  `control = list(objective = "pywitness")` turns the correction off to
+  reproduce pyWitness itself. The installed Python environment is unchanged. Observed-denominator fits
+  reject zero observed cells. Engine provenance records the correction.
+* Diagnosticity and z-ROC retain failed bootstrap attempts and report failure
+  counts; MAX warns about any failed bootstrap fit. ANRI and power outputs
+  report failed/attempted counts and conditional inference explicitly.
+* Binned RAC mean times now use the same correct/incorrect IDs as accuracy,
+  including 1/k weights for estimated TA IDs. Examples and application bins
+  include their full response-time range.
+* pAUC confidence labels follow the selected level; its SE-standardized
+  difference is no longer labelled Cohen d. Log diagnosticity variance,
+  prior-dependent EIG ceilings, fairness sensitivity bands, and embedding
+  similarity claims are described explicitly. EIG response plots distinguish
+  neutral likelihood ratios from evidence in either direction. Vignettes, help and manuscript
+  assurance claims are aligned with the statistical QA evidence and its gaps.
+
 # r4lineups 2.2.0 (2026-10-28)
 
 ## Breaking changes

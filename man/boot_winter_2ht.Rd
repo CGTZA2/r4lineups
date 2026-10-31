@@ -49,8 +49,8 @@ Computes bootstrap confidence intervals for the parameters of the 2-HT model
 by resampling the observed data with replacement.
 }
 \details{
-The bootstrap procedure resamples observations from the original data with replacement
-to create bootstrap datasets. For each bootstrap sample, the 2-HT model is re-fitted,
+The bootstrap procedure resamples within TP and TA strata with replacement
+to keep both experimental totals fixed. For each bootstrap sample, the 2-HT model is re-fitted,
 and the distribution of parameter estimates across bootstrap samples is used to
 construct confidence intervals.
 
@@ -60,8 +60,8 @@ Two types of confidence intervals are available:
   \item \strong{bca}: Bias-corrected and accelerated intervals (Efron,
     1987). The bias correction counts bootstrap ties with the estimate as
     half, and the acceleration comes from the jackknife over individual
-    observations, which needs at most six refits because the data are six
-    response counts.
+    observations, centered and scaled within TP/TA strata, using at most six
+    distinct leave-one-out response-count fits.
 }
 }
 \examples{

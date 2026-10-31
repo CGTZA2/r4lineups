@@ -601,9 +601,16 @@ produces two warnings that should be understood rather than ignored:
   off the very smallest or largest values, where it is unstable. The remedy is
   more replicates (a larger `R`), not a different interval type.
 
-Neither the studentized nor the normal-approximation interval is of much interest
-for a statistic like E', so requesting `"perc"` and `"bca"` explicitly, as above,
-both avoids the warnings and reflects what you actually want.
+These calls demonstrate empirical bootstrap intervals, which have important
+inferential limits. **Do not test exact fairness by checking whether a percentile or
+BCa interval for plug-in E' contains nominal size.** At N=100 and k=6, the most
+even possible count vector is (17,17,17,17,16,16), so the largest empirical E' is
+10000/1668 = 5.9952. Every bootstrap value is at most that number: an interval
+made from its quantiles cannot contain the perfectly fair population value 6.
+More resamples do not fix this nonregular boundary problem. Normal-theory and
+corrected-estimator intervals also require separate sampling assessment; none
+is a universally reliable replacement. Bayesian credible intervals describe
+the stated posterior and should not be treated as tests of exact equality to k.
 
 You can also look at the whole bootstrap distribution:
 
@@ -809,15 +816,16 @@ diag_ratio_W(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 = 8, k2 = 8)
 diag_ratio_T(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 = 8, k2 = 8)
 ```
 
-We can also calculate the variance of the diagnosticity ratio, which is useful
+We can also calculate the large-sample variance of the log diagnosticity ratio, which is useful
 for applying some inferential methods:
 
 ```{r}
 var_diag_ratio(TP_lineup, TA_lineup, 3, 7, 8, 8)
 ```
 
-_Note:_ `var_diag_ratio()` relies on Wells & Lindsay's original formula for
-computing diagnosticity ratio. See Tredoux (1998) for further details.
+_Note:_ This variance is on the **log-ratio scale**, not the raw ratio scale.
+A delta-method variance on the raw scale multiplies it by the squared ratio.
+See Tredoux (1998) for the large-sample assumptions.
 
 ### Differences between Independent Diagnosticity Ratios
 
@@ -1149,7 +1157,7 @@ note that these require the Python dependencies installed by
 | Measure | Function | Estimand | Key assumption |
 |---|---|---|---|
 | Lineup proportion | `lineup_prop_vec()` | Share of witnesses choosing one member | Binomial; chance value is $1/k$ |
-| Functional size | `func_size()` | $N / (\text{choices of the suspect})$ | Undefined when nobody chooses the suspect |
+| Functional size | `func_size()` | $N / (\text{choices of the suspect})$ | Infinite when nobody chooses the suspect; intervals may also have an infinite upper limit |
 | Effective size (Malpass) | `esize_m()` | Number of plausible alternatives, absolute-deviation form | Adjusted version counts all $k$; original counts only chosen members |
 | Effective size E' | `esize_T()` | $1/\sum p_i^2$, the inverse-Simpson index | Plug-in form biased downward at small $N$; see above |
 | Diagnosticity ratio | `diag_ratio_T()` | Ratio of suspect-choice rates, target-present against target-absent | The two lineups are independent samples |

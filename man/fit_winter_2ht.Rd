@@ -87,6 +87,12 @@ residual goodness-of-fit degrees of freedom. Inference about model fit or
 restrictions requires additional conditions, parameter constraints, or
 participant/item-level replication; the reported AIC/BIC describe this
 likelihood fit but do not by themselves validate the process interpretation.
+
+A feasible inverse of the published tree supplies the saturated
+  interior solution; otherwise bounded optimization uses multiple starts.
+  Regular Hessian SEs are returned only for interior fits. Boundary fits
+  retain their estimates but have unavailable regular SEs. A low rejection
+  percentage alone is not used as a criterion for refusing a fit.
 }
 \examples{
 # Example 1: Using count data directly
