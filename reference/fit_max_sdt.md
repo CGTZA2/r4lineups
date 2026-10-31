@@ -264,7 +264,8 @@ print(fit1)
 #> Observed   69.0        13.0        14.0 64.0        42.0
 #> Predicted  66.4        19.2        10.4 58.7        47.3
 
-# Two conditions, free parameters
+# \donttest{
+# Two conditions, free parameters (each two-condition fit takes a few seconds)
 fit_free <- fit_max_sdt(
   n_hit = 69, n_tp_choose = 82, n_fa = 64,
   N_tp = 96, N_ta = 106,
@@ -290,4 +291,5 @@ print(cmp)
 #>   Constraint: d' equal
 #>   Delta chi-sq(1) = 0.420, p = 0.5170
 #>   Interpretation: constraint does not significantly worsen fit.
+# }
 ```

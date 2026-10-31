@@ -42,6 +42,8 @@ least one additional constraint.
 ## Examples
 
 ``` r
+# \donttest{
+# Each two-condition fit takes a few seconds
 fit_free <- fit_max_sdt(
   n_hit=69, n_tp_choose=82, n_fa=64, N_tp=96, N_ta=106,
   n_hit_2=68, n_tp_choose_2=78, n_fa_2=42, N_tp_2=96, N_ta_2=96
@@ -58,4 +60,5 @@ compare_max_sdt(fit_free, fit_eqd)
 #>   Constraint: d' equal
 #>   Delta chi-sq(1) = 0.420, p = 0.5170
 #>   Interpretation: constraint does not significantly worsen fit.
+# }
 ```

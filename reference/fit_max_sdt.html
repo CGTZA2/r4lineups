@@ -298,7 +298,8 @@ memory. <em>Cognitive Psychology, 105</em>, 81–114.
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observed   69.0        13.0        14.0 64.0        42.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predicted  66.4        19.2        10.4 58.7        47.3</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Two conditions, free parameters</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Two conditions, free parameters (each two-condition fit takes a few seconds)</span></span></span>
 <span class="r-in"><span><span class="va">fit_free</span> <span class="op">&lt;-</span> <span class="fu">fit_max_sdt</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  n_hit <span class="op">=</span> <span class="fl">69</span>, n_tp_choose <span class="op">=</span> <span class="fl">82</span>, n_fa <span class="op">=</span> <span class="fl">64</span>,</span></span>
 <span class="r-in"><span>  N_tp <span class="op">=</span> <span class="fl">96</span>, N_ta <span class="op">=</span> <span class="fl">106</span>,</span></span>
@@ -324,6 +325,7 @@ memory. <em>Cognitive Psychology, 105</em>, 81–114.
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Constraint: d' equal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Delta chi-sq(1) = 0.420, p = 0.5170</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Interpretation: constraint does not significantly worsen fit.</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

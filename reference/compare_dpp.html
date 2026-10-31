@@ -156,8 +156,9 @@ not. <em>Journal of Applied Research in Memory and Cognition, 8</em>(1),
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Compare two halves of the example data (odd vs even rows)</span></span></span>
 <span class="r-in"><span><span class="va">odd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># 50 resamples keep the example quick; use 1000 or more in an analysis</span></span></span>
 <span class="r-in"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu">compare_dpp</span><span class="op">(</span><span class="va">lineup_example</span><span class="op">[</span><span class="va">odd</span>, <span class="op">]</span>, <span class="va">lineup_example</span><span class="op">[</span><span class="op">-</span><span class="va">odd</span>, <span class="op">]</span>,</span></span>
-<span class="r-in"><span>                   n_bootstrap <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                   n_bootstrap <span class="op">=</span> <span class="fl">50</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cmp</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === DPP Comparison ===</span>
@@ -165,8 +166,8 @@ not. <em>Journal of Applied Research in Memory and Cognition, 8</em>(1),
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average DPP, procedure A:  0.6862 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average DPP, procedure B:  0.7139 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Difference (A - B):        -0.0278  (negative = A better)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap SE:              0.0289</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 95% percentile interval:  [-0.0848, 0.0254]  (200 resamples)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap SE:              0.0310</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95% percentile interval:  [-0.0817, 0.0257]  (50 resamples)</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

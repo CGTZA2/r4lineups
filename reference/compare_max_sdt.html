@@ -102,7 +102,9 @@ least one additional constraint.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit_free</span> <span class="op">&lt;-</span> <span class="fu"><a href="fit_max_sdt.html">fit_max_sdt</a></span><span class="op">(</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Each two-condition fit takes a few seconds</span></span></span>
+<span class="r-in"><span><span class="va">fit_free</span> <span class="op">&lt;-</span> <span class="fu"><a href="fit_max_sdt.html">fit_max_sdt</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  n_hit<span class="op">=</span><span class="fl">69</span>, n_tp_choose<span class="op">=</span><span class="fl">82</span>, n_fa<span class="op">=</span><span class="fl">64</span>, N_tp<span class="op">=</span><span class="fl">96</span>, N_ta<span class="op">=</span><span class="fl">106</span>,</span></span>
 <span class="r-in"><span>  n_hit_2<span class="op">=</span><span class="fl">68</span>, n_tp_choose_2<span class="op">=</span><span class="fl">78</span>, n_fa_2<span class="op">=</span><span class="fl">42</span>, N_tp_2<span class="op">=</span><span class="fl">96</span>, N_ta_2<span class="op">=</span><span class="fl">96</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
@@ -118,6 +120,7 @@ least one additional constraint.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Constraint: d' equal</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Delta chi-sq(1) = 0.420, p = 0.5170</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Interpretation: constraint does not significantly worsen fit.</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

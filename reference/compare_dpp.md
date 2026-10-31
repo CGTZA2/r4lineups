@@ -110,8 +110,9 @@ curve does not. *Journal of Applied Research in Memory and Cognition,
 data(lineup_example)
 # Compare two halves of the example data (odd vs even rows)
 odd <- seq(1, nrow(lineup_example), by = 2)
+# 50 resamples keep the example quick; use 1000 or more in an analysis
 cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ],
-                   n_bootstrap = 200, seed = 1)
+                   n_bootstrap = 50, seed = 1)
 cmp
 #> 
 #> === DPP Comparison ===
@@ -119,6 +120,6 @@ cmp
 #> Average DPP, procedure A:  0.6862 
 #> Average DPP, procedure B:  0.7139 
 #> Difference (A - B):        -0.0278  (negative = A better)
-#> Bootstrap SE:              0.0289
-#> 95% percentile interval:  [-0.0848, 0.0254]  (200 resamples)
+#> Bootstrap SE:              0.0310
+#> 95% percentile interval:  [-0.0817, 0.0257]  (50 resamples)
 ```

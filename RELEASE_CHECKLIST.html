@@ -55,29 +55,30 @@
 <div id="r4lineups-230-release-checklist" class="section level1">
 
 <p>This is the sole CRAN and JOSS publication candidate. Versions 2.0.0, 2.1.0 and 2.2.0 were never submitted and must not be; their archives in <code>cran_submission_2026-10-27/</code> and earlier are historical.</p>
-<p>2.3.0 contains the fixes from two independent statistical reviews (<code>codex_qa_1.md</code>, 28 October 2026, and <code>codex_review_2.md</code>, 29 October 2026; neither file is in the build) and a convergence fix in <code><a href="reference/fit_max_sdt.html">fit_max_sdt()</a></code> found by CI after the second set of fixes was merged. See NEWS.md.</p>
+<p>2.3.0 contains the fixes from three independent reviews (<code>codex_qa_1.md</code>, 28 October; <code>codex_review_2.md</code>, 29 October; <code>codex_review_3.md</code>, 30 October 2026) and an independent statistical audit (<code>notes/statistical-qa/</code>, 31 October 2026), together with a convergence fix in <code><a href="reference/fit_max_sdt.html">fit_max_sdt()</a></code> found by CI. None of these files is in the build. See NEWS.md.</p>
 <div class="section level2">
 <h2 id="completed-locally">Completed locally<a class="anchor" aria-label="anchor" href="#completed-locally"></a></h2>
 <ul class="task-list"><li><label><input type="checkbox" checked>Version is 2.3.0, NEWS is dated 2026-10-29, and the public surface is 163 exports and 66 registered S3 methods.</label></li>
 <li><label><input type="checkbox" checked>Roxygen documentation and <code>NAMESPACE</code> were regenerated with no subsequent drift.</label></li>
-<li><label><input type="checkbox" checked>All 35 test files pass from the built source package: 1,282 passing expectations, no failures, and five opt-in skips: three live-pyWitness tests, covered by the pyWitness workflow below, and the MediaPipe face-landmark and installed-app headless-Chrome tests, which passed in the second review’s run on the 2.3.0 sources.</label></li>
+<li><label><input type="checkbox" checked>All 36 test files pass: 1,334 passing expectations, no failures, and five opt-in skips (three live-pyWitness tests, which pass locally with 24 expectations, the MediaPipe face-landmark test and the installed-app headless-Chrome test).</label></li>
 <li><label><input type="checkbox" checked>Ordinary examples, <code>\donttest{}</code> examples, installation and all 16 vignettes pass from the source tarball.</label></li>
-<li><label><input type="checkbox" checked><code>R CMD check --as-cran --no-manual --run-donttest</code> with network access passes on macOS 27.0.1/R 4.6.1 with 0 errors, 0 warnings and 0 notes, including the CRAN incoming feasibility and URL checks.</label></li>
+<li><label><input type="checkbox" checked><code>R CMD check --as-cran</code> with network access passes on macOS 27.0.1/R 4.6.1 with 0 errors, 0 warnings and 0 notes, including the CRAN incoming feasibility and URL checks and the PDF manual.</label></li>
 <li><label><input type="checkbox" checked>The reviewers’ reproductions give the corrected values, and each is a regression test.</label></li>
 <li><label><input type="checkbox" checked>The JOSS manuscript names 2.3.0 and renders cleanly in the Open Journals job.</label></li>
-<li><label><input type="checkbox" checked>Checked candidate: <code>cran_submission_2026-10-29/r4lineups_2.3.0.tar.gz</code>, 2,080,831 bytes, SHA-256 <code>b44dbc9badea79cb0b5508c135f35fced55abadbe3b88640fdfb7819cf1227ec</code>, built from commit <code>40de5bd</code> (package inputs identical to the release merge).</label></li>
+<li><label><input type="checkbox" checked>Checked candidate: <code>cran_submission_2026-10-31/r4lineups_2.3.0.tar.gz</code>, 2,297,508 bytes, SHA-256 <code>2dd8679fb26a0a29e7d7a1f3dcbc057ab4f21832d2dd5cdeaa85f8465b50468f</code>, built from the release merge commit <code>c124581</code>. Earlier archives (<code>cran_submission_2026-10-29/</code> and before) are superseded.</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="publication-gates">Publication gates<a class="anchor" aria-label="anchor" href="#publication-gates"></a></h2>
 <ul class="task-list"><li><label><input type="checkbox" checked>MIT-relicensing consent recorded for both authors: Colin Tredoux confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.</label></li>
-<li><label><input type="checkbox" checked>The R release/devel/oldrel-1 operating-system matrix passes on the release revision: GitHub Actions run <code>40967586729</code>.</label></li>
+<li><label><input type="checkbox" checked>The R release/devel/oldrel-1 operating-system matrix passes on the release revision: GitHub Actions run <code>41221763862</code> (tree identical to <code>c124581</code>).</label></li>
 <li><label><input type="checkbox" checked>The TeX-equipped reference-manual job produces a PDF (same run).</label></li>
 <li><label><input type="checkbox" checked>The official JOSS/Open Journals job produces a clean <code>paper.pdf</code>.</label></li>
 <li><label><input type="checkbox" checked>The Linux/macOS/Windows pinned-pyWitness workflow passes on commit <code>28c8768</code> (run <code>40962145807</code>); the later <code><a href="reference/fit_max_sdt.html">fit_max_sdt()</a></code> fix does not touch the pyWitness bridge.</label></li>
 <li><label><input type="checkbox" checked>r-universe built 2.3.0 from <code>1a4ed4e</code> for macOS, Windows, WebAssembly and Linux R-devel. Its Linux R-release check failed on the <code><a href="reference/fit_max_sdt.html">fit_max_sdt()</a></code> convergence test that the release PR fixes.</label></li>
 <li><label><input type="checkbox" checked>The browser app at <a href="https://cgtza2.github.io/r4lineups/app/" class="uri">https://cgtza2.github.io/r4lineups/app/</a> returns 200 and starts in headless Chrome with every tab present.</label></li>
 <li><label><input type="checkbox">After the release PR is merged, confirm that <code>main</code> passes the check matrix, that r-universe’s Linux R-release check passes, and that the deployed app bundles r4lineups 2.3.0.</label></li>
-<li><label><input type="checkbox">Submit the 29 October archive to CRAN. Do not submit any earlier archive.</label></li>
+<li><label><input type="checkbox" checked>Submitted the 31 October archive (SHA-256 <code>2dd8679f…0468f</code>) to CRAN on 31 October 2026 through the web form (submission ID 360999); the maintainer confirmation email was sent to <a href="mailto:colin.tredoux@uct.ac.za" class="email">colin.tredoux@uct.ac.za</a>.</label></li>
+<li><label><input type="checkbox">Maintainer clicks the confirmation link; CRAN pretest and review.</label></li>
 <li><label><input type="checkbox">After CRAN accepts the unchanged source, tag the matching commit <code>v2.3.0</code> and create the GitHub release.</label></li>
 <li><label><input type="checkbox">Submit the JOSS paper.</label></li>
 <li><label><input type="checkbox">At successful JOSS review, archive the accepted release, add the archive DOI to JOSS metadata, and verify that author lists agree.</label></li>
