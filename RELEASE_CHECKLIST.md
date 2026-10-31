@@ -4,10 +4,11 @@ This is the sole CRAN and JOSS publication candidate. Versions 2.0.0, 2.1.0
 and 2.2.0 were never submitted and must not be; their archives in
 `cran_submission_2026-10-27/` and earlier are historical.
 
-2.3.0 contains the fixes from two independent statistical reviews
-(`codex_qa_1.md`, 28 October 2026, and `codex_review_2.md`, 29 October 2026;
-neither file is in the build) and a convergence fix in `fit_max_sdt()` found
-by CI after the second set of fixes was merged. See NEWS.md.
+2.3.0 contains the fixes from three independent reviews (`codex_qa_1.md`,
+28 October; `codex_review_2.md`, 29 October; `codex_review_3.md`, 30 October
+2026) and an independent statistical audit (`notes/statistical-qa/`, 31
+October 2026), together with a convergence fix in `fit_max_sdt()` found by CI.
+None of these files is in the build. See NEWS.md.
 
 ## Completed locally
 
@@ -15,32 +16,32 @@ by CI after the second set of fixes was merged. See NEWS.md.
   163 exports and 66 registered S3 methods.
 - [x] Roxygen documentation and `NAMESPACE` were regenerated with no
   subsequent drift.
-- [x] All 35 test files pass from the built source package: 1,282 passing
-  expectations, no failures, and five opt-in skips: three live-pyWitness
-  tests, covered by the pyWitness workflow below, and the MediaPipe
-  face-landmark and installed-app headless-Chrome tests, which passed in the
-  second review's run on the 2.3.0 sources.
+- [x] All 36 test files pass: 1,334 passing expectations, no failures, and
+  five opt-in skips (three live-pyWitness tests, which pass locally with 24
+  expectations, the MediaPipe face-landmark test and the installed-app
+  headless-Chrome test).
 - [x] Ordinary examples, `\donttest{}` examples, installation and all 16
   vignettes pass from the source tarball.
-- [x] `R CMD check --as-cran --no-manual --run-donttest` with network access
-  passes on macOS 27.0.1/R 4.6.1 with 0 errors, 0 warnings and 0 notes,
-  including the CRAN incoming feasibility and URL checks.
+- [x] `R CMD check --as-cran` with network access passes on macOS
+  27.0.1/R 4.6.1 with 0 errors, 0 warnings and 0 notes, including the CRAN
+  incoming feasibility and URL checks and the PDF manual.
 - [x] The reviewers' reproductions give the corrected values, and each is a
   regression test.
 - [x] The JOSS manuscript names 2.3.0 and renders cleanly in the Open
   Journals job.
-- [x] Checked candidate: `cran_submission_2026-10-29/r4lineups_2.3.0.tar.gz`,
-  2,080,831 bytes, SHA-256
-  `b44dbc9badea79cb0b5508c135f35fced55abadbe3b88640fdfb7819cf1227ec`,
-  built from commit `40de5bd` (package inputs identical to the release
-  merge).
+- [x] Checked candidate: `cran_submission_2026-10-31/r4lineups_2.3.0.tar.gz`,
+  2,297,508 bytes, SHA-256
+  `2dd8679fb26a0a29e7d7a1f3dcbc057ab4f21832d2dd5cdeaa85f8465b50468f`,
+  built from the release merge commit `c124581`. Earlier archives
+  (`cran_submission_2026-10-29/` and before) are superseded.
 
 ## Publication gates
 
 - [x] MIT-relicensing consent recorded for both authors: Colin Tredoux
   confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.
 - [x] The R release/devel/oldrel-1 operating-system matrix passes on the
-  release revision: GitHub Actions run `40967586729`.
+  release revision: GitHub Actions run `41221763862` (tree identical to
+  `c124581`).
 - [x] The TeX-equipped reference-manual job produces a PDF (same run).
 - [x] The official JOSS/Open Journals job produces a clean `paper.pdf`.
 - [x] The Linux/macOS/Windows pinned-pyWitness workflow passes on commit
@@ -54,7 +55,7 @@ by CI after the second set of fixes was merged. See NEWS.md.
 - [ ] After the release PR is merged, confirm that `main` passes the check
   matrix, that r-universe's Linux R-release check passes, and that the
   deployed app bundles r4lineups 2.3.0.
-- [ ] Submit the 29 October archive to CRAN. Do not submit any earlier
+- [ ] Submit the 31 October archive to CRAN. Do not submit any earlier
   archive.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
   `v2.3.0` and create the GitHub release.
