@@ -55,8 +55,10 @@ None of these files is in the build. See NEWS.md.
 - [ ] After the release PR is merged, confirm that `main` passes the check
   matrix, that r-universe's Linux R-release check passes, and that the
   deployed app bundles r4lineups 2.3.0.
-- [ ] Submit the 31 October archive to CRAN. Do not submit any earlier
-  archive.
+- [x] Submitted the 31 October archive (SHA-256 `2dd8679f…0468f`) to CRAN on
+  31 October 2026 through the web form (submission ID 360999); the maintainer
+  confirmation email was sent to colin.tredoux@uct.ac.za.
+- [ ] Maintainer clicks the confirmation link; CRAN pretest and review.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
   `v2.3.0` and create the GitHub release.
 - [ ] Submit the JOSS paper.
