@@ -29,19 +29,19 @@ None of these files is in the build. See NEWS.md.
   regression test.
 - [x] The JOSS manuscript names 2.3.0 and renders cleanly in the Open
   Journals job.
-- [x] Checked candidate: `cran_submission_2026-10-31/r4lineups_2.3.0.tar.gz`,
-  2,297,508 bytes, SHA-256
-  `2dd8679fb26a0a29e7d7a1f3dcbc057ab4f21832d2dd5cdeaa85f8465b50468f`,
-  built from the release merge commit `c124581`. Earlier archives
-  (`cran_submission_2026-10-29/` and before) are superseded.
+- [x] Checked candidate: `cran_submission_2026-10-31b/r4lineups_2.3.0.tar.gz`,
+  2,298,002 bytes, SHA-256
+  `dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386`,
+  built from the merge commit `7315cf3`, which fixes the two pretest NOTEs.
+  Earlier archives (`cran_submission_2026-10-31/` and before) are superseded.
 
 ## Publication gates
 
 - [x] MIT-relicensing consent recorded for both authors: Colin Tredoux
   confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.
 - [x] The R release/devel/oldrel-1 operating-system matrix passes on the
-  release revision: GitHub Actions run `41221763862` (tree identical to
-  `c124581`).
+  resubmitted revision: GitHub Actions run `41242178346` (tree identical to
+  `7315cf3`).
 - [x] The TeX-equipped reference-manual job produces a PDF (same run).
 - [x] The official JOSS/Open Journals job produces a clean `paper.pdf`.
 - [x] The Linux/macOS/Windows pinned-pyWitness workflow passes on commit
@@ -58,6 +58,10 @@ None of these files is in the build. See NEWS.md.
 - [x] Submitted the 31 October archive (SHA-256 `2dd8679f…0468f`) to CRAN on
   31 October 2026 through the web form (submission ID 360999); the maintainer
   confirmation email was sent to colin.tredoux@uct.ac.za.
+- [x] CRAN's automatic pretest returned 2 NOTEs on Windows and Debian (a
+  flagged word in DESCRIPTION and slow examples); fixed in PR #12.
+- [ ] Resubmit the `cran_submission_2026-10-31b/` archive through the web form
+  (on Colin's go-ahead, planned for 1 November 2026).
 - [ ] Maintainer clicks the confirmation link; CRAN pretest and review.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
   `v2.3.0` and create the GitHub release.

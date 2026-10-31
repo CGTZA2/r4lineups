@@ -36,9 +36,9 @@ full changelog.
 * GitHub Actions Windows, R release
 * GitHub Actions Ubuntu, R devel, release, and oldrel-1
 
-All five jobs passed on the release revision in GitHub Actions run
-`41221763862` (its source tree is identical to the submitted merge commit
-`c124581`), and the TeX-equipped job in that run built the PDF reference
+All five jobs passed on the resubmitted revision in GitHub Actions run
+`41242178346` (its source tree is identical to the submitted merge commit
+`7315cf3`), and the TeX-equipped job in that run built the PDF reference
 manual. The opt-in pinned-pyWitness parity tests passed locally on macOS
 (24 expectations).
 
@@ -52,9 +52,9 @@ including the CRAN incoming feasibility checks and the PDF manual:
 The tests, examples, installation, and all 16 vignettes completed
 successfully.
 
-The submitted archive is `r4lineups_2.3.0.tar.gz` (2,297,508 bytes), SHA-256
-`2dd8679fb26a0a29e7d7a1f3dcbc057ab4f21832d2dd5cdeaa85f8465b50468f`, built
-from commit `c124581`.
+The submitted archive is `r4lineups_2.3.0.tar.gz` (2,298,002 bytes), SHA-256
+`dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386`, built
+from commit `7315cf3`.
 
 ## purrr::rerun() notice
 
