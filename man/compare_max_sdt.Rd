@@ -30,6 +30,8 @@ the constrained model must impose every constraint in the free model plus at
 least one additional constraint.
 }
 \examples{
+\donttest{
+# Each two-condition fit takes a few seconds
 fit_free <- fit_max_sdt(
   n_hit=69, n_tp_choose=82, n_fa=64, N_tp=96, N_ta=106,
   n_hit_2=68, n_tp_choose_2=78, n_fa_2=42, N_tp_2=96, N_ta_2=96
@@ -40,6 +42,7 @@ fit_eqd <- fit_max_sdt(
   constrain_d = TRUE
 )
 compare_max_sdt(fit_free, fit_eqd)
+}
 }
 \seealso{
 \code{\link{fit_max_sdt}}

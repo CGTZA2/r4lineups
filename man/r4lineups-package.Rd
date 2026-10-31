@@ -6,7 +6,7 @@
 \alias{r4lineups-package}
 \title{r4lineups: Statistical Inference on Lineup Fairness}
 \description{
-Computes statistical measures for laboratory and police lineups in forensic psychology, including lineup bias, functional and effective size, diagnosticity, confidence-accuracy curves, signal detection models, and simulation tools. Optional face-similarity functions use embeddings supplied by Python's 'deepface' library; optional lineup-memory model fitting uses a separately installed, pinned 'pyWitness' engine.
+Computes statistical measures for laboratory and police lineups in forensic psychology, including lineup bias, functional and effective size, diagnosticity, confidence-accuracy curves, signal detection models, and simulation tools. Optional face-similarity functions use numeric face representations computed by Python's 'deepface' library; optional lineup-memory model fitting uses a separately installed, pinned 'pyWitness' engine.
 }
 \section{Authorship and acknowledgements}{
 

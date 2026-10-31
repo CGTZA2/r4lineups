@@ -1,5 +1,17 @@
 # cran-comments
 
+## Resubmission
+
+The automatic pretest of the first 2.3.0 submission (31 October 2026)
+reported two NOTEs on Windows and Debian. Both are fixed:
+
+* "Possibly misspelled words in DESCRIPTION: embeddings". The word was correct,
+  but the Description now says "numeric face representations" instead.
+* Examples with elapsed time over 5 s (`fit_max_sdt`, `compare_max_sdt`,
+  `compare_dpp`). The two-condition MAX model fits, which take several seconds
+  each, are now in `\donttest{}`; the single-condition fit still runs. The
+  `compare_dpp()` example uses 50 bootstrap resamples instead of 200.
+
 ## Release summary
 
 r4lineups 2.3.0 is a major update from the 0.1.x series on CRAN. It expands
@@ -13,8 +25,9 @@ fairness measures, model and pAUC comparison, data simulation and power
 analysis, a Shiny application, optional deep-learning face similarity via
 reticulate/Python, and an optional interface to a pinned pyWitness revision
 for fitting lineup-memory models. Versions 2.1.0 to 2.2.0 were never
-submitted; 2.3.0 supersedes them and adds the corrections from two
-independent statistical reviews. See NEWS.md for the full changelog.
+submitted; 2.3.0 supersedes them and adds the corrections from three
+independent reviews and an independent statistical audit. See NEWS.md for the
+full changelog.
 
 ## Test environments
 
@@ -24,24 +37,24 @@ independent statistical reviews. See NEWS.md for the full changelog.
 * GitHub Actions Ubuntu, R devel, release, and oldrel-1
 
 All five jobs passed on the release revision in GitHub Actions run
-`40967586729`, and the TeX-equipped job in that run built the PDF reference
-manual. The separate pinned-pyWitness parity suite passed on Linux, macOS, and
-Windows in run `40962145807`.
+`41221763862` (its source tree is identical to the submitted merge commit
+`c124581`), and the TeX-equipped job in that run built the PDF reference
+manual. The opt-in pinned-pyWitness parity tests passed locally on macOS
+(24 expectations).
 
 ## R CMD check results
 
-Local source-tarball check (`R CMD check --as-cran --no-manual --run-donttest`),
-with network access, including the CRAN incoming feasibility checks:
+Local source-tarball check (`R CMD check --as-cran`), with network access,
+including the CRAN incoming feasibility checks and the PDF manual:
 
 0 errors | 0 warnings | 0 notes
 
-The tests, ordinary and `\donttest{}` examples, installation, and all 16
-vignettes completed successfully. A PDF manual was not built locally because
-a TeX installation is unavailable; it was built by the TeX-equipped GitHub
-Actions job above.
+The tests, examples, installation, and all 16 vignettes completed
+successfully.
 
-The submitted archive is `r4lineups_2.3.0.tar.gz` (2,080,831 bytes), SHA-256
-`b44dbc9badea79cb0b5508c135f35fced55abadbe3b88640fdfb7819cf1227ec`.
+The submitted archive is `r4lineups_2.3.0.tar.gz` (2,297,508 bytes), SHA-256
+`2dd8679fb26a0a29e7d7a1f3dcbc057ab4f21832d2dd5cdeaa85f8465b50468f`, built
+from commit `c124581`.
 
 ## purrr::rerun() notice
 

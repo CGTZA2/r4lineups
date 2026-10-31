@@ -133,7 +133,8 @@
 #' )
 #' print(fit1)
 #'
-#' # Two conditions, free parameters
+#' \donttest{
+#' # Two conditions, free parameters (each two-condition fit takes a few seconds)
 #' fit_free <- fit_max_sdt(
 #'   n_hit = 69, n_tp_choose = 82, n_fa = 64,
 #'   N_tp = 96, N_ta = 106,
@@ -153,6 +154,7 @@
 #' # Compare models
 #' cmp <- compare_max_sdt(fit_free, fit_eqd)
 #' print(cmp)
+#' }
 #'
 #' @importFrom stats optim integrate pnorm dnorm qchisq pchisq quantile rbinom
 #' @export
@@ -619,6 +621,8 @@ plot.max_sdt_fit <- function(x, ...) {
 #'
 #' @seealso \code{\link{fit_max_sdt}}
 #' @examples
+#' \donttest{
+#' # Each two-condition fit takes a few seconds
 #' fit_free <- fit_max_sdt(
 #'   n_hit=69, n_tp_choose=82, n_fa=64, N_tp=96, N_ta=106,
 #'   n_hit_2=68, n_tp_choose_2=78, n_fa_2=42, N_tp_2=96, N_ta_2=96
@@ -629,6 +633,7 @@ plot.max_sdt_fit <- function(x, ...) {
 #'   constrain_d = TRUE
 #' )
 #' compare_max_sdt(fit_free, fit_eqd)
+#' }
 #' @export
 compare_max_sdt <- function(free, constrained) {
   if (!inherits(free, "max_sdt_fit") || !inherits(constrained, "max_sdt_fit"))

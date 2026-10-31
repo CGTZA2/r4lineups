@@ -158,7 +158,8 @@ fit1 <- fit_max_sdt(
 )
 print(fit1)
 
-# Two conditions, free parameters
+\donttest{
+# Two conditions, free parameters (each two-condition fit takes a few seconds)
 fit_free <- fit_max_sdt(
   n_hit = 69, n_tp_choose = 82, n_fa = 64,
   N_tp = 96, N_ta = 106,
@@ -178,6 +179,7 @@ fit_eqd <- fit_max_sdt(
 # Compare models
 cmp <- compare_max_sdt(fit_free, fit_eqd)
 print(cmp)
+}
 
 }
 \references{
