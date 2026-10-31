@@ -80,7 +80,7 @@
 #' @import tibble
 make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto",
                          thresholds = NULL) {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "confidence")
@@ -136,7 +136,7 @@ make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto",
 
   # Add point at (0, 0) for reject all
   roc_results <- rbind(tibble::tibble(
-    confidence = min(conf_levels) - 1,
+    confidence = .reject_all_criterion(tp_data, ta_data, method, conf_levels),
     correct_id_rate = 0,
     false_id_rate = 0,
     n_correct_ids = 0,
@@ -154,6 +154,7 @@ make_rocdata <- function(data, lineup_size = 6, innocent_suspect = "auto",
     lineup_size = lineup_size,
     innocent_suspect_method = method,
     thresholds = conf_levels,
+    synthetic_origin = 1L,
     raw_data = data
   )
   class(out) <- c("lineup_roc_data", "list")

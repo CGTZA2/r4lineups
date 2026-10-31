@@ -39,7 +39,8 @@
 #'     \item utility_data: Dataframe with criterion, strategy, hit rate,
 #'       false alarm rate, and expected utility. Each row is the rule "accept
 #'       suspect IDs with confidence >= criterion". The \code{"reject_all"}
-#'       row has a criterion one above the highest confidence level, so that
+#'       row has a criterion above the observed identification confidences
+#'       and supplied grid (possibly \code{Inf}), so that
 #'       applying it accepts no identification.
 #'     \item max_utility: Maximum expected utility, with the corresponding
 #'       criterion and strategy
@@ -100,7 +101,7 @@ make_utility_curves <- function(data,
                                 criteria = c("confidence", "all"),
                                 innocent_suspect = "auto",
                                 thresholds = NULL) {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
 
   # Validate inputs
   required_cols <- c("target_present", "identification", "confidence")
@@ -185,7 +186,7 @@ make_utility_curves <- function(data,
   eu_reject_all <- base_rate * eu_reject_guilty + (1 - base_rate) * eu_reject_innocent
 
   utility_results <- rbind(utility_results, tibble::tibble(
-    criterion = max(conf_levels) + 1,
+    criterion = .reject_all_criterion(tp_data, ta_data, innocent_method, conf_levels),
     strategy = "reject_all",
     hit_rate = 0,
     false_alarm_rate = 0,
@@ -208,11 +209,22 @@ make_utility_curves <- function(data,
   confidence_rows <- seq_along(conf_levels)
   avg_utility <- mean(utility_results$expected_utility[confidence_rows])
 
-  # Utility if all IDs are accepted uses the lowest confidence threshold.
-  utility_all_ids <- utility_results$expected_utility[utils::tail(confidence_rows, 1)]
+  # The all-ID rule is independent of a restricted caller-supplied grid.
+  all_hits <- sum(tp_data$identification == "suspect")
+  all_false <- .innocent_suspect_count(ta_data, rep(TRUE, n_ta),
+                                      lineup_size, innocent_method)
+  all_hr <- all_hits / n_tp
+  all_far <- all_false / n_ta
+  utility_all_ids <- base_rate * (all_hr * utility_matrix["tp"] +
+    (1 - all_hr) * utility_matrix["fn"]) + (1 - base_rate) *
+    (all_far * utility_matrix["fp"] + (1 - all_far) * utility_matrix["tn"])
 
   if (criteria == "all") {
-    utility_results <- utility_results[c(utils::tail(confidence_rows, 1), nrow(utility_results)), ]
+    all_rule <- tibble::tibble(criterion = -Inf, strategy = "threshold",
+      hit_rate = all_hr, false_alarm_rate = all_far,
+      expected_utility = unname(utility_all_ids), n_ids_tp = all_hits,
+      n_ids_ta = all_false)
+    utility_results <- rbind(all_rule, utility_results[nrow(utility_results), ])
     max_idx <- which.max(utility_results$expected_utility)
     max_utility <- list(
       expected_utility = utility_results$expected_utility[max_idx],
@@ -314,6 +326,12 @@ make_utility_difference <- function(data_proc_a,
                                     innocent_suspect = "auto") {
 
   utility_type <- match.arg(utility_type)
+  if (!is.numeric(base_rate_grid) || length(base_rate_grid) == 0L ||
+      anyNA(base_rate_grid) || any(!is.finite(base_rate_grid)) ||
+      any(base_rate_grid < 0 | base_rate_grid > 1)) {
+    stop("base_rate_grid must be a nonempty finite numeric vector in [0, 1].",
+         call. = FALSE)
+  }
 
   # Initialize results
   difference_results <- tibble::tibble(
@@ -366,7 +384,8 @@ make_utility_difference <- function(data_proc_a,
 
   # Find crossover points (where difference changes sign)
   crossover_points <- numeric()
-  for (i in 2:nrow(difference_results)) {
+  for (i in if (nrow(difference_results) > 1L)
+    seq.int(2L, nrow(difference_results)) else integer()) {
     if (sign(difference_results$difference[i]) != sign(difference_results$difference[i-1])) {
       # Linear interpolation to find approximate crossover
       br1 <- difference_results$base_rate[i-1]

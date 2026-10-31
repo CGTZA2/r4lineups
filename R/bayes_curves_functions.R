@@ -87,7 +87,8 @@ make_bayes_curves <- function(data,
 
   response_categories <- match.arg(response_categories)
   .validate_lineup_analysis(data,
-    require_confidence = identical(response_categories, "confidence"))
+    require_confidence = identical(response_categories, "confidence"), lineup_size = lineup_size)
+  if (response_categories == "confidence") .validate_bins(data$confidence, confidence_bins)
   if (!is.numeric(lineup_size) || length(lineup_size) != 1L ||
       !is.finite(lineup_size) || lineup_size < 2) {
     stop("lineup_size must be a finite number of at least 2.", call. = FALSE)

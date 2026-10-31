@@ -75,7 +75,8 @@
 #' @import tibble
 make_cacdata <- function(data, lineup_size = 6, confidence_bins = NULL,
                          innocent_suspect = "auto", base_rate = NULL) {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
+  .validate_bins(data$confidence, confidence_bins)
   .check_base_rate(base_rate)
 
   # Validate required columns

@@ -16,13 +16,13 @@
 #' The plot shows three curves:
 #' \itemize{
 #'   \item \strong{Nominal} (blue, dashed): Best-case estimate assuming fair lineup
-#'   \item \strong{Effective} (red, solid): Realistic estimate accounting for bias
+#'   \item \strong{Effective} (red, solid): Size-based approximation accounting for uneven choices
 #'   \item \strong{None} (gray, dashed): Worst-case estimate (no correction)
 #' }
 #'
 #' The shaded band between nominal and none represents the PPV uncertainty range
 #' due to unknown lineup fairness conditions. The effective size estimate typically
-#' falls within this range and provides a more realistic middle ground.
+#' falls within this range and is a size-based approximation, not a validated best estimate.
 #'
 #' @references
 #' Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
@@ -55,7 +55,7 @@ plot_ppv_range <- function(ppv_range_obj,
     conf_numeric = rep(plot_data$conf_numeric, 3),
     confidence = rep(plot_data$confidence, 3),
     ppv = c(plot_data$ppv_nominal, plot_data$ppv_effective, plot_data$ppv_none),
-    correction = rep(c("Nominal (best-case)", "Effective (realistic)", "None (worst-case)"),
+    correction = rep(c("Nominal (best-case)", "Effective (size-based)", "None (worst-case)"),
                      each = nrow(plot_data))
   )
 
@@ -75,13 +75,13 @@ plot_ppv_range <- function(ppv_range_obj,
              linewidth = 1) +
     scale_color_manual(
       values = c("Nominal (best-case)" = "#2171b5",
-                "Effective (realistic)" = "#d7301f",
+                "Effective (size-based)" = "#d7301f",
                 "None (worst-case)" = "#636363"),
       name = "Correction Method"
     ) +
     scale_linetype_manual(
       values = c("Nominal (best-case)" = "dashed",
-                "Effective (realistic)" = "solid",
+                "Effective (size-based)" = "solid",
                 "None (worst-case)" = "dashed"),
       name = "Correction Method"
     )
@@ -104,7 +104,7 @@ plot_ppv_range <- function(ppv_range_obj,
     labs(
       title = "PPV Range Across Lineup Fairness Assumptions",
       subtitle = paste0("Lineup size = ", ppv_range_obj$lineup_size,
-                       " | Shaded band = uncertainty range"),
+                       " | Band = fairness sensitivity, not a confidence interval"),
       x = "Confidence Level",
       y = "Positive Predictive Value (PPV)",
       caption = "Fitzgerald, Tredoux & Juncu (2023)"
@@ -210,7 +210,7 @@ plot_effective_size_conf <- function(ppv_range_obj,
     theme_bw(base_size = 12) +
     labs(
       title = "Effective Lineup Size by Confidence Level",
-      subtitle = "Values below nominal size indicate lineup bias",
+      subtitle = "Sample estimates reflect both selection patterns and sampling variation",
       x = "Confidence Level",
       y = "Effective Size",
       caption = "Based on Tredoux (1998) effective size"

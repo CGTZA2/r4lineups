@@ -208,7 +208,8 @@ ppv_by_confidence <- function(data,
                                 quiet = FALSE,
                                 innocent_suspect = "auto",
                                 base_rate = NULL) {
-  .validate_lineup_analysis(data)
+  .validate_lineup_analysis(data, lineup_size = lineup_size)
+  .validate_bins(data$confidence, confidence_bins)
   .check_base_rate(base_rate)
 
   # Validate inputs

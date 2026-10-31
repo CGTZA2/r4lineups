@@ -402,7 +402,7 @@ plot_dpp_comparison <- function(compare_obj,
   )
   weighted <- !is.null(compare_obj$dpp_obj_a$alpha)
 
-  subtitle <- sprintf("%s: %.3f  |  %s: %.3f  |  Difference = %.3f",
+  subtitle <- sprintf("%s: %.3f  |  %s: %.3f\nDifference = %.3f",
                       proc_a_label, compare_obj$dpp_a,
                       proc_b_label, compare_obj$dpp_b,
                       compare_obj$dpp_difference)
