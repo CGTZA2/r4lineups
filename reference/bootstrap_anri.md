@@ -114,6 +114,6 @@ data <- data.frame(
 boot_result <- bootstrap_anri(data, confidence_bins = seq(0, 100, 20),
                               n_bootstrap = 200, seed = 1)
 c(boot_result$ci_lower, boot_result$ci_upper)
-#> [1] -0.03579564  0.13450153
+#> [1] -0.03187222  0.12030595
 # }
 ```

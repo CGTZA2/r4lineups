@@ -39,10 +39,11 @@ Calling [`table()`](https://rdrr.io/r/base/table.html) directly on a
 vector of lineup choices tabulates only the positions that were actually
 chosen. A lineup member that no witness selected — a *null foil* — is
 silently dropped, so the resulting table has fewer than `k` entries and
-nothing in the output reveals that a member is missing. This matters
-because null foils are precisely the members that contribute most to a
-lineup being unfair: a foil nobody ever picks is not a functioning
-alternative to the suspect.
+nothing in the output reveals that a member is missing. This is
+important because a foil nobody would pick is not a functioning
+alternative to the suspect, one of several things that can make a lineup
+unfair. A member with no choices in a small sample is not necessarily
+such a foil.
 
 `lineup_table()` tabulates over all `k` positions, so unchosen members
 appear explicitly as zero counts, and its print method names them.

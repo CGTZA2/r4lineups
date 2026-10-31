@@ -97,9 +97,10 @@ suspect.</p></dd>
 the positions that were actually chosen. A lineup member that no witness
 selected — a <em>null foil</em> — is silently dropped, so the resulting table has
 fewer than <code>k</code> entries and nothing in the output reveals that a member is
-missing. This matters because null foils are precisely the members that
-contribute most to a lineup being unfair: a foil nobody ever picks is not a
-functioning alternative to the suspect.</p>
+missing. This is important because a foil nobody would pick is not a
+functioning alternative to the suspect, one of several things that can make a
+lineup unfair. A member with no choices in a small sample is not necessarily
+such a foil.</p>
 <p><code>lineup_table()</code> tabulates over all <code>k</code> positions, so unchosen
 members appear explicitly as zero counts, and its print method names them.</p>
 <p>The measures in this package already handle null foils correctly when given a

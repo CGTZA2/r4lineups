@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/sdt_glm_analysis.Rmd" class="external-link"><code>vignettes/sdt_glm_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>sdt_glm_analysis.Rmd</code></div>
@@ -139,14 +139,12 @@ trial-level uncertainty.</li>
 since it is the most consequential.</li>
 </ol>
 <p>The GLM formulation avoids all four by modelling the individual
-response rather than the per-participant summary. It turns out that d′
-falls straight out of a probit regression, so nothing is lost by doing
-it this way.</p>
+response rather than the per-participant summary. d′ follows directly
+from a probit regression, so nothing is lost by doing it this way.</p>
 <div class="section level3">
 <h3 id="why-a-probit-regression-gives-you-d">Why a probit regression gives you d′<a class="anchor" aria-label="anchor" href="#why-a-probit-regression-gives-you-d"></a>
 </h3>
-<p>The connection is exact rather than approximate, and worth
-seeing.</p>
+<p>The connection is exact rather than approximate.</p>
 <p>Signal detection theory says the witness’s evidence is normally
 distributed with mean 0 for new items and mean d′ for old ones, with a
 criterion at some point
@@ -205,7 +203,7 @@ d′.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Note that both participants <strong>and items</strong> vary. That is
 realistic — some faces are simply more memorable than others — and it is
-what makes the next section matter.</p>
+what makes the next section important.</p>
 </div>
 <div class="section level2">
 <h2 id="single-level-glm">Single-level GLM<a class="anchor" aria-label="anchor" href="#single-level-glm"></a>
@@ -261,10 +259,10 @@ using <code><a href="https://rdrr.io/pkg/lme4/man/glmer.html" class="external-li
 <div class="section level2">
 <h2 id="participants-items-or-both">Participants, items, or both<a class="anchor" aria-label="anchor" href="#participants-items-or-both"></a>
 </h2>
-<p>This is the substantive reason to prefer the multilevel formulation,
-and it is an old argument: Clark (1973) pointed out that treating
-stimulus items as fixed means any conclusion strictly applies only to
-the particular items used. In recognition memory the items are faces or
+<p>This is the main reason to prefer the multilevel formulation, and it
+is an old argument: Clark (1973) pointed out that treating stimulus
+items as fixed means any conclusion strictly applies only to the
+particular items used. In recognition memory the items are faces or
 words, and they differ in memorability. If your analysis treats them as
 fixed, you are entitled to conclude something about <em>those sixty
 faces</em>, not about faces in general.</p>
@@ -517,7 +515,7 @@ realistic model and requires more data to fit.</li>
 </ol>
 </div>
 <div class="section level3">
-<h3 id="a-limitation-worth-naming">A limitation worth naming<a class="anchor" aria-label="anchor" href="#a-limitation-worth-naming"></a>
+<h3 id="a-limitation">A limitation<a class="anchor" aria-label="anchor" href="#a-limitation"></a>
 </h3>
 <p>This treats the response as binary — “old” or “new”. Recognition data
 usually carry confidence as well, and reducing a confidence rating to a
@@ -532,6 +530,7 @@ here.</p>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Bates, D., Mächler, M., Bolker, B., &amp; Walker, S. (2015). Fitting
 linear mixed-effects models using lme4. <em>Journal of Statistical
 Software, 67</em>(1), 1-48.</p>
@@ -541,6 +540,7 @@ Learning and Verbal Behavior, 12</em>(4), 335-359.</p>
 <p>Wright, D. B., Horry, R., &amp; Skagerberg, E. M. (2009). Functions
 for traditional and multilevel approaches to signal detection theory.
 <em>Behavior Research Methods, 41</em>(2), 257-267.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

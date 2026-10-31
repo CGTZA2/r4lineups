@@ -127,7 +127,8 @@ otherwise, with a message.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An S3 object of class "sdt_roc_fit" containing:</p><ul><li><p>dprime: Overall discriminability (d')</p></li>
 <li><p>criteria: Decision criterion for each confidence level (c values)</p></li>
-<li><p>variance_ratio: Ratio of target SD to lure SD (if unequal_variance)</p></li>
+<li><p>variance_ratio: Ratio of lure SD to target SD, the z-ROC slope
+      (if unequal_variance)</p></li>
 <li><p>slope: Slope of z-ROC</p></li>
 <li><p>intercept: Intercept of z-ROC</p></li>
 <li><p>roc_data: Original ROC data with z-transforms</p></li>

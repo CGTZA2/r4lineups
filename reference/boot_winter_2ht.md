@@ -86,8 +86,8 @@ An object of class "winter_2ht_boot" containing:
 
 ## Details
 
-The bootstrap procedure resamples observations from the original data
-with replacement to create bootstrap datasets. For each bootstrap
+The bootstrap procedure resamples within TP and TA strata with
+replacement to keep both experimental totals fixed. For each bootstrap
 sample, the 2-HT model is re-fitted, and the distribution of parameter
 estimates across bootstrap samples is used to construct confidence
 intervals.
@@ -99,8 +99,8 @@ Two types of confidence intervals are available:
 - **bca**: Bias-corrected and accelerated intervals (Efron, 1987). The
   bias correction counts bootstrap ties with the estimate as half, and
   the acceleration comes from the jackknife over individual
-  observations, which needs at most six refits because the data are six
-  response counts.
+  observations, centered and scaled within TP/TA strata, using at most
+  six distinct leave-one-out response-count fits.
 
 ## References
 
@@ -116,6 +116,7 @@ counts <- c(
   n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
 )
 fit <- fit_winter_2ht(counts, lineup_size = 6)
+#> Warning: 2-HT estimate is on a parameter boundary; regular Hessian standard errors are unavailable. Bootstrap intervals also need boundary qualification.
 
 # Bootstrap CIs
 boot_fit <- boot_winter_2ht(fit, nboot = 200, seed = 123)
@@ -132,10 +133,10 @@ print(boot_fit)
 #> 
 #> Parameter Estimates with Bootstrap CIs:
 #>    Estimate Boot_Lower Boot_Upper Boot_SE
-#> dP   0.3169     0.2511     0.3699  0.0296
-#> dA   0.0000     0.0000     0.1621  0.0489
-#> b    0.0273     0.0016     0.0646  0.0155
-#> g    0.4452     0.4107     0.5071  0.0252
+#> dP   0.3169     0.2580     0.3675  0.0304
+#> dA   0.0000     0.0000     0.1888  0.0541
+#> b    0.0273     0.0012     0.0677  0.0176
+#> g    0.4452     0.4122     0.5182  0.0275
 plot(boot_fit)
 #> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 #> ℹ Please use `linewidth` instead.

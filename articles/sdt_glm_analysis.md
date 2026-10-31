@@ -56,13 +56,12 @@ it has four awkward properties:
     most consequential.
 
 The GLM formulation avoids all four by modelling the individual response
-rather than the per-participant summary. It turns out that d′ falls
-straight out of a probit regression, so nothing is lost by doing it this
-way.
+rather than the per-participant summary. d′ follows directly from a
+probit regression, so nothing is lost by doing it this way.
 
 ### Why a probit regression gives you d′
 
-The connection is exact rather than approximate, and worth seeing.
+The connection is exact rather than approximate.
 
 Signal detection theory says the witness’s evidence is normally
 distributed with mean 0 for new items and mean d′ for old ones, with a
@@ -124,7 +123,7 @@ df$said_old <- rbinom(
 
 Note that both participants **and items** vary. That is realistic — some
 faces are simply more memorable than others — and it is what makes the
-next section matter.
+next section important.
 
 ## Single-level GLM
 
@@ -183,13 +182,13 @@ extract_sdt_metrics(glmm_fit)
 
 ## Participants, items, or both
 
-This is the substantive reason to prefer the multilevel formulation, and
-it is an old argument: Clark (1973) pointed out that treating stimulus
-items as fixed means any conclusion strictly applies only to the
-particular items used. In recognition memory the items are faces or
-words, and they differ in memorability. If your analysis treats them as
-fixed, you are entitled to conclude something about *those sixty faces*,
-not about faces in general.
+This is the main reason to prefer the multilevel formulation, and it is
+an old argument: Clark (1973) pointed out that treating stimulus items
+as fixed means any conclusion strictly applies only to the particular
+items used. In recognition memory the items are faces or words, and they
+differ in memorability. If your analysis treats them as fixed, you are
+entitled to conclude something about *those sixty faces*, not about
+faces in general.
 
 The traditional workaround was to run the analysis twice — once
 averaging over items to get a by-participants test, once averaging over
@@ -391,7 +390,7 @@ the intercept is not $`c`$.
     itself to vary across participants is often the more realistic model
     and requires more data to fit.
 
-### A limitation worth naming
+### A limitation
 
 This treats the response as binary — “old” or “new”. Recognition data
 usually carry confidence as well, and reducing a confidence rating to a

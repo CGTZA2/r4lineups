@@ -27,17 +27,23 @@ closed-form expression: \$\$\mathrm{Var}(I) \approx
 \frac{4}{N}\left(\sum_i p_i^3 - \left(\sum_i p_i^2\right)^2\right).\$\$
 Normal quantiles are applied to I and the resulting bounds are
 back-transformed to the E' scale via \\E' = 1/(1-I)\\. For small samples
-or skewed distributions, bootstrap methods
-([`esize_boot_dist`](https://cgtza2.github.io/r4lineups/reference/esize_boot_dist.md))
-or the Bayesian posterior
-([`esize_T_bayes`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md))
-may be preferred.
+or skewed distributions, all interval methods require qualification. In
+particular, plug-in bootstrap intervals also fail at exact uniform
+fairness; see
+[`esize_boot_dist`](https://cgtza2.github.io/r4lineups/reference/esize_boot_dist.md).
+Bayesian credible intervals describe a stated posterior rather than
+guaranteeing fixed-parameter frequentist coverage.
 
 Note that this concerns the *interval*. The point estimate itself is
-also biased downward at small samples, since \\E'\\ is a plug-in
+also biased downward near uniform choice distributions at small samples,
+although the direction is not universal, since \\E'\\ is a plug-in
 estimator; see the “Small-sample bias” section of
 [`esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md).
-This function uses the plug-in form.
+This function uses the plug-in form. This first-order interval is
+unreliable in small samples and at uniform or concentrated boundary
+distributions. A zero estimated variance yields a degenerate interval,
+not evidence of zero population uncertainty. An ordinary bootstrap is
+also not a general solution to these boundary problems.
 
 ## References
 

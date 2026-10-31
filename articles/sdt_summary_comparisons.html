@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/sdt_summary_comparisons.Rmd" class="external-link"><code>vignettes/sdt_summary_comparisons.Rmd</code></a></small>
       <div class="d-none name"><code>sdt_summary_comparisons.Rmd</code></div>
@@ -383,8 +383,7 @@ counts or SEs, z-tests are not identifiable.</li>
 <div class="section level2">
 <h2 id="the-compound-model-alternative">The compound-model alternative<a class="anchor" aria-label="anchor" href="#the-compound-model-alternative"></a>
 </h2>
-<p>The caution above is only useful if it names an alternative, so here
-it is. <code><a href="../reference/fit_max_sdt.html">fit_max_sdt()</a></code> fits the compound (MAX SDT) model of
+<p><code><a href="../reference/fit_max_sdt.html">fit_max_sdt()</a></code> fits the compound (MAX SDT) model of
 Duncan (2006) directly to lineup counts, estimating d’ and a criterion
 together, and gives the sampling distribution by parametric bootstrap.
 It is the lineup-appropriate counterpart to everything above.</p>
@@ -612,19 +611,28 @@ three options differ in what they assume:</p>
 </tr>
 <tr class="even">
 <td><code>"miller"</code></td>
-<td>Exact binomial treatment (Miller, 1996)</td>
-<td>The default recommendation; better coverage at small counts and
-extreme rates</td>
+<td>Binomial moment sums evaluated at estimated rates (Miller,
+1996)</td>
+<td>The package default; its plug-in Wald test is approximate and can be
+liberal with sparse false alarms</td>
 </tr>
 <tr class="odd">
 <td><code>"bootstrap"</code></td>
-<td>Resampling the binomial counts</td>
-<td>No distributional assumption about the transformed statistic; useful
-when rates are near 0 or 1, and the approach used in the meta-analysis
-cited above</td>
+<td>Parametric resampling of independent binomial counts at estimated
+rates</td>
+<td>Avoids a normal approximation for the transformed draws, but still
+assumes the binomial sampling model; boundary behaviour needs
+assessment</td>
 </tr>
 </tbody>
 </table>
+<p>Exact binomial moment summation does not make the resulting plug-in
+comparison an exact test. In an independent audit scenario with 200
+signal and 200 noise trials per condition, true hit rate .15 and
+false-alarm rate .01, nominal 5% Miller Wald tests rejected equal
+conditions about 8% of the time for d’ and 9% for ln-beta (12,000
+datasets). These are limits of the approximation, rather than evidence
+that one variance option is uniformly preferable.</p>
 <p>The comparison is a Wald test, with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi mathvariant="normal">Δ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mi>A</mi></msub><mo>+</mo><msub><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mi>B</mi></msub></mrow><annotation encoding="application/x-tex">\mathrm{Var}(\Delta) = \mathrm{Var}_A + \mathrm{Var}_B</annotation></semantics></math>,
 valid because the two conditions are independent samples. It would be
@@ -701,24 +709,26 @@ are lineups.</li>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Duncan, M. (2006). <em>A signal detection model of compound decision
 tasks</em> (Technical Note DRDC TR 2006-256). Defence R&amp;D Canada,
 Toronto.</p>
-<p>Reisberg, D., &amp; Pezdek, K. (2024). Data analysed with the MAX SDT
-model in scripts supplied by A. M. Smith (personal communication, 4
-April 2024).</p>
 <p>Gourevitch, V., &amp; Galanter, E. (1967). A significance test for
 one parameter isosensitivity functions. <em>Psychometrika, 32</em>(1),
 25-33.</p>
 <p>Miller, J. (1996). The sampling distribution of d’. <em>Perception
 &amp; Psychophysics, 58</em>(1), 65-72.</p>
+<p>Reisberg, D., &amp; Pezdek, K. (2024). Data analysed with the MAX SDT
+model in scripts supplied by A. M. Smith (personal communication, 4
+April 2024).</p>
 <p>Suero, M., Privado, J., &amp; Botella, J. (2017). Estimating the
 variances and covariance of the parameters of signal detection theory.
 <em>Psicothema, 29</em>(3), 432-437.</p>
 <p>Tredoux, C. G., Sporer, S. L., Vredeveldt, A., Kempen, K., &amp;
 Nortje, A. (2021). Does constructing a facial composite affect
 eyewitness memory? A research synthesis and meta-analysis. <em>Journal
-of Experimental Criminology, 17</em>(4), 713-741. </p>
+of Experimental Criminology, 17</em>(4), 713-741. <a href="https://doi.org/10.1007/s11292-020-09432-z" class="external-link uri">https://doi.org/10.1007/s11292-020-09432-z</a></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

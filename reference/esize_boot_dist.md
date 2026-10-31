@@ -50,8 +50,16 @@ esize_boot_dist(
 A numeric vector of bootstrap estimates, carrying an `"n"` attribute
 equal to the number of lineup choices resampled. With `unbiased = TRUE`,
 resamples in which every choice fell on a different member have an
-unbounded corrected estimate; they are dropped, with a warning, and
-their number is recorded in an `"n_undefined"` attribute.
+unbounded corrected estimate; they are retained as `Inf`, with a
+warning, and their number is recorded in an `"n_undefined"` attribute.
+
+## Details
+
+Percentile or BCa intervals from the plug-in E' bootstrap are not valid
+tests of exact uniform fairness. The population maximum E'=k is a
+nonregular boundary. If the sample size is not a multiple of k, even the
+largest attainable empirical E' is below k, so those intervals have zero
+coverage at exact fairness. More bootstrap replicates cannot fix this.
 
 ## Examples
 

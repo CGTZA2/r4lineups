@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/model_comparison.Rmd" class="external-link"><code>vignettes/model_comparison.Rmd</code></a></small>
       <div class="d-none name"><code>model_comparison.Rmd</code></div>
@@ -96,9 +96,9 @@ with the authors.</p>
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>Eyewitness identification data can be analyzed using multiple
-theoretical frameworks, each providing unique insights. This vignette
-demonstrates how to use r4lineups’ model comparison framework to fit and
-compare:</p>
+theoretical frameworks, each providing different information. This
+vignette demonstrates how to use r4lineups’ model comparison framework
+to fit and compare:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>2-HT Model</strong> (Winter et al., 2022): Multinomial
@@ -123,16 +123,29 @@ visualizations.</p>
 <p>The Two-High Threshold (2-HT) model is a multinomial processing tree
 (MPT) that separates identification decisions into distinct latent
 processes:</p>
-<p><strong>Parameters:</strong> - <strong>dP</strong>: Detection of
-culprit presence (0-1) - <strong>dA</strong>: Detection of culprit
-absence (0-1) - <strong>b</strong>: Biased suspect selection (0-1) -
-<strong>g</strong>: Guessing-based selection (0-1)</p>
-<p><strong>Model equations</strong> (target-present): - P(suspect ID) =
-dP + (1-dP) × [b + (1-b) × g × (1/L)] - P(filler ID) = (1-dP) × (1-b) ×
-g × ((L-1)/L) - P(reject) = (1-dP) × (1-b) × (1-g)</p>
-<p><strong>Use when:</strong> - You want to understand underlying
-cognitive mechanisms - Testing theories about detection vs. guessing -
-Comparing conditions with different bias levels</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li>
+<strong>dP</strong>: Detection of culprit presence (0-1)</li>
+<li>
+<strong>dA</strong>: Detection of culprit absence (0-1)</li>
+<li>
+<strong>b</strong>: Biased suspect selection (0-1)</li>
+<li>
+<strong>g</strong>: Guessing-based selection (0-1)</li>
+</ul>
+<p><strong>Model equations</strong> (target-present):</p>
+<ul>
+<li>P(suspect ID) = dP + (1-dP) × [b + (1-b) × g × (1/L)]</li>
+<li>P(filler ID) = (1-dP) × (1-b) × g × ((L-1)/L)</li>
+<li>P(reject) = (1-dP) × (1-b) × (1-g)</li>
+</ul>
+<p><strong>Use when:</strong></p>
+<ul>
+<li>You want to understand underlying cognitive mechanisms</li>
+<li>Testing theories about detection vs. guessing</li>
+<li>Comparing conditions with different bias levels</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="eig-information-theoretic-measure">EIG: Information-Theoretic Measure<a class="anchor" aria-label="anchor" href="#eig-information-theoretic-measure"></a>
@@ -142,24 +155,41 @@ responses provide about guilt vs. innocence using Shannon entropy:</p>
 <p><strong>Formula:</strong> EIG = Σ p(x) × [H(prior) -
 H(p(guilty|x))]</p>
 <p>where x = response category (e.g., “suspect_high_confidence”)</p>
-<p><strong>Interpretation:</strong> - EIG = 0: No information (responses
-don’t distinguish guilty/innocent) - EIG = 1: Perfect information
-(complete resolution of uncertainty) - Higher EIG = more diagnostic
-procedure</p>
-<p><strong>Use when:</strong> - Evaluating overall diagnosticity of
-procedures - Comparing different identification methods - Assessing
-policy-relevant cutoffs</p>
+<p><strong>Interpretation:</strong></p>
+<ul>
+<li>EIG = 0: No information (responses don’t distinguish
+guilty/innocent)</li>
+<li>The maximum is the prior entropy, reached when every response
+resolves guilt completely. That is 1 bit only when the prior probability
+of guilt is .5; at a prior of .1 it is about .47 bits. Compare EIG
+values only at the same prior.</li>
+<li>Higher EIG = more diagnostic procedure</li>
+</ul>
+<p><strong>Use when:</strong></p>
+<ul>
+<li>Evaluating overall diagnosticity of procedures</li>
+<li>Comparing different identification methods</li>
+<li>Assessing policy-relevant cutoffs</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="full-roc-investigator-discriminability">Full ROC: Investigator Discriminability<a class="anchor" aria-label="anchor" href="#full-roc-investigator-discriminability"></a>
 </h3>
 <p>Full ROC uses ALL witness responses (suspect IDs, filler IDs,
 rejections) to compute a threshold-free measure of discriminability:</p>
-<p><strong>Measure:</strong> - AUC (Area Under the Curve) - Range: 0.5
-(chance) to 1.0 (perfect)</p>
-<p><strong>Use when:</strong> - Measuring investigator discriminability
-- Comparing system variables (lineup procedures) - Need threshold-free
-performance measure</p>
+<p><strong>Measure:</strong></p>
+<ul>
+<li>AUC (Area Under the Curve)</li>
+<li>Range: 0 to 1. A value of .5 is the no-discrimination reference, not
+a lower bound: with the a-priori ordering a procedure that does worse
+than chance gives an AUC below .5.</li>
+</ul>
+<p><strong>Use when:</strong></p>
+<ul>
+<li>Measuring investigator discriminability</li>
+<li>Comparing system variables (lineup procedures)</li>
+<li>Need threshold-free performance measure</li>
+</ul>
 </div>
 </div>
 <div class="section level2">
@@ -197,9 +227,8 @@ performance measure</p>
 <span><span class="co">#&gt; 4          1</span></span>
 <span><span class="co">#&gt; 5          2</span></span>
 <span><span class="co">#&gt; 6          5</span></span></code></pre></div>
-<p>The <code>c_criterion = 0.9</code> is not incidental, and it is worth
-explaining because getting it wrong makes one of the three models
-impossible to fit.</p>
+<p>The <code>c_criterion = 0.9</code> is not incidental: getting it
+wrong makes one of the three models impossible to fit.</p>
 <p><code>c_criterion</code> is a threshold on the
 <strong>maximum</strong> of the lineup members’ memory strengths, not a
 textbook signal-detection criterion. The maximum of six draws from a
@@ -244,13 +273,12 @@ target-present and 300 target-absent lineups).</caption>
 </table>
 <p>The 2-HT model’s detect-absence parameter <code>dA</code> is
 identified almost entirely by rejections — it is the probability of
-correctly concluding the culprit is absent. With half a percent of
-witnesses rejecting, the likelihood is nearly flat in <code>dA</code>
-and the fit fails. <code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> now detects this and
-says so; earlier versions failed with an opaque message about non-finite
-differences, and <code><a href="../reference/compare_models.html">compare_models()</a></code> simply omitted the model
-from its results, so every downstream section that referred to it
-silently produced nothing.</p>
+correctly concluding the culprit is absent. Here only one witness in 600
+rejects, so the likelihood carries almost no information about
+<code>dA</code> and the fit fails; <code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> stops
+with a message naming that cause. A low rejection percentage is not by
+itself fatal in a large sample; the information about <code>dA</code>
+depends on the number of rejections.</p>
 </div>
 <div class="section level3">
 <h3 id="comparing-all-models">Comparing All Models<a class="anchor" aria-label="anchor" href="#comparing-all-models"></a>
@@ -343,15 +371,15 @@ silently produced nothing.</p>
 <span><span class="co">#&gt;   - EIG: Higher values = more informative procedure</span></span>
 <span><span class="co">#&gt;   - Full ROC: Higher AUC = better investigator discriminability</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Each model provides different insights -- consider using multiple models.</span></span></code></pre></div>
+<span><span class="co">#&gt; Each model provides different information; consider reporting more than one.</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="visualizing-model-comparisons">Visualizing Model Comparisons<a class="anchor" aria-label="anchor" href="#visualizing-model-comparisons"></a>
 </h3>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Side-by-side plots</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">comparison</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="model_comparison_files/figure-html/visualize_models-1.png" class="r-plt" alt="" width="768"></p>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">comparison</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<p><img src="model_comparison_files/figure-html/visualize_models-1.png" class="r-plt" alt="" width="960"></p>
 </div>
 </div>
 <div class="section level2">
@@ -383,22 +411,22 @@ data.</caption>
 <tr class="odd">
 <td align="left">dP</td>
 <td align="right">0.485</td>
-<td align="right">0.035</td>
+<td align="right">NA</td>
 </tr>
 <tr class="even">
 <td align="left">dA</td>
 <td align="right">0.049</td>
-<td align="right">0.057</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">b</td>
 <td align="right">0.000</td>
-<td align="right">0.024</td>
+<td align="right">NA</td>
 </tr>
 <tr class="even">
 <td align="left">g</td>
 <td align="right">0.754</td>
-<td align="right">0.036</td>
+<td align="right">NA</td>
 </tr>
 </tbody>
 </table>
@@ -413,7 +441,8 @@ data.</caption>
 <li>
 <strong>dP</strong>: Probability of detecting guilty suspect</li>
 <li>
-<strong>dA</strong>: Probability of detecting innocent suspect</li>
+<strong>dA</strong>: Probability of detecting the culprit’s
+absence</li>
 <li>
 <strong>b</strong>: Bias toward suspect</li>
 <li>
@@ -503,16 +532,27 @@ a “best model.”</p>
 <div class="section level3">
 <h3 id="when-to-use-each-model">When to Use Each Model<a class="anchor" aria-label="anchor" href="#when-to-use-each-model"></a>
 </h3>
-<p><strong>Use 2-HT when:</strong> - Testing cognitive theories
-(detection, guessing, bias) - Need to separate memory from response bias
-- Comparing procedures that might differ in bias - Want to understand
-latent psychological processes</p>
-<p><strong>Use EIG when:</strong> - Evaluating overall diagnosticity -
-Comparing identification procedures - Need a single summary measure -
-Want information-theoretic interpretation</p>
-<p><strong>Use Full ROC when:</strong> - Need threshold-free
-discriminability measure - Comparing system variables - Want to use all
-available information - Policy/practical decision-making focus</p>
+<p><strong>Use 2-HT when:</strong></p>
+<ul>
+<li>Testing cognitive theories (detection, guessing, bias)</li>
+<li>Need to separate memory from response bias</li>
+<li>Comparing procedures that might differ in bias</li>
+<li>Want to understand latent psychological processes</li>
+</ul>
+<p><strong>Use EIG when:</strong></p>
+<ul>
+<li>Evaluating overall diagnosticity</li>
+<li>Comparing identification procedures</li>
+<li>Need a single summary measure</li>
+<li>Want information-theoretic interpretation</li>
+</ul>
+<p><strong>Use Full ROC when:</strong></p>
+<ul>
+<li>Need threshold-free discriminability measure</li>
+<li>Comparing system variables</li>
+<li>Want to use all available information</li>
+<li>Policy/practical decision-making focus</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="comparing-model-fits">Comparing Model Fits<a class="anchor" aria-label="anchor" href="#comparing-model-fits"></a>
@@ -521,7 +561,8 @@ available information - Policy/practical decision-making focus</p>
 than absolute. They can only be compared with alternative likelihood
 models fitted to the same observations and outcome representation; they
 cannot be compared with EIG or AUC. A single-condition 2-HT fit is
-saturated.</p>
+saturated: it has zero residual degrees of freedom, so it reproduces the
+observed counts exactly and its absolute fit cannot be tested.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT Model Fit:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 2-HT Model Fit:</span></span>
@@ -705,11 +746,12 @@ saturated.</p>
 <span><span class="co">#&gt; Available models: 2ht, eig, fullroc</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="parameter-recovery-check">Parameter Recovery Check<a class="anchor" aria-label="anchor" href="#parameter-recovery-check"></a>
+<h3 id="sensitivity-to-the-generating-d">Sensitivity to the Generating d′<a class="anchor" aria-label="anchor" href="#sensitivity-to-the-generating-d"></a>
 </h3>
-<p>A single fit tells you little. The useful check is whether the
-recovered parameters <em>move</em> as the generating parameter
-moves:</p>
+<p>A single fit tells you little. A useful check is whether the 2-HT
+parameters <em>move</em> as the generating d′ moves. The data come from
+a signal detection (MAX) model, not from the 2-HT model, so there are no
+true 2-HT parameter values to recover:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">recovery</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">2.5</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">dp</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
@@ -721,22 +763,22 @@ moves:</p>
 <span>                        target_present <span class="op">=</span> <span class="st">"target_present"</span>,</span>
 <span>                        identification <span class="op">=</span> <span class="st">"identification"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>`True d'` <span class="op">=</span> <span class="va">dp</span>,</span>
-<span>             `Recovered dP` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>             `Recovered dA` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dA"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             `Fitted dP` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             `Fitted dA` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dA"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>             check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="va">recovery</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"2-HT detection parameters recovered from data simulated at known d', 400 lineups per arm."</span></span>
+<span>  caption <span class="op">=</span> <span class="st">"2-HT detection parameters fitted to data simulated from a signal detection model at known d', 400 lineups per arm."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>2-HT detection parameters recovered from data simulated at
-known d’, 400 lineups per arm.</caption>
+<caption>2-HT detection parameters fitted to data simulated from a
+signal detection model at known d’, 400 lineups per arm.</caption>
 <thead><tr class="header">
 <th align="right">True d’</th>
-<th align="right">Recovered dP</th>
-<th align="right">Recovered dA</th>
+<th align="right">Fitted dP</th>
+<th align="right">Fitted dA</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -766,11 +808,13 @@ known d’, 400 lineups per arm.</caption>
 </tr>
 </tbody>
 </table>
-<p><code>dP</code> increases monotonically with the generating d′, which
-is the result the check is looking for. It is not on the same scale as
-d′ and should not be expected to equal it: the two models parameterise
-memory differently, and what validates the analysis is that the ordering
-is recovered.</p>
+<p><code>dP</code> increases monotonically with the generating d′. That
+shows the parameter is sensitive to memory strength. It is not parameter
+recovery: <code>dP</code> is not on the same scale as d′, the generating
+model is not the 2-HT model, and the check says nothing about bias,
+interval coverage or whether the process interpretation is correct.
+Recovery would need data simulated from <code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code>’s
+own equations.</p>
 </div>
 </div>
 <div class="section level2">
@@ -788,34 +832,48 @@ between guilty and innocent suspects?</p>
 <span>  models <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2ht"</span>, <span class="st">"eig"</span>, <span class="st">"fullroc"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Interpretation</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Procedure Evaluation:\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Procedure Evaluation:</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"2-HT: dP ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>    <span class="st">"\n  → Detection ability is"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0.5</span>,</span>
-<span>           <span class="st">"good"</span>, <span class="st">"moderate"</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 2-HT: dP = 0.49 </span></span>
-<span><span class="co">#&gt;   → Detection ability is moderate</span></span>
-<span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="st">"eig"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">procedure_eval</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"EIG ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">eig</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"bits\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  → Provides"</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">eig</span> <span class="op">/</span></span>
-<span>              <span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">prior_entropy</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">0</span><span class="op">)</span>,</span>
-<span>      <span class="st">"% of maximum information\n\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt; EIG = 0.187 bits</span></span>
-<span><span class="co">#&gt;   → Provides 19 % of maximum information</span></span>
-<span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="st">"fullroc"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">procedure_eval</span><span class="op">$</span><span class="va">models_fit</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Full ROC AUC ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">fullroc</span><span class="op">$</span><span class="va">auc</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  → Discriminability is"</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">fullroc</span><span class="op">$</span><span class="va">auc</span> <span class="op">&gt;</span> <span class="fl">0.75</span>, <span class="st">"good"</span>, <span class="st">"moderate"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt; Full ROC AUC = 0.747 </span></span>
-<span><span class="co">#&gt;   → Discriminability is moderate</span></span></code></pre></div>
+<span><span class="va">fm</span> <span class="op">&lt;-</span> <span class="va">procedure_eval</span><span class="op">$</span><span class="va">fitted_models</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Measure  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2-HT dP (SE)"</span>, <span class="st">"EIG, bits (share of prior entropy)"</span>,</span>
+<span>                 <span class="st">"Full ROC AUC (diagnosticity ordering)"</span><span class="op">)</span>,</span>
+<span>    Estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f (%.3f)"</span>, <span class="va">fm</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>                         <span class="va">fm</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">se</span><span class="op">[[</span><span class="st">"dP"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>                 <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f (%.0f%%)"</span>, <span class="va">fm</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">eig</span>,</span>
+<span>                         <span class="fl">100</span> <span class="op">*</span> <span class="va">fm</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">eig</span> <span class="op">/</span> <span class="va">fm</span><span class="op">$</span><span class="va">eig</span><span class="op">$</span><span class="va">prior_entropy</span><span class="op">)</span>,</span>
+<span>                 <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.3f"</span>, <span class="va">fm</span><span class="op">$</span><span class="va">fullroc</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Three summaries of the same simulated procedure, prior guilt .5."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Three summaries of the same simulated procedure, prior guilt
+.5.</caption>
+<thead><tr class="header">
+<th align="left">Measure</th>
+<th align="left">Estimate</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">2-HT dP (SE)</td>
+<td align="left">0.485 (NA)</td>
+</tr>
+<tr class="even">
+<td align="left">EIG, bits (share of prior entropy)</td>
+<td align="left">0.187 (19%)</td>
+</tr>
+<tr class="odd">
+<td align="left">Full ROC AUC (diagnosticity ordering)</td>
+<td align="left">0.747</td>
+</tr>
+</tbody>
+</table>
+<p>The table reports estimates, not verdicts. No validated benchmarks
+exist that would let a value of <code>dP</code>, EIG or AUC be called
+good or poor in itself; the <code><a href="../articles/fullroc_analysis.html">vignette("fullroc_analysis")</a></code>
+makes the same point about AUC. These numbers are informative when
+compared with another procedure or condition analysed the same way, with
+their uncertainty.</p>
 </div>
 <div class="section level3">
 <h3 id="example-2-identifying-sources-of-bias">Example 2: Identifying Sources of Bias<a class="anchor" aria-label="anchor" href="#example-2-identifying-sources-of-bias"></a>
@@ -824,42 +882,38 @@ between guilty and innocent suspects?</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span><span class="op">$</span><span class="va">parameters</span></span>
 <span></span>
-<span><span class="va">bias_param</span> <span class="op">&lt;-</span> <span class="va">params</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">bias_reading</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">bias_param</span> <span class="op">&lt;</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="st">"Low: the suspect does not appear to stand out unfairly"</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">bias_param</span> <span class="op">&gt;</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="st">"High: the suspect may stand out. Check lineup construction"</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>  <span class="st">"Moderate"</span></span>
-<span><span class="op">}</span></span>
-<span></span>
+<span><span class="va">model_2ht</span> <span class="op">&lt;-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">fitted_models</span><span class="op">$</span><span class="va">`2ht`</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Parameter <span class="op">=</span> <span class="st">"b (biased suspect selection)"</span>,</span>
-<span>             Estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">bias_param</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>             Reading <span class="op">=</span> <span class="va">bias_reading</span><span class="op">)</span>,</span>
+<span>             Estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">params</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>             `95% Wald interval` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.3f, %.3f]"</span>,</span>
+<span>               <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">params</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">model_2ht</span><span class="op">$</span><span class="va">se</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>               <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">params</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">model_2ht</span><span class="op">$</span><span class="va">se</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>             check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"2-HT bias parameter, simulated data (300 target-present and 300 target-absent lineups)."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>2-HT bias parameter, simulated data (300 target-present and 300
 target-absent lineups).</caption>
-<colgroup>
-<col width="31%">
-<col width="9%">
-<col width="59%">
-</colgroup>
 <thead><tr class="header">
 <th align="left">Parameter</th>
 <th align="right">Estimate</th>
-<th align="left">Reading</th>
+<th align="left">95% Wald interval</th>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="left">b (biased suspect selection)</td>
 <td align="right">0</td>
-<td align="left">Low: the suspect does not appear to stand out
-unfairly</td>
+<td align="left">[NA, NA]</td>
 </tr></tbody>
 </table>
+<p><code>b</code> is the probability that a witness who detects nothing
+picks the suspect because the suspect stands out. An interval clearly
+above zero is a reason to inspect the lineup; how large a <code>b</code>
+is acceptable is a policy judgement that the model cannot make. Note
+that the interval is a Wald interval clipped to [0, 1];
+<code><a href="../reference/boot_winter_2ht.html">boot_winter_2ht()</a></code> gives bootstrap intervals that respect
+the boundary.</p>
 </div>
 <div class="section level3">
 <h3 id="example-3-comparing-detection-vs--guessing">Example 3: Comparing Detection vs. Guessing<a class="anchor" aria-label="anchor" href="#example-3-comparing-detection-vs--guessing"></a>
@@ -1037,54 +1091,26 @@ when detection fails.</p>
 <div class="section level2">
 <h2 id="interpretation-guidelines">Interpretation Guidelines<a class="anchor" aria-label="anchor" href="#interpretation-guidelines"></a>
 </h2>
-<div class="section level3">
-<h3 id="ht-parameters">2-HT Parameters<a class="anchor" aria-label="anchor" href="#ht-parameters"></a>
-</h3>
-<p><strong>dP (Detection of Presence)</strong> - 0.0-0.3: Poor detection
-- 0.3-0.5: Moderate detection - 0.5-0.7: Good detection - 0.7-1.0:
-Excellent detection</p>
-<p><strong>dA (Detection of Absence)</strong> - 0.0-0.2: Poor rejection
-ability - 0.2-0.4: Moderate rejection ability - 0.4+: Good rejection
-ability</p>
-<p><strong>b (Bias)</strong> - 0.0-0.1: Low bias (good lineup) -
-0.1-0.3: Moderate bias - 0.3+: High bias (problematic lineup)</p>
-<p><strong>g (Guessing)</strong> - 0.0-0.3: Conservative (prefer
-rejection) - 0.3-0.7: Moderate - 0.7-1.0: Liberal (prefer selection)</p>
-</div>
-<div class="section level3">
-<h3 id="eig-values">EIG Values<a class="anchor" aria-label="anchor" href="#eig-values"></a>
-</h3>
+<p>This vignette deliberately gives no poor/moderate/good bands for the
+2-HT parameters, EIG or AUC. No study has calibrated such bands, and
+cut-offs of that kind would read as findings when they are conventions.
+Interpret each estimate on its own scale, with its uncertainty and its
+assumptions:</p>
 <ul>
 <li>
-<strong>0.0-0.1 bits</strong>: Very low diagnosticity</li>
+<strong>2-HT parameters</strong> are probabilities of latent states.
+Compare them across conditions, ideally with parameters constrained
+across conditions so that the differences can be tested.</li>
 <li>
-<strong>0.1-0.3 bits</strong>: Low diagnosticity</li>
+<strong>EIG</strong> runs from 0 to the prior entropy, which depends
+on <code>prior_guilt</code> (1 bit only at .5). Compare procedures at
+the same prior.</li>
 <li>
-<strong>0.3-0.5 bits</strong>: Moderate diagnosticity</li>
-<li>
-<strong>0.5-0.7 bits</strong>: Good diagnosticity</li>
-<li>
-<strong>0.7+ bits</strong>: Excellent diagnosticity</li>
+<strong>Full-ROC AUC</strong> lies between 0 and 1, with .5 the
+no-discrimination reference. The default diagnosticity ordering is
+optimistically biased (see Technical Details), so compare procedures
+with the a-priori ordering.</li>
 </ul>
-</div>
-<div class="section level3">
-<h3 id="full-roc-auc">Full ROC AUC<a class="anchor" aria-label="anchor" href="#full-roc-auc"></a>
-</h3>
-<ul>
-<li>
-<strong>0.50</strong>: Chance performance</li>
-<li>
-<strong>0.50-0.60</strong>: Poor discriminability</li>
-<li>
-<strong>0.60-0.70</strong>: Fair discriminability</li>
-<li>
-<strong>0.70-0.80</strong>: Good discriminability</li>
-<li>
-<strong>0.80-0.90</strong>: Very good discriminability</li>
-<li>
-<strong>0.90-1.00</strong>: Excellent discriminability</li>
-</ul>
-</div>
 </div>
 <div class="section level2">
 <h2 id="common-pitfalls">Common Pitfalls<a class="anchor" aria-label="anchor" href="#common-pitfalls"></a>
@@ -1110,9 +1136,13 @@ rejection) - 0.3-0.7: Moderate - 0.7-1.0: Liberal (prefer selection)</p>
 <div class="section level3">
 <h3 id="model-convergence-issues">2. Model Convergence Issues<a class="anchor" aria-label="anchor" href="#model-convergence-issues"></a>
 </h3>
-<p>If 2-HT model fails to converge: - Check data quality (sufficient
-variability) - Try different starting parameters - Ensure adequate
-sample size - Consider data preprocessing</p>
+<p>If 2-HT model fails to converge:</p>
+<ul>
+<li>Check data quality (sufficient variability)</li>
+<li>Try different starting parameters</li>
+<li>Ensure adequate sample size</li>
+<li>Consider data preprocessing</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="comparing-non-comparable-measures">3. Comparing Non-Comparable Measures<a class="anchor" aria-label="anchor" href="#comparing-non-comparable-measures"></a>
@@ -1124,12 +1154,12 @@ sample size - Consider data preprocessing</p>
 <span><span class="co">#&gt; ✗ Wrong: 'dP = 0.6 is better than EIG = 0.4'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  → These are different scales and constructs\n\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   → These are different scales and constructs</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"✓ Right: 'dP = 0.6 indicates good detection AND\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ✓ Right: 'dP = 0.6 indicates good detection AND</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"          EIG = 0.4 indicates moderate diagnosticity'\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;           EIG = 0.4 indicates moderate diagnosticity'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  → Each model provides unique insights\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   → Each model provides unique insights</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"✓ Right: 'dP rose from 0.45 to 0.60 between conditions, and EIG\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ✓ Right: 'dP rose from 0.45 to 0.60 between conditions, and EIG</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"          (prior .5) rose from 0.30 to 0.40 bits'\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           (prior .5) rose from 0.30 to 0.40 bits'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  → Compare each measure with itself across conditions\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   → Compare each measure with itself across conditions</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -1138,7 +1168,11 @@ sample size - Consider data preprocessing</p>
 <div class="section level3">
 <h3 id="fit-multiple-models">1. Fit Multiple Models<a class="anchor" aria-label="anchor" href="#fit-multiple-models"></a>
 </h3>
-<p>Don’t rely on a single model, as each provides unique insights:</p>
+<p>Don’t rely on a single model: each answers a different question, as
+set out in <a href="#the-three-models">The Three Models</a> above. The
+2-HT model separates detection from guessing and bias, EIG summarises
+how much the responses tell an investigator about guilt, and the full
+ROC measures investigator discriminability.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Always fit at least 2-3 models</span></span>
 <span><span class="va">comprehensive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_models.html">compare_models</a></span><span class="op">(</span></span>
@@ -1169,8 +1203,8 @@ models:</p>
 <span><span class="co">#&gt;   • EIG: Value in bits, efficiency percentage</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  • Full ROC: AUC, number of operating points\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   • Full ROC: AUC, number of operating points</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  • Interpretation of each model's insights\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   • Interpretation of each model's insights</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  • What each model's estimates say about the procedure\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   • What each model's estimates say about the procedure</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="check-model-assumptions">3. Check Model Assumptions<a class="anchor" aria-label="anchor" href="#check-model-assumptions"></a>
@@ -1188,11 +1222,11 @@ models:</p>
 <span><span class="co">#&gt;   Lineup size:    6</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Parameter Estimates:</span></span>
-<span><span class="co">#&gt;                       Estimate     SE Lower_95 Upper_95</span></span>
-<span><span class="co">#&gt; dP (culprit presence)   0.4853 0.0353   0.4162   0.5545</span></span>
-<span><span class="co">#&gt; dA (culprit absence)    0.0494 0.0572  -0.0627   0.1614</span></span>
-<span><span class="co">#&gt; b  (biased selection)   0.0000 0.0239  -0.0468   0.0468</span></span>
-<span><span class="co">#&gt; g  (guessing)           0.7539 0.0355   0.6843   0.8235</span></span>
+<span><span class="co">#&gt;                       Estimate SE Lower_95 Upper_95</span></span>
+<span><span class="co">#&gt; dP (culprit presence)   0.4853 NA       NA       NA</span></span>
+<span><span class="co">#&gt; dA (culprit absence)    0.0494 NA       NA       NA</span></span>
+<span><span class="co">#&gt; b  (biased selection)   0.0000 NA       NA       NA</span></span>
+<span><span class="co">#&gt; g  (guessing)           0.7539 NA       NA       NA</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Model Fit:</span></span>
@@ -1204,25 +1238,28 @@ models:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Target-Present Lineups:</span></span>
 <span><span class="co">#&gt;            Observed Expected      Residual</span></span>
-<span><span class="co">#&gt; Suspect ID      165      165  1.841166e-03</span></span>
-<span><span class="co">#&gt; Filler ID        97       97 -1.909498e-03</span></span>
-<span><span class="co">#&gt; Reject           38       38  6.833131e-05</span></span>
+<span><span class="co">#&gt; Suspect ID      165      165  1.001150e-06</span></span>
+<span><span class="co">#&gt; Filler ID        97       97 -6.398027e-07</span></span>
+<span><span class="co">#&gt; Reject           38       38 -3.613474e-07</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Target-Absent Lineups:</span></span>
-<span><span class="co">#&gt;            Observed Expected     Residual</span></span>
-<span><span class="co">#&gt; Suspect ID       33     35.8 -2.833685981</span></span>
-<span><span class="co">#&gt; Filler ID       182    179.2  2.831570094</span></span>
-<span><span class="co">#&gt; Reject           85     85.0  0.002115887</span></span>
+<span><span class="co">#&gt;            Observed Expected      Residual</span></span>
+<span><span class="co">#&gt; Suspect ID       33     35.8 -2.833333e+00</span></span>
+<span><span class="co">#&gt; Filler ID       182    179.2  2.833334e+00</span></span>
+<span><span class="co">#&gt; Reject           85     85.0 -3.352462e-07</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Model identification:</span></span>
 <span><span class="co">#&gt;   Saturated (just-identified): 4 parameters, 4 data df, 0 residual df.</span></span>
 <span><span class="co">#&gt;   Absolute fit is not testable from a single condition (the model reproduces the</span></span>
 <span><span class="co">#&gt;   data by construction); use multiple conditions or constraints to test fit.</span></span>
 <span><span class="co">#&gt;   Residual obs-vs-expected discrepancy = 0.2688 (~= 0 confirms convergence).</span></span></code></pre></div>
-<p>A chi-square p-value below 0.05 indicates that the model does not
-reproduce the observed response frequencies well. With large samples the
-test will detect small departures, so read it alongside the size of the
-discrepancies rather than as a pass/fail.</p>
+<p>The summary’s identification note is the part to read. With one
+target-present and one target-absent condition the 2-HT model has zero
+residual degrees of freedom, so it reproduces the counts exactly and
+there is no goodness-of-fit test to read. Convergence, identifiability
+(enough rejections to estimate <code>dA</code>) and fit are separate
+questions. Fit can be tested only with several conditions and parameters
+constrained across them, as in Winter et al. (2022).</p>
 </div>
 </div>
 <div class="section level2">
@@ -1251,19 +1288,22 @@ quantity, and cannot be ranked against each other directly.</p>
 <td>2-HT</td>
 <td>Latent probabilities of detection, bias and guessing</td>
 <td>Four probabilities in [0, 1]</td>
-<td>Standard errors from the observed information matrix;
-goodness-of-fit chi-square</td>
+<td>Standard errors from the observed information matrix; bootstrap
+intervals via <code><a href="../reference/boot_winter_2ht.html">boot_winter_2ht()</a></code>. No fit test for a single
+condition (zero residual df)</td>
 </tr>
 <tr class="even">
 <td>EIG</td>
 <td>Expected reduction in uncertainty about guilt</td>
 <td>Bits, 0 to the prior entropy</td>
-<td>None in this package</td>
+<td>None in this package. Tuttle, Starns and Cohen (2025) give 95%
+credible intervals for EIG from a Bayesian multinomial model of the
+response proportions; adding this is planned</td>
 </tr>
 <tr class="odd">
 <td>Full ROC</td>
 <td>Investigator discriminability</td>
-<td>AUC in [0.5, 1]</td>
+<td>AUC in [0, 1], .5 = no discrimination</td>
 <td>None in this package; see the note on ordering bias below</td>
 </tr>
 </tbody>
@@ -1275,10 +1315,17 @@ goodness-of-fit chi-square</td>
 <p>The model is a multinomial processing tree. Response probabilities
 are as given in the introduction, and the parameters are estimated by
 maximum likelihood over the six observed cell counts (three responses by
-two lineup types), so the model has four parameters for five free cells
-and one residual degree of freedom. Standard errors come from the
-numerically differentiated Hessian at the optimum, and the
-goodness-of-fit statistic is the usual multinomial chi-square.</p>
+two lineup types). The target-present and target-absent totals are
+fixed, so the data have 2 × (3 − 1) = 4 degrees of freedom, the same as
+the number of parameters: a single-condition fit is saturated, with zero
+residual degrees of freedom (Winter et al., 2022, Figure 1). The
+standard errors measure how sharply the data pin each parameter down. At
+the best-fitting values, the log-likelihood falls away steeply in some
+directions and gently in others; that curvature, the <em>Hessian</em>
+matrix of second derivatives, is computed numerically, and its inverse
+gives the sampling variances of the estimates. A flat likelihood (little
+curvature) means a large standard error. Winter et al. (2022) describe
+the model and its estimation in full.</p>
 <p><strong>Identifiability.</strong> The detect-absence parameter
 <code>dA</code> is identified almost entirely by rejections. If very few
 witnesses reject, the likelihood is close to flat in <code>dA</code> and
@@ -1317,46 +1364,78 @@ partition the sample.</li>
 <li>Target-present and target-absent lineups are independent
 samples.</li>
 <li>All lineup members other than the suspect are functioning foils.
-Where a lineup contains members nobody ever chooses, the effective
-lineup size is smaller than the nominal <code>lineup_size</code> passed
-here, and all three models will be misspecified in the same
-direction.</li>
+Where some members are implausible alternatives, the effective lineup
+size is smaller than the nominal <code>lineup_size</code> passed here,
+and all three models will be misspecified in the same direction. A
+member nobody chose in the sample is not necessarily such a foil: in a
+fair six-person lineup, a given member receives no choices from ten
+witnesses with probability (5/6)^10 ≈ .16. Fitzgerald, Tredoux and Juncu
+(2023) discuss correcting error-rate estimates for unequal foil choices
+by using effective rather than nominal size; passing an effective size
+to these models is planned for a future version.</li>
 </ol>
 </div>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p><strong>Key Functions:</strong> - <code><a href="../reference/compare_models.html">compare_models()</a></code>: Fit
-multiple models - <code><a href="../reference/print.model_comparison.html">print.model_comparison()</a></code>: View comparison
-table - <code><a href="../reference/summary.model_comparison.html">summary.model_comparison()</a></code>: Detailed results -
-<code><a href="../reference/plot.model_comparison.html">plot.model_comparison()</a></code>: Visualizations -
-<code><a href="../reference/format_comparison_table.html">format_comparison_table()</a></code>: Publication tables</p>
-<p><strong>When to Use Each Model:</strong> - <strong>2-HT</strong>:
-Understanding cognitive processes - <strong>EIG</strong>: Overall
-diagnosticity assessment - <strong>Full ROC</strong>: Threshold-free
-discriminability</p>
-<p><strong>Best Practices:</strong> - Fit multiple models for
-comprehensive analysis - Report all model results - Check model fit and
-convergence - Use adequate sample sizes (n ≥ 100 per condition) -
-Interpret each model’s unique insights</p>
+<p><strong>Key Functions:</strong></p>
+<ul>
+<li>
+<code><a href="../reference/compare_models.html">compare_models()</a></code>: Fit multiple models</li>
+<li>
+<code><a href="../reference/print.model_comparison.html">print.model_comparison()</a></code>: View comparison table</li>
+<li>
+<code><a href="../reference/summary.model_comparison.html">summary.model_comparison()</a></code>: Detailed results</li>
+<li>
+<code><a href="../reference/plot.model_comparison.html">plot.model_comparison()</a></code>: Visualizations</li>
+<li>
+<code><a href="../reference/format_comparison_table.html">format_comparison_table()</a></code>: Publication tables</li>
+</ul>
+<p><strong>When to Use Each Model:</strong></p>
+<ul>
+<li>
+<strong>2-HT</strong>: Understanding cognitive processes</li>
+<li>
+<strong>EIG</strong>: Overall diagnosticity assessment</li>
+<li>
+<strong>Full ROC</strong>: Threshold-free discriminability</li>
+</ul>
+<p><strong>Best Practices:</strong></p>
+<ul>
+<li>Fit multiple models for comprehensive analysis</li>
+<li>Report all model results</li>
+<li>Check convergence and identifiability; test fit only across
+constrained conditions</li>
+<li>Use adequate sample sizes (n ≥ 100 per condition)</li>
+<li>Interpret each model’s estimates on their own scale</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<p>Winter, K., Menne, N. M., Bell, R., &amp; Buchner, A. (2022).
-Experimental validation of a multinomial processing tree model for
-analyzing eyewitness identification decisions. <em>Scientific Reports,
-12</em>, 15571.</p>
-<p>Starns, J. J., Cohen, A. L., &amp; Rotello, C. M. (2023). A complete
-method for assessing the effectiveness of eyewitness identification
-procedures: Expected information gain. <em>Psychological Review,
-130</em>(3), 677–719. <a href="https://doi.org/10.1037/rev0000332" class="external-link uri">https://doi.org/10.1037/rev0000332</a></p>
+<div class="hanging-indent">
+<p>Fitzgerald, R. J., Tredoux, C. G., &amp; Juncu, S. (2023). Estimation
+of eyewitness error rates in fair and biased lineups. <em>Law and Human
+Behavior, 47</em>(4), 463-483.</p>
 <p>Smith, A. M., Yang, Y., &amp; Wells, G. L. (2020). Distinguishing
 between investigator discriminability and eyewitness discriminability: A
 method for creating full receiver operating characteristic curves of
 lineup identification performance. <em>Perspectives on Psychological
 Science, 15</em>(3), 589-607.</p>
+<p>Starns, J. J., Cohen, A. L., &amp; Rotello, C. M. (2023). A complete
+method for assessing the effectiveness of eyewitness identification
+procedures: Expected information gain. <em>Psychological Review,
+130</em>(3), 677–719. <a href="https://doi.org/10.1037/rev0000332" class="external-link uri">https://doi.org/10.1037/rev0000332</a></p>
+<p>Tuttle, M. D., Starns, J. J., &amp; Cohen, A. L. (2025). Protecting
+the innocent in eyewitness identification: An analysis of simultaneous
+and ranking lineups. <em>Journal of Memory and Language, 140</em>,
+104581. <a href="https://doi.org/10.1016/j.jml.2024.104581" class="external-link uri">https://doi.org/10.1016/j.jml.2024.104581</a></p>
+<p>Winter, K., Menne, N. M., Bell, R., &amp; Buchner, A. (2022).
+Experimental validation of a multinomial processing tree model for
+analyzing eyewitness identification decisions. <em>Scientific Reports,
+12</em>, 15571.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

@@ -1,7 +1,6 @@
 # Comparing Effective Size: Base function for bootstrapping
 
-A base function for bootstrapping a dataframe of choices for 2
-independent lineups
+A row-resampling statistic for two columns of lineup choices.
 
 ## Usage
 
@@ -23,10 +22,13 @@ compare_eff_sizes.boot(linedf, d)
 
 ## Details
 
-The approach here is to compute the effective size of each lineup
-separately, and to take the difference between them. This is then
-bootstrapped, and if the bootstrap does not contain 0, we conclude the
-effective size estimates are different at p = alpha
+This statistic applies the same row indices to both columns. Using it
+with an ordinary row bootstrap therefore resamples paired observations.
+For independent lineup samples use
+[`effsize_compare`](https://cgtza2.github.io/r4lineups/reference/effsize_compare.md),
+which resamples each sample independently. Bootstrap intervals remain
+approximations; inclusion or exclusion of zero does not establish
+calibration in small or nearly uniform samples.
 
 ## References
 
@@ -63,18 +65,13 @@ linedf <- data.frame(lineup1 = sample(1:6, 50, replace = TRUE),
 # Difference in effective size for the observed data
 compare_eff_sizes.boot(linedf, seq_len(nrow(linedf)))
 #> [1] -0.07855048
-# Bootstrap the difference
-boot_diff <- boot::boot(linedf, compare_eff_sizes.boot, R = 100)
-boot::boot.ci(boot_diff, type = "perc")
-#> BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
-#> Based on 100 bootstrap replicates
+# Resample the independent lineups separately
+effsize_compare(linedf, R = 100)
 #> 
-#> CALL : 
-#> boot::boot.ci(boot.out = boot_diff, type = "perc")
-#> 
-#> Intervals : 
-#> Level     Percentile     
-#> 95%   (-1.0963,  0.7905 )  
-#> Calculations and Intervals on Original Scale
-#> Some percentile intervals may be unstable
+#> The two Effective sizes are  5.681818   5.760369
+#> If the interval includes 0, ns at p = .05
+#> Confidence intervals of difference [95%]
+#> Normal Theory -1.086 0.941
+#> Bootstrap: percentile (R = 100) -1.355 0.949
+#> Bootstrap: bias-corrected (R = 100) -1.281 0.964
 ```

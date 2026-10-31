@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/information_error_rate_analysis.Rmd" class="external-link"><code>vignettes/information_error_rate_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>information_error_rate_analysis.Rmd</code></div>
@@ -173,7 +173,7 @@ occurs:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">E</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">G</mi></mrow><mo>=</mo><munder><mo>∑</mo><mi>x</mi></munder><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">[</mo><mi>H</mi><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo>−</mo><mi>H</mi><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>G</mi><mo>∣</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">
 \mathrm{EIG} = \sum_x P(x)\,\Bigl[H\bigl(P(G)\bigr) - H\bigl(P(G \mid x)\bigr)\Bigr]
 </annotation></semantics></math></p>
-<p>Two consequences are worth noting. Individual responses can have
+<p>Two consequences follow. Individual responses can have
 <strong>negative</strong> information gain — a response that moves
 belief towards 0.5 increases uncertainty — but the expectation over all
 responses cannot be negative. And EIG depends on the prior
@@ -422,20 +422,27 @@ count being corrected for is observed directly.
 <div class="section level3">
 <h3 id="when-they-diverge">When they diverge<a class="anchor" aria-label="anchor" href="#when-they-diverge"></a>
 </h3>
-<p>The corrections matter when no innocent suspect is designated — the
-usual situation with field data. We can create that case by relabelling
-the target-absent suspect identifications as foil identifications, which
-is exactly the information loss that occurs when the lineup did not
-nominate a suspect in advance:</p>
+<p>The corrections are important when no innocent suspect is designated
+— the usual situation with field data. We can create that case by
+relabelling the target-absent suspect identifications as foil
+identifications <strong>and</strong> removing the
+<code>suspect_pos</code> column, which is exactly the information loss
+that occurs when the lineup did not nominate a suspect in advance. Both
+steps are needed: a non-missing <code>suspect_pos</code> tells
+<code><a href="../reference/make_ppv_range.html">make_ppv_range()</a></code> that a suspect was designated, and the
+design would then stay designated with zero innocent-suspect
+identifications, giving PPV = 1 under every correction.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">no_designation</span> <span class="op">&lt;-</span> <span class="va">lineup_example</span></span>
 <span><span class="va">ta_suspect</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="va">no_designation</span><span class="op">$</span><span class="va">target_present</span> <span class="op">&amp;</span></span>
 <span>               <span class="va">no_designation</span><span class="op">$</span><span class="va">identification</span> <span class="op">==</span> <span class="st">"suspect"</span></span>
 <span><span class="va">no_designation</span><span class="op">$</span><span class="va">identification</span><span class="op">[</span><span class="va">ta_suspect</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"filler"</span></span>
+<span><span class="va">no_designation</span><span class="op">$</span><span class="va">suspect_pos</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span></span>
 <span><span class="va">ppv_estimated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_ppv_range.html">make_ppv_range</a></span><span class="op">(</span></span>
 <span>  <span class="va">no_designation</span>,</span>
 <span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  innocent_suspect <span class="op">=</span> <span class="st">"estimated"</span>,  <span class="co"># state the design rather than rely on "auto"</span></span>
 <span>  show_plots <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -463,22 +470,21 @@ exists to report.</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Nominal size (best case)</td>
-<td align="right">1</td>
+<td align="right">0.8331</td>
 </tr>
 <tr class="even">
 <td align="left">Effective size</td>
-<td align="right">1</td>
+<td align="right">0.7691</td>
 </tr>
 <tr class="odd">
 <td align="left">None (worst case)</td>
-<td align="right">1</td>
+<td align="right">0.4540</td>
 </tr>
 </tbody>
 </table>
-<p>The spread is large — from about 1 to about 1 — and that spread is
-the finding. An analysis reporting only the nominal-size figure would be
-asserting that the lineup was perfectly fair, which is precisely what is
-unknown.</p>
+<p>The spread is large, from about 0.45 to about 0.83. An analysis
+reporting only the nominal-size figure would be asserting that the
+lineup was perfectly fair, which is precisely what is unknown.</p>
 <p>The effective-size correction sits between the two because the
 lineup’s members do not attract choices equally:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -503,47 +509,47 @@ nominal size of 6.</caption>
 <tbody>
 <tr class="odd">
 <td align="left">20</td>
-<td align="right">NA</td>
+<td align="right">4.55</td>
 <td align="right">0.314</td>
 </tr>
 <tr class="even">
 <td align="left">30</td>
-<td align="right">NA</td>
+<td align="right">4.58</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="odd">
 <td align="left">40</td>
-<td align="right">NA</td>
+<td align="right">3.98</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="even">
 <td align="left">50</td>
-<td align="right">NA</td>
+<td align="right">4.07</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="odd">
 <td align="left">60</td>
-<td align="right">NA</td>
+<td align="right">3.45</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="even">
 <td align="left">70</td>
-<td align="right">NA</td>
+<td align="right">3.33</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="odd">
 <td align="left">80</td>
-<td align="right">NA</td>
+<td align="right">3.77</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="even">
 <td align="left">90</td>
-<td align="right">NA</td>
+<td align="right">3.63</td>
 <td align="right">1.000</td>
 </tr>
 <tr class="odd">
 <td align="left">100</td>
-<td align="right">NA</td>
+<td align="right">3.33</td>
 <td align="right">1.000</td>
 </tr>
 </tbody>
@@ -630,17 +636,19 @@ bound, not an estimate.</li>
 <li>Effective size is estimated per confidence bin, so bins with few
 observations give unstable corrections — check the counts before relying
 on a bin.</li>
-<li>Effective size is itself a plug-in estimate and is biased downward
-at small samples; see the “Small-sample bias” section of
-<code><a href="../reference/esize_T.html">?esize_T</a></code>. A downward-biased effective size makes the
-correction <em>more</em> conservative, so the effect is in the safe
-direction, but it is not negligible.</li>
+<li>Effective size is itself a plug-in estimate with small-sample bias;
+see the “Small-sample bias” section of <code><a href="../reference/esize_T.html">?esize_T</a></code>. In
+near-fair lineups the bias is downward, which makes the correction more
+conservative, but its direction is not guaranteed: with strongly unequal
+choices the plug-in estimate can be biased upward. Bins with few
+target-absent choices deserve particular care.</li>
 </ol>
 </div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Fitzgerald, R. J., Tredoux, C. G., &amp; Juncu, S. (2023). Estimation
 of eyewitness error rates in fair and biased lineups. <em>Law and Human
 Behavior, 47</em>(4), 463-483.</p>
@@ -648,6 +656,7 @@ Behavior, 47</em>(4), 463-483.</p>
 method for assessing the effectiveness of eyewitness identification
 procedures: Expected information gain. <em>Psychological Review,
 130</em>(3), 677-719.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

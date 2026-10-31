@@ -117,9 +117,11 @@ This is the core function for comparing a target face to a foil face.</p>
 similarity measurement rather than identity verification. In lineup research,
 we typically want to measure how similar foils are to the target, not whether
 they are the same person.</p>
-<p>The 'verified' field indicates whether the faces would be considered
-"the same person" by the model, which in lineup research context means
-the foil is too similar to the target (potential lineup bias).</p>
+<p>The 'verified' field is the model's identity decision: whether the
+distance falls inside the model's threshold for "same person". In a lineup
+it is a prompt to inspect the two photographs, not a finding. Face
+recognition systems make false matches, and a match does not show that a
+foil is nonfunctioning for witnesses.</p>
     </div>
 
     <div class="section level2">
@@ -131,7 +133,7 @@ the foil is too similar to the target (potential lineup bias).</p>
 <span class="r-in"><span><span class="co"># Check similarity score</span></span></span>
 <span class="r-in"><span><span class="va">result</span><span class="op">$</span><span class="va">similarity</span>  <span class="co"># 0.85 would mean very similar</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Check if they'd be identified as same person (too similar for fair lineup)</span></span></span>
+<span class="r-in"><span><span class="co"># Inspect the model's same-identity flag; this is not a fairness judgment.</span></span></span>
 <span class="r-in"><span><span class="va">result</span><span class="op">$</span><span class="va">verified</span>  <span class="co"># TRUE would indicate problematic similarity</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/simulation_power_analysis.Rmd" class="external-link"><code>vignettes/simulation_power_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>simulation_power_analysis.Rmd</code></div>
@@ -96,8 +96,7 @@ with the authors.</p>
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>Simulation is useful in lineup research for four rather different
-purposes, and it is worth separating them because they make different
-demands on the simulation.</p>
+purposes, and they make different demands on the simulation.</p>
 <ul>
 <li>
 <strong>Planning a study.</strong> How many participants are needed
@@ -121,8 +120,8 @@ lineup is easier with simulated data than with a real experiment.</li>
 <div class="section level2">
 <h2 id="signal-detection-theory-briefly">Signal Detection Theory, briefly<a class="anchor" aria-label="anchor" href="#signal-detection-theory-briefly"></a>
 </h2>
-<p>Signal detection theory (SDT) is the framework the simulator uses, so
-it is worth stating what it assumes.</p>
+<p>Signal detection theory (SDT) is the framework the simulator uses.
+Its assumptions are as follows.</p>
 <p>The idea is that a witness viewing a lineup member experiences some
 degree of <strong>memory strength</strong> — a sense of familiarity or
 match to their memory of the culprit. This is treated as a continuous
@@ -140,8 +139,8 @@ foils and innocent suspects from Normal(0, 1).</li>
 <li>
 <strong>The criterion</strong> is how much strength the witness
 requires before they are willing to identify anybody at all. It captures
-willingness to choose, which is a separate matter from memory quality —
-a witness with excellent memory may still be reluctant to commit.</li>
+willingness to choose, which is a separate question from memory quality
+— a witness with excellent memory may still be reluctant to commit.</li>
 </ul>
 <p>Keeping these separate is the central contribution of SDT to this
 area. Two procedures can produce identical identification rates for
@@ -192,10 +191,9 @@ correspondingly rescaled criteria.</td>
 </table>
 <p>These are equal-variance, independent-signal versions of those
 models.</p>
-<p>To be clear about a point that has caused confusion: <strong>you are
-not obliged to adopt one of these models to plan a lineup
-study.</strong> They are how this simulator generates data, so if you
-use it for power analysis you are assuming one of them holds. That
+<p><strong>You are not obliged to adopt one of these models to plan a
+lineup study.</strong> They are how this simulator generates data, so if
+you use it for power analysis you are assuming one of them holds. That
 assumption is no different in kind from assuming a normal distribution
 when using a conventional power calculator. If you have pilot data,
 checking that the simulated identification rates resemble it is a
@@ -215,12 +213,12 @@ itself.</p>
 <p><code>c_criterion</code> is the strength a lineup member must reach
 before the witness will identify anyone. Raise it and witnesses reject
 more often; lower it and they choose more often.</p>
-<p>One point trips people up, and the guidance in earlier versions of
-this vignette got it wrong. In textbook SDT, a criterion of 0 is
-“neutral”. <strong>That is not true here</strong>, because the criterion
-applies to the <em>maximum</em> of several members’ strengths, not to a
-single item. The maximum of six draws from Normal(0, 1) averages about
-1.27, so a criterion of 0 is passed by nearly every lineup:</p>
+<p>It is important to make a point of clarification here. In textbook
+SDT, a criterion of 0 is “neutral”. <strong>That is not true
+here</strong>, because the criterion applies to the <em>maximum</em> of
+several members’ strengths, not to a single item. The maximum of six
+draws from Normal(0, 1) averages about 1.27, so a criterion of 0 is
+passed by nearly every lineup:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">criteria</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.27</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span><span class="op">)</span></span>
 <span></span>
@@ -273,57 +271,66 @@ varies, simulated data (800 lineups of size 6 per point, d’ =
 </tr>
 </tbody>
 </table>
-<p>A criterion of 0 rejects almost nothing. The roughly neutral value —
-where target-absent lineups are rejected about half the time — is near
-1.27, which is exactly the expected maximum of six standard normal
-draws.</p>
+<p>A criterion of 0 rejects almost nothing. The neutral value, where
+target-absent lineups are rejected half the time, is the
+<strong>median</strong> of the maximum of six standard normal draws. In
+a fair target-absent lineup every member’s strength is Normal(0, 1), so
+the maximum is below
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+with probability
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>6</mn></msup></mrow><annotation encoding="application/x-tex">\Phi(x)^6</annotation></semantics></math>,
+and the median is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="normal">Φ</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><msup><mn>0.5</mn><mrow><mn>1</mn><mi>/</mi><mn>6</mn></mrow></msup><mo stretchy="false" form="postfix">)</mo><mo>≈</mo></mrow><annotation encoding="application/x-tex">\Phi^{-1}(0.5^{1/6}) \approx</annotation></semantics></math>
+1.231. The mean of the maximum, about 1.27, is close but not the same:
+used as the criterion it gives a rejection rate of about 52.2%.</p>
 <p>That value therefore <strong>depends on lineup size</strong>, which
 is why no fixed table of “liberal / neutral / conservative” values can
 be given:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">10</span>, <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">expected_max</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">sizes</span>, <span class="kw">function</span><span class="op">(</span><span class="va">k</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span><span class="fl">20000</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>`Lineup size` <span class="op">=</span> <span class="va">sizes</span>,</span>
-<span>             `Roughly neutral criterion` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">expected_max</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>             `Neutral criterion` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">qnorm</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">^</span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">sizes</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>             check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"Approximately neutral criterion by lineup size: the expected maximum of k standard normal draws."</span></span>
+<span>  caption <span class="op">=</span> <span class="st">"Criterion giving 50% target-absent rejections in a fair lineup: the median of the maximum of k standard normal draws."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>Approximately neutral criterion by lineup size: the expected
-maximum of k standard normal draws.</caption>
+<caption>Criterion giving 50% target-absent rejections in a fair lineup:
+the median of the maximum of k standard normal draws.</caption>
 <thead><tr class="header">
 <th align="right">Lineup size</th>
-<th align="right">Roughly neutral criterion</th>
+<th align="right">Neutral criterion</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="right">4</td>
-<td align="right">1.03</td>
+<td align="right">0.998</td>
 </tr>
 <tr class="even">
 <td align="right">6</td>
-<td align="right">1.27</td>
+<td align="right">1.231</td>
 </tr>
 <tr class="odd">
 <td align="right">8</td>
-<td align="right">1.42</td>
+<td align="right">1.385</td>
 </tr>
 <tr class="even">
 <td align="right">10</td>
-<td align="right">1.54</td>
+<td align="right">1.499</td>
 </tr>
 <tr class="odd">
 <td align="right">12</td>
-<td align="right">1.63</td>
+<td align="right">1.588</td>
 </tr>
 </tbody>
 </table>
+<p>The same formula gives any other target rejection rate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="normal">Φ</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><msup><mi>r</mi><mrow><mn>1</mn><mi>/</mi><mi>k</mi></mrow></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Phi^{-1}(r^{1/k})</annotation></semantics></math>.
+It assumes a fair lineup with <code>foil_bias</code> at its default, so
+treat it as a starting point when foils are unequal.</p>
 <p>A practical approach is to choose the criterion by the rejection rate
 it produces, rather than by its nominal value: simulate, look at the
 rejection rate, and adjust until it resembles the studies you are
@@ -374,12 +381,12 @@ from the two columns above by
 <code><a href="../reference/classify_lineup_choices.html">classify_lineup_choices()</a></code>
 </li>
 </ul>
-<p>This matters because foils are not interchangeable. By default the
-simulator draws every foil from the same distribution, which makes them
-statistically equivalent even though they are simulated separately. Real
-lineups are not like that: some foils are plausible alternatives to the
-suspect and others are barely considered. Use <code>foil_bias</code> to
-give each foil its own mean strength:</p>
+<p>This is important because foils are not interchangeable. By default
+the simulator draws every foil from the same distribution, which makes
+them statistically equivalent even though they are simulated separately.
+Real lineups are not like that: some foils are plausible alternatives to
+the suspect and others are barely considered. Use <code>foil_bias</code>
+to give each foil its own mean strength:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">uneven</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
 <span>  n_tp <span class="op">=</span> <span class="fl">400</span>, n_ta <span class="op">=</span> <span class="fl">400</span>, d_prime <span class="op">=</span> <span class="fl">1.5</span>, c_criterion <span class="op">=</span> <span class="fl">1.0</span>,</span>
@@ -425,20 +432,17 @@ two working procedures could be told apart.</p>
 bootstrap comparison of partial area under the ROC curve, and power is
 the proportion of studies whose p-value falls below
 <code>alpha</code>.</p>
-<blockquote>
-<p><strong>Note on earlier versions.</strong> Before r4lineups
-2.1.0.9000 this function computed power as the proportion of simulations
-in which the pAUC exceeded zero. Since an area is always positive, that
-proportion was always 1, and the power curve was a flat line at the top
-of the plot regardless of sample size or effect size. If you have output
-from an earlier version, discard it.</p>
-</blockquote>
 </div>
 <div class="section level3">
 <h3 id="a-worked-power-analysis">A worked power analysis<a class="anchor" aria-label="anchor" href="#a-worked-power-analysis"></a>
 </h3>
-<p>The question: how many participants per condition are needed to show
-that a procedure with d′ = 1.0 discriminates better than chance?</p>
+<p>The question: how many witnesses are needed to show that a procedure
+with d′ = 1.0 discriminates better than chance?</p>
+<p>Be clear about the unit first. A <code>sample_size</code> of n
+simulates n target-present <strong>and</strong> n target-absent
+witnesses in each of the two conditions being compared, so 2n witnesses
+per condition and 4n in all; the <code>n_total</code> column gives the
+total.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">power_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_power_analysis.html">simulate_power_analysis</a></span><span class="op">(</span></span>
 <span>  sample_sizes  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span><span class="op">)</span>,</span>
@@ -453,53 +457,70 @@ that a procedure with d′ = 1.0 discriminates better than chance?</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">power_result</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_size"</span>, <span class="st">"power"</span>, <span class="st">"power_se"</span>,</span>
-<span>                                  <span class="st">"mean_effect"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">power_result</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_size"</span>, <span class="st">"n_total"</span>, <span class="st">"power"</span>,</span>
+<span>                                           <span class="st">"power_se"</span>, <span class="st">"mean_effect"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TP (= TA) per condition"</span>, <span class="st">"Total witnesses"</span>, <span class="st">"Power"</span>,</span>
+<span>             <span class="st">"Power SE"</span>, <span class="st">"Mean effect"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  digits <span class="op">=</span> <span class="fl">3</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"Power to detect d' = 1.0 against chance, 30 simulated studies per sample size."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table class="table">
+<table style="width:100%;" class="table">
 <caption>Power to detect d’ = 1.0 against chance, 30 simulated studies
 per sample size.</caption>
+<colgroup>
+<col width="35%">
+<col width="23%">
+<col width="8%">
+<col width="13%">
+<col width="17%">
+</colgroup>
 <thead><tr class="header">
-<th align="right">sample_size</th>
-<th align="right">power</th>
-<th align="right">power_se</th>
-<th align="right">mean_effect</th>
+<th align="right">TP (= TA) per condition</th>
+<th align="right">Total witnesses</th>
+<th align="right">Power</th>
+<th align="right">Power SE</th>
+<th align="right">Mean effect</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="right">25</td>
+<td align="right">100</td>
 <td align="right">0.367</td>
 <td align="right">0.088</td>
 <td align="right">0.033</td>
 </tr>
 <tr class="even">
 <td align="right">50</td>
+<td align="right">200</td>
 <td align="right">0.733</td>
 <td align="right">0.081</td>
 <td align="right">0.026</td>
 </tr>
 <tr class="odd">
 <td align="right">100</td>
+<td align="right">400</td>
 <td align="right">0.833</td>
 <td align="right">0.068</td>
 <td align="right">0.026</td>
 </tr>
 <tr class="even">
 <td align="right">200</td>
+<td align="right">800</td>
 <td align="right">1.000</td>
 <td align="right">0.000</td>
 <td align="right">0.032</td>
 </tr>
 </tbody>
 </table>
-<p>Two things to read off. Power rises with sample size, as it must,
-crossing 80% somewhere between 25 and 50 participants per condition. And
-<code>mean_effect</code> — the average observed difference in pAUC —
-stays roughly constant across sample sizes, which is the sanity check:
-sample size does not change the size of an effect, only how precisely it
-is measured, and <code>sd_effect</code> duly shrinks.</p>
+<p>Two things to read off. Power rises with sample size, crossing 80%
+between 50 and 100 target-present (and as many target-absent) witnesses
+per condition, that is between 200 and 400 witnesses in the whole
+simulated experiment. With only 30 simulations per point the crossing is
+itself uncertain (see the standard errors). And <code>mean_effect</code>
+— the average observed difference in pAUC — stays roughly constant
+across sample sizes, which is a check: sample size does not change the
+size of an effect, only how precisely it is measured, and
+<code>sd_effect</code> duly shrinks.</p>
 </div>
 <div class="section level3">
 <h3 id="plotting-and-adjusting-the-plot">Plotting, and adjusting the plot<a class="anchor" aria-label="anchor" href="#plotting-and-adjusting-the-plot"></a>
@@ -529,12 +550,14 @@ proportionately greater cost.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="method-validation-parameter-recovery">Method Validation: Parameter Recovery<a class="anchor" aria-label="anchor" href="#method-validation-parameter-recovery"></a>
+<h2 id="method-check-sensitivity-to-d">Method Check: Sensitivity to d′<a class="anchor" aria-label="anchor" href="#method-check-sensitivity-to-d"></a>
 </h2>
 <p>A different use of simulation: generate data with a known d′, fit a
 model, and check that the model’s parameters move as they should. Here
 the 2-high-threshold model of Winter et al. is fitted to data simulated
-across a range of d′.</p>
+across a range of d′. The data come from a signal detection (MAX) model,
+so there are no true 2-HT parameter values; this checks sensitivity, not
+recovery.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">true_dprimes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">2.5</span>, <span class="fl">3.0</span><span class="op">)</span></span>
 <span></span>
@@ -554,11 +577,11 @@ across a range of d′.</p>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="va">recovery</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"2HT detection parameters recovered from data simulated at known d', 500 lineups per condition."</span></span>
+<span>  caption <span class="op">=</span> <span class="st">"2-HT detection parameters fitted to data simulated from a signal detection model at known d', 500 lineups per condition."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>2HT detection parameters recovered from data simulated at known
-d’, 500 lineups per condition.</caption>
+<caption>2-HT detection parameters fitted to data simulated from a
+signal detection model at known d’, 500 lineups per condition.</caption>
 <thead><tr class="header">
 <th align="right">True d’</th>
 <th align="right">dP</th>
@@ -598,12 +621,13 @@ d’, 500 lineups per condition.</caption>
 </tbody>
 </table>
 <p>The detection parameter <code>dP</code> increases monotonically with
-the d′ used to generate the data, from about 0.11 to about 0.92. That is
-the result the exercise is looking for. Note that <code>dP</code> is not
-on the same scale as d′ and should not be expected to equal it — the two
-models parameterise memory differently, and what validates the analysis
-is that the ordering and the spacing are recovered, not that the numbers
-coincide.</p>
+the d′ used to generate the data, from about 0.11 to about 0.92. That
+shows <code>dP</code> is sensitive to memory strength. It does not
+validate the 2-HT model: <code>dP</code> is not on the same scale as d′,
+the generating model is a different model, and the exercise says nothing
+about bias, interval coverage or the process interpretation. Parameter
+recovery in the strict sense would simulate from the 2-HT equations
+themselves and check that the known parameters come back.</p>
 <p>The model fits without difficulty on data of this kind. If a fit does
 fail, resist the temptation to wrap it in <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code> and
 report “did not converge”, because that will also swallow genuine errors
@@ -658,20 +682,20 @@ lineups per size, d’ = 1.5).</caption>
 <tbody>
 <tr class="odd">
 <td align="right">4</td>
-<td align="right">1.02</td>
-<td align="right">61.8</td>
+<td align="right">1.01</td>
+<td align="right">62.2</td>
 <td align="right">9.8</td>
 </tr>
 <tr class="even">
 <td align="right">6</td>
-<td align="right">1.27</td>
-<td align="right">48.4</td>
+<td align="right">1.26</td>
+<td align="right">49.2</td>
 <td align="right">9.0</td>
 </tr>
 <tr class="odd">
 <td align="right">8</td>
-<td align="right">1.43</td>
-<td align="right">47.0</td>
+<td align="right">1.41</td>
+<td align="right">47.8</td>
 <td align="right">6.8</td>
 </tr>
 <tr class="even">
@@ -682,7 +706,7 @@ lineups per size, d’ = 1.5).</caption>
 </tr>
 <tr class="odd">
 <td align="right">12</td>
-<td align="right">1.65</td>
+<td align="right">1.64</td>
 <td align="right">38.0</td>
 <td align="right">4.2</td>
 </tr>
@@ -734,7 +758,7 @@ data.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">#&gt;   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids</span></span>
 <span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          0           0           0                   0           0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          6           0           0                   0           0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>          5           0.13        0                  39           0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>          4           0.243       0.003<span style="text-decoration: underline;">33</span>            73           1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          3           0.437       0.02              131           6</span></span>
@@ -807,7 +831,7 @@ substantial noise added.</p>
 <span><span class="co">#&gt;    0%   25%   50%   75%  100% </span></span>
 <span><span class="co">#&gt;  1628  5279  6100  6906 11167</span></span>
 <span></span>
-<span><span class="va">rac_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_rac.html">make_rac</a></span><span class="op">(</span><span class="va">sim_rac</span>, time_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">4500</span>, <span class="fl">5500</span>, <span class="fl">6500</span>, <span class="fl">12000</span><span class="op">)</span>,</span>
+<span><span class="va">rac_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_rac.html">make_rac</a></span><span class="op">(</span><span class="va">sim_rac</span>, time_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">4500</span>, <span class="fl">5500</span>, <span class="fl">6500</span>, <span class="cn">Inf</span><span class="op">)</span>,</span>
 <span>                       show_plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rac_result</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -821,20 +845,20 @@ substantial noise added.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 7</span></span></span>
 <span><span class="co">#&gt;   response_time mean_time n_correct n_incorrect n_total accuracy     se</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> [0,4500]          <span style="text-decoration: underline;">3</span>928.        82           9      91    0.901 0.031<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> (4500,5500]       <span style="text-decoration: underline;">5</span>031.       177          38     215    0.823 0.026<span style="text-decoration: underline;">0</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> (5500,6500]       <span style="text-decoration: underline;">5</span>958.       185          43     228    0.811 0.025<span style="text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> (6500,12000]      <span style="text-decoration: underline;">7</span>113.       147          29     176    0.835 0.028<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> [0,4500]          <span style="text-decoration: underline;">3</span>957.        82           9      91    0.901 0.031<span style="text-decoration: underline;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> (4500,5500]       <span style="text-decoration: underline;">5</span>032.       177          38     215    0.823 0.026<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> (5500,6500]       <span style="text-decoration: underline;">5</span>961.       185          43     228    0.811 0.025<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> (6500,Inf]        <span style="text-decoration: underline;">7</span>131.       147          29     176    0.835 0.028<span style="text-decoration: underline;">0</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Plot: save this object first, then extract it with x$plot</span></span></code></pre></div>
 <p>The fastest responders are the most accurate, at about 90% against
 roughly 82% for everyone else, after which the relationship flattens.
-That is a weaker and less orderly pattern than the CAC above, and the
-reason is worth noting: the simulator’s response-time model is
-deliberately simple, and the noise it adds is of comparable size to the
-systematic component. Do not read this as evidence about response times
-in real witnesses — it demonstrates the mechanics of the analysis, not a
-substantive finding.</p>
+That is a weaker and less orderly pattern than the CAC above, because
+the simulator’s response-time model is deliberately simple, and the
+noise it adds is of comparable size to the systematic component. Do not
+read this as evidence about response times in real witnesses — it
+demonstrates the mechanics of the analysis, not a substantive
+finding.</p>
 <p>Choosing bins is the part that needs care. Bins fixed in advance
 without reference to the data will often be empty at one end, and an
 accuracy estimated from one or two observations will dominate the plot
@@ -899,9 +923,8 @@ argument behind it.</p>
 <div class="section level2">
 <h2 id="choosing-parameter-values">Choosing Parameter Values<a class="anchor" aria-label="anchor" href="#choosing-parameter-values"></a>
 </h2>
-<p>These are starting points rather than rules, and they are worth
-revisiting against whatever literature is closest to your own
-design.</p>
+<p>These are starting points rather than rules; revisit them against
+whatever literature is closest to your own design.</p>
 <p><strong>Discriminability (d′).</strong> Values around 1.0 are weak,
 1.5 moderate, and 2.0 to 2.5 strong. Values above 3.0 are rarely
 observed in eyewitness studies, and a simulation resting on one will
@@ -939,7 +962,7 @@ in discriminability</li>
 <code><a href="../reference/classify_lineup_choices.html">classify_lineup_choices()</a></code>: derive identification
 outcomes from raw choices</li>
 </ul>
-<p>Points worth carrying away:</p>
+<p>In summary:</p>
 <ol style="list-style-type: decimal">
 <li>Power analysis needs a hypothesis test, and therefore two
 conditions.</li>
@@ -955,6 +978,7 @@ at all.</li>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S.
 (2024). pyWitness 1.0: A python eyewitness identification analysis
 toolkit. <em>Behavior Research Methods, 56</em>, 1533-1550.</p>
@@ -964,6 +988,7 @@ characteristic analysis. <em>Perspectives on Psychological Science,
 7</em>(3), 275-278.</p>
 <p>Wixted, J. T., Vul, E., Mickes, L., &amp; Wilson, B. M. (2018).
 Models of lineup memory. <em>Cognitive Psychology, 105</em>, 81-114.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

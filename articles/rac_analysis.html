@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/rac_analysis.Rmd" class="external-link"><code>vignettes/rac_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>rac_analysis.Rmd</code></div>
@@ -147,11 +147,12 @@ accurate identifications were indeed faster than inaccurate ones, the
 <em>boundary</em> that best separated them varied enormously between
 experiments — from about 5 seconds to about 29 seconds. There is a real
 speed-accuracy relationship; there is no universal number.</p>
-<p>The practical consequence is worth stating plainly, because it shapes
-how this vignette proceeds. <strong>A time boundary should be estimated
-from the data in hand, with an interval around it, rather than imported
-from another study.</strong> The <a href="#a-continuous-alternative-to-binning">continuous approach</a>
-below does exactly that.</p>
+<p>The practical consequence shapes how this vignette proceeds.
+<strong>A time boundary should be estimated from the data in hand rather
+than imported from another study.</strong> The <a href="#a-continuous-alternative-to-binning">continuous approach</a>
+below does that. It gives a point estimate of the boundary; an interval
+for the boundary itself would need a further step, such as bootstrapping
+the whole fit, which this vignette does not show.</p>
 </div>
 </div>
 <div class="section level2">
@@ -210,13 +211,12 @@ demonstration trivial.</p>
 <div class="section level2">
 <h2 id="response-time-and-accuracy-the-simplest-analysis">Response Time and Accuracy: the simplest analysis<a class="anchor" aria-label="anchor" href="#response-time-and-accuracy-the-simplest-analysis"></a>
 </h2>
-<p>Before any binning, it is worth looking at the plain correlation
-between response time and accuracy. Accuracy is binary, so this is a
+<p>Before any binning, look at the plain correlation between response
+time and accuracy. Accuracy is binary, so this is a
 <strong>point-biserial</strong> correlation — which is just Pearson’s
 <em>r</em> with one dichotomous variable, and needs no special
 machinery.</p>
-<p>The choice of <em>which trials to include</em> turns out to matter a
-great deal:</p>
+<p>The choice of <em>which trials to include</em> is very important:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># All trials: "correct" means a suspect ID when the target was present, or a</span></span>
 <span><span class="co"># rejection when it was absent</span></span>
@@ -265,12 +265,14 @@ great deal:</p>
 </tbody>
 </table>
 <p>The correlation across all trials is close to zero; restricting to
-witnesses who identified the suspect roughly triples it. This is not a
-trick. Rejections are slow for a quite different reason than false
-identifications are — a witness who searches the lineup thoroughly and
-then declines to choose is being careful, not uncertain in the way a
-slow chooser is. Pooling the two mixes two different relationships
-between time and accuracy and mostly cancels them out.</p>
+witnesses who identified the suspect roughly triples it. In these
+simulated data that is a consequence of how response time was generated:
+it depends on confidence alone, and rejections and identifications
+relate to accuracy differently, so pooling them mixes two relationships
+that partly cancel. In real data a further reason is often proposed,
+that a witness who searches the lineup thoroughly and then declines to
+choose is being careful rather than uncertain, but this simulation does
+not model that process and cannot show it.</p>
 <p>This is why RAC, like CAC, is computed on choosers. It is also a
 reminder that the headline correlation in a response-time study depends
 on a decision that is easy to leave unstated.</p>
@@ -296,7 +298,7 @@ indistinguishable from one based on two hundred.</p>
 <span><span class="co">#&gt;    0%   25%   50%   75%  100% </span></span>
 <span><span class="co">#&gt;   800  7028  9938 12806 24244</span></span>
 <span></span>
-<span><span class="va">time_bins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5000</span>, <span class="fl">7500</span>, <span class="fl">10000</span>, <span class="fl">20000</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">time_bins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5000</span>, <span class="fl">7500</span>, <span class="fl">10000</span>, <span class="cn">Inf</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="compute-and-plot">Compute and plot<a class="anchor" aria-label="anchor" href="#compute-and-plot"></a>
@@ -322,16 +324,16 @@ indistinguishable from one based on two hundred.</p>
 <span><span class="co">#&gt;   response_time mean_time n_correct n_incorrect n_total accuracy     se</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> [0,5000]          <span style="text-decoration: underline;">3</span>429.        63           0      63    1     0     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> (5000,7500]       <span style="text-decoration: underline;">6</span>321.        52           8      60    0.867 0.043<span style="text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> (7500,10000]      <span style="text-decoration: underline;">8</span>838.        80          16      96    0.833 0.038<span style="text-decoration: underline;">0</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> (10000,20000]    <span style="text-decoration: underline;">13</span>101.       166          46     212    0.783 0.028<span style="text-decoration: underline;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> (5000,7500]       <span style="text-decoration: underline;">6</span>350         52           8      60    0.867 0.043<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> (7500,10000]      <span style="text-decoration: underline;">8</span>882.        80          16      96    0.833 0.038<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> (10000,Inf]      <span style="text-decoration: underline;">13</span>245.       168          46     214    0.785 0.028<span style="text-decoration: underline;">1</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Plot: save this object first, then extract it with x$plot</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rac_result</span><span class="op">$</span><span class="va">plot</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code></pre></div>
 <p><img src="rac_analysis_files/figure-html/plot_rac-1.png" class="r-plt" alt="" width="672"></p>
 <p>Accuracy falls as responses get slower, from about 100% in the
-fastest bin to about 78% in the slowest. The relationship is real but
+fastest bin to about 79% in the slowest. The relationship is real but
 shallower than the corresponding CAC relationship, which is the usual
 finding: response time carries information about accuracy, but less of
 it than confidence does.</p>
@@ -381,7 +383,9 @@ it than confidence does.</p>
 </tr>
 <tr class="even">
 <td><strong>Robustness</strong></td>
-<td>Not affected by feedback or post-event information</td>
+<td>A recorded decision time cannot be changed by later feedback;
+earlier information, procedures and timing conventions can still affect
+it</td>
 <td>Can be inflated by confirming feedback</td>
 </tr>
 <tr class="odd">
@@ -400,7 +404,7 @@ deal of independent variation.</p>
 </h2>
 <p>Finer bins reveal more structure, at the cost of stability:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fine_bins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20000</span>, by <span class="op">=</span> <span class="fl">2500</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">fine_bins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20000</span>, by <span class="op">=</span> <span class="fl">2500</span><span class="op">)</span>, <span class="cn">Inf</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rac_fine</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_rac.html">make_rac</a></span><span class="op">(</span><span class="va">lineup_data</span>, time_bins <span class="op">=</span> <span class="va">fine_bins</span>, show_plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                     show_errorbars <span class="op">=</span> <span class="cn">TRUE</span>, show_n <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -408,11 +412,11 @@ deal of independent variation.</p>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">rac_fine</span><span class="op">$</span><span class="va">rac_data</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"response_time"</span>, <span class="st">"n_total"</span>, <span class="st">"accuracy"</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>  digits <span class="op">=</span> <span class="fl">3</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"RAC with 2.5-second bins, simulated data. Note the small n in the extreme bins."</span></span>
+<span>  caption <span class="op">=</span> <span class="st">"RAC with 2.5-second bins plus an overflow bin, simulated data. Note the small n in the extreme bins."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>RAC with 2.5-second bins, simulated data. Note the small n in
-the extreme bins.</caption>
+<caption>RAC with 2.5-second bins plus an overflow bin, simulated data.
+Note the small n in the extreme bins.</caption>
 <thead><tr class="header">
 <th align="left">response_time</th>
 <th align="right">n_total</th>
@@ -458,6 +462,11 @@ the extreme bins.</caption>
 <td align="left">(17500,20000]</td>
 <td align="right">8</td>
 <td align="right">0.750</td>
+</tr>
+<tr class="odd">
+<td align="left">(20000,Inf]</td>
+<td align="right">2</td>
+<td align="right">1.000</td>
 </tr>
 </tbody>
 </table>
@@ -508,8 +517,8 @@ assumed:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code></pre></div>
 <p><img src="rac_analysis_files/figure-html/continuous_plot-1.png" class="r-plt" alt="" width="672"></p>
 <p>This uses every observation, requires no arbitrary boundaries, and
-comes with a confidence band that widens honestly where the data thin
-out — visible in the rug along the bottom.</p>
+comes with a confidence band that widens where the data thin out —
+visible in the rug along the bottom.</p>
 <div class="section level3">
 <h3 id="estimating-a-time-boundary">Estimating a time boundary<a class="anchor" aria-label="anchor" href="#estimating-a-time-boundary"></a>
 </h3>
@@ -520,6 +529,10 @@ least 90%?</strong></p>
 <code class="sourceCode R"><span><span class="va">above</span> <span class="op">&lt;-</span> <span class="va">grid</span><span class="op">$</span><span class="va">response_time</span><span class="op">[</span><span class="va">grid</span><span class="op">$</span><span class="va">accuracy</span> <span class="op">&gt;=</span> <span class="fl">0.90</span><span class="op">]</span></span>
 <span><span class="va">boundary</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">above</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">above</span><span class="op">)</span> <span class="kw">else</span> <span class="cn">NA</span></span>
 <span></span>
+<span><span class="co"># The fitted curve could cross 90% more than once. Count the crossings, so a</span></span>
+<span><span class="co"># single "boundary" is not reported when accuracy dips and recovers.</span></span>
+<span><span class="va">n_crossings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">accuracy</span> <span class="op">&gt;=</span> <span class="fl">0.90</span><span class="op">)</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Estimated accuracy at  3 s:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">approx</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">response_time</span>, <span class="va">grid</span><span class="op">$</span><span class="va">accuracy</span>, <span class="fl">3000</span><span class="op">)</span><span class="op">$</span><span class="va">y</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Estimated accuracy at  3 s: 0.991</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Estimated accuracy at  8 s:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">approx</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">response_time</span>, <span class="va">grid</span><span class="op">$</span><span class="va">accuracy</span>, <span class="fl">8000</span><span class="op">)</span><span class="op">$</span><span class="va">y</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -527,14 +540,21 @@ least 90%?</strong></p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Estimated accuracy at 15 s:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">approx</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">response_time</span>, <span class="va">grid</span><span class="op">$</span><span class="va">accuracy</span>, <span class="fl">15000</span><span class="op">)</span><span class="op">$</span><span class="va">y</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Estimated accuracy at 15 s: 0.773</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Accuracy is at least 90% up to about"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">boundary</span> <span class="op">/</span> <span class="fl">1000</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"seconds\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Accuracy is at least 90% up to about 6.9 seconds</span></span></code></pre></div>
+<span><span class="co">#&gt; Accuracy is at least 90% up to about 6.9 seconds</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Crossings of the 90% line:"</span>, <span class="va">n_crossings</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Crossings of the 90% line: 1</span></span></code></pre></div>
 <p>For these simulated data the boundary falls near 6.9 seconds. That
 number is a property of <em>this</em> dataset, and the point of Weber et
 al. (2004) is precisely that it will not transfer: had the simulation
 used a different criterion or a different d′, the boundary would move.
-Reporting it with the interval around it, and refitting on new data
-rather than importing the number, is the appropriate use of the
-method.</p>
+Refitting on new data rather than importing the number is the
+appropriate use of the method.</p>
+<p>Two cautions. The shaded band in the plot is a pointwise interval for
+accuracy at each time; it is not an interval for the boundary, which
+would need the whole fit bootstrapped. And a spline can cross the 90%
+line more than once, in which case the largest qualifying time does not
+mean accuracy exceeded 90% at every shorter time. The curve here crosses
+it once; check this before reporting a single boundary.</p>
 <p>A note on what is being estimated. Because accuracy among suspect
 identifications is a positive predictive value, it depends on the
 proportion of target-present lineups in the design — 50% here, which is
@@ -608,9 +628,9 @@ and 400 target-absent lineups per condition).</caption>
 <td align="right">0.721</td>
 </tr>
 <tr class="even">
-<td align="left">(10000,20000]</td>
-<td align="right">0.806</td>
-<td align="right">0.798</td>
+<td align="left">(10000,Inf]</td>
+<td align="right">0.807</td>
+<td align="right">0.800</td>
 </tr>
 </tbody>
 </table>
@@ -712,8 +732,8 @@ here.</p>
 units. The package assumes milliseconds.</li>
 <li>
 <strong>Bins.</strong> Inspect the distribution first, as above.
-Four to six bins is common, but the number matters far less than whether
-each is populated.</li>
+Four to six bins is common, but the number is far less important than
+whether each is populated.</li>
 <li>
 <strong>Extreme values.</strong> Very long times often mean an
 interruption rather than deliberation. Consider capping rather than
@@ -769,7 +789,7 @@ decision time with viewing time.</li>
 </tr>
 <tr class="even">
 <td align="left">(5000,7500]</td>
-<td align="right">6320.827</td>
+<td align="right">6350.000</td>
 <td align="right">52</td>
 <td align="right">8</td>
 <td align="right">60</td>
@@ -778,7 +798,7 @@ decision time with viewing time.</li>
 </tr>
 <tr class="odd">
 <td align="left">(7500,10000]</td>
-<td align="right">8838.262</td>
+<td align="right">8882.167</td>
 <td align="right">80</td>
 <td align="right">16</td>
 <td align="right">96</td>
@@ -786,12 +806,12 @@ decision time with viewing time.</li>
 <td align="right">0.038</td>
 </tr>
 <tr class="even">
-<td align="left">(10000,20000]</td>
-<td align="right">13101.422</td>
-<td align="right">166</td>
+<td align="left">(10000,Inf]</td>
+<td align="right">13244.748</td>
+<td align="right">168</td>
 <td align="right">46</td>
-<td align="right">212</td>
-<td align="right">0.783</td>
+<td align="right">214</td>
+<td align="right">0.785</td>
 <td align="right">0.028</td>
 </tr>
 </tbody>
@@ -801,7 +821,7 @@ decision time with viewing time.</li>
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <p>RAC analysis puts response time on the same footing as the CAC plot
-puts confidence. Points worth carrying away:</p>
+puts confidence. In summary:</p>
 <ol style="list-style-type: decimal">
 <li>The idea is old (Sporer, 1993); the plot is new.</li>
 <li>Compute it on choosers. Pooling choosers with rejections mixes two
@@ -815,12 +835,13 @@ Estimate it from your data.</li>
 spline uses every observation, needs no boundaries, and gives an honest
 confidence band.</li>
 <li>Response time is a weaker indicator of accuracy than confidence, and
-worth reporting alongside it rather than instead of it.</li>
+should be reported alongside it rather than instead of it.</li>
 </ol>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Dunning, D., &amp; Perretta, S. (2002). Automaticity and eyewitness
 accuracy: A 10- to 12-second rule for distinguishing accurate from
 inaccurate positive identifications. <em>Journal of Applied Psychology,
@@ -848,6 +869,7 @@ Applied, 10</em>(3), 139-147.</p>
 <p>Wixted, J. T., &amp; Wells, G. L. (2017). The relationship between
 eyewitness confidence and identification accuracy: A new synthesis.
 <em>Psychological Science in the Public Interest, 18</em>(1), 10-65.</p>
+</div>
 <hr>
 <p><em>This vignette was created for r4lineups version 2.3.0</em></p>
 </div>

@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/pauc_statistical_comparison.Rmd" class="external-link"><code>vignettes/pauc_statistical_comparison.Rmd</code></a></small>
       <div class="d-none name"><code>pauc_statistical_comparison.Rmd</code></div>
@@ -101,7 +101,7 @@ with the authors.</p>
 <p>Eyewitness researchers frequently need to decide whether one
 identification procedure is better than another: whether simultaneous
 lineups beat sequential ones, whether a longer retention interval hurts,
-whether lineup size matters.</p>
+whether lineup size is important.</p>
 <p>Since about 2012 the dominant way of answering such questions has
 been to compare <strong>ROC curves</strong>, and usually to reduce each
 curve to a single number — the <strong>partial area under it
@@ -173,7 +173,7 @@ identifications.</caption>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">0</td>
+<td align="right">6</td>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">0.0000</td>
@@ -239,14 +239,14 @@ improves memory moves the whole curve outward.</p>
 anyone at all. A cautious witness identifies rarely; a willing one
 identifies often. Changing the criterion moves you <em>along</em> a
 curve without changing which curve you are on.</p>
-<p>The distinction matters because a procedure can change identification
-rates without improving anything. If sequential lineups simply make
-witnesses more cautious, they will produce fewer false identifications
-<em>and</em> fewer correct ones, and a comparison of raw rates will make
-them look better or worse depending on which rate the reader happens to
-weight. The ROC curve answers the question that survives a criterion
-shift: at the same false identification rate, which procedure gets more
-correct identifications?</p>
+<p>The distinction is important because a procedure can change
+identification rates without improving anything. If sequential lineups
+simply make witnesses more cautious, they will produce fewer false
+identifications <em>and</em> fewer correct ones, and a comparison of raw
+rates will make them look better or worse depending on which rate the
+reader happens to weight. The ROC curve answers the question that
+survives a criterion shift: at the same false identification rate, which
+procedure gets more correct identifications?</p>
 <p>This is the argument Wixted and Mickes (2012) made in urging the
 field to abandon the diagnosticity ratio in favour of ROC analysis, and
 it is why ROC analysis became standard.</p>
@@ -284,7 +284,7 @@ identification is counted, however hesitant. There is no way to push
 further to the right: doing so would require witnesses to identify
 someone more often than they are willing to, and the experiment provides
 no lever for that.</p>
-<p>Two consequences follow, and both matter:</p>
+<p>Two consequences follow, and both are important:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>The full area under the curve cannot be computed</strong>
@@ -324,8 +324,8 @@ area only over the region that was actually observed: the
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pauc_statistical_comparison_files/figure-html/pauc_region_figure-1.png" class="r-plt" alt="" width="672"></p>
-<p>Partial AUC is defended on four grounds, which are worth separating
-because they are not equally strong:</p>
+<p>Partial AUC is defended on four grounds, which are taken separately
+here because they are not equally strong:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>It is computable.</strong> Unlike full AUC, it requires no
@@ -405,11 +405,6 @@ is no single region both fully cover.</caption>
 </tr>
 </tbody>
 </table>
-<p>Earlier versions of this package defaulted to the <em>larger</em> of
-the two maxima, which silently integrated each curve only as far as its
-own data went — so the two areas covered different intervals and the
-comparison was biased against whichever curve stopped sooner. That
-default has been corrected.</p>
 </div>
 <div class="section level3">
 <h3 id="the-deeper-objection">The deeper objection<a class="anchor" aria-label="anchor" href="#the-deeper-objection"></a>
@@ -417,7 +412,7 @@ default has been corrected.</p>
 <p>Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) go further
 and argue that pAUC does not measure what researchers want it to
 measure. Their claim is that pAUC fails to track the <strong>diagnostic
-utility</strong> of a lineup — the thing that actually matters for
+utility</strong> of a lineup — the thing that is actually important for
 deciding which procedure a police force should adopt — and that neither
 choice of region repairs this. They propose <em>deviation from perfect
 performance</em> (DPP) instead, which is implemented in this package and
@@ -491,13 +486,14 @@ checked against</td>
 <p>and refers
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math>
 to a standard normal distribution.</p>
-<p>It is worth being precise about what kind of test this is, because it
-is easy to assume it is something it is not. <strong>It is a Wald
-test</strong>: an estimate divided by an estimate of its own standard
-error. It is <em>not</em> a comparison of two standard normal deviates,
-and it is not a test on transformed proportions. The normal reference
-distribution comes from the asymptotic normality of the estimator, not
-from any assumption that the underlying data are normal.</p>
+<p>It is important to make a point of clarification here about what kind
+of test this is, because it is easy to assume it is something it is not.
+<strong>It is a Wald test</strong>: an estimate divided by an estimate
+of its own standard error. It is <em>not</em> a comparison of two
+standard normal deviates, and it is not a test on transformed
+proportions. The normal reference distribution comes from the asymptotic
+normality of the estimator, not from any assumption that the underlying
+data are normal.</p>
 <p>The standard error in the denominator is obtained by
 <strong>bootstrap</strong>: the witnesses in each condition are
 resampled with replacement, the whole ROC and its partial area are
@@ -519,8 +515,8 @@ in doing so.</p>
 <h3 id="is-normality-reasonable">Is normality reasonable?<a class="anchor" aria-label="anchor" href="#is-normality-reasonable"></a>
 </h3>
 <p>The Wald test assumes the <em>difference in pAUC</em> is
-approximately normally distributed. That is checkable, and worth
-checking rather than assuming:</p>
+approximately normally distributed. That can be checked, rather than
+assumed:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_pauc.html">compare_pauc</a></span><span class="op">(</span></span>
 <span>  <span class="va">strong</span>, <span class="va">weak</span>,</span>
@@ -597,10 +593,10 @@ simulated data (600 bootstrap resamples).</caption>
 <p>Typically the distribution is close to normal but not exactly so —
 mild skew is common, because pAUC is bounded and the region is
 data-determined. With several hundred resamples a formal normality test
-will often reject even when the departure is too small to matter. The
-practical question is not whether normality holds exactly but whether it
-holds well enough that the interval is about right, and that is best
-answered by comparing the two intervals directly:</p>
+will often reject even when the departure is too small to be important.
+The practical question is not whether normality holds exactly but
+whether it holds well enough that the interval is about right, and that
+is best answered by comparing the two intervals directly:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -696,7 +692,7 @@ than imposing symmetry on it.</p>
 <span><span class="co">#&gt;   Z-score: 2.6 </span></span>
 <span><span class="co">#&gt;   p-value: 0.009329 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Effect size (d): 3.781 </span></span>
+<span><span class="co">#&gt; SE-standardized difference (depends on sample size; not Cohen d): 3.781 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Analysis Details:</span></span>
 <span><span class="co">#&gt;   Max false ID rate cutoff: 0.1125 </span></span>
@@ -872,9 +868,11 @@ falls between two observed points, the curve is linearly interpolated to
 that point. If
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi mathvariant="normal">max</mi></msub><annotation encoding="application/x-tex">f_{\max}</annotation></semantics></math>
 lies beyond the last observed point, <strong>no extrapolation is
-performed</strong> — the sum simply stops at the data, which is why
-supplying a cutoff beyond a curve’s reach produces a warning rather than
-a number.</p>
+performed</strong>: the sum simply stops at the data. Supplying a cutoff
+beyond a curve’s reach therefore produces a warning <strong>and</strong>
+an area truncated at the observed reach, which is smaller than the area
+up to the requested cutoff would be. Read the warning; it means the two
+areas being compared may not cover the same false-ID range.</p>
 </div>
 <div class="section level3">
 <h3 id="how-the-standard-error-is-obtained">How the standard error is obtained<a class="anchor" aria-label="anchor" href="#how-the-standard-error-is-obtained"></a>
@@ -945,6 +943,7 @@ rather than alone.</li>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Gronlund, S. D., Wixted, J. T., &amp; Mickes, L. (2014). Evaluating
 eyewitness identification procedures using receiver operating
 characteristic analysis. <em>Current Directions in Psychological
@@ -961,6 +960,7 @@ curve does not. <em>Journal of Applied Research in Memory and Cognition,
 memory should abandon probative value and embrace receiver operating
 characteristic analysis. <em>Perspectives on Psychological Science,
 7</em>(3), 275-278.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

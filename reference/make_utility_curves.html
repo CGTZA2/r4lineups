@@ -134,9 +134,14 @@ average utility.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing:</p><ul><li><p>utility_data: Dataframe with criterion, hit rate, false alarm rate,
-      and expected utility</p></li>
-<li><p>max_utility: Maximum expected utility and corresponding criterion</p></li>
+    <p>A list containing:</p><ul><li><p>utility_data: Dataframe with criterion, strategy, hit rate,
+      false alarm rate, and expected utility. Each row is the rule "accept
+      suspect IDs with confidence &gt;= criterion". The <code>"reject_all"</code>
+      row has a criterion above the observed identification confidences
+      and supplied grid (possibly <code>Inf</code>), so that
+      applying it accepts no identification.</p></li>
+<li><p>max_utility: Maximum expected utility, with the corresponding
+      criterion and strategy</p></li>
 <li><p>avg_utility: Average expected utility across all criteria</p></li>
 <li><p>utility_all_ids: Expected utility if all IDs are accepted</p></li>
 <li><p>base_rate: Base rate used</p></li>
@@ -181,6 +186,9 @@ Behavior, 43</em>(1), 26-44.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criterion</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 30</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $strategy</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "threshold"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $hit_rate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5557143</span>

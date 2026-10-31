@@ -1,6 +1,7 @@
-# Variance of diagnosticity ratio (Tredoux)
+# Asymptotic Variance of Log Diagnosticity
 
-Computes the variance of the diagnosticity ratio for a lineup pair
+Computes the large-sample variance of the log diagnosticity ratio for a
+lineup pair.
 
 ## Usage
 
@@ -37,6 +38,13 @@ var_diag_ratio(lineup_pres, lineup_abs, pos_pres, pos_abs, k1, k2)
 - k2:
 
   Number of targets in TA lineup. Must be specified by user (scalar).
+
+## Details
+
+Returns 1/h - 1/N_TP + 1/f - 1/N_TA for positive suspect-ID counts h and
+f. This is on the log-ratio scale, as in Tredoux (1998), not the raw
+ratio scale. A delta-method variance for the raw ratio is the squared
+diagnosticity ratio times this value.
 
 ## References
 

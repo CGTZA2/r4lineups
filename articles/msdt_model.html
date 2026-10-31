@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/msdt_model.Rmd" class="external-link"><code>vignettes/msdt_model.Rmd</code></a></small>
       <div class="d-none name"><code>msdt_model.Rmd</code></div>
@@ -153,8 +153,8 @@ against max filler signal)</li>
 how likely the suspect’s signal is to take each value. A
 <strong>joint</strong> distribution describes two or more together,
 including how they move with one another.</p>
-<p>The distinction matters here because the witness’s decision is not
-about the suspect’s signal in isolation. It is about whether the
+<p>The distinction is important here because the witness’s decision is
+not about the suspect’s signal in isolation. It is about whether the
 suspect’s signal is the largest <em>and</em> clears the criterion. That
 is inherently a question about two quantities at once, so a joint
 distribution is the natural object.</p>
@@ -165,8 +165,7 @@ of the normal CDF — but it is not obviously true. Fillers in a real
 lineup are chosen to match a description, so they resemble each other. A
 witness whose memory happens to align with that description may find
 <em>all</em> of them somewhat familiar, and one whose memory does not
-may find none of them familiar. That is precisely what correlation
-means.</p>
+may find none of them familiar.</p>
 <p>The consequence is not small. Under independence the largest of five
 standard normal fillers has an expected value of about 1.17. If the
 fillers are strongly correlated the shared component dominates and the
@@ -174,8 +173,7 @@ fillers are strongly correlated the shared component dominates and the
 0.9, roughly a third of the independent value. Treating correlated
 fillers as independent therefore <strong>overstates how often a filler
 out-competes the suspect</strong>, and so understates the suspect’s
-exposure. The <a href="#planned-extensions">implementation plan</a>
-below treats this as the first extension worth building.</p>
+exposure.</p>
 </div>
 </div>
 <div class="section level2">
@@ -215,7 +213,7 @@ centred near 1.17. A culprit with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>d</mi><mo>′</mo></msup><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d' = 1</annotation></semantics></math>
 is therefore competing against a typical best-filler signal <em>higher
 than its own mean</em> — which is why lineup identification is hard, and
-why lineup size matters so much.</p>
+why lineup size is so important.</p>
 <div class="section level3">
 <h3 id="moments">Moments<a class="anchor" aria-label="anchor" href="#moments"></a>
 </h3>
@@ -227,11 +225,11 @@ the distribution sits; the second central moment is the
 third standardised moment is the <strong>skewness</strong>, which says
 how asymmetric it is — zero for a symmetric distribution, positive when
 the right tail is longer.</p>
-<p>They matter here because the max filler distribution is <strong>not
-normal</strong>, even though every filler individually is. Taking a
-maximum shifts the distribution right, compresses its spread, and makes
-it asymmetric. The moments quantify exactly that, and they are computed
-numerically because no simple closed form exists.</p>
+<p>They are important here because the max filler distribution is
+<strong>not normal</strong>, even though every filler individually is.
+Taking a maximum shifts the distribution right, compresses its spread,
+and makes it asymmetric. The moments quantify exactly that, and they are
+computed numerically because no simple closed form exists.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">moments</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/max_filler_moments.html">max_filler_moments</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
 <span></span>
@@ -355,8 +353,7 @@ The two steps are also available separately as
 <div class="section level3">
 <h3 id="what-this-estimator-gives-up">What this estimator gives up<a class="anchor" aria-label="anchor" href="#what-this-estimator-gives-up"></a>
 </h3>
-<p>The closed form comes at a price, and it is worth stating
-plainly.</p>
+<p>The closed form comes at a price.</p>
 <p><code><a href="../reference/estimate_msdt_params.html">estimate_msdt_params()</a></code> uses <strong>only the two
 rejection rates</strong>. It never looks at whether the witnesses who
 <em>did</em> choose picked the suspect or a filler. Since a suspect
@@ -365,9 +362,22 @@ evidential weight, that is a great deal of information to leave on the
 table — arguably the most informative part of the data.</p>
 <p>The estimator is also <strong>exactly identified</strong>: two
 numbers in, two parameters out, with nothing left over. There is no
-residual, so there is no goodness-of-fit test. The model cannot be found
-to fit badly, because it will always reproduce the two rates it was
-given exactly.</p>
+residual, so there is no goodness-of-fit test, and for feasible rates
+the model reproduces the two rates it was given. Not every pair of rates
+is feasible, however. With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
+members, a target-absent rejection rate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mi>A</mi></msub><annotation encoding="application/x-tex">r_A</annotation></semantics></math>
+fixes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>,
+and the target-present rejection rate can then be at most
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>r</mi><mi>A</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mi>m</mi></mrow></msubsup><annotation encoding="application/x-tex">r_A^{(m-1)/m}</annotation></semantics></math>,
+the limit as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>d</mi><mo>′</mo></msup><mo>→</mo><mi>−</mi><mi>∞</mi></mrow><annotation encoding="application/x-tex">d' \to -\infty</annotation></semantics></math>.
+Rates outside that bound, for example
+<code>estimate_msdt_params(0.1, 0.9, 6)</code>, are rejected with an
+error, and rates at the edges of the scale are clipped, so the
+reproduction is exact only in the interior.</p>
 <p>Use it when the rejection rates are all you have, or as a quick
 starting point. Where the full response breakdown exists, prefer:</p>
 <table class="table">
@@ -434,95 +444,22 @@ densities drawn from the parameters supplied in the call — here
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>d</mi><mo>′</mo></msup><mo>=</mo><mn>1.2</mn></mrow><annotation encoding="application/x-tex">d' = 1.2</annotation></semantics></math>,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>0.4</mn></mrow><annotation encoding="application/x-tex">\gamma = 0.4</annotation></semantics></math>
 and a six-person lineup — not summaries of observed data. Comparing the
-two makes the model’s logic visible: in the culprit-absent plot the mass
-sits symmetrically about the diagonal, since the suspect is just another
-filler; in the culprit-present plot it is displaced by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>d</mi><mo>′</mo></msup><annotation encoding="application/x-tex">d'</annotation></semantics></math>
-towards the suspect axis.</p>
-</div>
-<div class="section level2">
-<h2 id="planned-extensions">Planned extensions<a class="anchor" aria-label="anchor" href="#planned-extensions"></a>
-</h2>
-<p>The functions here implement the <strong>core</strong> mSDT
-assumptions: equal variance and independent filler signals. Yang et
-al. (2025) discuss extensions that are not yet implemented. Rather than
-leave that as a bare caveat, here is what each would take.</p>
-<div class="section level3">
-<h3 id="correlated-filler-signals">1. Correlated filler signals<a class="anchor" aria-label="anchor" href="#correlated-filler-signals"></a>
-</h3>
-<p><strong>Why it matters.</strong> As noted above, fillers matched to a
-common description are unlikely to be independent, and the error runs in
-an unsafe direction: assuming independence overstates the competition
-the suspect faces.</p>
-<p><strong>How to implement it.</strong> Equicorrelated fillers admit a
-one-factor representation. Writing
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-for the common correlation,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>i</mi></msub><mo>=</mo><msqrt><mi>ρ</mi></msqrt><mspace width="0.167em"></mspace><mi>Z</mi><mo>+</mo><msqrt><mrow><mn>1</mn><mo>−</mo><mi>ρ</mi></mrow></msqrt><mspace width="0.167em"></mspace><msub><mi>e</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">
-f_i = \sqrt{\rho}\,Z + \sqrt{1-\rho}\,e_i
-</annotation></semantics></math></p>
-<p>with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math>
-and the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>e</mi><mi>i</mi></msub><annotation encoding="application/x-tex">e_i</annotation></semantics></math>
-independent standard normals. Conditional on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math>
-the fillers <em>are</em> independent, so the existing
-power-of-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Φ</mi><annotation encoding="application/x-tex">\Phi</annotation></semantics></math>
-result applies inside an expectation over
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo></mrow><mo>&lt;</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>∫</mo><mi>ϕ</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi mathvariant="normal">Φ</mi><mspace width="-0.167em"></mspace><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mi>x</mi><mo>−</mo><msqrt><mi>ρ</mi></msqrt><mspace width="0.167em"></mspace><mi>z</mi></mrow><msqrt><mrow><mn>1</mn><mo>−</mo><mi>ρ</mi></mrow></msqrt></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>m</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>d</mi><mi>z</mi></mrow><annotation encoding="application/x-tex">
-P(\max &lt; x) = \int \phi(z)\,
-\Phi\!\left(\frac{x - \sqrt{\rho}\,z}{\sqrt{1-\rho}}\right)^{m-1} dz
-</annotation></semantics></math></p>
-<p>a one-dimensional integral, evaluable with
-<code><a href="https://rdrr.io/r/stats/integrate.html" class="external-link">stats::integrate()</a></code>. This extends <code><a href="../reference/dmax_filler.html">dmax_filler()</a></code>
-and friends by a single <code>rho</code> argument defaulting to 0, which
-reduces exactly to the current behaviour.</p>
-<p><strong>Effort:</strong> small. <strong>Risk:</strong> low — the
-formula is checkable against simulation, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\rho = 0</annotation></semantics></math>
-must reproduce the existing functions.</p>
-</div>
-<div class="section level3">
-<h3 id="unequal-variances">2. Unequal variances<a class="anchor" aria-label="anchor" href="#unequal-variances"></a>
-</h3>
-<p><strong>Why it matters.</strong> The empirical evidence in
-recognition memory generally favours a culprit distribution with larger
-variance than the filler distribution, and assuming equality distorts
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>d</mi><mo>′</mo></msup><annotation encoding="application/x-tex">d'</annotation></semantics></math>.</p>
-<p><strong>The obstacle is identifiability, not arithmetic.</strong>
-With a culprit signal
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>d</mi><mo>′</mo></msup><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(d', \sigma^2)</annotation></semantics></math>
-the rejection rates become</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">R</mi><mi mathvariant="normal">E</mi><mi mathvariant="normal">J</mi></mrow><mo>∣</mo><mi>I</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>m</mi></msup><mo>,</mo><mspace width="2.0em"></mspace><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">R</mi><mi mathvariant="normal">E</mi><mi mathvariant="normal">J</mi></mrow><mo>∣</mo><mi>G</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi mathvariant="normal">Φ</mi><mspace width="-0.167em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mi>γ</mi><mo>−</mo><msup><mi>d</mi><mo>′</mo></msup></mrow><mi>σ</mi></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>m</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">
-\Pr(\mathrm{REJ}\mid I) = \Phi(\gamma)^m, \qquad
-\Pr(\mathrm{REJ}\mid G) = \Phi\!\left(\frac{\gamma - d'}{\sigma}\right)\Phi(\gamma)^{m-1}
-</annotation></semantics></math></p>
-<p>which is <strong>two equations in three unknowns</strong>.
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
-is simply not identified from rejection rates, so
-<code><a href="../reference/estimate_msdt_params.html">estimate_msdt_params()</a></code> cannot be extended to cover it. The
-extension belongs in <code><a href="../reference/fit_max_sdt.html">fit_max_sdt()</a></code>, which uses the full
-response breakdown, or requires confidence data and the z-ROC slope
-(<code><a href="../reference/fit_sdt_roc.html">fit_sdt_roc()</a></code>).</p>
-<p><strong>Effort:</strong> moderate. <strong>Risk:</strong> higher —
-the third parameter must be shown to be recoverable before the option is
-offered, which means a simulation study sweeping
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
-and sample size and checking recovery, on the model of the
-identifiability concerns raised in
-<code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code>.</p>
-</div>
-<div class="section level3">
-<h3 id="order-of-work">3. Order of work<a class="anchor" aria-label="anchor" href="#order-of-work"></a>
-</h3>
-<p>Correlated fillers first: it is self-contained, verifiable against
-simulation, and backwards compatible. Unequal variance second, and only
-after a recovery study establishes that the parameter can be estimated
-at realistic sample sizes. Shipping an option that returns an
-unidentified parameter would be worse than not shipping it.</p>
-</div>
+two makes the model’s logic visible. In the culprit-absent plot the
+suspect is one innocent member, Normal(0, 1), but the other axis is the
+<strong>strongest of the five fillers</strong>, whose density is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mi>ϕ</mi><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>m</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>4</mn></msup></mrow><annotation encoding="application/x-tex">5\phi(m)\Phi(m)^4</annotation></semantics></math>
+with mean about 1.16. The joint density
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mo stretchy="false" form="prefix">(</mo><mi>s</mi><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><mn>5</mn><mi>ϕ</mi><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>m</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>4</mn></msup></mrow><annotation encoding="application/x-tex">\phi(s) \cdot 5\phi(m)\Phi(m)^4</annotation></semantics></math>
+is therefore not symmetric about the diagonal: the mass sits above it,
+towards the filler axis (at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>s</mi><mo>,</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(s, m) = (0, 1)</annotation></semantics></math>
+the density is about eight times that at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(1, 0)</annotation></semantics></math>).
+That asymmetry is why an innocent suspect is chosen less often than the
+fillers combined. In the culprit-present plot the suspect’s signal is
+shifted by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>d</mi><mo>′</mo></msup><annotation encoding="application/x-tex">d'</annotation></semantics></math>,
+moving the mass towards the suspect axis.</p>
 </div>
 <div class="section level2">
 <h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
@@ -580,8 +517,7 @@ fillers</td>
 </h3>
 <ol style="list-style-type: decimal">
 <li>Filler signals are independent and identically distributed
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(0, 1)</annotation></semantics></math>.
-See the planned extension above for the correlated case.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(0, 1)</annotation></semantics></math>.</li>
 <li>The culprit signal is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>d</mi><mo>′</mo></msup><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(d', 1)</annotation></semantics></math>
 — equal variance.</li>
@@ -606,6 +542,7 @@ therefore untestable — no residual, no goodness-of-fit.</li>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Duncan, M. (2006). <em>A signal detection model of compound decision
 tasks</em> (Technical Note DRDC TR 2006-256). Defence R&amp;D Canada,
 Toronto.</p>
@@ -613,7 +550,8 @@ Toronto.</p>
 Models of lineup memory. <em>Cognitive Psychology, 105</em>, 81-114.</p>
 <p>Yang, Y., Burke, J. L., &amp; Healy, J. (2025). A multi-item signal
 detection theory model for eyewitness identification. <em>Cognitive
-Research: Principles and Implications, 10</em>, 54. </p>
+Research: Principles and Implications, 10</em>, 54. <a href="https://doi.org/10.1186/s41235-025-00652-3" class="external-link uri">https://doi.org/10.1186/s41235-025-00652-3</a></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

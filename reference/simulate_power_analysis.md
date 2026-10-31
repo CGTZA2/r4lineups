@@ -26,9 +26,10 @@ simulate_power_analysis(
 
 - sample_sizes:
 
-  Integer vector. Sample sizes per condition to test (e.g., c(50, 100,
-  200)). Each is used for both target-present and target-absent lineups
-  in each condition.
+  Integer vector of sizes to test (e.g., c(50, 100, 200)). A size n
+  means n target-present *and* n target-absent witnesses in each of the
+  two simulated conditions: 2n witnesses per condition and 4n in the
+  whole simulated experiment.
 
 - d_prime:
 
@@ -84,7 +85,10 @@ simulate_power_analysis(
 
 A dataframe of class `power_analysis` with columns:
 
-- sample_size: N per condition
+- sample_size: n, the number of target-present (and, separately,
+  target-absent) witnesses per condition
+
+- n_total: Witnesses in the whole simulated experiment, 4n
 
 - power: Proportion of simulated studies reaching significance
 
@@ -95,6 +99,15 @@ A dataframe of class `power_analysis` with columns:
 - sd_effect: Standard deviation of the observed difference
 
 - n_valid: Simulations that produced a usable test
+
+- n_failed: Attempted simulations without a usable test
+
+- n_attempted: All attempted simulations
+
+Power and its Monte Carlo standard error are conditional on usable
+tests. Failures are retained in the attempted count and trigger a
+warning; compare failure rates as well as conditional power when
+assessing a design.
 
 ## Details
 
@@ -128,8 +141,11 @@ power_res <- simulate_power_analysis(
 #> Simulating sample size 50 (8 studies)
 #> Simulating sample size 100 (8 studies)
 print(power_res)
-#>   sample_size power  power_se mean_effect  sd_effect n_valid
-#> 1          50 0.875 0.1169268  0.04444208 0.01567793       8
-#> 2         100 1.000 0.0000000  0.04280260 0.01922859       8
+#>   sample_size n_total power  power_se mean_effect  sd_effect n_valid n_failed
+#> 1          50     200 0.875 0.1169268  0.04444208 0.01567793       8        0
+#> 2         100     400 1.000 0.0000000  0.04280260 0.01922859       8        0
+#>   n_attempted
+#> 1           8
+#> 2           8
 # }
 ```

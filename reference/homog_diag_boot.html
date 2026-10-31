@@ -113,7 +113,9 @@ heterogeneity is declared. Defaults to 0.95.</p></dd>
     <p>Invisibly returns a list containing the observed mean diagnosticity,
  chi-square statistic with degrees of freedom and asymptotic p-value,
  percentile intervals, a <code>heterogeneous</code> flag, a <code>parameters</code> data
- frame of per-pair ratios and intervals, the bootstrap draws, and <code>R</code>.</p>
+ frame of per-pair ratios and intervals, all attempted bootstrap draws
+ (failed rows retained as NA), <code>n_successful</code>, <code>n_failed</code>, and
+ <code>R</code>. Intervals are conditional on successful draws when failures occur.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -71,7 +71,8 @@ An S3 object of class "sdt_roc_fit" containing:
 
 - criteria: Decision criterion for each confidence level (c values)
 
-- variance_ratio: Ratio of target SD to lure SD (if unequal_variance)
+- variance_ratio: Ratio of lure SD to target SD, the z-ROC slope (if
+  unequal_variance)
 
 - slope: Slope of z-ROC
 

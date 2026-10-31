@@ -43,7 +43,14 @@ esize_T_bayes(
   Optional finite scalar. When supplied, the function also reports P(E'
   \< threshold \| data) and P(E' \> threshold \| data), enabling direct
   probability statements about whether the lineup is functioning below
-  or above a fairness benchmark.
+  or above a fairness benchmark. Because E' \<= k for every
+  choice-probability vector, with equality only when all k probabilities
+  are exactly equal, P(E' \< k \| data) is 1 under any continuous
+  posterior, however uniform the data. A threshold of k or more
+  therefore carries no information, and the function warns. Use a
+  tolerance below k that you choose and justify in advance (for example
+  0.8 k), or report the credible interval for E' or for the deficit k -
+  E'.
 
 ## Value
 
@@ -153,9 +160,9 @@ print(result)
 #> ------------------------------------------------
 #>   k (positions): 6    N (choices): 40    S (draws): 10000
 #>   Prior: Dirichlet(alpha = 0.50)
-#>   Posterior mean:   3.760
-#>   Posterior median: 3.747
-#>   95% credible interval: [2.645, 4.932]
+#>   Posterior mean:   3.757
+#>   Posterior median: 3.742
+#>   95% credible interval: [2.641, 4.938]
 
 # With a fairness threshold
 result2 <- esize_T_bayes(lineup_tab, threshold = 4)
@@ -165,10 +172,10 @@ print(result2)
 #>   k (positions): 6    N (choices): 40    S (draws): 10000
 #>   Prior: Dirichlet(alpha = 0.50)
 #>   Posterior mean:   3.767
-#>   Posterior median: 3.757
-#>   95% credible interval: [2.648, 4.930]
-#>   P(E' < 4.00 | data): 0.648
-#>   P(E' > 4.00 | data): 0.352
+#>   Posterior median: 3.764
+#>   95% credible interval: [2.647, 4.952]
+#>   P(E' < 4.00 | data): 0.653
+#>   P(E' > 4.00 | data): 0.347
 
 # Plot the posterior
 plot(result)

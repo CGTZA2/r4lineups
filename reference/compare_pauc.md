@@ -111,8 +111,8 @@ An object of class "pauc_comparison" containing:
 
 ## Details
 
-This function implements a rigorous statistical test for comparing ROC
-curves between two conditions (e.g., simultaneous vs. sequential
+This function implements an approximate statistical test for comparing
+ROC curves between two conditions (e.g., simultaneous vs. sequential
 lineups, different retention intervals, etc.).
 
 \*\*Method:\*\*
@@ -136,6 +136,13 @@ does not implement a paired or clustered bootstrap.
 - Negative pAUC difference: Condition 2 has better discriminability
 
 - p \< 0.05: Significant difference between conditions
+
+The independent-sample bootstrap estimates uncertainty in an empirical
+partial-area functional; the final comparison uses a normal/Wald
+interval. It is approximate and can be liberal in finite samples. A
+data-selected cutoff, sparse high-confidence cells, or resamples that do
+not reach the cutoff require additional caution. It is not an exact
+discrimination test.
 
 ## References
 

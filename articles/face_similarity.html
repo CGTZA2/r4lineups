@@ -72,14 +72,14 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Face Similarity Analysis</h1>
-            <h3 data-toc-skip class="subtitle">Deep Learning for
-Objective Lineup Fairness Assessment</h3>
+            <h3 data-toc-skip class="subtitle">Deep-learning measures of
+facial similarity in lineups</h3>
                         <h4 data-toc-skip class="author">Colin G.
 Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/face_similarity.Rmd" class="external-link"><code>vignettes/face_similarity.Rmd</code></a></small>
       <div class="d-none name"><code>face_similarity.Rmd</code></div>
@@ -100,9 +100,10 @@ vignettes in this package, the examples below are <strong>not
 executed</strong> when it is built. They require two things the package
 cannot supply: a working Python environment with DeepFace installed, and
 <strong>face image files of your own</strong>. No face images are
-distributed with r4lineups, for obvious reasons. The code is exactly
-what would run against your own images, but the outputs shown in the
-prose are described rather than computed.</p>
+distributed with r4lineups, for obvious reasons. The calls match the
+functions’ arguments and return values, and the code that works on their
+results has been run against objects of the same structure, but the
+outputs are described rather than computed here.</p>
 </blockquote>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -111,8 +112,8 @@ prose are described rather than computed.</p>
 measuring facial similarity in eyewitness lineups. These tools
 complement mock-witness studies by giving analysts reproducible,
 continuous similarity summaries that can help screen candidate foils and
-document visual fairness checks. They should be treated as exploratory
-aids, not as a replacement for mock-witness or outcome-based
+document how a lineup was assembled. They should be treated as
+exploratory aids, not as a replacement for mock-witness or outcome-based
 evidence.</p>
 <div class="section level3">
 <h3 id="why-measure-face-similarity">Why measure face similarity?<a class="anchor" aria-label="anchor" href="#why-measure-face-similarity"></a>
@@ -215,8 +216,8 @@ reticulate package. This requires a one-time setup.</p>
 <h3 id="install-python-dependencies">Install Python Dependencies<a class="anchor" aria-label="anchor" href="#install-python-dependencies"></a>
 </h3>
 <p>If you don’t have the required dependencies, install them:</p>
-<p>The setup has one requirement that catches most people out, so it is
-worth doing in the right order.</p>
+<p>The setup has one requirement that must be met first, so do it in the
+order below.</p>
 <p><strong>TensorFlow, which DeepFace depends on, does not publish
 wheels for every Python version.</strong> At the time of writing it
 supports Python 3.9 to 3.12. If your system Python is newer — 3.13 or
@@ -235,12 +236,8 @@ asking for an environment built from one</strong>:</p>
 <span><span class="fu"><a href="../reference/install_r4lineups_python.html">install_r4lineups_python</a></span><span class="op">(</span>envname <span class="op">=</span> <span class="st">"r4lineups-face-env"</span>,</span>
 <span>                         python_version <span class="op">=</span> <span class="st">"3.11"</span><span class="op">)</span></span></code></pre></div>
 <p>Requesting <code>python_version = "3.11"</code> without step 1 fails,
-because there is no 3.11 interpreter to build from. Earlier versions of
-this package passed that straight through to reticulate, which
-reported</p>
-<pre><code>Suitable Python installation for creating a venv not found.
-Requested version constraint: 3.11</code></pre>
-<p>without saying how to obtain one. The package now checks first and
+because there is no 3.11 interpreter to build from.
+<code><a href="../reference/install_r4lineups_python.html">install_r4lineups_python()</a></code> checks for this first and
 reports which versions it did find, along with the
 <code><a href="https://rstudio.github.io/reticulate/reference/install_python.html" class="external-link">reticulate::install_python()</a></code> call needed.</p>
 <p>The first run takes several minutes, as it downloads the deep
@@ -256,15 +253,17 @@ platform dependent. Two fallbacks:</p>
 <li>The bundled Shiny application, <code><a href="../reference/run_r4lineups_app.html">run_r4lineups_app()</a></code>,
 covers the lineup fairness measures that need no Python at all.</li>
 <li>Everything in the rest of this package — effective size, functional
-size, ROC, CAC, the SDT and MPT models — is pure R. Face similarity is
-the only component with a Python dependency, and it is an optional
-adjunct rather than a prerequisite for anything else.</li>
+size, ROC, CAC, the SDT and MPT models — is pure R. Two optional
+components use Python: face similarity, and the pyWitness bridge behind
+<code><a href="../reference/fit_lineup_models.html">fit_lineup_models()</a></code>
+(<code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code>). Neither is a
+prerequisite for anything else.</li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="verify-installation">Verify Installation<a class="anchor" aria-label="anchor" href="#verify-installation"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check available models</span></span>
 <span><span class="fu"><a href="../reference/available_models.html">available_models</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -279,7 +278,7 @@ adjunct rather than a prerequisite for anything else.</li>
 <div class="section level3">
 <h3 id="compare-two-faces">Compare Two Faces<a class="anchor" aria-label="anchor" href="#compare-two-faces"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare target to a foil</span></span>
 <span><span class="co"># (Use your own image paths)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/face_similarity.html">face_similarity</a></span><span class="op">(</span></span>
@@ -294,9 +293,9 @@ adjunct rather than a prerequisite for anything else.</li>
 <div class="section level3">
 <h3 id="understanding-the-output">Understanding the Output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Similarity score (0-1, higher = more similar)</span></span>
-<span><span class="va">result</span><span class="op">$</span><span class="va">similarity</span>  <span class="co"># e.g., 0.85 = very similar</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Similarity score (for cosine, 1 - distance: -1 to 1, higher = more similar)</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">similarity</span>  <span class="co"># e.g., 0.85</span></span>
 <span></span>
 <span><span class="co"># Distance (lower = more similar)</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">distance</span>    <span class="co"># e.g., 0.15</span></span>
@@ -308,22 +307,23 @@ adjunct rather than a prerequisite for anything else.</li>
 <span><span class="va">result</span><span class="op">$</span><span class="va">threshold</span>   <span class="co"># e.g., 0.68 for ArcFace + cosine</span></span></code></pre></div>
 <p><strong>Reading the output.</strong> <code>similarity</code> is a
 continuous score on the model’s own scale; higher means the two images
-are closer in the model’s embedding space. There is deliberately no
-table of bands here, because — as set out above — the literature does
-not establish what level of similarity a lineup foil ought to have.
-Compare scores against each other, not against a standard.</p>
-<p><code>verified</code> is different, and it is worth separating
-clearly. It is not a judgement about fairness; it is the model’s
-<strong>identity</strong> decision — whether the two images are of the
-<em>same person</em>. A <code>TRUE</code> here does carry a definite
-implication, but a narrow one: if the model cannot distinguish the foil
-from the suspect, the foil is arguably not functioning as an alternative
-at all, and the lineup may effectively contain the suspect twice. That
-is a construction error, detectable without any claim about optimal
-similarity.</p>
+are closer in the model’s embedding space. There is no table of bands
+here, because the literature does not establish what level of similarity
+a lineup foil ought to have. Compare scores against each other, not
+against a standard.</p>
+<p><code>verified</code> is a different kind of output. It is not a
+judgement about fairness; it is the model’s <strong>identity</strong>
+decision, whether the distance falls inside its threshold for “same
+person”. A <code>TRUE</code> is a reason to look at the two photographs,
+nothing more. Face recognition systems make false matches, especially
+between people of similar appearance, and a match does not establish
+that the photographs show the same person, that the foil fails as an
+alternative for witnesses, or that the lineup contains the suspect
+twice.</p>
 <p><code>threshold</code> is the model’s own cut-off for that identity
-decision, and it varies by model and metric — it is not a fairness
-criterion.</p>
+decision. It is a <strong>distance</strong>, so on the similarity scale
+the corresponding value for cosine is <code>1 - threshold</code>. It
+varies by model and metric, and it is not a fairness criterion.</p>
 </div>
 </div>
 <div class="section level2">
@@ -333,17 +333,22 @@ criterion.</p>
 <div class="section level3">
 <h3 id="analyze-complete-lineup">Analyze Complete Lineup<a class="anchor" aria-label="anchor" href="#analyze-complete-lineup"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Analyze all foils in a lineup</span></span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Paths to your own images; later chunks reuse these two objects</span></span>
+<span><span class="va">target_path</span> <span class="op">&lt;-</span> <span class="st">"path/to/target.jpg"</span></span>
+<span><span class="va">foil_paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"path/to/foil1.jpg"</span>,</span>
+<span>  <span class="st">"path/to/foil2.jpg"</span>,</span>
+<span>  <span class="st">"path/to/foil3.jpg"</span>,</span>
+<span>  <span class="st">"path/to/foil4.jpg"</span>,</span>
+<span>  <span class="st">"path/to/foil5.jpg"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Analyze all foils in a lineup. Rows come back ordered by rank, most similar</span></span>
+<span><span class="co"># first; foil_name and foil_path identify each foil.</span></span>
 <span><span class="va">lineup_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lineup_similarity.html">lineup_similarity</a></span><span class="op">(</span></span>
-<span>  target_path <span class="op">=</span> <span class="st">"path/to/target.jpg"</span>,</span>
-<span>  foil_paths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"path/to/foil1.jpg"</span>,</span>
-<span>    <span class="st">"path/to/foil2.jpg"</span>,</span>
-<span>    <span class="st">"path/to/foil3.jpg"</span>,</span>
-<span>    <span class="st">"path/to/foil4.jpg"</span>,</span>
-<span>    <span class="st">"path/to/foil5.jpg"</span></span>
-<span>  <span class="op">)</span>,</span>
+<span>  target_path <span class="op">=</span> <span class="va">target_path</span>,</span>
+<span>  foil_paths <span class="op">=</span> <span class="va">foil_paths</span>,</span>
 <span>  model <span class="op">=</span> <span class="st">"ArcFace"</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"cosine"</span></span>
 <span><span class="op">)</span></span>
@@ -353,20 +358,21 @@ criterion.</p>
 <div class="section level3">
 <h3 id="examining-results">Examining Results<a class="anchor" aria-label="anchor" href="#examining-results"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># View as dataframe</span></span>
 <span><span class="va">lineup_result</span></span>
 <span></span>
 <span><span class="co"># Summary statistics</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">lineup_result</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Foils the model judges to be the same identity as the suspect. These are</span></span>
-<span><span class="co"># worth inspecting by eye: a foil indistinguishable from the suspect is not</span></span>
-<span><span class="co"># functioning as an alternative.</span></span>
-<span><span class="va">same_identity</span> <span class="op">&lt;-</span> <span class="va">lineup_result</span><span class="op">[</span><span class="va">lineup_result</span><span class="op">$</span><span class="va">verified</span>, <span class="op">]</span></span>
+<span><span class="co"># Foils the model judges to be the same identity as the suspect. Inspect</span></span>
+<span><span class="co"># them by eye; the model can be wrong.</span></span>
+<span><span class="va">same_identity</span> <span class="op">&lt;-</span> <span class="va">lineup_result</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">lineup_result</span><span class="op">$</span><span class="va">verified</span><span class="op">)</span>, <span class="op">]</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">same_identity</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Model judges these foils to be the same person as the target:\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">same_identity</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foil_path"</span>, <span class="st">"similarity"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="co"># as.data.frame() first: a column subset keeps the lineup_similarity class,</span></span>
+<span>  <span class="co"># whose print method needs the distance and verified columns</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">same_identity</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foil_path"</span>, <span class="st">"similarity"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># Check similarity distribution</span></span>
@@ -377,12 +383,11 @@ criterion.</p>
 <div class="section level3">
 <h3 id="describing-the-similarity-profile">Describing the similarity profile<a class="anchor" aria-label="anchor" href="#describing-the-similarity-profile"></a>
 </h3>
-<p>The heading here is deliberately not “fairness assessment”. What
-these numbers describe is the <strong>similarity profile</strong> of the
+<p>These numbers describe the <strong>similarity profile</strong> of the
 lineup — where the foils sit relative to the suspect and to each other.
 Turning that into a verdict would require knowing what profile is
 desirable, which is exactly what is unsettled.</p>
-<p>Three quantities are worth reporting:</p>
+<p>Report three quantities:</p>
 <ul>
 <li>
 <strong>Mean similarity</strong> — how close the foils are to the
@@ -397,7 +402,7 @@ unbalanced whatever the mean.</li>
 <strong>Identity matches</strong> — foils the model cannot
 distinguish from the suspect, as discussed above.</li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Describe the similarity profile</span></span>
 <span><span class="va">mean_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">lineup_result</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span></span>
 <span><span class="va">sd_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">lineup_result</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span></span>
@@ -409,11 +414,11 @@ distinguish from the suspect, as discussed above.</li>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">lineup_result</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Foils judged same identity:"</span>, <span class="va">n_verified</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># The one flag worth raising automatically, because it is an identity decision</span></span>
+<span><span class="co"># The one flag raised automatically, because it is an identity decision</span></span>
 <span><span class="co"># rather than a fairness judgement</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="va">n_verified</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Note:"</span>, <span class="va">n_verified</span>, <span class="st">"foil(s) judged the same person as the target.\n"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Inspect these by eye; they may not be functioning as alternatives.\n"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Inspect these photographs by eye; the model's match may be false.\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 </div>
@@ -424,40 +429,39 @@ distinguish from the suspect, as discussed above.</li>
 <div class="section level3">
 <h3 id="available-models">Available Models<a class="anchor" aria-label="anchor" href="#available-models"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># List all models</span></span>
 <span><span class="fu"><a href="../reference/available_models.html">available_models</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Models in order of recommendation for lineup research:</span></span>
-<span><span class="co"># 1. ArcFace    - State-of-the-art, best overall performance</span></span>
-<span><span class="co"># 2. Facenet512 - Very good, slightly faster than ArcFace</span></span>
-<span><span class="co"># 3. Facenet    - Good, faster inference</span></span>
-<span><span class="co"># 4. VGG-Face   - Older but reliable baseline</span></span>
-<span><span class="co"># 5. OpenFace   - Fastest, lower accuracy</span></span></code></pre></div>
+<span><span class="co"># Models ordered by identity-recognition accuracy on standard benchmarks.</span></span>
+<span><span class="co"># That is accuracy at telling people apart, not agreement with human</span></span>
+<span><span class="co"># similarity judgements or with mock-witness choices.</span></span>
+<span><span class="co"># 1. ArcFace</span></span>
+<span><span class="co"># 2. Facenet512</span></span>
+<span><span class="co"># 3. Facenet</span></span>
+<span><span class="co"># 4. VGG-Face</span></span>
+<span><span class="co"># 5. OpenFace (fastest, least accurate)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="distance-metrics">Distance Metrics<a class="anchor" aria-label="anchor" href="#distance-metrics"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Three metrics available:</span></span>
 <span></span>
-<span><span class="co"># 1. Cosine (RECOMMENDED for most cases)</span></span>
-<span><span class="co">#    - Range: [0, 1] (can convert to similarity)</span></span>
-<span><span class="co">#    - Focuses on angle between embeddings</span></span>
-<span><span class="co">#    - Most commonly used in face recognition</span></span>
+<span><span class="co"># 1. Cosine (the default, and the only metric with a similarity score)</span></span>
+<span><span class="co">#    - Distance ranges from 0 to 2; similarity = 1 - distance, from -1 to 1</span></span>
+<span><span class="co">#    - Depends only on the angle between embeddings</span></span>
 <span></span>
-<span><span class="co"># 2. Euclidean L2 (normalized Euclidean)</span></span>
-<span><span class="co">#    - Normalized vector distance</span></span>
-<span><span class="co">#    - Good for comparing across models</span></span>
+<span><span class="co"># 2. Euclidean L2 (Euclidean distance between normalised embeddings)</span></span>
+<span><span class="co">#    - Still specific to the model: not comparable across models</span></span>
 <span></span>
 <span><span class="co"># 3. Euclidean</span></span>
-<span><span class="co">#    - Raw vector distance</span></span>
-<span><span class="co">#    - Less commonly used</span></span></code></pre></div>
+<span><span class="co">#    - Raw vector distance, on each model's own scale</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="comparing-models">Comparing Models<a class="anchor" aria-label="anchor" href="#comparing-models"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare different models on same lineup</span></span>
 <span><span class="va">models_to_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ArcFace"</span>, <span class="st">"Facenet512"</span>, <span class="st">"VGG-Face"</span><span class="op">)</span></span>
 <span></span>
@@ -481,10 +485,14 @@ distinguish from the suspect, as discussed above.</li>
 <span></span>
 <span><span class="va">comparison_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">comparison_results</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_df</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Interpretation:</strong> - Models may give different absolute
-scores - But relative ordering (which foils are most similar) usually
-consistent - Use same model consistently within a study - ArcFace
-generally most accurate</p>
+<p><strong>Interpretation:</strong></p>
+<ul>
+<li>Models give different absolute scores, which are not comparable
+across models</li>
+<li>Check whether the ordering of foils agrees across models; do not
+assume it</li>
+<li>Use the same model consistently within a study</li>
+</ul>
 </div>
 </div>
 <div class="section level2">
@@ -493,23 +501,27 @@ generally most accurate</p>
 <div class="section level3">
 <h3 id="display-lineup-with-similarity-scores">Display Lineup with Similarity Scores<a class="anchor" aria-label="anchor" href="#display-lineup-with-similarity-scores"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create visual display of lineup</span></span>
-<span><span class="fu"><a href="../reference/display_lineup.html">display_lineup</a></span><span class="op">(</span></span>
-<span>  target_path <span class="op">=</span> <span class="st">"path/to/target.jpg"</span>,</span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Display the lineup as a grid of images, target outlined in red.</span></span>
+<span><span class="co"># display_lineup() returns a magick image, not a ggplot.</span></span>
+<span><span class="va">lineup_img</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/display_lineup.html">display_lineup</a></span><span class="op">(</span></span>
+<span>  target_path <span class="op">=</span> <span class="va">target_path</span>,</span>
 <span>  foil_paths <span class="op">=</span> <span class="va">foil_paths</span>,</span>
-<span>  similarity_scores <span class="op">=</span> <span class="va">lineup_result</span><span class="op">$</span><span class="va">similarity</span>,</span>
-<span>  labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Foil"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
-<span>  title <span class="op">=</span> <span class="st">"Lineup Similarity Analysis"</span></span>
+<span>  ncol <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  show_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  highlight_target <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
+<span><span class="va">lineup_img</span></span>
 <span></span>
-<span><span class="co"># Save the visualization</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"lineup_display.png"</span>, width <span class="op">=</span> <span class="fl">10</span>, height <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Save it with magick (ggsave() would save the last ggplot instead)</span></span>
+<span><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html" class="external-link">image_write</a></span><span class="op">(</span><span class="va">lineup_img</span>, <span class="st">"lineup_display.png"</span><span class="op">)</span></span></code></pre></div>
+<p>The similarity scores are best shown alongside, for example with
+<code>plot_lineup_similarity(lineup_result)</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="similarity-heatmap">Similarity Heatmap<a class="anchor" aria-label="anchor" href="#similarity-heatmap"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For multiple lineups, create heatmap</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
@@ -525,19 +537,14 @@ generally most accurate</p>
 <span>  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">lineup_ids</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Foil"</span>, <span class="va">foil_positions</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Convert to long format for ggplot</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hadley/reshape" class="external-link">reshape2</a></span><span class="op">)</span></span>
-<span><span class="va">sim_long</span> <span class="op">&lt;-</span> <span class="fu">melt</span><span class="op">(</span><span class="va">similarity_matrix</span><span class="op">)</span></span>
+<span><span class="co"># Convert to long format for ggplot (base R, no extra package needed)</span></span>
+<span><span class="va">sim_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">as.table</a></span><span class="op">(</span><span class="va">similarity_matrix</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sim_long</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lineup"</span>, <span class="st">"Foil"</span>, <span class="st">"Similarity"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create heatmap</span></span>
+<span><span class="co"># Create heatmap. The colour scale is descriptive; it marks no fair range.</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">sim_long</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Foil</span>, y <span class="op">=</span> <span class="va">Lineup</span>, fill <span class="op">=</span> <span class="va">Similarity</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradient2</a></span><span class="op">(</span></span>
-<span>    low <span class="op">=</span> <span class="st">"blue"</span>, mid <span class="op">=</span> <span class="st">"yellow"</span>, high <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>    midpoint <span class="op">=</span> <span class="fl">0.6</span>,</span>
-<span>    limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradient</a></span><span class="op">(</span>low <span class="op">=</span> <span class="st">"grey95"</span>, high <span class="op">=</span> <span class="st">"steelblue4"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Similarity</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"black"</span>, size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Lineup Similarity Heatmap"</span>,</span>
@@ -546,14 +553,17 @@ generally most accurate</p>
 <div class="section level3">
 <h3 id="similarity-distribution">Similarity Distribution<a class="anchor" aria-label="anchor" href="#similarity-distribution"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Plot distribution of similarities</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">lineup_result</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">similarity</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The model's threshold is a cosine *distance*, stored as an attribute.</span></span>
+<span><span class="co"># On the similarity scale the identity cut-off is 1 - threshold.</span></span>
+<span><span class="va">sim_threshold</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">lineup_result</span>, <span class="st">"threshold"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">lineup_result</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">similarity</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">geom_histogram</a></span><span class="op">(</span>binwidth <span class="op">=</span> <span class="fl">0.05</span>, fill <span class="op">=</span> <span class="st">"steelblue"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">threshold</span><span class="op">)</span>,</span>
-<span>             color <span class="op">=</span> <span class="st">"red"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="va">threshold</span>, y <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>           label <span class="op">=</span> <span class="st">"Verification\nThreshold"</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">sim_threshold</span>,</span>
+<span>             color <span class="op">=</span> <span class="st">"red"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="va">sim_threshold</span>, y <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>           label <span class="op">=</span> <span class="st">"Identity\nthreshold"</span>,</span>
 <span>           vjust <span class="op">=</span> <span class="fl">1.5</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Distribution of Target-Foil Similarity"</span>,</span>
@@ -571,14 +581,15 @@ generally most accurate</p>
 </h3>
 <p>Embeddings are the deep learning representations of faces. They can
 be used for advanced analyses.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Get embedding for a face</span></span>
-<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_embedding.html">get_embedding</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># get_embedding() returns a list: the vector is in $embedding, alongside the</span></span>
+<span><span class="co"># image path, model, detector and the detected face region</span></span>
+<span><span class="va">emb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_embedding.html">get_embedding</a></span><span class="op">(</span></span>
 <span>  img_path <span class="op">=</span> <span class="st">"path/to/face.jpg"</span>,</span>
 <span>  model <span class="op">=</span> <span class="st">"ArcFace"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Embedding is a numeric vector (typically 512 dimensions)</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="va">emb</span><span class="op">$</span><span class="va">embedding</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">embedding</span><span class="op">)</span>  <span class="co"># 512 for ArcFace</span></span>
 <span></span>
 <span><span class="co"># Get embeddings for comparison</span></span>
@@ -589,41 +600,34 @@ be used for advanced analyses.</p>
 <span>  return_embeddings <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">target_embedding</span> <span class="op">&lt;-</span> <span class="va">result_with_emb</span><span class="op">$</span><span class="va">embeddings</span><span class="op">$</span><span class="va">img1</span></span>
-<span><span class="va">foil_embedding</span> <span class="op">&lt;-</span> <span class="va">result_with_emb</span><span class="op">$</span><span class="va">embeddings</span><span class="op">$</span><span class="va">img2</span></span></code></pre></div>
+<span><span class="va">target_embedding</span> <span class="op">&lt;-</span> <span class="va">result_with_emb</span><span class="op">$</span><span class="va">embeddings</span><span class="op">$</span><span class="va">emb1</span></span>
+<span><span class="va">foil_embedding</span> <span class="op">&lt;-</span> <span class="va">result_with_emb</span><span class="op">$</span><span class="va">embeddings</span><span class="op">$</span><span class="va">emb2</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="dimensionality-reduction-visualization">Dimensionality Reduction Visualization<a class="anchor" aria-label="anchor" href="#dimensionality-reduction-visualization"></a>
 </h3>
-<p>Visualize lineup in 2D space using embeddings:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Requires Rtsne package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jkrijthe/Rtsne" class="external-link">Rtsne</a></span><span class="op">)</span></span>
+<p>Visualize the lineup in two dimensions. With six faces, principal
+components are the sensible projection; t-SNE needs far more points than
+a lineup has (its perplexity must be well below the number of
+observations), so keep it for collections of many faces.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Collect the numeric embedding vectors for all lineup members</span></span>
+<span><span class="va">member_paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Target <span class="op">=</span> <span class="va">target_path</span>,</span>
+<span>                  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">foil_paths</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Foil_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">foil_paths</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">embedding_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span></span>
+<span>  <span class="va">member_paths</span>,</span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="fu"><a href="../reference/get_embedding.html">get_embedding</a></span><span class="op">(</span><span class="va">p</span>, model <span class="op">=</span> <span class="st">"ArcFace"</span><span class="op">)</span><span class="op">$</span><span class="va">embedding</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">512</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Collect embeddings for all lineup members</span></span>
-<span><span class="va">all_embeddings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># Project onto the first two principal components</span></span>
+<span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">embedding_matrix</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Target embedding</span></span>
-<span><span class="va">all_embeddings</span><span class="op">[[</span><span class="st">"Target"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_embedding.html">get_embedding</a></span><span class="op">(</span><span class="st">"path/to/target.jpg"</span>, model <span class="op">=</span> <span class="st">"ArcFace"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Foil embeddings</span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">foil_paths</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">all_embeddings</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Foil_"</span>, <span class="va">i</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_embedding.html">get_embedding</a></span><span class="op">(</span><span class="va">foil_paths</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, model <span class="op">=</span> <span class="st">"ArcFace"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># Convert to matrix</span></span>
-<span><span class="va">embedding_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">all_embeddings</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Run t-SNE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">tsne_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Rtsne/man/Rtsne.html" class="external-link">Rtsne</a></span><span class="op">(</span><span class="va">embedding_matrix</span>, dims <span class="op">=</span> <span class="fl">2</span>, perplexity <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create visualization dataframe</span></span>
 <span><span class="va">viz_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="va">tsne_result</span><span class="op">$</span><span class="va">Y</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
-<span>  y <span class="op">=</span> <span class="va">tsne_result</span><span class="op">$</span><span class="va">Y</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>,</span>
-<span>  member <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">all_embeddings</span><span class="op">)</span>,</span>
-<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">all_embeddings</span><span class="op">)</span> <span class="op">==</span> <span class="st">"Target"</span>, <span class="st">"Target"</span>, <span class="st">"Foil"</span><span class="op">)</span></span>
+<span>  x <span class="op">=</span> <span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">pca</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>,</span>
+<span>  member <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">embedding_matrix</span><span class="op">)</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">embedding_matrix</span><span class="op">)</span> <span class="op">==</span> <span class="st">"Target"</span>, <span class="st">"Target"</span>, <span class="st">"Foil"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot</span></span>
@@ -633,9 +637,9 @@ be used for advanced analyses.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Target"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"Foil"</span> <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Lineup Members in Embedding Space"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"t-SNE projection of face embeddings"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"t-SNE Dimension 1"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"t-SNE Dimension 2"</span></span>
+<span>    subtitle <span class="op">=</span> <span class="st">"First two principal components of the face embeddings"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"PC 1"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"PC 2"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
@@ -643,7 +647,7 @@ be used for advanced analyses.</p>
 <div class="section level3">
 <h3 id="batch-processing-multiple-lineups">Batch Processing Multiple Lineups<a class="anchor" aria-label="anchor" href="#batch-processing-multiple-lineups"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Process multiple lineups efficiently</span></span>
 <span><span class="va">lineup_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  lineup1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target <span class="op">=</span> <span class="st">"target1.jpg"</span>, foils <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1a.jpg"</span>, <span class="st">"1b.jpg"</span>, <span class="st">"1c.jpg"</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -693,7 +697,7 @@ measures.</p>
 <div class="section level3">
 <h3 id="compare-with-effective-size">Compare with Effective Size<a class="anchor" aria-label="anchor" href="#compare-with-effective-size"></a>
 </h3>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Traditional effective size from mock witnesses</span></span>
 <span><span class="co"># (Using example data)</span></span>
 <span><span class="va">mock_choices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">4</span><span class="op">)</span>  <span class="co"># Position 3 is suspect</span></span>
@@ -712,11 +716,10 @@ measures.</p>
 <span><span class="co"># (With sufficient data, examine relationship)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="similarity-weighted-effective-size">Similarity-Weighted Effective Size<a class="anchor" aria-label="anchor" href="#similarity-weighted-effective-size"></a>
+<h3 id="similarity-and-mock-witness-choices-a-hypothesis-to-test">Similarity and mock-witness choices: a hypothesis to test<a class="anchor" aria-label="anchor" href="#similarity-and-mock-witness-choices-a-hypothesis-to-test"></a>
 </h3>
-<p>Create a hybrid measure:</p>
-<p>The direction of the relationship matters here, and it is easy to
-state backwards. Mock witnesses choose the member who best matches
+<p>The direction of the relationship is important here, and it is easy
+to state backwards. Mock witnesses choose the member who best matches
 <strong>the description</strong>. A foil that closely resembles the
 suspect also resembles the description, so it draws choices
 <em>away</em> from the suspect — which is precisely what makes a lineup
@@ -725,8 +728,12 @@ description poorly and tends to be chosen by nobody: it is a null foil,
 and it contributes nothing.</p>
 <p>So the expectation runs: <strong>higher foil-suspect similarity
 should mean a higher share of mock-witness choices</strong>, and hence a
-larger effective size.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+larger effective size. That is a hypothesis, not an established result:
+embedding similarity is not human perceived similarity, and Lee, Mansour
+and Penrod (2024) report that different families of fairness measures
+can disagree. The sketch below shows the comparison to make; it is not a
+validated measure.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Expected selection shares implied by similarity. Foils more similar to the</span></span>
 <span><span class="co"># suspect match the description better and should attract more choices.</span></span>
 <span><span class="va">similarities</span> <span class="op">&lt;-</span> <span class="va">lineup_result</span><span class="op">$</span><span class="va">similarity</span></span>
@@ -736,14 +743,14 @@ larger effective size.</p>
 <span><span class="co"># observed_prob &lt;- table(mock_choices[-which(mock_choices == suspect_pos)]) /</span></span>
 <span><span class="co">#                  length(mock_choices[-which(mock_choices == suspect_pos)])</span></span>
 <span></span>
-<span><span class="co"># Similarity-adjusted bias metric</span></span>
-<span><span class="co"># (Larger discrepancy = more bias after accounting for appearance)</span></span></code></pre></div>
+<span><span class="co"># A discrepancy between expected and observed shares is a question to</span></span>
+<span><span class="co"># investigate, not a validated measure of bias.</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="validation-studies">Validation Studies<a class="anchor" aria-label="anchor" href="#validation-studies"></a>
 </h3>
 <p>Examine predictive validity:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Research question: Do objective similarity scores predict mock witness choices?</span></span>
 <span></span>
 <span><span class="co"># For each lineup:</span></span>
@@ -761,17 +768,15 @@ larger effective size.</p>
 <div class="section level3">
 <h3 id="interpreting-similarity-scores">Interpreting Similarity Scores<a class="anchor" aria-label="anchor" href="#interpreting-similarity-scores"></a>
 </h3>
-<p><strong>Similarity ranges (for ArcFace + cosine):</strong> -
-<code>&gt; 0.80</code>: Very high similarity - likely lineup bias -
-<code>0.70-0.80</code>: High similarity - check if acceptable for your
-context - <code>0.55-0.70</code>: Moderate similarity - generally
-acceptable - <code>0.40-0.55</code>: Low similarity - foils sufficiently
-different - <code>&lt; 0.40</code>: Very low similarity - foils may not
-match description</p>
-<p><strong>Context matters:</strong> - Acceptable similarity depends on
-description specificity - More specific descriptions allow tighter
-similarity ranges - Less specific descriptions require broader
-ranges</p>
+<p>This vignette gives no similarity bands, for the reason set out at
+the start: no study has established what similarity a foil should have,
+and a band labelled “acceptable” would read as a finding when it is a
+guess. Two points in particular resist a simple rule. Low similarity
+between suspect and foils can make the suspect conspicuous, so it does
+not certify a fair lineup. And high similarity, or an identity match, is
+a reason to look at the photographs, not a verdict. Report the scores
+descriptively, compare them within a study, and use mock-witness and
+outcome data for claims about fairness.</p>
 </div>
 <div class="section level3">
 <h3 id="best-practices">Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
@@ -789,16 +794,16 @@ ranges</p>
 <strong>Validation</strong>
 <ul>
 <li>Compare similarity scores to mock witness data when available</li>
-<li>Validate that your similarity threshold makes sense for your
-context</li>
+<li>Treat any cut-off you adopt as a proposal to be tested, not a
+standard</li>
 </ul>
 </li>
 <li>
 <strong>Complementarity</strong>
 <ul>
 <li>Use face similarity alongside traditional mock witness studies</li>
-<li>Objective similarity + subjective judgments provide comprehensive
-assessment</li>
+<li>Similarity describes the images; mock-witness and outcome data
+describe how the lineup performs</li>
 </ul>
 </li>
 <li>
@@ -822,25 +827,38 @@ assessment</li>
 <div class="section level3">
 <h3 id="troubleshooting">Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"></a>
 </h3>
-<p><strong>“No face detected”</strong> - Image quality too poor - Face
-not front-facing enough - Try different detector:
-<code>detector = "opencv"</code> is more lenient</p>
-<p><strong>Embeddings fail</strong> - Check image file paths are correct
-- Ensure images are standard formats (jpg, png) - Verify Python
-environment is activated</p>
-<p><strong>Inconsistent results</strong> - Deep learning models are
-deterministic - If results change, check if images were modified -
-Verify same model/metric used</p>
-<p><strong>Very high/low similarities</strong> - Check image quality -
-Verify correct target-foil pairing - Consider if lineup truly is
-biased/fair</p>
+<p><strong>“No face detected”</strong></p>
+<ul>
+<li>Image quality too poor</li>
+<li>Face not front-facing enough</li>
+<li>Try different detector: <code>detector = "opencv"</code> is more
+lenient</li>
+</ul>
+<p><strong>Embeddings fail</strong></p>
+<ul>
+<li>Check image file paths are correct</li>
+<li>Ensure images are standard formats (jpg, png)</li>
+<li>Verify Python environment is activated</li>
+</ul>
+<p><strong>Inconsistent results</strong></p>
+<ul>
+<li>Deep learning models are deterministic</li>
+<li>If results change, check if images were modified</li>
+<li>Verify same model/metric used</li>
+</ul>
+<p><strong>Very high/low similarities</strong></p>
+<ul>
+<li>Check image quality</li>
+<li>Verify correct target-foil pairing</li>
+<li>Look at the photographs before drawing any conclusion</li>
+</ul>
 </div>
 </div>
 <div class="section level2">
 <h2 id="example-workflow">Example Workflow<a class="anchor" aria-label="anchor" href="#example-workflow"></a>
 </h2>
 <p>Complete analysis from start to finish:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1. Setup (first time only)</span></span>
 <span><span class="co"># install_r4lineups_python()</span></span>
 <span></span>
@@ -856,38 +874,33 @@ biased/fair</p>
 <span>  metric <span class="op">=</span> <span class="st">"cosine"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 4. Assess fairness</span></span>
+<span><span class="co"># 4. Describe the similarity profile</span></span>
 <span><span class="va">mean_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">lineup_sim</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span></span>
 <span><span class="va">sd_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">lineup_sim</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span></span>
 <span><span class="va">n_verified</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">lineup_sim</span><span class="op">$</span><span class="va">verified</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 5. Generate report</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"=== Lineup Fairness Report ===\n\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Objective Similarity Analysis\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"=== Lineup Similarity Profile ===\n\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Model: ArcFace | Metric: Cosine\n\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Results:\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Mean similarity:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mean_sim</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  SD similarity:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">sd_sim</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Range:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">lineup_sim</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"-"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">lineup_sim</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Verified as same person:"</span>, <span class="va">n_verified</span>, <span class="st">"of 5 foils\n\n"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">mean_sim</span> <span class="op">&gt;</span> <span class="fl">0.7</span> <span class="op">||</span> <span class="va">n_verified</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"CONCERN: High similarity indicates potential lineup bias\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">mean_sim</span> <span class="op">&lt;</span> <span class="fl">0.55</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ACCEPTABLE: Foils sufficiently dissimilar from target\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"BORDERLINE: Consider additional assessment\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Judged same person by the model:"</span>, <span class="va">n_verified</span>, <span class="st">"of 5 foils\n"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">n_verified</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Inspect those photographs; the model's match may be false.\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
+<span><span class="co"># No fairness verdict is printed: no validated similarity range defines one.</span></span>
 <span></span>
 <span><span class="co"># 6. Visualize</span></span>
-<span><span class="fu"><a href="../reference/display_lineup.html">display_lineup</a></span><span class="op">(</span></span>
+<span><span class="va">lineup_img</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/display_lineup.html">display_lineup</a></span><span class="op">(</span></span>
 <span>  target_path <span class="op">=</span> <span class="st">"suspect_photo.jpg"</span>,</span>
 <span>  foil_paths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foil1.jpg"</span>, <span class="st">"foil2.jpg"</span>, <span class="st">"foil3.jpg"</span>,</span>
-<span>                 <span class="st">"foil4.jpg"</span>, <span class="st">"foil5.jpg"</span><span class="op">)</span>,</span>
-<span>  similarity_scores <span class="op">=</span> <span class="va">lineup_sim</span><span class="op">$</span><span class="va">similarity</span>,</span>
-<span>  title <span class="op">=</span> <span class="st">"Lineup 001 - Similarity Analysis"</span></span>
+<span>                 <span class="st">"foil4.jpg"</span>, <span class="st">"foil5.jpg"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
+<span><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html" class="external-link">image_write</a></span><span class="op">(</span><span class="va">lineup_img</span>, <span class="st">"lineup_001.png"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot_lineup_similarity.html">plot_lineup_similarity</a></span><span class="op">(</span><span class="va">lineup_sim</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 7. Save results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">lineup_sim</span>, <span class="st">"lineup_001_similarity.csv"</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
@@ -895,26 +908,25 @@ biased/fair</p>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<p><strong>Deep Learning Face Recognition:</strong> - Deng, J., Guo, J.,
-Xue, N., &amp; Zafeiriou, S. (2019). ArcFace: Additive angular margin
-loss for deep face recognition. <em>CVPR 2019</em>.</p>
-<ul>
-<li>Schroff, F., Kalenichenko, D., &amp; Philbin, J. (2015). FaceNet: A
+<div class="hanging-indent">
+<p>Colloff, M. F., Wade, K. A., &amp; Strange, D. (2016). Unfair lineups
+make witnesses more likely to confuse innocent and guilty suspects.
+<em>Psychological Science, 27</em>(9), 1227-1239.</p>
+<p>Deng, J., Guo, J., Xue, N., &amp; Zafeiriou, S. (2019). ArcFace:
+Additive angular margin loss for deep face recognition. <em>CVPR
+2019</em>.</p>
+<p>Lee, J., Mansour, J. K., &amp; Penrod, S. D. (2024). How to measure
+lineup fairness: Concurrent and predictive validity of lineup-fairness
+measures. <em>Psychology, Crime &amp; Law</em>. <a href="https://doi.org/10.1080/1068316X.2024.2307358" class="external-link uri">https://doi.org/10.1080/1068316X.2024.2307358</a></p>
+<p>Schroff, F., Kalenichenko, D., &amp; Philbin, J. (2015). FaceNet: A
 unified embedding for face recognition and clustering. <em>CVPR
-2015</em>.</li>
-</ul>
-<p><strong>DeepFace Library:</strong> - Serengil, S. I., &amp; Ozpinar,
-A. (2020). LightFace: A hybrid deep face recognition framework. <em>ASYU
-2020</em>.</p>
-<p><strong>Lineup Research Applications:</strong> - Tredoux, C. G.
-(2002). A direct measure of facial similarity and its relation to human
-similarity perceptions. <em>Journal of Experimental Psychology: Applied,
-8</em>(3), 180-193.</p>
-<ul>
-<li>Colloff, M. F., Wade, K. A., &amp; Strange, D. (2016). Unfair
-lineups make witnesses more likely to confuse innocent and guilty
-suspects. <em>Psychological Science, 27</em>(9), 1227-1239.</li>
-</ul>
+2015</em>.</p>
+<p>Serengil, S. I., &amp; Ozpinar, A. (2020). LightFace: A hybrid deep
+face recognition framework. <em>ASYU 2020</em>.</p>
+<p>Tredoux, C. G. (2002). A direct measure of facial similarity and its
+relation to human similarity perceptions. <em>Journal of Experimental
+Psychology: Applied, 8</em>(3), 180-193.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="technical-details">Technical Details<a class="anchor" aria-label="anchor" href="#technical-details"></a>
@@ -951,12 +963,14 @@ Euclidean on L2-normalised vectors</td>
 </tr>
 <tr class="odd">
 <td><code>similarity</code></td>
-<td>Distance converted to a 0-1 scale, higher meaning closer</td>
+<td>For cosine, 1 − distance, from −1 to 1, higher meaning closer;
+<code>NA</code> for the Euclidean metrics</td>
 </tr>
 <tr class="even">
 <td><code>threshold</code></td>
-<td>The model’s own cut-off for judging two images the same
-<strong>identity</strong>. Model- and metric-specific</td>
+<td>The model’s own <strong>distance</strong> cut-off for judging two
+images the same identity (on the similarity scale,
+<code>1 - threshold</code> for cosine). Model- and metric-specific</td>
 </tr>
 <tr class="odd">
 <td><code>verified</code></td>
@@ -983,7 +997,7 @@ look alike to a witness. Whether the embedding distance corresponds to
 appropriate reference here is Tredoux (2002) on direct similarity
 measurement and its relation to human judgements.</li>
 <li>
-<strong>Image conditions matter.</strong> Pose, lighting,
+<strong>Image conditions are important.</strong> Pose, lighting,
 expression, resolution and background all affect embeddings. Lineup
 photographs taken under different conditions may differ in similarity
 for reasons that have nothing to do with facial resemblance.
@@ -1011,7 +1025,7 @@ different DeepFace release may ship different weights.</p>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Check Python environment</span></span>

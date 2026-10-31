@@ -19,9 +19,8 @@ adapted into this package’s data conventions. No code was reused.
 
 ### The general approach
 
-The model is a **multinomial processing tree** (MPT). The idea behind
-that family is worth stating, because it is different from signal
-detection theory and the two are easily confused.
+The model is a **multinomial processing tree** (MPT). MPT models differ
+from signal detection theory, and the two are easily confused.
 
 Signal detection theory posits a continuous evidence variable and a
 criterion placed on it. An MPT instead posits a small number of
@@ -131,8 +130,8 @@ counts <- c(
 
 fit <- fit_winter_2ht(counts, lineup_size = 6)
 fit$parameters
-#>         dP         dA          b          g 
-#> 0.52617951 0.10669261 0.00927434 0.79610359
+#>          dP          dA           b           g 
+#> 0.526176573 0.106690695 0.009275303 0.796104687
 ```
 
 ## 2. Model diagnostics and plots
@@ -171,14 +170,13 @@ boot_fit <- boot_winter_2ht(
 
 boot_fit$ci
 #>         Lower      Upper
-#> dP 0.48255377 0.56813183
-#> dA 0.03540606 0.17454599
-#> b  0.00000000 0.04342048
-#> g  0.75086446 0.84055629
+#> dP 0.47233774 0.56248806
+#> dA 0.02781788 0.17171187
+#> b  0.00000000 0.04308407
+#> g  0.74713037 0.83854453
 ```
 
-The bootstrap intervals are preferable to the normal approximation for
-these parameters, and
+The percentile intervals stay inside the parameter space, and
 [`plot_2ht_parameters()`](https://cgtza2.github.io/r4lineups/reference/plot_2ht_parameters.md)
 uses them when given a bootstrap object:
 
@@ -189,17 +187,17 @@ plot_2ht_parameters(boot_fit)
 
 ![](winter_2ht_model_files/figure-html/plot_boot-1.png)
 
-All four parameters are probabilities bounded in \[0, 1\], so an
-estimate close to a boundary — `b` here — has a normal interval that
-runs outside the parameter space. The percentile interval cannot.
+All four parameters are probabilities bounded in \[0, 1\]. At a boundary
+— `b` here — regular Hessian standard errors are unavailable. Percentile
+intervals respect the parameter space, but this alone does not establish
+nominal coverage at a boundary.
 
 For larger datasets, increase `nboot` to 1000 or more for stable
 intervals.
 
 ## 4. What `b` tells you about lineup fairness
 
-This is arguably the most useful thing the model does, and it deserves
-more than a line.
+This is arguably the most useful thing the model does.
 
 Classical lineup fairness measures — Tredoux’s E′, functional size, the
 proportion of mock witnesses choosing the suspect — are computed from
@@ -221,19 +219,21 @@ interval.
 
 ### Does it work?
 
-That is a checkable claim rather than a promise, so here it is checked
-against two established measures computed from the same data:
+The claim can be checked against Tredoux’s (1998) E′, computed with
+[`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
+as $`1/\sum p_i^2`$ over choices across all six members (it is defined
+in the main vignette). E′ measures the **effective number of functioning
+alternatives**.
 
-- **E′ (Tredoux, 1998)**,
-  [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md),
-  the inverse-Simpson index $`1/\sum p_i^2`$ over choices across all six
-  members. It measures the **effective number of functioning
-  alternatives**. Note where E′ comes from here: the **target-absent
-  lineups**. A target-absent lineup is functionally a mock-witness
-  lineup — the witness has no culprit to recognise — so the choice
-  distribution across members gives E′ without running a separate
-  mock-witness study. See the main vignette on the small-sample
-  properties of that estimate, which are not negligible.
+Note where E′ comes from here: the **target-absent lineups**. Their
+choice distribution across members gives a *resultant* effective size,
+as used by Fitzgerald, Tredoux and Juncu (2023), without running a
+separate mock-witness study. It is not the same measurement as a
+mock-witness E′: real witnesses have a memory of the culprit and may
+reject the lineup, whereas mock witnesses choose from a description, and
+the two families of measures can differ (Lee, Mansour and Penrod, 2024).
+See the main vignette on the small-sample properties of the estimate,
+which are not negligible.
 
 ``` r
 
@@ -320,10 +320,17 @@ a lineup with a high `b` is not evidence of a good procedure.
 
 Parameters are estimated by maximum likelihood over the six observed
 cell counts (three responses by two lineup types), using the multinomial
-likelihood implied by the equations above. The model has four free
-parameters against five free cells, leaving **one residual degree of
-freedom** — so it is testable, but only just. Standard errors come from
-the numerically differentiated Hessian at the optimum, and
+likelihood implied by the equations above. The target-present and
+target-absent totals are each fixed, so each three-category multinomial
+contributes two independent proportions: four data degrees of freedom
+against four free parameters, leaving **zero residual degrees of
+freedom**. A single-condition fit is therefore saturated (just
+identified), as Winter et al. (2022, Figure 1) state and as
+[`summary()`](https://rdrr.io/r/base/summary.html) reports. The model
+reproduces the observed counts by construction, so its absolute fit
+cannot be tested from one condition. Testing it needs several conditions
+with parameters constrained across them. Standard errors come from the
+numerically differentiated Hessian at the optimum, and
 [`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
 reports AIC, BIC and the log-likelihood, all of which are well defined
 here because this is a genuine maximum-likelihood fit.
@@ -340,24 +347,25 @@ not be compared by information criteria.
 
 `dA` is identified almost entirely by rejections: it is the probability
 of correctly concluding the culprit is absent, and a witness in that
-state rejects. If very few witnesses reject, the likelihood is close to
-flat in `dA` and the fit fails.
-[`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
-checks for this and stops with a message naming the cause. In simulated
-data the usual reason is a decision criterion set too liberally — see
+state rejects. The amount of information depends on both the response
+probabilities and sample size. A low rejection percentage alone does not
+establish nonidentifiability. Inspect sparse cells, boundary estimates
+and convergence; regular Hessian uncertainty is not available at a
+boundary. In simulated data a liberal criterion can produce few
+rejections — see
 [`vignette("simulation_power_analysis")`](https://cgtza2.github.io/r4lineups/articles/simulation_power_analysis.md)
 on why `c_criterion = 0` is not a neutral value.
 
 ### Confidence intervals
 
 [`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
-returns standard errors, from which normal intervals can be formed, but
-all four parameters are probabilities bounded in \[0, 1\] and a normal
-interval around an estimate near a boundary runs outside that range.
-Prefer
-[`boot_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/boot_winter_2ht.md),
-which gives percentile intervals that cannot. The plotting function uses
-whichever it is given.
+returns regular Hessian standard errors for interior fits; they are
+unavailable at a parameter boundary.
+[`boot_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/boot_winter_2ht.md)
+gives approximate percentile or BCa intervals while keeping TP and TA
+totals fixed. Respecting the parameter space is useful, but does not
+establish coverage near a boundary. The plotting function uses the
+supplied intervals.
 
 ### Assumptions
 
@@ -376,6 +384,15 @@ whichever it is given.
     for null foils before fitting.
 
 ## References
+
+Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
+eyewitness error rates in fair and biased lineups. *Law and Human
+Behavior, 47*(4), 463-483.
+
+Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup
+fairness: Concurrent and predictive validity of lineup-fairness
+measures. *Psychology, Crime & Law*.
+<https://doi.org/10.1080/1068316X.2024.2307358>
 
 Malpass, R. S. (1981). Effective size and defendant bias in eyewitness
 identification lineups. *Law and Human Behavior, 5*(4), 299-309.

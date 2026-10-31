@@ -118,7 +118,7 @@ roc$roc_data
 #> # A tibble: 10 × 5
 #>    confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
 #>         <dbl>           <dbl>         <dbl>         <dbl>       <dbl>
-#>  1         19          0            0                   0           0
+#>  1        101          0            0                   0           0
 #>  2        100          0.0971       0                  68           0
 #>  3         90          0.143        0.00571           100           4
 #>  4         80          0.189        0.0143            132          10

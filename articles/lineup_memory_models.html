@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/lineup_memory_models.Rmd" class="external-link"><code>vignettes/lineup_memory_models.Rmd</code></a></small>
       <div class="d-none name"><code>lineup_memory_models.Rmd</code></div>
@@ -130,7 +130,7 @@ DV_{\text{Ensemble}} = \frac{k-1}{k}\, DV_{\text{BEST-Rest}}
 identical fits. Reporting both as though they were separate
 model-selection evidence would be double counting.</p>
 <div class="section level3">
-<h3 id="why-it-matters-which-one-is-right">Why it matters which one is right<a class="anchor" aria-label="anchor" href="#why-it-matters-which-one-is-right"></a>
+<h3 id="why-it-is-important-to-know-which-one-is-right">Why it is important to know which one is right<a class="anchor" aria-label="anchor" href="#why-it-is-important-to-know-which-one-is-right"></a>
 </h3>
 <p>These are not interchangeable descriptions. They disagree about what
 makes a lineup fair. Under Independent Observations, foil quality
@@ -171,13 +171,14 @@ revision does not expose</td>
 <td>The models assume every foil is a functioning alternative. An unfair
 lineup has a smaller effective than nominal size, so
 <code>lineup_size</code> is misspecified. Fitting with effective rather
-than nominal size is a workaround, not a solution</td>
+than nominal size is a workaround, not yet validated in this interface;
+an explicit model of unequal members would be needed to fit an unfair
+lineup properly</td>
 </tr>
 <tr class="odd">
 <td>Sequential lineups</td>
 <td>The decision variable is defined over simultaneously available
-members. Sequential viewing needs a different model, not a different
-parameterisation</td>
+members. Sequential viewing needs a different model</td>
 </tr>
 <tr class="even">
 <td>Reaction-time models</td>
@@ -192,11 +193,10 @@ effects would need a trial-level likelihood</td>
 </tr>
 </tbody>
 </table>
-<p>The first two are the ones most likely to bite in practice, since
-real lineups are rarely perfectly fair. If your lineup has null foils —
-members nobody ever chooses — see <code><a href="../reference/lineup_table.html">lineup_table()</a></code> and the
-effective-size measures in the main vignette before fitting anything
-here.</p>
+<p>The first two are the most common in practice, since real lineups are
+rarely perfectly fair. If your lineup has null foils — members nobody
+ever chooses — see <code><a href="../reference/lineup_table.html">lineup_table()</a></code> and the effective-size
+measures in the main vignette before fitting anything here.</p>
 </div>
 <div class="section level2">
 <h2 id="installing-the-engine">Installing the engine<a class="anchor" aria-label="anchor" href="#installing-the-engine"></a>
@@ -335,11 +335,16 @@ variance is requested with <code>variance = "unequal"</code>.</p>
 <span><span class="va">fit_started</span><span class="op">$</span><span class="va">comparison</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="does-the-fit-recover-the-generating-model">Does the fit recover the generating model?<a class="anchor" aria-label="anchor" href="#does-the-fit-recover-the-generating-model"></a>
+<h2 id="can-the-fit-tell-the-generating-rules-apart">Can the fit tell the generating rules apart?<a class="anchor" aria-label="anchor" href="#can-the-fit-tell-the-generating-rules-apart"></a>
 </h2>
-<p>The most informative check is whether fitting recovers the rule that
+<p>An informative check is whether fitting picks out the rule that
 generated the data. <code><a href="../reference/simulate_lineup_data.html">simulate_lineup_data()</a></code> implements the
-same three decision rules, so this can be tested directly.</p>
+same three decision rules, so this can be explored directly. One
+mismatch should be kept in mind: the data below are simulated with
+unequal foils (<code>foil_bias</code>), while
+<code><a href="../reference/fit_lineup_models.html">fit_lineup_models()</a></code> assumes a fair lineup with exchangeable
+fillers. Every fitted model is therefore somewhat misspecified, even the
+one matching the generating rule.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simulate_under</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">rule</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">404</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_lineup_data.html">simulate_lineup_data</a></span><span class="op">(</span></span>
@@ -380,18 +385,19 @@ residual degree of freedom — so the model with more parameters is
 favoured by a raw chi-square comparison purely by being more flexible.
 Ranking the models by chi-square alone is not a comparison the statistic
 licenses.</p>
-<p>With that in mind, two things emerge.</p>
-<p>The MAX and Integration rows recover their generating model
-decisively: the generating model fits well and the others are rejected
-outright.</p>
+<p>A p-value here is the probability of a discrepancy this large if that
+model were true; it is not the probability that the model is the correct
+one, and p-values from non-nested models do not rank them on a common
+scale. With that in mind, two things emerge.</p>
+<p>In the MAX and Integration rows the model matching the generating
+rule fits acceptably and the others are rejected outright.</p>
 <p>The Ensemble row does not. Independent Observations and Ensemble
 return essentially <strong>identical</strong> p-values, and neither can
 be rejected. This is not a case of the wrong model winning; it is a case
 of the two models being <strong>indistinguishable</strong> on these
 data.</p>
-<p>That is the substantive finding rather than a defect in the fitting.
-Independent Observations and Ensemble make very similar predictions for
-a <em>fair</em> lineup. Separating them requires either much larger
+<p>Independent Observations and Ensemble make very similar predictions
+for a <em>fair</em> lineup. Separating them requires either much larger
 samples or a design built to separate them — most obviously one that
 manipulates foil quality, since it is precisely there that the two
 accounts disagree: Ensemble makes the comparison standard depend on the
@@ -442,13 +448,13 @@ shared-variance term.</p>
 <div class="section level3">
 <h3 id="why-aic-and-bic-are-na">Why AIC and BIC are NA<a class="anchor" aria-label="anchor" href="#why-aic-and-bic-are-na"></a>
 </h3>
-<p>This is the point most likely to cause trouble, so it is worth being
-explicit. <code>loglik_at_estimate</code> is the multinomial log
-likelihood <strong>evaluated at the minimum-Pearson estimate</strong>.
-It is not a maximised likelihood. AIC and BIC are defined in terms of
-the maximum of the likelihood, so computing them from this quantity
-would be invalid, and the package returns <code>NA</code> rather than a
-number that would look usable and be wrong.</p>
+<p>It is important to make a point of clarification here.
+<code>loglik_at_estimate</code> is the multinomial log likelihood
+<strong>evaluated at the minimum-Pearson estimate</strong>. It is not a
+maximised likelihood. AIC and BIC are defined in terms of the maximum of
+the likelihood, so computing them from this quantity would be invalid,
+and the package returns <code>NA</code> rather than a number that would
+look usable and be wrong.</p>
 <p>Model comparison here therefore rests on the Pearson chi-square and
 its degrees of freedom, not on information criteria. Comparing models
 with different numbers of parameters requires attention to
@@ -487,12 +493,13 @@ structure.</li>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
 <p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S.
 (2024). pyWitness 1.0: A Python eyewitness identification analysis
 toolkit. <em>Behavior Research Methods, 56</em>, 1533-1550.</p>
 <p>Wixted, J. T., Vul, E., Mickes, L., &amp; Wilson, B. M. (2018).
-Models of lineup memory. <em>Cognitive Psychology, 105</em>, 81-114.
-</p>
+Models of lineup memory. <em>Cognitive Psychology, 105</em>, 81-114. <a href="https://doi.org/10.1016/j.cogpsych.2018.06.001" class="external-link uri">https://doi.org/10.1016/j.cogpsych.2018.06.001</a></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

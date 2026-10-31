@@ -83,10 +83,10 @@ print(rac_result)
 #> # A tibble: 4 × 7
 #>   response_time mean_time n_correct n_incorrect n_total accuracy      se
 #>   <chr>             <dbl>     <int>       <int>   <int>    <dbl>   <dbl>
-#> 1 [0,5000]          3193.        33           8      41    0.805  0.0619
-#> 2 (5000,10000]      6632.        29           4      33    0.879  0.0568
-#> 3 (10000,15000]      NaN          0           0       0   NA     NA     
-#> 4 (15000,20000]      NaN          0           0       0   NA     NA     
+#> 1 [0,5000]          3337.        33           8      41    0.805  0.0619
+#> 2 (5000,10000]      6657.        29           4      33    0.879  0.0568
+#> 3 (10000,15000]       NA          0           0       0   NA     NA     
+#> 4 (15000,20000]       NA          0           0       0   NA     NA     
 #> 
 #> Plot: save this object first, then extract it with x$plot
 rac_result$plot

@@ -123,7 +123,12 @@ otherwise, with a message.</p></dd>
 $$Accuracy = \frac{Correct Suspect IDs}{Correct Suspect IDs + Incorrect Suspect IDs}$$</p>
 <p>Explicit target-absent suspect IDs are used when present. Otherwise,
 target-absent filler IDs are divided by lineup size to estimate incorrect
-suspect IDs. The two estimators are never added together.</p>
+suspect IDs. The two estimators are never added together.
+The bin mean time uses the same suspect-ID observations as accuracy;
+estimated-mode TA filler times receive weight \(1/k\). Bin edges must
+cover all supplied observations. Count accuracy depends on TP/TA sampling
+fractions and does not adjust to a different population base rate. The
+displayed binomial SE is approximate, especially for estimated counts.</p>
 <p>RAC analysis is useful for examining the speed-accuracy tradeoff in
 eyewitness identifications. Faster responses typically indicate stronger
 memory, and RAC curves often show higher accuracy for faster response times.</p>
@@ -149,10 +154,10 @@ pyWitness 1.0: A python eyewitness identification analysis toolkit.
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   response_time mean_time n_correct n_incorrect n_total accuracy      se</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> [0,4000]          <span style="text-decoration: underline;">2</span>671.        24           4      28    0.857  0.066<span style="text-decoration: underline;">1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> (4000,8000]       <span style="text-decoration: underline;">5</span>924.        35           7      42    0.833  0.057<span style="text-decoration: underline;">5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> (8000,12000]      <span style="text-decoration: underline;">8</span>758.         3           1       4    0.75   0.217 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> (12000,20000]      <span style="color: #BB0000;">NaN</span>          0           0       0   <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> [0,4000]          <span style="text-decoration: underline;">2</span>767.        24           4      28    0.857  0.066<span style="text-decoration: underline;">1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> (4000,8000]       <span style="text-decoration: underline;">5</span>798.        35           7      42    0.833  0.057<span style="text-decoration: underline;">5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> (8000,12000]      <span style="text-decoration: underline;">8</span>873.         3           1       4    0.75   0.217 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> (12000,20000]       <span style="color: #BB0000;">NA</span>          0           0       0   <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>     </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

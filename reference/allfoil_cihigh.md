@@ -16,7 +16,7 @@ allfoil_cihigh(linetabprops, sumlineup)
 
 - sumlineup:
 
-  Number of members in a lineup
+  Number of mock-witness observations used to estimate each proportion.
 
 ## References
 

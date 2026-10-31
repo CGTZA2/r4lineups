@@ -116,7 +116,11 @@ or a named list of such vectors indexed by model.</p></dd>
 <dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
 <dd><p>Named list controlling <code>maxiter</code>, optimizer
 <code>method</code>, numerical <code>integration_sigma</code>,
-<code>chi2_variance</code>, and <code>verbose</code>.</p></dd>
+<code>chi2_variance</code>, <code>objective</code>, and <code>verbose</code>.
+<code>objective = "corrected"</code> (the default) applies the per-fit
+correction described in Details; <code>objective = "pywitness"</code> leaves the
+engine's own objective and optimizer untouched, which reproduces results
+from pyWitness itself, including published fits.</p></dd>
 
 
 <dt id="arg-envname">envname<a class="anchor" aria-label="anchor" href="#arg-envname"></a></dt>
@@ -140,8 +144,13 @@ category; zero cells within particular confidence bins remain supported.
 If the input includes a <code>condition</code> or <code>procedure</code> column, it must
 contain only one non-missing value; otherwise the data must be subset before
 fitting.</p>
-<p>The audited pyWitness revision estimates parameters by minimizing Pearson
-chi-squared. Thus, <code>loglik_at_estimate</code> is a multinomial likelihood
+<p>By default the bridge corrects the pinned engine's reversed observed/expected
+rejection-cell variance denominators in memory for each fit, without changing
+its installed environment; <code>control = list(objective = "pywitness")</code>
+turns the correction off. With the default <code>chi2_variance = "expected"</code>,
+every cell therefore uses the Pearson denominator. With <code>"observed"</code>,
+every cell uses the observed denominator (the Neyman discrepancy), requiring
+positive observed cells. Thus, <code>loglik_at_estimate</code> is a multinomial likelihood
 evaluated at the minimum-Pearson estimate, not a maximized likelihood. AIC
 and BIC are returned as <code>NA</code>; computing them from a non-likelihood
 optimum would be invalid.</p>

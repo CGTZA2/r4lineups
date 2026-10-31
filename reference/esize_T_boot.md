@@ -27,6 +27,9 @@ bootstrapping Tredoux's E'. The data argument must contain individual
 lineup choices; `d` resamples mock witnesses rather than count-table
 cells. For a higher-level interface that accepts raw lineup vectors, see
 [`esize_boot_dist`](https://cgtza2.github.io/r4lineups/reference/esize_boot_dist.md).
+Percentile and BCa intervals from this plug-in statistic cannot be used
+to test exact fairness E'=k; see the boundary warning in
+[`esize_boot_dist`](https://cgtza2.github.io/r4lineups/reference/esize_boot_dist.md).
 
 ## References
 

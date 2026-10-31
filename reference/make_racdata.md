@@ -70,7 +70,13 @@ IDs}\$\$
 
 Explicit target-absent suspect IDs are used when present. Otherwise,
 target-absent filler IDs are divided by lineup size to estimate
-incorrect suspect IDs. The two estimators are never added together.
+incorrect suspect IDs. The two estimators are never added together. The
+bin mean time uses the same suspect-ID observations as accuracy;
+estimated-mode TA filler times receive weight \\1/k\\. Bin edges must
+cover all supplied observations. Count accuracy depends on TP/TA
+sampling fractions and does not adjust to a different population base
+rate. The displayed binomial SE is approximate, especially for estimated
+counts.
 
 RAC analysis is useful for examining the speed-accuracy tradeoff in
 eyewitness identifications. Faster responses typically indicate stronger
@@ -99,8 +105,8 @@ rac$rac_data
 #> # A tibble: 4 × 7
 #>   response_time mean_time n_correct n_incorrect n_total accuracy      se
 #>   <chr>             <dbl>     <int>       <int>   <int>    <dbl>   <dbl>
-#> 1 [0,4000]          2671.        24           4      28    0.857  0.0661
-#> 2 (4000,8000]       5924.        35           7      42    0.833  0.0575
-#> 3 (8000,12000]      8758.         3           1       4    0.75   0.217 
-#> 4 (12000,20000]      NaN          0           0       0   NA     NA     
+#> 1 [0,4000]          2767.        24           4      28    0.857  0.0661
+#> 2 (4000,8000]       5798.        35           7      42    0.833  0.0575
+#> 3 (8000,12000]      8873.         3           1       4    0.75   0.217 
+#> 4 (12000,20000]       NA          0           0       0   NA     NA     
 ```

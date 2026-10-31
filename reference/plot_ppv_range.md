@@ -36,14 +36,15 @@ The plot shows three curves:
 
 - **Nominal** (blue, dashed): Best-case estimate assuming fair lineup
 
-- **Effective** (red, solid): Realistic estimate accounting for bias
+- **Effective** (red, solid): Size-based approximation accounting for
+  uneven choices
 
 - **None** (gray, dashed): Worst-case estimate (no correction)
 
 The shaded band between nominal and none represents the PPV uncertainty
 range due to unknown lineup fairness conditions. The effective size
-estimate typically falls within this range and provides a more realistic
-middle ground.
+estimate typically falls within this range and is a size-based
+approximation, not a validated best estimate.
 
 ## References
 

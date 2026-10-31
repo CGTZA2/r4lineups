@@ -20,7 +20,8 @@ plot_utility_curves(utility_obj, show_max = TRUE, show_reject = TRUE)
 
 - show_reject:
 
-  Logical. Whether to show reject-all utility point. Default = TRUE.
+  Logical. Whether to show the reject-all utility, drawn as a dashed
+  horizontal reference line. Default = TRUE.
 
 ## Value
 

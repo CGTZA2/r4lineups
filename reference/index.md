@@ -139,7 +139,7 @@ Diagnosticity ratios and homogeneity tests.
 - [`ln_diag_ratio()`](https://cgtza2.github.io/r4lineups/reference/ln_diag_ratio.md)
   : Ln of Diagnosticity Ratio
 - [`var_diag_ratio()`](https://cgtza2.github.io/r4lineups/reference/var_diag_ratio.md)
-  : Variance of diagnosticity ratio (Tredoux)
+  : Asymptotic Variance of Log Diagnosticity
 - [`var_lnd()`](https://cgtza2.github.io/r4lineups/reference/var_lnd.md)
   : Variance of ln of diagnosticity ratio
 

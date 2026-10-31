@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/Vignette.Rmd" class="external-link"><code>vignettes/Vignette.Rmd</code></a></small>
       <div class="d-none name"><code>Vignette.Rmd</code></div>
@@ -94,7 +94,13 @@ with checking code, testing the veracity of the approaches described,
 and on occasion editing the text. Responsibility for the content rests
 with the authors.</p>
 </blockquote>
+<p>The current release is also available from r-universe, which is
+updated sooner than CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"r4lineups"</span>,</span>
+<span>                 repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://cgtza2.r-universe.dev"</span>,</span>
+<span>                           <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CGTZA2/r4lineups" class="external-link">r4lineups</a></span><span class="op">)</span></span></code></pre></div>
 <p>This is the <strong>main vignette</strong> for
 <strong>r4lineups</strong>. It covers the classical measures of lineup
@@ -140,14 +146,14 @@ list.</p>
 with 6 members, then we could record their choices as a numeric vector,
 where the elements represent the position of the lineup member chosen by
 each witness:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lineup_vec_demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p>However, it is also possible to represent this set of choices as a
 one-dimensional table:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">table</span>(lineup_vec_demo)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>lineup_vec_demo</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span> <span class="dv">6</span> </span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="dv">1</span> <span class="dv">1</span> <span class="dv">3</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">2</span> </span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">table</span>(lineup_vec_demo)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>lineup_vec_demo</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span> <span class="dv">6</span> </span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="dv">1</span> <span class="dv">1</span> <span class="dv">3</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">2</span> </span></code></pre></div>
 <p>If we had our lineup choices recorded in a data frame, which is what
 we might end up with if we import the data from a spreadsheet program,
 then we could easily extract the variable representing choices in the
@@ -157,27 +163,27 @@ were part of a larger dataset, and we had recorded the ages and
 participant number of each participant, then the dataframe might appear
 as shown below (we create the dataframe with simulated data here,
 though):</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>participant_num <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Partic_"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">sep =</span> <span class="st">""</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>age             <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">runif</span>(<span class="dv">10</span>, <span class="dv">18</span>, <span class="dv">80</span>), <span class="dv">2</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>line_df         <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(participant_num, age,</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                              <span class="at">lineup_vec =</span> lineup_vec_demo)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>line_df</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>   participant_num   age lineup_vec</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="dv">1</span>         Partic_1 <span class="fl">61.32</span>          <span class="dv">3</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="dv">2</span>         Partic_2 <span class="fl">52.50</span>          <span class="dv">2</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="dv">3</span>         Partic_3 <span class="fl">26.69</span>          <span class="dv">5</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="dv">4</span>         Partic_4 <span class="fl">35.71</span>          <span class="dv">6</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="dv">5</span>         Partic_5 <span class="fl">52.43</span>          <span class="dv">1</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="dv">6</span>         Partic_6 <span class="fl">19.56</span>          <span class="dv">3</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="dv">7</span>         Partic_7 <span class="fl">46.91</span>          <span class="dv">3</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="dv">8</span>         Partic_8 <span class="fl">71.38</span>          <span class="dv">5</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="dv">9</span>         Partic_9 <span class="fl">33.66</span>          <span class="dv">6</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="dv">10</span>       Partic_10 <span class="fl">54.01</span>          <span class="dv">4</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>participant_num <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Partic_"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>age             <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">runif</span>(<span class="dv">10</span>, <span class="dv">18</span>, <span class="dv">80</span>), <span class="dv">2</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>line_df         <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(participant_num, age,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                              <span class="at">lineup_vec =</span> lineup_vec_demo)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>line_df</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>   participant_num   age lineup_vec</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="dv">1</span>         Partic_1 <span class="fl">61.32</span>          <span class="dv">3</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="dv">2</span>         Partic_2 <span class="fl">52.50</span>          <span class="dv">2</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="dv">3</span>         Partic_3 <span class="fl">26.69</span>          <span class="dv">5</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="dv">4</span>         Partic_4 <span class="fl">35.71</span>          <span class="dv">6</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="dv">5</span>         Partic_5 <span class="fl">52.43</span>          <span class="dv">1</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="dv">6</span>         Partic_6 <span class="fl">19.56</span>          <span class="dv">3</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="dv">7</span>         Partic_7 <span class="fl">46.91</span>          <span class="dv">3</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="dv">8</span>         Partic_8 <span class="fl">71.38</span>          <span class="dv">5</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="dv">9</span>         Partic_9 <span class="fl">33.66</span>          <span class="dv">6</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="dv">10</span>       Partic_10 <span class="fl">54.01</span>          <span class="dv">4</span></span></code></pre></div>
 <p>Extract the lineup choices, per participant, to a vector:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a_lineup_vec</span> <span class="op">&lt;-</span> <span class="va">line_df</span><span class="op">$</span><span class="va">lineup_vec</span></span></code></pre></div>
 <p>Or make a table directly from the variable of choices:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a_lineup_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">line_df</span><span class="op">$</span><span class="va">lineup_vec</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="null-foils-and-why-table-can-mislead">Null foils, and why <code>table()</code> can mislead<a class="anchor" aria-label="anchor" href="#null-foils-and-why-table-can-mislead"></a>
@@ -189,28 +195,35 @@ chosen by nobody, that would not be evident from the vector at all. Such
 an unchosen member is called a <strong>null foil</strong>.</p>
 <p><code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code> makes this worse, because it tabulates only the
 positions that were actually chosen and silently omits the rest:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>null_foil_vec <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">8</span>, <span class="dv">6</span>, <span class="dv">7</span>), <span class="at">each =</span> <span class="dv">4</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># Position 4 was never chosen, so this table has 7 entries, not 8</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">table</span>(null_foil_vec)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>null_foil_vec</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">5</span> <span class="dv">6</span> <span class="dv">7</span> <span class="dv">8</span> </span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> </span></code></pre></div>
-<p>Null foils matter, because they are exactly the members that make a
-lineup unfair: a foil nobody ever picks is not a functioning alternative
-to the suspect. Use <code><a href="../reference/lineup_table.html">lineup_table()</a></code> instead, which tabulates
-over all <code>k</code> positions, keeps unchosen members as explicit
-zeroes, and says so:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">lineup_table</span>(null_foil_vec, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">suspect_pos =</span> <span class="dv">3</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>Lineup <span class="fu">choices</span> (<span class="at">k =</span> <span class="dv">8</span>, <span class="at">N =</span> <span class="dv">28</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a> pos<span class="sc">:</span> <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span><span class="sc">*</span>  <span class="dv">4</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">7</span>  <span class="dv">8</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a> cnt<span class="sc">:</span> <span class="dv">4</span>  <span class="dv">4</span>   <span class="dv">4</span>  <span class="dv">0</span>  <span class="dv">4</span>  <span class="dv">4</span>  <span class="dv">4</span>  <span class="dv">4</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a> <span class="sc">*</span> <span class="er">=</span> nominated suspect</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a> Note<span class="sc">:</span> <span class="dv">1</span> null <span class="fu">foil</span> (position <span class="dv">4</span>) received no choices.</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a> Unchosen members reduce effective size; see ?esize_m.</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>null_foil_vec <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">8</span>, <span class="dv">6</span>, <span class="dv">7</span>), <span class="at">each =</span> <span class="dv">4</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># Position 4 was never chosen, so this table has 7 entries, not 8</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">table</span>(null_foil_vec)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>null_foil_vec</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">5</span> <span class="dv">6</span> <span class="dv">7</span> <span class="dv">8</span> </span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> </span></code></pre></div>
+<p>Null foils are important, because a foil nobody would pick is not a
+functioning alternative to the suspect. They are one of several things
+that can make a lineup unfair: poor foils that draw only a few choices
+weaken it in the same way, and a suspect who stands out does so whatever
+the foils are like. A zero in a sample is also weaker evidence than it
+looks. Even in a perfectly fair six-person lineup, a given member
+receives no choices from ten mock witnesses with probability
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>5</mn><mi>/</mi><mn>6</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>10</mn></msup><mo>≈</mo><mn>.16</mn></mrow><annotation encoding="application/x-tex">(5/6)^{10} \approx .16</annotation></semantics></math>.
+Treat an unchosen member as a prompt to look at that photograph, not as
+proof that it fails as a foil. Use <code><a href="../reference/lineup_table.html">lineup_table()</a></code> instead,
+which tabulates over all <code>k</code> positions, keeps unchosen
+members as explicit zeroes, and says so:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">lineup_table</span>(null_foil_vec, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">suspect_pos =</span> <span class="dv">3</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>Lineup <span class="fu">choices</span> (<span class="at">k =</span> <span class="dv">8</span>, <span class="at">N =</span> <span class="dv">28</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a> pos<span class="sc">:</span> <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span><span class="sc">*</span>  <span class="dv">4</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">7</span>  <span class="dv">8</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a> cnt<span class="sc">:</span> <span class="dv">4</span>  <span class="dv">4</span>   <span class="dv">4</span>  <span class="dv">0</span>  <span class="dv">4</span>  <span class="dv">4</span>  <span class="dv">4</span>  <span class="dv">4</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a> <span class="sc">*</span> <span class="er">=</span> nominated suspect</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a> Note<span class="sc">:</span> <span class="dv">1</span> null <span class="fu">foil</span> (position <span class="dv">4</span>) received no choices.</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a> Unchosen members reduce effective size; see ?esize_m.</span></code></pre></div>
 <p>The result inherits from <code>table</code>, so it can be passed to
 <code><a href="../reference/esize_m.html">esize_m()</a></code>, <code><a href="../reference/esize_T.html">esize_T()</a></code> and the other
 table-taking functions in the package exactly as an ordinary table would
@@ -226,7 +239,7 @@ same reason.</p>
 </h3>
 <p>Let’s look at a slightly larger data set. Only the first three rows
 are shown here; <code>nortje2012</code> has 133 rows in total.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">nortje2012</span><span class="op">)</span></span></code></pre></div>
 <table style="width:46%;" class="table">
 <caption>nortje2012 data (first 3 rows of 133)</caption>
@@ -267,7 +280,7 @@ alternatively <code>lineup_vec &lt;- nortje2012[[1]]</code></p></li>
 pairs, you can convert the data to a list,
 e.g. <code>lineup_list &lt;- as.list(nortje2012)</code></p></li>
 </ul>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lineup_vec</span>   <span class="op">&lt;-</span> <span class="va">nortje2012</span><span class="op">$</span><span class="va">lineup_1</span></span>
 <span><span class="va">lineup_list</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">nortje2012</span><span class="op">)</span></span>
 <span><span class="va">lineup_tab</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lineup_table.html">lineup_table</a></span><span class="op">(</span><span class="va">lineup_vec</span>, k <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
@@ -317,6 +330,14 @@ identification data, to be passed to the ROC and CAC functions such as
 <p>Each dataset is loaded by name, e.g. <code>data(nortje2012)</code> or
 <code>data(lineup_example)</code>. Further details can be found in the
 documentation for each dataset, e.g. <code><a href="../reference/nortje2012.html">?nortje2012</a></code>.</p>
+<p>The package can also generate data.
+<code><a href="../reference/simulate_lineup_data.html">simulate_lineup_data()</a></code> simulates target-present and
+target-absent lineups with confidence ratings from a signal detection
+model, with control over discriminability, decision criterion, lineup
+size and the quality of each foil, and returns data in the format the
+ROC, CAC and model-fitting functions expect. It is useful for trying out
+an analysis before data are collected and for power analysis; see
+<code><a href="../articles/simulation_power_analysis.html">vignette("simulation_power_analysis")</a></code>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -350,8 +371,8 @@ the relevant references are described in
 <div class="section level3">
 <h3 id="calculating-proportion-for-a-single-targetlineup-member">Calculating proportion for a single target/lineup member<a class="anchor" aria-label="anchor" href="#calculating-proportion-for-a-single-targetlineup-member"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">lineup_prop_vec</span>(lineup_vec, <span class="at">target_pos =</span> <span class="dv">3</span>, <span class="at">k =</span> <span class="dv">8</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.1428571</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">lineup_prop_vec</span>(lineup_vec, <span class="at">target_pos =</span> <span class="dv">3</span>, <span class="at">k =</span> <span class="dv">8</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.1428571</span></span></code></pre></div>
 <p>This function requires three arguments: a vector of lineup data (here
 <code>lineup_vec</code>, the choices for
 <code>nortje2012$lineup_1</code> that we extracted above), the position
@@ -372,8 +393,11 @@ use enough mock witnesses to strongly warrant this approach, since it
 assumes approximation to a normal distribution, and the size of the
 lineup places hard limits that are often not observed by computed
 confidence intervals.</p>
-<p>We therefore recommend computing bootstrapped estimates of all lineup
-measures, and especially the sampling variability around estimates.</p>
+<p>The bootstrap is a useful alternative for the sampling variability of
+most lineup measures, especially the nonlinear ones such as effective
+size. For a single member’s proportion, though, an exact binomial
+interval is usually the better choice, for the reason shown at the end
+of this section.</p>
 <p>To calculate a bootstrapped lineup proportion for a single lineup
 member, we pass the <code><a href="../reference/lineup_prop_boot.html">lineup_prop_boot()</a></code> function as an
 argument to the <code>boot()</code> function supplied by the package
@@ -382,34 +406,34 @@ argument to the <code>boot()</code> function supplied by the package
 is the lineup vector, the position of the target
 (<code>target_pos</code>), and the number of bootstrap resamples we
 desire (<code>R</code>).</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>bootobject <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(lineup_vec, lineup_prop_boot, <span class="at">target_pos =</span> <span class="dv">3</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>bootobject</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>ORDINARY NONPARAMETRIC BOOTSTRAP</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>Call<span class="sc">:</span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot</span>(<span class="at">data =</span> lineup_vec, <span class="at">statistic =</span> lineup_prop_boot, <span class="at">R =</span> <span class="dv">1000</span>, </span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>    <span class="at">target_pos =</span> <span class="dv">3</span>)</span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a></span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>Bootstrap Statistics <span class="sc">:</span></span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>     original        bias    std. error</span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>t1<span class="sc">*</span> <span class="fl">0.1428571</span> <span class="sc">-</span><span class="fl">0.0004586466</span>   <span class="fl">0.0289372</span></span></code></pre></div>
-<p>We then compute confidence intervals:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>cis <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot.ci</span>(bootobject, <span class="at">conf =</span> <span class="fl">0.95</span>, <span class="at">type =</span> <span class="st">"bca"</span>, <span class="at">target_pos =</span> <span class="dv">3</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>cis</span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS</span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>Based on <span class="dv">1000</span> bootstrap replicates</span>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>bootobject <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(lineup_vec, lineup_prop_boot, <span class="at">target_pos =</span> <span class="dv">3</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>bootobject</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>ORDINARY NONPARAMETRIC BOOTSTRAP</span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>CALL <span class="sc">:</span> </span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot.ci</span>(<span class="at">boot.out =</span> bootobject, <span class="at">conf =</span> <span class="fl">0.95</span>, <span class="at">type =</span> <span class="st">"bca"</span>, </span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>    <span class="at">target_pos =</span> <span class="dv">3</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>Intervals <span class="sc">:</span> </span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>Level       BCa          </span>
-<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="dv">95</span>%   ( <span class="fl">0.0902</span>,  <span class="fl">0.1955</span> )  </span>
-<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>Calculations and Intervals on Original Scale</span></code></pre></div>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>Call<span class="sc">:</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot</span>(<span class="at">data =</span> lineup_vec, <span class="at">statistic =</span> lineup_prop_boot, <span class="at">R =</span> <span class="dv">1000</span>, </span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>    <span class="at">target_pos =</span> <span class="dv">3</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>Bootstrap Statistics <span class="sc">:</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>     original        bias    std. error</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>t1<span class="sc">*</span> <span class="fl">0.1428571</span> <span class="sc">-</span><span class="fl">0.0004586466</span>   <span class="fl">0.0289372</span></span></code></pre></div>
+<p>We then compute confidence intervals:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>cis <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot.ci</span>(bootobject, <span class="at">conf =</span> <span class="fl">0.95</span>, <span class="at">type =</span> <span class="st">"bca"</span>, <span class="at">target_pos =</span> <span class="dv">3</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>cis</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>Based on <span class="dv">1000</span> bootstrap replicates</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>CALL <span class="sc">:</span> </span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot.ci</span>(<span class="at">boot.out =</span> bootobject, <span class="at">conf =</span> <span class="fl">0.95</span>, <span class="at">type =</span> <span class="st">"bca"</span>, </span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>    <span class="at">target_pos =</span> <span class="dv">3</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>Intervals <span class="sc">:</span> </span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>Level       BCa          </span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="dv">95</span>%   ( <span class="fl">0.0902</span>,  <span class="fl">0.1955</span> )  </span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>Calculations and Intervals on Original Scale</span></code></pre></div>
 <p>If you are not familiar with how the <code>boot</code> or the
 <code>boot.ci</code> functions work, you could consult the documentation
 for the <strong>boot</strong> package. However, by using the functions
@@ -427,32 +451,52 @@ of types.</p>
 <div class="section level4">
 <h4 id="comparing-against-a-normal-theory-interval">Comparing against a normal-theory interval<a class="anchor" aria-label="anchor" href="#comparing-against-a-normal-theory-interval"></a>
 </h4>
-<p>It is worth seeing how the bootstrap interval compares with the
-classical interval, which is what the earlier literature used. There is
-no r4lineups function for this, because base R already provides it: a
-lineup proportion is just a binomial proportion, so
+<p>The bootstrap interval can be compared with the classical interval,
+which is what the earlier literature used. There is no r4lineups
+function for this, because base R already provides it: a lineup
+proportion is just a binomial proportion, so
 <code><a href="https://rdrr.io/r/stats/binom.test.html" class="external-link">stats::binom.test()</a></code> (exact) and
 <code><a href="https://rdrr.io/r/stats/prop.test.html" class="external-link">stats::prop.test()</a></code> (normal approximation with continuity
 correction) apply directly.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>n_chose_3 <span class="ot">&lt;-</span> <span class="fu">sum</span>(lineup_vec <span class="sc">==</span> <span class="dv">3</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>n_total   <span class="ot">&lt;-</span> <span class="fu">length</span>(lineup_vec)</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># Exact (Clopper-Pearson) interval</span></span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">binom.test</span>(n_chose_3, n_total)<span class="sc">$</span>conf.int</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.08825399</span> <span class="fl">0.21406762</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="fu">attr</span>(,<span class="st">"conf.level"</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co"># Normal-theory interval</span></span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="fu">prop.test</span>(n_chose_3, n_total)<span class="sc">$</span>conf.int</span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.09037086</span> <span class="fl">0.21662699</span></span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="fu">attr</span>(,<span class="st">"conf.level"</span>)</span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>n_chose_3 <span class="ot">&lt;-</span> <span class="fu">sum</span>(lineup_vec <span class="sc">==</span> <span class="dv">3</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>n_total   <span class="ot">&lt;-</span> <span class="fu">length</span>(lineup_vec)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># Exact (Clopper-Pearson) interval</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="fu">binom.test</span>(n_chose_3, n_total)<span class="sc">$</span>conf.int</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.08825399</span> <span class="fl">0.21406762</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="fu">attr</span>(,<span class="st">"conf.level"</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co"># Normal-theory interval</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="fu">prop.test</span>(n_chose_3, n_total)<span class="sc">$</span>conf.int</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.09037086</span> <span class="fl">0.21662699</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="fu">attr</span>(,<span class="st">"conf.level"</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span></code></pre></div>
 <p>Compare these with the BCa interval above. For a proportion near the
 middle of its range and a reasonable sample size the three tend to agree
-closely; they diverge when the proportion is near 0 or 1, or when the
-sample of mock witnesses is small, which is precisely the situation the
-bootstrap handles better.</p>
+closely. They diverge when the proportion is near 0 or 1, or when the
+sample of mock witnesses is small, and there the ordinary bootstrap is
+<strong>not</strong> the safer choice. A resample can only contain
+choices that occurred in the sample, so a member nobody chose is never
+chosen in any resample:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>never_chosen <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">6</span>)   <span class="co"># 30 mock witnesses; member 1 never chosen</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(never_chosen, lineup_prop_boot, <span class="at">target_pos =</span> <span class="dv">1</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">range</span>(b0<span class="sc">$</span>t)                              <span class="co"># every resample gives 0</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">0</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">binom.test</span>(<span class="dv">0</span>, <span class="fu">length</span>(never_chosen))<span class="sc">$</span>conf.int</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.0000000</span> <span class="fl">0.1157033</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="fu">attr</span>(,<span class="st">"conf.level"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span></code></pre></div>
+<p>The percentile interval is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 0]</annotation></semantics></math>,
+which claims certainty that the member is never chosen, and the BCa
+interval cannot be computed at all. More resamples do not help, because
+the bootstrap cannot generate an outcome the sample lacks. The exact
+Clopper–Pearson interval,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>.116</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, .116]</annotation></semantics></math>
+here, is the appropriate summary for a member proportion at or near a
+boundary, and a Bayesian posterior
+(<code><a href="../articles/bayesian_inference.html">vignette("bayesian_inference")</a></code>) is another option.</p>
 </div>
 </div>
 <div class="section level3">
@@ -465,16 +509,16 @@ researchers do in laboratory experiments. Instead of manually specifying
 the target position, a vector indexing all target positions is
 automatically generated from the argument <code>k</code>, within the
 function itself.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">allprop</span>(lineup_vec, <span class="at">k =</span> <span class="dv">8</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>        prop</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="dv">1</span> <span class="fl">0.14285714</span></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="dv">2</span> <span class="fl">0.13533835</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="dv">3</span> <span class="fl">0.14285714</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="dv">4</span> <span class="fl">0.04511278</span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="dv">5</span> <span class="fl">0.28571429</span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="dv">6</span> <span class="fl">0.04511278</span></span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="dv">7</span> <span class="fl">0.17293233</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="dv">8</span> <span class="fl">0.03007519</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">allprop</span>(lineup_vec, <span class="at">k =</span> <span class="dv">8</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>        prop</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="dv">1</span> <span class="fl">0.14285714</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="dv">2</span> <span class="fl">0.13533835</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="dv">3</span> <span class="fl">0.14285714</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="dv">4</span> <span class="fl">0.04511278</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="dv">5</span> <span class="fl">0.28571429</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="dv">6</span> <span class="fl">0.04511278</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="dv">7</span> <span class="fl">0.17293233</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="dv">8</span> <span class="fl">0.03007519</span></span></code></pre></div>
 <p>The function then returns the proportion of mock witnesses selecting
 each lineup member.</p>
 <div class="section level4">
@@ -483,17 +527,17 @@ each lineup member.</p>
 <p>We can generate bootstrap estimates for all the computed proportions,
 too, with <code><a href="../reference/lineup_boot_allprop.html">lineup_boot_allprop()</a></code>. This function takes a
 vector of lineup data and the nominal lineup size.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>lineuprops_ci <span class="ot">&lt;-</span> <span class="fu">lineup_boot_allprop</span>(lineup_vec, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>lineuprops_ci</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>       ci_low    ci_high</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="dv">1</span> <span class="fl">0.082706767</span> <span class="fl">0.19548872</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="dv">2</span> <span class="fl">0.075187970</span> <span class="fl">0.18796992</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="dv">3</span> <span class="fl">0.075187970</span> <span class="fl">0.19548872</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="dv">4</span> <span class="fl">0.015037594</span> <span class="fl">0.08270677</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="dv">5</span> <span class="fl">0.210526316</span> <span class="fl">0.36842105</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="dv">6</span> <span class="fl">0.015037594</span> <span class="fl">0.08663526</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="dv">7</span> <span class="fl">0.105263158</span> <span class="fl">0.24060150</span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="dv">8</span> <span class="fl">0.007518797</span> <span class="fl">0.06015038</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>lineuprops_ci <span class="ot">&lt;-</span> <span class="fu">lineup_boot_allprop</span>(lineup_vec, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>lineuprops_ci</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>       ci_low    ci_high</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="dv">1</span> <span class="fl">0.082706767</span> <span class="fl">0.19548872</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="dv">2</span> <span class="fl">0.082706767</span> <span class="fl">0.18796992</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="dv">3</span> <span class="fl">0.081853490</span> <span class="fl">0.20300752</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="dv">4</span> <span class="fl">0.015037594</span> <span class="fl">0.08270677</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="dv">5</span> <span class="fl">0.205667634</span> <span class="fl">0.36090226</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="dv">6</span> <span class="fl">0.015037594</span> <span class="fl">0.08270677</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="dv">7</span> <span class="fl">0.112781955</span> <span class="fl">0.24060150</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="dv">8</span> <span class="fl">0.007518797</span> <span class="fl">0.06015038</span></span></code></pre></div>
 <p>The object <code>lineuprops_ci</code> is a dataframe of 2 columns and
 <code>k</code> rows, in which <code>ci_low</code> and
 <code>ci_high</code> contain the lower and upper confidence limits
@@ -509,16 +553,16 @@ least one</em> excludes 1/k by accident is appreciably higher than 5%.
 If you want a statement about the lineup as a whole rather than about
 one nominated member, raise the level for each interval, e.g. a
 Bonferroni-style <code>conf = 1 - 0.05 / k</code>:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">lineup_boot_allprop</span>(lineup_vec, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">conf =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.05</span> <span class="sc">/</span> <span class="dv">8</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>       ci_low    ci_high</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="dv">1</span> <span class="fl">0.067669173</span> <span class="fl">0.23308271</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="dv">2</span> <span class="fl">0.052631579</span> <span class="fl">0.22628626</span></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="dv">3</span> <span class="fl">0.063938000</span> <span class="fl">0.23292968</span></span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="dv">4</span> <span class="fl">0.007518797</span> <span class="fl">0.10239777</span></span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="dv">5</span> <span class="fl">0.178355546</span> <span class="fl">0.39849624</span></span>
-<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="dv">6</span> <span class="fl">0.007518797</span> <span class="fl">0.11874538</span></span>
-<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="dv">7</span> <span class="fl">0.097744361</span> <span class="fl">0.26771452</span></span>
-<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="dv">8</span> <span class="fl">0.000000000</span> <span class="fl">0.09022556</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">lineup_boot_allprop</span>(lineup_vec, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">conf =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.05</span> <span class="sc">/</span> <span class="dv">8</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>       ci_low    ci_high</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="dv">1</span> <span class="fl">0.065932074</span> <span class="fl">0.24386511</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="dv">2</span> <span class="fl">0.060150376</span> <span class="fl">0.21804511</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="dv">3</span> <span class="fl">0.067669173</span> <span class="fl">0.23473395</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="dv">4</span> <span class="fl">0.007518797</span> <span class="fl">0.10094435</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="dv">5</span> <span class="fl">0.163254847</span> <span class="fl">0.39308379</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="dv">6</span> <span class="fl">0.007518797</span> <span class="fl">0.11663662</span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="dv">7</span> <span class="fl">0.090225564</span> <span class="fl">0.26335704</span></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="dv">8</span> <span class="fl">0.000000000</span> <span class="fl">0.09022556</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -528,7 +572,7 @@ Bonferroni-style <code>conf = 1 - 0.05 / k</code>:</p>
 distribution than at its endpoints. <code><a href="../reference/lineup_bias_boot_dist.html">lineup_bias_boot_dist()</a></code>
 returns the replicates and <code><a href="../reference/plot_lineup_bias_distribution.html">plot_lineup_bias_distribution()</a></code>
 draws them:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bias_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lineup_bias_boot_dist.html">lineup_bias_boot_dist</a></span><span class="op">(</span><span class="va">lineup_vec</span>, target_pos <span class="op">=</span> <span class="fl">3</span>, k <span class="op">=</span> <span class="fl">8</span>, R <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_lineup_bias_distribution.html">plot_lineup_bias_distribution</a></span><span class="op">(</span><span class="va">bias_dist</span>, target_pos <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Vignette_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="" width="576"></p>
@@ -567,13 +611,13 @@ bootstrapped confidence intervals.</p>
 <code><a href="../reference/func_size_report.html">func_size_report()</a></code>, and pass a vector of lineup data, as
 well as one scalar indicating target position, and another indicating
 nominal size:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">func_size_report</span>(lineup_vec, <span class="at">target_pos =</span> <span class="dv">3</span>, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>Functional size of lineup is <span class="dv">7</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>Confidence intervals [<span class="dv">95</span>%]</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>Normal Theory <span class="fl">4.93</span> <span class="fl">11.628</span> </span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>Bootstrap<span class="sc">:</span> <span class="fu">percentile</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="fl">4.926</span> <span class="fl">12.063</span> </span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>Bootstrap<span class="sc">:</span> bias<span class="sc">-</span><span class="fu">corrected</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="fl">4.926</span> <span class="fl">11.889</span> </span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="fu">Exact</span> (Clopper<span class="sc">-</span>Pearson) <span class="fl">4.671</span> <span class="fl">11.331</span> </span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">func_size_report</span>(lineup_vec, <span class="at">target_pos =</span> <span class="dv">3</span>, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>Functional size of lineup is <span class="dv">7</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>Confidence intervals [<span class="dv">95</span>%]</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>Normal Theory <span class="fl">4.921</span> <span class="fl">11.668</span> </span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>Bootstrap<span class="sc">:</span> <span class="fu">percentile</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="fl">4.926</span> <span class="fl">12.091</span> </span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>Bootstrap<span class="sc">:</span> bias<span class="sc">-</span><span class="fu">corrected</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="fl">4.926</span> <span class="fl">12.091</span> </span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="fu">Exact</span> (Clopper<span class="sc">-</span>Pearson) <span class="fl">4.671</span> <span class="fl">11.331</span> </span></code></pre></div>
 <p><strong>Functional size can exceed nominal size.</strong> This
 surprises people, but it follows directly from the definition: if fewer
 than 1/k of the mock witnesses choose the suspect, the inverse of that
@@ -634,11 +678,11 @@ as follows.</p>
 nominal size. The function always returns the Tredoux-adjusted estimate;
 <code>both = TRUE</code> additionally prints the original Malpass
 estimate for comparison.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">esize_m</span>(lineup_tab, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">both =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>, </span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>             adj Tredoux, <span class="dv">1998</span>) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.962406</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">esize_m</span>(lineup_tab, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">both =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>, </span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>             adj Tredoux, <span class="dv">1998</span>) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.962406</span></span></code></pre></div>
 <p>Every member of <code>lineup_1</code> was chosen at least once, so
 here the two formulations coincide. They come apart as soon as there is
 a null foil, which is where the distinction between
@@ -646,12 +690,12 @@ a null foil, which is where the distinction between
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>k</mi><mi>a</mi></msub><annotation encoding="application/x-tex">k_a</annotation></semantics></math>
 bites:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># Position 4 was never chosen</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">esize_m</span>(<span class="fu">lineup_table</span>(null_foil_vec, <span class="at">k =</span> <span class="dv">8</span>), <span class="at">k =</span> <span class="dv">8</span>, <span class="at">both =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>) <span class="ot">=</span>  <span class="dv">7</span> </span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>, </span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>             adj Tredoux, <span class="dv">1998</span>) <span class="ot">=</span>  <span class="dv">7</span> </span>
-<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">7</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Position 4 was never chosen</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">esize_m</span>(<span class="fu">lineup_table</span>(null_foil_vec, <span class="at">k =</span> <span class="dv">8</span>), <span class="at">k =</span> <span class="dv">8</span>, <span class="at">both =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>) <span class="ot">=</span>  <span class="dv">7</span> </span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>, </span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>             adj Tredoux, <span class="dv">1998</span>) <span class="ot">=</span>  <span class="dv">7</span> </span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">7</span></span></code></pre></div>
 <p>The adjusted estimate deducts the unchosen member. Note that both
 figures happen to be 7 in this particular example, but for different
 reasons: the adjusted formula starts from k = 8 and deducts the null
@@ -672,21 +716,21 @@ confidence intervals.</p>
 <code><a href="../reference/gen_boot_samples.html">gen_boot_samples()</a></code> function, then
 <code><a href="../reference/gen_esize_m.html">gen_esize_m()</a></code>, and then <code><a href="../reference/gen_esize_m_ci.html">gen_esize_m_ci()</a></code>.
 Their usage is shown below.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Create a dataframe of bootstrapped lineup data</span></span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>bootdata <span class="ot">&lt;-</span> <span class="fu">gen_boot_samples</span>(lineup_vec, <span class="dv">1000</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a></span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="co"># Calculate effective size for each lineup in bootdata.</span></span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="co"># Nominal size is again declared by the user.</span></span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>lineupsizes <span class="ot">&lt;-</span> <span class="fu">gen_esize_m</span>(bootdata, <span class="at">k =</span> <span class="dv">8</span>)</span>
-<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a></span>
-<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="co"># Pass the vector of bootstrapped effective sizes to gen_esize_m_ci</span></span>
-<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="co"># to calculate lower and upper CIs with the desired level of alpha</span></span>
-<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="fu">gen_esize_m_ci</span>(lineupsizes, <span class="at">perc =</span> .<span class="dv">025</span>)</span>
-<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>    <span class="fl">2.5</span>% </span>
-<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="fl">5.323308</span> </span>
-<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="fu">gen_esize_m_ci</span>(lineupsizes, <span class="at">perc =</span> .<span class="dv">975</span>)</span>
-<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a>   <span class="fl">97.5</span>% </span>
-<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a><span class="fl">6.263158</span> </span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="co"># Create a dataframe of bootstrapped lineup data</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>bootdata <span class="ot">&lt;-</span> <span class="fu">gen_boot_samples</span>(lineup_vec, <span class="dv">1000</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="co"># Calculate effective size for each lineup in bootdata.</span></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="co"># Nominal size is again declared by the user.</span></span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>lineupsizes <span class="ot">&lt;-</span> <span class="fu">gen_esize_m</span>(bootdata, <span class="at">k =</span> <span class="dv">8</span>)</span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a><span class="co"># Pass the vector of bootstrapped effective sizes to gen_esize_m_ci</span></span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="co"># to calculate lower and upper CIs with the desired level of alpha</span></span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a><span class="fu">gen_esize_m_ci</span>(lineupsizes, <span class="at">perc =</span> .<span class="dv">025</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>    <span class="fl">2.5</span>% </span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a><span class="fl">5.345865</span> </span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a><span class="fu">gen_esize_m_ci</span>(lineupsizes, <span class="at">perc =</span> .<span class="dv">975</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a>   <span class="fl">97.5</span>% </span>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a><span class="fl">6.285714</span> </span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="compute-bootstrap-descriptive-statistics">Compute bootstrap descriptive statistics<a class="anchor" aria-label="anchor" href="#compute-bootstrap-descriptive-statistics"></a>
@@ -696,13 +740,13 @@ bootstrapped vector/df of effective sizes (see the object
 <code>lineupsizes</code>, above). We pass this to
 <code><a href="../reference/gen_boot_propmean_se.html">gen_boot_propmean_se()</a></code>. Descriptive statistics are reported
 in some detail.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">gen_boot_propmean_se</span>(lineupsizes)</span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>Boot <span class="fu">prop.</span> (mean)   <span class="ot">=</span>  <span class="fl">5.815564</span> </span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>Boot <span class="fu">prop.</span> (median) <span class="ot">=</span>  <span class="fl">5.804511</span> </span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>SD of boot prop     <span class="ot">=</span>  <span class="fl">0.2473418</span> </span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>SE of boot prop     <span class="ot">=</span>  <span class="fl">0.247</span> </span>
-<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="fl">2.5</span>% boot CI lvl    <span class="ot">=</span>  <span class="fl">5.323308</span> </span>
-<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a><span class="fl">97.5</span>% boot CI lvl   <span class="ot">=</span>  <span class="fl">6.263158</span> </span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">gen_boot_propmean_se</span>(lineupsizes)</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>Boot <span class="fu">prop.</span> (mean)   <span class="ot">=</span>  <span class="fl">5.820346</span> </span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>Boot <span class="fu">prop.</span> (median) <span class="ot">=</span>  <span class="fl">5.827068</span> </span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>SD of boot prop     <span class="ot">=</span>  <span class="fl">0.2395503</span> </span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>SE of boot prop     <span class="ot">=</span>  <span class="fl">0.24</span> </span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="fl">2.5</span>% boot CI lvl    <span class="ot">=</span>  <span class="fl">5.345865</span> </span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="fl">97.5</span>% boot CI lvl   <span class="ot">=</span>  <span class="fl">6.285714</span> </span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -717,6 +761,15 @@ where I =
 <p>and where k, N, and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>O</mi><mi>i</mi></msub><annotation encoding="application/x-tex">O_i</annotation></semantics></math>
 are all as defined earlier.</p>
+<p>Substituting for I gives
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>E</mi><mo>′</mo></msup><mo>=</mo><mn>1</mn><mi>/</mi><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup><mo stretchy="false" form="prefix">(</mo><msub><mi>O</mi><mi>i</mi></msub><mi>/</mi><mi>N</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">E' = 1/\sum_{i=1}^k (O_i/N)^2</annotation></semantics></math>.
+This is the reciprocal of Simpson’s (1949) concentration index, known in
+ecology as the inverse Simpson index and in economics as the inverse
+Herfindahl index, and it can be read as the effective number of members
+drawing choices: if all k members are chosen equally often, E’ = k, and
+if one member draws every choice, E’ = 1. The other vignettes use this
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mo>∑</mo><msubsup><mi>p</mi><mi>i</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">1/\sum p_i^2</annotation></semantics></math>
+form; it is the same quantity as Tredoux’s E’.</p>
 <p>To compute Tredoux’s measure of effective size, E’, use the function
 <code><a href="../reference/esize_T.html">esize_T()</a></code>. We can compute confidence intervals around the
 measure of E’ using normal distribution theory, and using bootstrap
@@ -726,42 +779,42 @@ intervals, with the function <code><a href="../reference/esize_T_boot.html">esiz
 shown below. Recall that <code>lineup_tab</code> was created near the
 start of this vignette with
 <code>lineup_table(lineup_vec, k = 8)</code>.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="co"># Compute effective size from a lineup table</span></span>
-<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="fu">esize_T</span>(lineup_tab)</span>
-<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.693273</span></span>
-<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a></span>
-<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="co"># Compute bootstrapped effective size</span></span>
-<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>esize_boot <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(lineup_vec, esize_T_boot, <span class="at">R =</span> <span class="dv">1000</span>)</span>
-<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a>esize_boot</span>
-<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a></span>
-<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>ORDINARY NONPARAMETRIC BOOTSTRAP</span>
-<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a></span>
-<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>Call<span class="sc">:</span></span>
-<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot</span>(<span class="at">data =</span> lineup_vec, <span class="at">statistic =</span> esize_T_boot, <span class="at">R =</span> <span class="dv">1000</span>)</span>
-<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a></span>
-<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a></span>
-<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a>Bootstrap Statistics <span class="sc">:</span></span>
-<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a>    original     bias    std. error</span>
-<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a>t1<span class="sc">*</span> <span class="fl">5.693273</span> <span class="sc">-</span><span class="fl">0.1680123</span>   <span class="fl">0.4080961</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co"># Compute effective size from a lineup table</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="fu">esize_T</span>(lineup_tab)</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.693273</span></span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a><span class="co"># Compute bootstrapped effective size</span></span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>esize_boot <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot</span>(lineup_vec, esize_T_boot, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>esize_boot</span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>ORDINARY NONPARAMETRIC BOOTSTRAP</span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a>Call<span class="sc">:</span></span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot</span>(<span class="at">data =</span> lineup_vec, <span class="at">statistic =</span> esize_T_boot, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a>Bootstrap Statistics <span class="sc">:</span></span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a>    original     bias    std. error</span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a>t1<span class="sc">*</span> <span class="fl">5.693273</span> <span class="sc">-</span><span class="fl">0.1578132</span>   <span class="fl">0.4144991</span></span></code></pre></div>
 <p>When requesting confidence intervals, name the types you actually
 want:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>esize_boot_ci <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot.ci</span>(esize_boot, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"perc"</span>, <span class="st">"bca"</span>))</span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>esize_boot_ci</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS</span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>Based on <span class="dv">1000</span> bootstrap replicates</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a></span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>CALL <span class="sc">:</span> </span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot.ci</span>(<span class="at">boot.out =</span> esize_boot, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"perc"</span>, <span class="st">"bca"</span>))</span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a></span>
-<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>Intervals <span class="sc">:</span> </span>
-<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a>Level     Percentile            BCa          </span>
-<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a><span class="dv">95</span>%   ( <span class="fl">4.691</span>,  <span class="fl">6.306</span> )   ( <span class="fl">5.070</span>,  <span class="fl">6.649</span> )  </span>
-<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a>Calculations and Intervals on Original Scale</span>
-<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a>Some BCa intervals may be unstable</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>esize_boot_ci <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">boot.ci</span>(esize_boot, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"perc"</span>, <span class="st">"bca"</span>))</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>esize_boot_ci</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>Based on <span class="dv">1000</span> bootstrap replicates</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>CALL <span class="sc">:</span> </span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">boot.ci</span>(<span class="at">boot.out =</span> esize_boot, <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"perc"</span>, <span class="st">"bca"</span>))</span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a>Intervals <span class="sc">:</span> </span>
+<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a>Level     Percentile            BCa          </span>
+<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a><span class="dv">95</span>%   ( <span class="fl">4.681</span>,  <span class="fl">6.333</span> )   ( <span class="fl">5.029</span>,  <span class="fl">6.589</span> )  </span>
+<span id="cb27-12"><a href="#cb27-12" tabindex="-1"></a>Calculations and Intervals on Original Scale</span>
+<span id="cb27-13"><a href="#cb27-13" tabindex="-1"></a>Some BCa intervals may be unstable</span></code></pre></div>
 <p>Calling <code>boot.ci()</code> without a <code>type</code> argument
-asks for <em>all</em> interval types, and produces two warnings that are
-worth understanding rather than ignoring:</p>
+asks for <em>all</em> interval types, and produces two warnings that
+should be understood rather than ignored:</p>
 <ul>
 <li>
 <em>“bootstrap variances needed for studentized intervals”</em>. The
@@ -776,23 +829,34 @@ endpoint is being read off the very smallest or largest values, where it
 is unstable. The remedy is more replicates (a larger <code>R</code>),
 not a different interval type.</li>
 </ul>
-<p>Neither the studentized nor the normal-approximation interval is of
-much interest for a statistic like E’, so requesting <code>"perc"</code>
-and <code>"bca"</code> explicitly, as above, both avoids the warnings
-and reflects what you actually want.</p>
+<p>These calls demonstrate empirical bootstrap intervals, which have
+important inferential limits. <strong>Do not test exact fairness by
+checking whether a percentile or BCa interval for plug-in E’ contains
+nominal size.</strong> At N=100 and k=6, the most even possible count
+vector is (17,17,17,17,16,16), so the largest empirical E’ is 10000/1668
+= 5.9952. Every bootstrap value is at most that number: an interval made
+from its quantiles cannot contain the perfectly fair population value 6.
+More resamples do not fix this nonregular boundary problem.
+Normal-theory and corrected-estimator intervals also require separate
+sampling assessment; none is a universally reliable replacement.
+Bayesian credible intervals describe the stated posterior and should not
+be treated as tests of exact equality to k.</p>
 <p>You can also look at the whole bootstrap distribution:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">esize_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/esize_boot_dist.html">esize_boot_dist</a></span><span class="op">(</span><span class="va">lineup_vec</span>, k <span class="op">=</span> <span class="fl">8</span>, metric <span class="op">=</span> <span class="st">"tredoux"</span>, R <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_esize_distribution.html">plot_esize_distribution</a></span><span class="op">(</span><span class="va">esize_dist</span>, metric <span class="op">=</span> <span class="st">"E' (Tredoux, 1998)"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Vignette_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" alt="" width="576"></p>
 <div class="section level4">
-<h4 id="e-is-biased-downward-in-small-samples">E’ is biased downward in small samples<a class="anchor" aria-label="anchor" href="#e-is-biased-downward-in-small-samples"></a>
+<h4 id="e-has-small-sample-bias-downward-for-fair-lineups">E’ has small-sample bias, downward for fair lineups<a class="anchor" aria-label="anchor" href="#e-has-small-sample-bias-downward-for-fair-lineups"></a>
 </h4>
 <p>The estimator above is a <strong>plug-in</strong>: sample proportions
-are substituted for the unknown choice probabilities. Plug-in estimators
-of
+are substituted for the unknown choice probabilities. The plug-in
+estimate of the concentration
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo><msubsup><mi>p</mi><mi>i</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\sum p_i^2</annotation></semantics></math>
-are biased upward, so E’ — its reciprocal — is biased
+is biased upward. That does not by itself fix the direction of the bias
+in its reciprocal, E’, because the expectation of a nonlinear function
+is not the function of the expectation. For fair and near-fair lineups,
+where the question is usually important, E’ is biased
 <strong>downward</strong>. For
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
 choices spread evenly over
@@ -803,7 +867,7 @@ members the bias is approximately</p>
 <p>which is not negligible at the sample sizes mock-witness studies
 typically use. A perfectly fair six-person lineup returns about 5.47
 rather than 6 with 50 choices, and about 4.87 with 20:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">4242</span><span class="op">)</span></span>
 <span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fl">6L</span></span>
 <span></span>
@@ -862,51 +926,70 @@ row.</caption>
 </tr>
 </tbody>
 </table>
+<p>The downward bias is not universal. When one member draws most
+choices it can reverse: for two members chosen with probabilities .9 and
+.1 and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">N = 10</annotation></semantics></math>,
+exact enumeration over all binomial outcomes gives a mean plug-in E′ of
+1.230 against a true value of 1.220.</p>
 <p><code><a href="../reference/esize_T.html">esize_T()</a></code> accepts <code>unbiased = TRUE</code>, which
-substitutes the unbiased estimator of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo><msubsup><mi>p</mi><mi>i</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\sum p_i^2</annotation></semantics></math>,
-namely
+replaces the concentration with its unbiased estimator,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo><msub><mi>O</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>O</mi><mi>i</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\sum O_i(O_i-1)/(N(N-1))</annotation></semantics></math>,
+and reports the reciprocal,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mo>∑</mo><msub><mi>O</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>O</mi><mi>i</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(N-1)/\sum O_i(O_i-1)</annotation></semantics></math>.
-The default is unchanged, so nothing previously computed moves; the
-correction is available when wanted:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">c</span>(<span class="at">plug_in =</span> <span class="fu">esize_T</span>(lineup_tab),</span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>  <span class="at">corrected =</span> <span class="fu">esize_T</span>(lineup_tab, <span class="at">unbiased =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>  plug_in corrected </span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a> <span class="fl">5.693273</span>  <span class="fl">5.903161</span> </span></code></pre></div>
+The reciprocal of an unbiased estimate is not itself unbiased: the
+corrected E′ removes most of the bias for near-fair lineups, as the
+table shows, but it is more variable, and in the concentrated two-member
+example above it overshoots further (mean 1.269). The default is the
+plug-in estimator; the correction is available when wanted:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">c</span>(<span class="at">plug_in =</span> <span class="fu">esize_T</span>(lineup_tab),</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>  <span class="at">corrected =</span> <span class="fu">esize_T</span>(lineup_tab, <span class="at">unbiased =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>  plug_in corrected </span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a> <span class="fl">5.693273</span>  <span class="fl">5.903161</span> </span></code></pre></div>
 <p>Which to report depends on the question. For
 <strong>describing</strong> the choice distribution actually observed,
 the plug-in value is the quantity of interest. For
-<strong>inference</strong> about the lineup that produced those choices
-— which is the framing of Tredoux (1998) — the corrected form is the
-better estimator. Either way, state which was used.</p>
+<strong>inference</strong> about the lineup that produced those choices,
+which is the framing of Tredoux (1998), the corrected form usually has
+less bias when choices are spread across members, at the cost of more
+variance. Neither is uniformly better. Either way, state which was
+used.</p>
 </div>
 <div class="section level4">
 <h4 id="getting-the-choice-distribution-without-mock-witnesses">Getting the choice distribution without mock witnesses<a class="anchor" aria-label="anchor" href="#getting-the-choice-distribution-without-mock-witnesses"></a>
 </h4>
 <p>E’ needs a distribution of choices across lineup members, which
-normally means running a mock-witness study. There is an alternative
-worth knowing about: <strong>target-absent lineups from an
-identification experiment supply the same thing</strong>. A witness
-viewing a target-absent lineup has no culprit to recognise, so their
-choice reflects how the members compare to their memory and to the
-description — functionally what a mock witness provides.</p>
+normally means running a mock-witness study. There is an alternative:
+<strong>target-absent lineups from an identification experiment supply a
+choice distribution too</strong>. Its effective size is a
+<em>resultant</em> measure of how choices spread in practice, and
+Fitzgerald, Tredoux and Juncu (2023) use it this way. It is not the same
+measurement as a mock-witness E′: a witness viewing a target-absent
+lineup has a memory of the culprit and may reject the lineup, whereas a
+mock witness chooses from a description, and the two families of
+measures can disagree (Lee, Mansour &amp; Penrod, 2024).</p>
 <p>If your data record which member was chosen, E’ follows directly:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="fu">data</span>(lineup_example)</span>
-<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>ta <span class="ot">&lt;-</span> lineup_example[<span class="sc">!</span>lineup_example<span class="sc">$</span>target_present, ]</span>
-<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>chosen <span class="ot">&lt;-</span> ta<span class="sc">$</span>lineup_member[ta<span class="sc">$</span>lineup_member <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
-<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a></span>
-<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a><span class="fu">c</span>(<span class="at">plug_in   =</span> <span class="fu">esize_T</span>(<span class="fu">table</span>(<span class="fu">factor</span>(chosen, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>))),</span>
-<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>  <span class="at">corrected =</span> <span class="fu">esize_T</span>(<span class="fu">table</span>(<span class="fu">factor</span>(chosen, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)), <span class="at">unbiased =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>  plug_in corrected </span>
-<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a> <span class="fl">4.225584</span>  <span class="fl">4.253132</span> </span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="fu">data</span>(lineup_example)</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>ta <span class="ot">&lt;-</span> lineup_example[<span class="sc">!</span>lineup_example<span class="sc">$</span>target_present, ]</span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>chosen <span class="ot">&lt;-</span> ta<span class="sc">$</span>lineup_member[ta<span class="sc">$</span>lineup_member <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a><span class="fu">c</span>(<span class="at">plug_in   =</span> <span class="fu">esize_T</span>(<span class="fu">table</span>(<span class="fu">factor</span>(chosen, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>))),</span>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a>  <span class="at">corrected =</span> <span class="fu">esize_T</span>(<span class="fu">table</span>(<span class="fu">factor</span>(chosen, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)), <span class="at">unbiased =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a>  plug_in corrected </span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a> <span class="fl">4.225584</span>  <span class="fl">4.253132</span> </span></code></pre></div>
 <p>This is the reason the package records <code>lineup_member</code>
 rather than only the collapsed <code>identification</code> label: a
 dataset that stores just suspect/filler/reject cannot support this
 calculation, because it no longer knows <em>which</em> filler was
 chosen. Note that the bias above applies here too, and target-absent
 choosers are often fewer than mock witnesses would be, so the correction
-matters more rather than less. ### 3. Effective Size Per Foils</p>
+is more important rather than less.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="effective-size-per-foils">3. Effective Size Per Foils<a class="anchor" aria-label="anchor" href="#effective-size-per-foils"></a>
+</h3>
 <p>Malpass (1981) proposed an additional method for computing effective
 size, based on the number of foils who are chosen at a rate nearly equal
 to chance expectation. We propose that ‘nearly equal’ could mean that
@@ -915,18 +998,28 @@ the proportion of mock witnesses choosing the lineup member.</p>
 <p>To calculate effective size by counting the number of foils who fall
 within the CI for chance guessing, we pass a vector of lineup data, a
 vector of target positions and nominal size.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">eff_size_per_foils</span>(lineup_vec, <span class="at">target_pos =</span> <span class="fu">seq_len</span>(<span class="dv">8</span>), <span class="at">k =</span> <span class="dv">8</span>,</span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>                   <span class="at">conf =</span> <span class="fl">0.95</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
-<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">4</span></span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">eff_size_per_foils</span>(lineup_vec, <span class="at">target_pos =</span> <span class="fu">seq_len</span>(<span class="dv">8</span>), <span class="at">k =</span> <span class="dv">8</span>,</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>                   <span class="at">conf =</span> <span class="fl">0.95</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">4</span></span></code></pre></div>
 <p>Applying this function to our data, we see that effective size for
 this lineup is 4: four of the eight members were chosen at a rate not
 distinguishable from chance.</p>
 <p>Note that the value returned is a <strong>count of members</strong>,
 not a continuous quantity, so it moves only in whole steps as
 <code>conf</code> is varied, and it stays flat across any range of
-<code>conf</code> in which no member’s interval crosses 1/k. Widening
-the interval can only ever increase the count.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code>conf</code> in which no member’s interval crosses 1/k.</p>
+<p>The direction of the change with <code>conf</code> can look backwards
+at first. A member is counted when its interval
+<strong>contains</strong> chance, that is, when its choice rate cannot
+be distinguished from 1/k. A higher <code>conf</code> gives wider
+intervals, which makes it harder to show that any member departs from
+chance, so more members are counted and the effective size rises. A
+higher confidence level is a stricter test of <em>unfairness</em>, and
+so a more lenient test of each foil. The same logic means the measure
+rises when there are few mock witnesses, because every interval is then
+wide: with a small sample, a large count can reflect low power rather
+than a fair lineup.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">conf</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.95</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"conf ="</span>, <span class="va">conf</span>, <span class="st">"-&gt;"</span>,</span>
 <span>      <span class="fu"><a href="../reference/eff_size_per_foils.html">eff_size_per_foils</a></span><span class="op">(</span><span class="va">lineup_vec</span>, target_pos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span>, k <span class="op">=</span> <span class="fl">8</span>,</span>
@@ -940,7 +1033,6 @@ the interval can only ever increase the count.</p>
 built, the intervals are not corrected for the fact that <code>k</code>
 of them are examined at once.</p>
 </div>
-</div>
 <div class="section level3">
 <h3 id="comparing-two-effective-sizes">Comparing two effective sizes<a class="anchor" aria-label="anchor" href="#comparing-two-effective-sizes"></a>
 </h3>
@@ -951,18 +1043,18 @@ function, <code><a href="../reference/effsize_compare.html">effsize_compare()</a
 containing lineup data for two independent lineups. Here, we create a
 new dataframe containing two independent lineups from
 <code>nortje2012</code>.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="co"># Get data</span></span>
-<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>linedf <span class="ot">&lt;-</span> nortje2012[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
-<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a></span>
-<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a><span class="co"># Compare effective size</span></span>
-<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a><span class="fu">effsize_compare</span>(linedf)</span>
-<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a></span>
-<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>The two Effective sizes are  <span class="fl">5.693273</span>   <span class="fl">4.967425</span></span>
-<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>If the interval includes <span class="dv">0</span>, ns at p <span class="ot">=</span> .<span class="dv">05</span></span>
-<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a>Confidence intervals of difference [<span class="dv">95</span>%]</span>
-<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a>Normal Theory <span class="sc">-</span><span class="fl">0.231</span> <span class="fl">1.788</span></span>
-<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a>Bootstrap<span class="sc">:</span> <span class="fu">percentile</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="sc">-</span><span class="fl">0.389</span> <span class="fl">1.702</span></span>
-<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a>Bootstrap<span class="sc">:</span> bias<span class="sc">-</span><span class="fu">corrected</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="sc">-</span><span class="fl">0.325</span> <span class="fl">1.743</span></span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="co"># Get data</span></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>linedf <span class="ot">&lt;-</span> nortje2012[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a><span class="co"># Compare effective size</span></span>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a><span class="fu">effsize_compare</span>(linedf)</span>
+<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" tabindex="-1"></a>The two Effective sizes are  <span class="fl">5.693273</span>   <span class="fl">4.967425</span></span>
+<span id="cb34-8"><a href="#cb34-8" tabindex="-1"></a>If the interval includes <span class="dv">0</span>, ns at p <span class="ot">=</span> .<span class="dv">05</span></span>
+<span id="cb34-9"><a href="#cb34-9" tabindex="-1"></a>Confidence intervals of difference [<span class="dv">95</span>%]</span>
+<span id="cb34-10"><a href="#cb34-10" tabindex="-1"></a>Normal Theory <span class="sc">-</span><span class="fl">0.302</span> <span class="fl">1.887</span></span>
+<span id="cb34-11"><a href="#cb34-11" tabindex="-1"></a>Bootstrap<span class="sc">:</span> <span class="fu">percentile</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="sc">-</span><span class="fl">0.4</span> <span class="fl">1.737</span></span>
+<span id="cb34-12"><a href="#cb34-12" tabindex="-1"></a>Bootstrap<span class="sc">:</span> bias<span class="sc">-</span><span class="fu">corrected</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="sc">-</span><span class="fl">0.292</span> <span class="fl">1.836</span></span></code></pre></div>
 <p>The effective size for lineup_1 is therefore not significantly
 different from the effective size for lineup_2.</p>
 <hr>
@@ -989,22 +1081,24 @@ choices in which the target was present (TP), a vector of lineup choices
 in which the target was absent (TA), as well as target positions and
 nominal size for TP and TA lineups, respectively. These last arguments
 are specified explicitly.</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="co"># Target present &amp; target absent lineup data for 1 lineup pair</span></span>
-<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>TP_lineup <span class="ot">&lt;-</span> nortje2012<span class="sc">$</span>lineup_1</span>
-<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>TA_lineup <span class="ot">&lt;-</span> nortje2012<span class="sc">$</span>lineup_3</span>
-<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a></span>
-<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a><span class="co"># Compute diagnosticity ratio</span></span>
-<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a><span class="fu">diag_ratio_W</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">7</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
-<span id="cb33-7"><a href="#cb33-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">6.333333</span></span>
-<span id="cb33-8"><a href="#cb33-8" tabindex="-1"></a><span class="fu">diag_ratio_T</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">7</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
-<span id="cb33-9"><a href="#cb33-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.571429</span></span></code></pre></div>
-<p>We can also calculate the variance of the diagnosticity ratio, which
-is useful for applying some inferential methods:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="fu">var_diag_ratio</span>(TP_lineup, TA_lineup, <span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">8</span>)</span>
-<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.3709273</span></span></code></pre></div>
-<p><em>Note:</em> <code><a href="../reference/var_diag_ratio.html">var_diag_ratio()</a></code> relies on Wells &amp;
-Lindsay’s original formula for computing diagnosticity ratio. See
-Tredoux (1998) for further details.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="co"># Target present &amp; target absent lineup data for 1 lineup pair</span></span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>TP_lineup <span class="ot">&lt;-</span> nortje2012<span class="sc">$</span>lineup_1</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>TA_lineup <span class="ot">&lt;-</span> nortje2012<span class="sc">$</span>lineup_3</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a><span class="co"># Compute diagnosticity ratio</span></span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a><span class="fu">diag_ratio_W</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">7</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">6.333333</span></span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a><span class="fu">diag_ratio_T</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">7</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.571429</span></span></code></pre></div>
+<p>We can also calculate the large-sample variance of the log
+diagnosticity ratio, which is useful for applying some inferential
+methods:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">var_diag_ratio</span>(TP_lineup, TA_lineup, <span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">8</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.3709273</span></span></code></pre></div>
+<p><em>Note:</em> This variance is on the <strong>log-ratio
+scale</strong>, not the raw ratio scale. A delta-method variance on the
+raw scale multiplies it by the squared ratio. See Tredoux (1998) for the
+large-sample assumptions.</p>
 <div class="section level3">
 <h3 id="differences-between-independent-diagnosticity-ratios">Differences between Independent Diagnosticity Ratios<a class="anchor" aria-label="anchor" href="#differences-between-independent-diagnosticity-ratios"></a>
 </h3>
@@ -1024,9 +1118,9 @@ this, we compute a chi-square deviate with <em>k</em>−1 degrees of
 freedom, and calculate its significance.</p>
 <p>All these calculations are built into <code><a href="../reference/homog_diag.html">homog_diag()</a></code>, and
 so do not need to be calculated separately.</p>
-<p><strong>Two different questions.</strong> Before running anything it
-is worth being explicit about what this test does and does not tell you,
-because its output is easy to misread. The chi-square is Cochran’s
+<p><strong>Two different questions.</strong> It is important to make a
+point of clarification here about what this test does and does not tell
+you, because its output is easy to misread. The chi-square is Cochran’s
 <em>Q</em>,</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>w</mi><mi>i</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi mathvariant="normal">ln</mi><msub><mi>d</mi><mi>i</mi></msub><mo>−</mo><mi mathvariant="normal">ln</mi><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">Q = \sum_{i=1}^{k} w_i \left( \ln d_i - \ln \bar{d} \right)^2 ,</annotation></semantics></math></p>
 <p>which measures how far the <em>k</em> ratios lie <strong>from each
@@ -1074,7 +1168,7 @@ TP lineup list is TP lineup data for lineup pair 1, then the first
 element of the TA lineup list should be the TA lineup data for lineup
 pair 1.</li>
 </ol>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Target present data:</span></span>
 <span><span class="va">TP_lineup1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">TP_lineup2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, length.out <span class="op">=</span> <span class="fl">70</span><span class="op">)</span></span>
@@ -1092,7 +1186,7 @@ pair. If the TP and TA suspect positions differ, supply a two-element
 vector in TP, TA order for that pair. A single position can be supplied
 for each pair when it is shared by the TP and TA lineups.</li>
 </ol>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pos_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li>To ensure the data have been coded accurately, we then specify
@@ -1101,26 +1195,26 @@ positions of each respective lineup in the lineup lists (i.e., if lineup
 1 has <em>k</em> = 6, then the first element of vector <code>k</code> =
 6).</li>
 </ol>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <ol start="4" style="list-style-type: decimal">
 <li>Finally, we pass the above arguments to <code><a href="../reference/homog_diag.html">homog_diag()</a></code>,
 which assesses the homogeneity of k independent diagnosticity
 ratios.</li>
 </ol>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="fu">homog_diag</span>(lineup_pres_list, lineup_abs_list, pos_list, k)</span>
-<span id="cb38-2"><a href="#cb38-2" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
-<span id="cb38-3"><a href="#cb38-3" tabindex="-1"></a> pair     d       <span class="dv">95</span>% CI</span>
-<span id="cb38-4"><a href="#cb38-4" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">1.000</span> [<span class="fl">0.54</span>, <span class="fl">1.84</span>]</span>
-<span id="cb38-5"><a href="#cb38-5" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">1.000</span> [<span class="fl">0.52</span>, <span class="fl">1.94</span>]</span>
-<span id="cb38-6"><a href="#cb38-6" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">1.000</span> [<span class="fl">0.34</span>, <span class="fl">2.93</span>]</span>
-<span id="cb38-7"><a href="#cb38-7" tabindex="-1"></a></span>
-<span id="cb38-8"><a href="#cb38-8" tabindex="-1"></a>Mean diagnosticity ratio<span class="sc">:</span> <span class="dv">1</span></span>
-<span id="cb38-9"><a href="#cb38-9" tabindex="-1"></a>Chi<span class="sc">-</span>square <span class="fu">estimate</span> (q)<span class="sc">:</span> <span class="dv">0</span></span>
-<span id="cb38-10"><a href="#cb38-10" tabindex="-1"></a>Sig<span class="sc">:</span> <span class="dv">1</span></span>
-<span id="cb38-11"><a href="#cb38-11" tabindex="-1"></a></span>
-<span id="cb38-12"><a href="#cb38-12" tabindex="-1"></a>Note<span class="sc">:</span> no evidence of <span class="fu">heterogeneity</span> (p <span class="sc">&gt;=</span> <span class="fl">0.05</span>), so the ratios are</span>
-<span id="cb38-13"><a href="#cb38-13" tabindex="-1"></a>consistent with a common value and the pooled mean is a reasonable summary.</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a><span class="fu">homog_diag</span>(lineup_pres_list, lineup_abs_list, pos_list, k)</span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
+<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a> pair     d       <span class="dv">95</span>% CI</span>
+<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">1.000</span> [<span class="fl">0.54</span>, <span class="fl">1.84</span>]</span>
+<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">1.000</span> [<span class="fl">0.52</span>, <span class="fl">1.94</span>]</span>
+<span id="cb40-6"><a href="#cb40-6" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">1.000</span> [<span class="fl">0.34</span>, <span class="fl">2.93</span>]</span>
+<span id="cb40-7"><a href="#cb40-7" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" tabindex="-1"></a>Mean diagnosticity ratio<span class="sc">:</span> <span class="dv">1</span></span>
+<span id="cb40-9"><a href="#cb40-9" tabindex="-1"></a>Chi<span class="sc">-</span>square <span class="fu">estimate</span> (q)<span class="sc">:</span> <span class="dv">0</span></span>
+<span id="cb40-10"><a href="#cb40-10" tabindex="-1"></a>Sig<span class="sc">:</span> <span class="dv">1</span></span>
+<span id="cb40-11"><a href="#cb40-11" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" tabindex="-1"></a>Note<span class="sc">:</span> no evidence of <span class="fu">heterogeneity</span> (p <span class="sc">&gt;=</span> <span class="fl">0.05</span>), so the ratios are</span>
+<span id="cb40-13"><a href="#cb40-13" tabindex="-1"></a>consistent with a common value and the pooled mean is a reasonable summary.</span></code></pre></div>
 <p>These three lineups were built with <code><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep()</a></code> and are close
 to uniform by construction. Every pair has the suspect chosen equally
 often whether the target was present or absent, so each <em>d</em> = 1
@@ -1132,31 +1226,31 @@ difference between them.</p>
 pairs is diagnostic — the suspect is chosen more often when the target
 is present — but they differ substantially in <strong>how</strong>
 diagnostic they are:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="co"># A helper: n1 witnesses choose position 1, the rest spread over positions 2-6</span></span>
-<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a>choose_pos1 <span class="ot">&lt;-</span> <span class="cf">function</span>(n1) <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, n1), <span class="fu">rep</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">length.out =</span> <span class="dv">100</span> <span class="sc">-</span> n1))</span>
-<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a></span>
-<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a><span class="co"># Suspect ID rate falls from .60 to .32 across the three TP lineups,</span></span>
-<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a><span class="co"># and rises from .10 to .20 across the three TA lineups</span></span>
-<span id="cb39-6"><a href="#cb39-6" tabindex="-1"></a>het_pres <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">60</span>), <span class="fu">choose_pos1</span>(<span class="dv">45</span>), <span class="fu">choose_pos1</span>(<span class="dv">32</span>))</span>
-<span id="cb39-7"><a href="#cb39-7" tabindex="-1"></a>het_abs  <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">10</span>), <span class="fu">choose_pos1</span>(<span class="dv">15</span>), <span class="fu">choose_pos1</span>(<span class="dv">20</span>))</span>
-<span id="cb39-8"><a href="#cb39-8" tabindex="-1"></a></span>
-<span id="cb39-9"><a href="#cb39-9" tabindex="-1"></a><span class="fu">homog_diag</span>(het_pres, het_abs, <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>))</span>
-<span id="cb39-10"><a href="#cb39-10" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
-<span id="cb39-11"><a href="#cb39-11" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
-<span id="cb39-12"><a href="#cb39-12" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
-<span id="cb39-13"><a href="#cb39-13" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">3.000</span>  [<span class="fl">1.79</span>, <span class="fl">5.02</span>]</span>
-<span id="cb39-14"><a href="#cb39-14" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">1.600</span>  [<span class="fl">0.99</span>, <span class="fl">2.60</span>]</span>
-<span id="cb39-15"><a href="#cb39-15" tabindex="-1"></a></span>
-<span id="cb39-16"><a href="#cb39-16" tabindex="-1"></a>Mean diagnosticity ratio<span class="sc">:</span> <span class="fl">2.782997</span></span>
-<span id="cb39-17"><a href="#cb39-17" tabindex="-1"></a>Chi<span class="sc">-</span>square <span class="fu">estimate</span> (q)<span class="sc">:</span> <span class="fl">11.18942</span></span>
-<span id="cb39-18"><a href="#cb39-18" tabindex="-1"></a>Sig<span class="sc">:</span> <span class="fl">0.003717485</span></span>
-<span id="cb39-19"><a href="#cb39-19" tabindex="-1"></a></span>
-<span id="cb39-20"><a href="#cb39-20" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
-<span id="cb39-21"><a href="#cb39-21" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
-<span id="cb39-22"><a href="#cb39-22" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
-<span id="cb39-23"><a href="#cb39-23" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
-<span id="cb39-24"><a href="#cb39-24" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
-<span id="cb39-25"><a href="#cb39-25" tabindex="-1"></a>pairs separately.</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="co"># A helper: n1 witnesses choose position 1, the rest spread over positions 2-6</span></span>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a>choose_pos1 <span class="ot">&lt;-</span> <span class="cf">function</span>(n1) <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, n1), <span class="fu">rep</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">length.out =</span> <span class="dv">100</span> <span class="sc">-</span> n1))</span>
+<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a><span class="co"># Suspect ID rate falls from .60 to .32 across the three TP lineups,</span></span>
+<span id="cb41-5"><a href="#cb41-5" tabindex="-1"></a><span class="co"># and rises from .10 to .20 across the three TA lineups</span></span>
+<span id="cb41-6"><a href="#cb41-6" tabindex="-1"></a>het_pres <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">60</span>), <span class="fu">choose_pos1</span>(<span class="dv">45</span>), <span class="fu">choose_pos1</span>(<span class="dv">32</span>))</span>
+<span id="cb41-7"><a href="#cb41-7" tabindex="-1"></a>het_abs  <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">10</span>), <span class="fu">choose_pos1</span>(<span class="dv">15</span>), <span class="fu">choose_pos1</span>(<span class="dv">20</span>))</span>
+<span id="cb41-8"><a href="#cb41-8" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" tabindex="-1"></a><span class="fu">homog_diag</span>(het_pres, het_abs, <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>))</span>
+<span id="cb41-10"><a href="#cb41-10" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
+<span id="cb41-11"><a href="#cb41-11" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
+<span id="cb41-12"><a href="#cb41-12" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
+<span id="cb41-13"><a href="#cb41-13" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">3.000</span>  [<span class="fl">1.79</span>, <span class="fl">5.02</span>]</span>
+<span id="cb41-14"><a href="#cb41-14" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">1.600</span>  [<span class="fl">0.99</span>, <span class="fl">2.60</span>]</span>
+<span id="cb41-15"><a href="#cb41-15" tabindex="-1"></a></span>
+<span id="cb41-16"><a href="#cb41-16" tabindex="-1"></a>Mean diagnosticity ratio<span class="sc">:</span> <span class="fl">2.782997</span></span>
+<span id="cb41-17"><a href="#cb41-17" tabindex="-1"></a>Chi<span class="sc">-</span>square <span class="fu">estimate</span> (q)<span class="sc">:</span> <span class="fl">11.18942</span></span>
+<span id="cb41-18"><a href="#cb41-18" tabindex="-1"></a>Sig<span class="sc">:</span> <span class="fl">0.003717485</span></span>
+<span id="cb41-19"><a href="#cb41-19" tabindex="-1"></a></span>
+<span id="cb41-20"><a href="#cb41-20" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
+<span id="cb41-21"><a href="#cb41-21" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
+<span id="cb41-22"><a href="#cb41-22" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
+<span id="cb41-23"><a href="#cb41-23" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
+<span id="cb41-24"><a href="#cb41-24" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
+<span id="cb41-25"><a href="#cb41-25" tabindex="-1"></a>pairs separately.</span></code></pre></div>
 <p>The per-pair table makes the result readable: the ratios are 6.0, 3.0
 and 1.6, all pointing the same way but far enough apart that <em>Q</em>
 = 11.19 on 2 <em>df</em> rejects homogeneity (<em>p</em> = .004). The
@@ -1177,26 +1271,26 @@ degree — one lineup strongly incriminating, one uninformative, and one
 that points the wrong way (the suspect is chosen <em>more</em> often
 when the target is absent, which is what a badly biased lineup looks
 like):</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>mixed_pres <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">60</span>), <span class="fu">choose_pos1</span>(<span class="dv">30</span>), <span class="fu">choose_pos1</span>(<span class="dv">20</span>))</span>
-<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>mixed_abs  <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">10</span>), <span class="fu">choose_pos1</span>(<span class="dv">30</span>), <span class="fu">choose_pos1</span>(<span class="dv">45</span>))</span>
-<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a></span>
-<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a><span class="fu">homog_diag</span>(mixed_pres, mixed_abs, <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>))</span>
-<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
-<span id="cb40-6"><a href="#cb40-6" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
-<span id="cb40-7"><a href="#cb40-7" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
-<span id="cb40-8"><a href="#cb40-8" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">1.000</span>  [<span class="fl">0.65</span>, <span class="fl">1.53</span>]</span>
-<span id="cb40-9"><a href="#cb40-9" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">0.444</span>  [<span class="fl">0.28</span>, <span class="fl">0.70</span>]</span>
-<span id="cb40-10"><a href="#cb40-10" tabindex="-1"></a></span>
-<span id="cb40-11"><a href="#cb40-11" tabindex="-1"></a>Mean diagnosticity ratio<span class="sc">:</span> <span class="fl">1.060829</span></span>
-<span id="cb40-12"><a href="#cb40-12" tabindex="-1"></a>Chi<span class="sc">-</span>square <span class="fu">estimate</span> (q)<span class="sc">:</span> <span class="fl">45.62598</span></span>
-<span id="cb40-13"><a href="#cb40-13" tabindex="-1"></a>Sig<span class="sc">:</span> <span class="fl">1.237212e-10</span></span>
-<span id="cb40-14"><a href="#cb40-14" tabindex="-1"></a></span>
-<span id="cb40-15"><a href="#cb40-15" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
-<span id="cb40-16"><a href="#cb40-16" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
-<span id="cb40-17"><a href="#cb40-17" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
-<span id="cb40-18"><a href="#cb40-18" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
-<span id="cb40-19"><a href="#cb40-19" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
-<span id="cb40-20"><a href="#cb40-20" tabindex="-1"></a>pairs separately.</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>mixed_pres <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">60</span>), <span class="fu">choose_pos1</span>(<span class="dv">30</span>), <span class="fu">choose_pos1</span>(<span class="dv">20</span>))</span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>mixed_abs  <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">10</span>), <span class="fu">choose_pos1</span>(<span class="dv">30</span>), <span class="fu">choose_pos1</span>(<span class="dv">45</span>))</span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a><span class="fu">homog_diag</span>(mixed_pres, mixed_abs, <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>))</span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
+<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
+<span id="cb42-7"><a href="#cb42-7" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
+<span id="cb42-8"><a href="#cb42-8" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">1.000</span>  [<span class="fl">0.65</span>, <span class="fl">1.53</span>]</span>
+<span id="cb42-9"><a href="#cb42-9" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">0.444</span>  [<span class="fl">0.28</span>, <span class="fl">0.70</span>]</span>
+<span id="cb42-10"><a href="#cb42-10" tabindex="-1"></a></span>
+<span id="cb42-11"><a href="#cb42-11" tabindex="-1"></a>Mean diagnosticity ratio<span class="sc">:</span> <span class="fl">1.060829</span></span>
+<span id="cb42-12"><a href="#cb42-12" tabindex="-1"></a>Chi<span class="sc">-</span>square <span class="fu">estimate</span> (q)<span class="sc">:</span> <span class="fl">45.62598</span></span>
+<span id="cb42-13"><a href="#cb42-13" tabindex="-1"></a>Sig<span class="sc">:</span> <span class="fl">1.237212e-10</span></span>
+<span id="cb42-14"><a href="#cb42-14" tabindex="-1"></a></span>
+<span id="cb42-15"><a href="#cb42-15" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
+<span id="cb42-16"><a href="#cb42-16" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
+<span id="cb42-17"><a href="#cb42-17" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
+<span id="cb42-18"><a href="#cb42-18" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
+<span id="cb42-19"><a href="#cb42-19" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
+<span id="cb42-20"><a href="#cb42-20" tabindex="-1"></a>pairs separately.</span></code></pre></div>
 <p>Here <em>d</em> = 6.00, 1.00 and 0.44. The chi-square is enormous
 (<em>Q</em> = 45.6, <em>p</em> &lt; .0001), and yet the pooled ratio is
 1.06 — barely distinguishable from no diagnosticity at all. Nothing has
@@ -1231,62 +1325,62 @@ homogeneity of k diagnosticity ratios, and takes the same arguments as
 requires suspect positions: they cannot be inferred from the observed
 choices.</p>
 <p>The percentile interval it reports for the mean is an interval on the
-<strong>pooled</strong> ratio, so the same caution applies: it is only
-worth interpreting when the chi-square has not rejected homogeneity.</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="fu">homog_diag_boot</span>(<span class="at">lineup_pres_list =</span> het_pres,</span>
-<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a>                <span class="at">lineup_abs_list =</span> het_abs,</span>
-<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a>                <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
-<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>                <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>),</span>
-<span id="cb41-5"><a href="#cb41-5" tabindex="-1"></a>                <span class="at">R =</span> <span class="dv">200</span>,</span>
-<span id="cb41-6"><a href="#cb41-6" tabindex="-1"></a>                <span class="at">seed =</span> <span class="dv">1</span>)</span>
-<span id="cb41-7"><a href="#cb41-7" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
-<span id="cb41-8"><a href="#cb41-8" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
-<span id="cb41-9"><a href="#cb41-9" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
-<span id="cb41-10"><a href="#cb41-10" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">3.000</span>  [<span class="fl">1.79</span>, <span class="fl">5.02</span>]</span>
-<span id="cb41-11"><a href="#cb41-11" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">1.600</span>  [<span class="fl">0.99</span>, <span class="fl">2.60</span>]</span>
-<span id="cb41-12"><a href="#cb41-12" tabindex="-1"></a></span>
-<span id="cb41-13"><a href="#cb41-13" tabindex="-1"></a>Mean diagnosticity ratio is <span class="fl">2.783</span> </span>
-<span id="cb41-14"><a href="#cb41-14" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile) <span class="fl">2.059</span> <span class="fl">3.7</span> </span>
-<span id="cb41-15"><a href="#cb41-15" tabindex="-1"></a>Chi<span class="sc">-</span>squared estimate is <span class="fl">11.189</span> </span>
-<span id="cb41-16"><a href="#cb41-16" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile)<span class="sc">:</span> <span class="fl">2.601</span> <span class="fl">24.833</span> </span>
-<span id="cb41-17"><a href="#cb41-17" tabindex="-1"></a><span class="fu">Sig</span> (asymptotic, <span class="at">df =</span> <span class="dv">2</span>)<span class="sc">:</span>  <span class="fl">0.003717</span> </span>
-<span id="cb41-18"><a href="#cb41-18" tabindex="-1"></a></span>
-<span id="cb41-19"><a href="#cb41-19" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
-<span id="cb41-20"><a href="#cb41-20" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
-<span id="cb41-21"><a href="#cb41-21" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
-<span id="cb41-22"><a href="#cb41-22" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
-<span id="cb41-23"><a href="#cb41-23" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
-<span id="cb41-24"><a href="#cb41-24" tabindex="-1"></a>pairs separately.</span></code></pre></div>
+<strong>pooled</strong> ratio, so the same caution applies: interpret it
+only when the chi-square has not rejected homogeneity.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="fu">homog_diag_boot</span>(<span class="at">lineup_pres_list =</span> het_pres,</span>
+<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a>                <span class="at">lineup_abs_list =</span> het_abs,</span>
+<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a>                <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a>                <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>),</span>
+<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a>                <span class="at">R =</span> <span class="dv">200</span>,</span>
+<span id="cb43-6"><a href="#cb43-6" tabindex="-1"></a>                <span class="at">seed =</span> <span class="dv">1</span>)</span>
+<span id="cb43-7"><a href="#cb43-7" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
+<span id="cb43-8"><a href="#cb43-8" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
+<span id="cb43-9"><a href="#cb43-9" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
+<span id="cb43-10"><a href="#cb43-10" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">3.000</span>  [<span class="fl">1.79</span>, <span class="fl">5.02</span>]</span>
+<span id="cb43-11"><a href="#cb43-11" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">1.600</span>  [<span class="fl">0.99</span>, <span class="fl">2.60</span>]</span>
+<span id="cb43-12"><a href="#cb43-12" tabindex="-1"></a></span>
+<span id="cb43-13"><a href="#cb43-13" tabindex="-1"></a>Mean diagnosticity ratio is <span class="fl">2.783</span> </span>
+<span id="cb43-14"><a href="#cb43-14" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile) <span class="fl">2.059</span> <span class="fl">3.7</span> </span>
+<span id="cb43-15"><a href="#cb43-15" tabindex="-1"></a>Chi<span class="sc">-</span>squared estimate is <span class="fl">11.189</span> </span>
+<span id="cb43-16"><a href="#cb43-16" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile)<span class="sc">:</span> <span class="fl">2.601</span> <span class="fl">24.833</span> </span>
+<span id="cb43-17"><a href="#cb43-17" tabindex="-1"></a><span class="fu">Sig</span> (asymptotic, <span class="at">df =</span> <span class="dv">2</span>)<span class="sc">:</span>  <span class="fl">0.003717</span> </span>
+<span id="cb43-18"><a href="#cb43-18" tabindex="-1"></a></span>
+<span id="cb43-19"><a href="#cb43-19" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
+<span id="cb43-20"><a href="#cb43-20" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
+<span id="cb43-21"><a href="#cb43-21" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
+<span id="cb43-22"><a href="#cb43-22" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
+<span id="cb43-23"><a href="#cb43-23" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
+<span id="cb43-24"><a href="#cb43-24" tabindex="-1"></a>pairs separately.</span></code></pre></div>
 <p>Both routes agree, as they should. Note that the bootstrap interval
 on the mean, [2.06, 3.70], excludes 1 — the set of lineups is diagnostic
 on average — while the chi-square still says the three ratios are not
 interchangeable.</p>
-<p>Running the same call on the cautionary data makes the trap
-concrete:</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="fu">homog_diag_boot</span>(<span class="at">lineup_pres_list =</span> mixed_pres,</span>
-<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>                <span class="at">lineup_abs_list =</span> mixed_abs,</span>
-<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a>                <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
-<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a>                <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>),</span>
-<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a>                <span class="at">R =</span> <span class="dv">200</span>,</span>
-<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a>                <span class="at">seed =</span> <span class="dv">1</span>)</span>
-<span id="cb42-7"><a href="#cb42-7" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
-<span id="cb42-8"><a href="#cb42-8" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
-<span id="cb42-9"><a href="#cb42-9" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
-<span id="cb42-10"><a href="#cb42-10" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">1.000</span>  [<span class="fl">0.65</span>, <span class="fl">1.53</span>]</span>
-<span id="cb42-11"><a href="#cb42-11" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">0.444</span>  [<span class="fl">0.28</span>, <span class="fl">0.70</span>]</span>
-<span id="cb42-12"><a href="#cb42-12" tabindex="-1"></a></span>
-<span id="cb42-13"><a href="#cb42-13" tabindex="-1"></a>Mean diagnosticity ratio is <span class="fl">1.061</span> </span>
-<span id="cb42-14"><a href="#cb42-14" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile) <span class="fl">0.827</span> <span class="fl">1.327</span> </span>
-<span id="cb42-15"><a href="#cb42-15" tabindex="-1"></a>Chi<span class="sc">-</span>squared estimate is <span class="fl">45.626</span> </span>
-<span id="cb42-16"><a href="#cb42-16" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile)<span class="sc">:</span> <span class="fl">32.879</span> <span class="fl">59.368</span> </span>
-<span id="cb42-17"><a href="#cb42-17" tabindex="-1"></a><span class="fu">Sig</span> (asymptotic, <span class="at">df =</span> <span class="dv">2</span>)<span class="sc">:</span>  <span class="fl">1.237e-10</span> </span>
-<span id="cb42-18"><a href="#cb42-18" tabindex="-1"></a></span>
-<span id="cb42-19"><a href="#cb42-19" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
-<span id="cb42-20"><a href="#cb42-20" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
-<span id="cb42-21"><a href="#cb42-21" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
-<span id="cb42-22"><a href="#cb42-22" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
-<span id="cb42-23"><a href="#cb42-23" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
-<span id="cb42-24"><a href="#cb42-24" tabindex="-1"></a>pairs separately.</span></code></pre></div>
+<p>Running the same call on the cautionary data illustrates the
+problem:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="fu">homog_diag_boot</span>(<span class="at">lineup_pres_list =</span> mixed_pres,</span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a>                <span class="at">lineup_abs_list =</span> mixed_abs,</span>
+<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a>                <span class="at">pos_list =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb44-4"><a href="#cb44-4" tabindex="-1"></a>                <span class="at">k =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>),</span>
+<span id="cb44-5"><a href="#cb44-5" tabindex="-1"></a>                <span class="at">R =</span> <span class="dv">200</span>,</span>
+<span id="cb44-6"><a href="#cb44-6" tabindex="-1"></a>                <span class="at">seed =</span> <span class="dv">1</span>)</span>
+<span id="cb44-7"><a href="#cb44-7" tabindex="-1"></a>Diagnosticity ratio <span class="cf">for</span> each lineup pair<span class="sc">:</span></span>
+<span id="cb44-8"><a href="#cb44-8" tabindex="-1"></a> pair     d        <span class="dv">95</span>% CI</span>
+<span id="cb44-9"><a href="#cb44-9" tabindex="-1"></a>    <span class="dv">1</span> <span class="fl">6.000</span> [<span class="fl">3.26</span>, <span class="fl">11.04</span>]</span>
+<span id="cb44-10"><a href="#cb44-10" tabindex="-1"></a>    <span class="dv">2</span> <span class="fl">1.000</span>  [<span class="fl">0.65</span>, <span class="fl">1.53</span>]</span>
+<span id="cb44-11"><a href="#cb44-11" tabindex="-1"></a>    <span class="dv">3</span> <span class="fl">0.444</span>  [<span class="fl">0.28</span>, <span class="fl">0.70</span>]</span>
+<span id="cb44-12"><a href="#cb44-12" tabindex="-1"></a></span>
+<span id="cb44-13"><a href="#cb44-13" tabindex="-1"></a>Mean diagnosticity ratio is <span class="fl">1.061</span> </span>
+<span id="cb44-14"><a href="#cb44-14" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile) <span class="fl">0.827</span> <span class="fl">1.327</span> </span>
+<span id="cb44-15"><a href="#cb44-15" tabindex="-1"></a>Chi<span class="sc">-</span>squared estimate is <span class="fl">45.626</span> </span>
+<span id="cb44-16"><a href="#cb44-16" tabindex="-1"></a>Confidence <span class="fu">intervals</span> (percentile)<span class="sc">:</span> <span class="fl">32.879</span> <span class="fl">59.368</span> </span>
+<span id="cb44-17"><a href="#cb44-17" tabindex="-1"></a><span class="fu">Sig</span> (asymptotic, <span class="at">df =</span> <span class="dv">2</span>)<span class="sc">:</span>  <span class="fl">1.237e-10</span> </span>
+<span id="cb44-18"><a href="#cb44-18" tabindex="-1"></a></span>
+<span id="cb44-19"><a href="#cb44-19" tabindex="-1"></a>Note<span class="sc">:</span> the ratios are <span class="fu">heterogeneous</span> (p <span class="sc">&lt;</span> <span class="fl">0.05</span>), so they do not share a</span>
+<span id="cb44-20"><a href="#cb44-20" tabindex="-1"></a>common diagnosticity ratio. Q measures how far the ratios lie from their</span>
+<span id="cb44-21"><a href="#cb44-21" tabindex="-1"></a>pooled value, which is a different question from whether the pooled ratio</span>
+<span id="cb44-22"><a href="#cb44-22" tabindex="-1"></a>differs from <span class="fl">1.</span> The mean above averages ratios that genuinely differ and</span>
+<span id="cb44-23"><a href="#cb44-23" tabindex="-1"></a>should not be reported as a single summary <span class="cf">for</span> these lineups; interpret the</span>
+<span id="cb44-24"><a href="#cb44-24" tabindex="-1"></a>pairs separately.</span></code></pre></div>
 <p>The interval on the pooled ratio is [0.83, 1.33] and covers 1, while
 the chi-square is 45.6 with <em>p</em> &lt; .0001. Read on its own, the
 interval says “no diagnosticity”; that reading is wrong, and pair 1
@@ -1322,27 +1416,27 @@ compute every measure in this vignette from the same dataset, and lets
 you re-derive the classification if the suspect position is later
 corrected.</p>
 <p>The derivation is straightforward:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="co"># Raw data as it should be collected: the member chosen (0 = rejected the lineup)</span></span>
-<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a>raw <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a>  <span class="at">target_present =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>),</span>
-<span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a>  <span class="at">chosen_member  =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">0</span>),</span>
-<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a>  <span class="at">confidence     =</span> <span class="fu">c</span>(<span class="dv">90</span>, <span class="dv">70</span>, <span class="dv">40</span>, <span class="dv">80</span>, <span class="dv">60</span>, <span class="dv">50</span>)</span>
-<span id="cb43-6"><a href="#cb43-6" tabindex="-1"></a>)</span>
-<span id="cb43-7"><a href="#cb43-7" tabindex="-1"></a></span>
-<span id="cb43-8"><a href="#cb43-8" tabindex="-1"></a><span class="co"># The suspect occupies position 3 in both the TP and TA lineups</span></span>
-<span id="cb43-9"><a href="#cb43-9" tabindex="-1"></a>suspect_pos <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb43-10"><a href="#cb43-10" tabindex="-1"></a></span>
-<span id="cb43-11"><a href="#cb43-11" tabindex="-1"></a>raw<span class="sc">$</span>identification <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(raw<span class="sc">$</span>chosen_member <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"reject"</span>,</span>
-<span id="cb43-12"><a href="#cb43-12" tabindex="-1"></a>                      <span class="fu">ifelse</span>(raw<span class="sc">$</span>chosen_member <span class="sc">==</span> suspect_pos, <span class="st">"suspect"</span>,</span>
-<span id="cb43-13"><a href="#cb43-13" tabindex="-1"></a>                             <span class="st">"filler"</span>))</span>
-<span id="cb43-14"><a href="#cb43-14" tabindex="-1"></a>raw</span>
-<span id="cb43-15"><a href="#cb43-15" tabindex="-1"></a>  target_present chosen_member confidence identification</span>
-<span id="cb43-16"><a href="#cb43-16" tabindex="-1"></a><span class="dv">1</span>           <span class="cn">TRUE</span>             <span class="dv">3</span>         <span class="dv">90</span>        suspect</span>
-<span id="cb43-17"><a href="#cb43-17" tabindex="-1"></a><span class="dv">2</span>           <span class="cn">TRUE</span>             <span class="dv">5</span>         <span class="dv">70</span>         filler</span>
-<span id="cb43-18"><a href="#cb43-18" tabindex="-1"></a><span class="dv">3</span>           <span class="cn">TRUE</span>             <span class="dv">0</span>         <span class="dv">40</span>         reject</span>
-<span id="cb43-19"><a href="#cb43-19" tabindex="-1"></a><span class="dv">4</span>          <span class="cn">FALSE</span>             <span class="dv">3</span>         <span class="dv">80</span>        suspect</span>
-<span id="cb43-20"><a href="#cb43-20" tabindex="-1"></a><span class="dv">5</span>          <span class="cn">FALSE</span>             <span class="dv">2</span>         <span class="dv">60</span>         filler</span>
-<span id="cb43-21"><a href="#cb43-21" tabindex="-1"></a><span class="dv">6</span>          <span class="cn">FALSE</span>             <span class="dv">0</span>         <span class="dv">50</span>         reject</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="co"># Raw data as it should be collected: the member chosen (0 = rejected the lineup)</span></span>
+<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a>raw <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a>  <span class="at">target_present =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>),</span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>  <span class="at">chosen_member  =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">0</span>),</span>
+<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a>  <span class="at">confidence     =</span> <span class="fu">c</span>(<span class="dv">90</span>, <span class="dv">70</span>, <span class="dv">40</span>, <span class="dv">80</span>, <span class="dv">60</span>, <span class="dv">50</span>)</span>
+<span id="cb45-6"><a href="#cb45-6" tabindex="-1"></a>)</span>
+<span id="cb45-7"><a href="#cb45-7" tabindex="-1"></a></span>
+<span id="cb45-8"><a href="#cb45-8" tabindex="-1"></a><span class="co"># The suspect occupies position 3 in both the TP and TA lineups</span></span>
+<span id="cb45-9"><a href="#cb45-9" tabindex="-1"></a>suspect_pos <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb45-10"><a href="#cb45-10" tabindex="-1"></a></span>
+<span id="cb45-11"><a href="#cb45-11" tabindex="-1"></a>raw<span class="sc">$</span>identification <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(raw<span class="sc">$</span>chosen_member <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"reject"</span>,</span>
+<span id="cb45-12"><a href="#cb45-12" tabindex="-1"></a>                      <span class="fu">ifelse</span>(raw<span class="sc">$</span>chosen_member <span class="sc">==</span> suspect_pos, <span class="st">"suspect"</span>,</span>
+<span id="cb45-13"><a href="#cb45-13" tabindex="-1"></a>                             <span class="st">"filler"</span>))</span>
+<span id="cb45-14"><a href="#cb45-14" tabindex="-1"></a>raw</span>
+<span id="cb45-15"><a href="#cb45-15" tabindex="-1"></a>  target_present chosen_member confidence identification</span>
+<span id="cb45-16"><a href="#cb45-16" tabindex="-1"></a><span class="dv">1</span>           <span class="cn">TRUE</span>             <span class="dv">3</span>         <span class="dv">90</span>        suspect</span>
+<span id="cb45-17"><a href="#cb45-17" tabindex="-1"></a><span class="dv">2</span>           <span class="cn">TRUE</span>             <span class="dv">5</span>         <span class="dv">70</span>         filler</span>
+<span id="cb45-18"><a href="#cb45-18" tabindex="-1"></a><span class="dv">3</span>           <span class="cn">TRUE</span>             <span class="dv">0</span>         <span class="dv">40</span>         reject</span>
+<span id="cb45-19"><a href="#cb45-19" tabindex="-1"></a><span class="dv">4</span>          <span class="cn">FALSE</span>             <span class="dv">3</span>         <span class="dv">80</span>        suspect</span>
+<span id="cb45-20"><a href="#cb45-20" tabindex="-1"></a><span class="dv">5</span>          <span class="cn">FALSE</span>             <span class="dv">2</span>         <span class="dv">60</span>         filler</span>
+<span id="cb45-21"><a href="#cb45-21" tabindex="-1"></a><span class="dv">6</span>          <span class="cn">FALSE</span>             <span class="dv">0</span>         <span class="dv">50</span>         reject</span></code></pre></div>
 <p>The bundled <code>lineup_example</code> dataset is already in the
 derived form. Only the first 8 rows are shown:</p>
 <table class="table">
@@ -1424,8 +1518,7 @@ derived form. Only the first 8 rows are shown:</p>
 <div class="section level3">
 <h3 id="computing-and-plotting-the-roc">Computing and plotting the ROC<a class="anchor" aria-label="anchor" href="#computing-and-plotting-the-roc"></a>
 </h3>
-<p>Each ROC and CAC analysis comes in two forms, and it is worth being
-clear about the difference:</p>
+<p>Each ROC and CAC analysis comes in two forms:</p>
 <ul>
 <li>
 <code><a href="../reference/make_rocdata.html">make_rocdata()</a></code>, <code><a href="../reference/make_cacdata.html">make_cacdata()</a></code> and
@@ -1437,7 +1530,7 @@ only</strong>.</li>
 return a classed object with the plot stored in <code>$plot</code>.</li>
 </ul>
 <p>Either form can be passed to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">roc1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_rocdata.html">make_rocdata</a></span><span class="op">(</span><span class="va">lineup_example</span>, lineup_size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">roc1</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -1446,38 +1539,46 @@ ROC Curve for Confidence ~ Accuracy
 </p>
 </div>
 <p>Printing the wrapper object gives the numerical summary:</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a>roc_result <span class="ot">&lt;-</span> <span class="fu">make_roc</span>(lineup_example, <span class="at">lineup_size =</span> <span class="dv">6</span>, <span class="at">show_plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a>roc_result</span>
-<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a></span>
-<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span> Lineup ROC Analysis <span class="sc">==</span><span class="er">=</span></span>
-<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a></span>
-<span id="cb45-6"><a href="#cb45-6" tabindex="-1"></a>Partial AUC<span class="sc">:</span> <span class="fl">0.053</span> </span>
-<span id="cb45-7"><a href="#cb45-7" tabindex="-1"></a>Target<span class="sc">-</span>present <span class="fu">trials</span> (N)<span class="sc">:</span> <span class="dv">700</span> </span>
-<span id="cb45-8"><a href="#cb45-8" tabindex="-1"></a>Target<span class="sc">-</span>absent <span class="fu">trials</span> (N)<span class="sc">:</span> <span class="dv">700</span> </span>
-<span id="cb45-9"><a href="#cb45-9" tabindex="-1"></a>Lineup size<span class="sc">:</span> <span class="dv">6</span> </span>
-<span id="cb45-10"><a href="#cb45-10" tabindex="-1"></a>Confidence levels<span class="sc">:</span> <span class="dv">9</span> </span>
-<span id="cb45-11"><a href="#cb45-11" tabindex="-1"></a></span>
-<span id="cb45-12"><a href="#cb45-12" tabindex="-1"></a>ROC Data<span class="sc">:</span></span>
-<span id="cb45-13"><a href="#cb45-13" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 10 × 5 [39m</span></span>
-<span id="cb45-14"><a href="#cb45-14" tabindex="-1"></a>   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids</span>
-<span id="cb45-15"><a href="#cb45-15" tabindex="-1"></a>         [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m            [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m          [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m          [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m        [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
-<span id="cb45-16"><a href="#cb45-16" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">1</span> [<span class="dv">39</span>m         <span class="dv">19</span>          <span class="dv">0</span>            <span class="dv">0</span>                   <span class="dv">0</span>           <span class="dv">0</span></span>
-<span id="cb45-17"><a href="#cb45-17" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">2</span> [<span class="dv">39</span>m        <span class="dv">100</span>          <span class="fl">0.097</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m       <span class="dv">0</span>                  <span class="dv">68</span>           <span class="dv">0</span></span>
-<span id="cb45-18"><a href="#cb45-18" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">3</span> [<span class="dv">39</span>m         <span class="dv">90</span>          <span class="fl">0.143</span>        <span class="fl">0.005</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m [<span class="dv">4</span>m1 [<span class="dv">24</span>m           <span class="dv">100</span>           <span class="dv">4</span></span>
-<span id="cb45-19"><a href="#cb45-19" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">4</span> [<span class="dv">39</span>m         <span class="dv">80</span>          <span class="fl">0.189</span>        <span class="fl">0.014</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m            <span class="dv">132</span>          <span class="dv">10</span></span>
-<span id="cb45-20"><a href="#cb45-20" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">5</span> [<span class="dv">39</span>m         <span class="dv">70</span>          <span class="fl">0.26</span>         <span class="fl">0.022</span> [<span class="dv">4</span>m9 [<span class="dv">24</span>m            <span class="dv">182</span>          <span class="dv">16</span></span>
-<span id="cb45-21"><a href="#cb45-21" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">6</span> [<span class="dv">39</span>m         <span class="dv">60</span>          <span class="fl">0.351</span>        <span class="fl">0.03</span>              <span class="dv">246</span>          <span class="dv">21</span></span>
-<span id="cb45-22"><a href="#cb45-22" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">7</span> [<span class="dv">39</span>m         <span class="dv">50</span>          <span class="fl">0.436</span>        <span class="fl">0.054</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m            <span class="dv">305</span>          <span class="dv">38</span></span>
-<span id="cb45-23"><a href="#cb45-23" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">8</span> [<span class="dv">39</span>m         <span class="dv">40</span>          <span class="fl">0.507</span>        <span class="fl">0.077</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m            <span class="dv">355</span>          <span class="dv">54</span></span>
-<span id="cb45-24"><a href="#cb45-24" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">9</span> [<span class="dv">39</span>m         <span class="dv">30</span>          <span class="fl">0.556</span>        <span class="fl">0.103</span>             <span class="dv">389</span>          <span class="dv">72</span></span>
-<span id="cb45-25"><a href="#cb45-25" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m10 [<span class="dv">39</span>m         <span class="dv">20</span>          <span class="fl">0.593</span>        <span class="fl">0.126</span>             <span class="dv">415</span>          <span class="dv">88</span></span>
-<span id="cb45-26"><a href="#cb45-26" tabindex="-1"></a></span>
-<span id="cb45-27"><a href="#cb45-27" tabindex="-1"></a>Plot<span class="sc">:</span> use <span class="fu">plot</span>(x), or save the object and extract x<span class="sc">$</span>plot</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>roc_result <span class="ot">&lt;-</span> <span class="fu">make_roc</span>(lineup_example, <span class="at">lineup_size =</span> <span class="dv">6</span>, <span class="at">show_plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" tabindex="-1"></a>roc_result</span>
+<span id="cb47-3"><a href="#cb47-3" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span> Lineup ROC Analysis <span class="sc">==</span><span class="er">=</span></span>
+<span id="cb47-5"><a href="#cb47-5" tabindex="-1"></a></span>
+<span id="cb47-6"><a href="#cb47-6" tabindex="-1"></a>Partial AUC<span class="sc">:</span> <span class="fl">0.053</span> </span>
+<span id="cb47-7"><a href="#cb47-7" tabindex="-1"></a>Target<span class="sc">-</span>present <span class="fu">trials</span> (N)<span class="sc">:</span> <span class="dv">700</span> </span>
+<span id="cb47-8"><a href="#cb47-8" tabindex="-1"></a>Target<span class="sc">-</span>absent <span class="fu">trials</span> (N)<span class="sc">:</span> <span class="dv">700</span> </span>
+<span id="cb47-9"><a href="#cb47-9" tabindex="-1"></a>Lineup size<span class="sc">:</span> <span class="dv">6</span> </span>
+<span id="cb47-10"><a href="#cb47-10" tabindex="-1"></a>Confidence levels<span class="sc">:</span> <span class="dv">9</span> </span>
+<span id="cb47-11"><a href="#cb47-11" tabindex="-1"></a></span>
+<span id="cb47-12"><a href="#cb47-12" tabindex="-1"></a>ROC Data<span class="sc">:</span></span>
+<span id="cb47-13"><a href="#cb47-13" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 10 × 5 [39m</span></span>
+<span id="cb47-14"><a href="#cb47-14" tabindex="-1"></a>   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids</span>
+<span id="cb47-15"><a href="#cb47-15" tabindex="-1"></a>         [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m            [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m          [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m          [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m        [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
+<span id="cb47-16"><a href="#cb47-16" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">1</span> [<span class="dv">39</span>m        <span class="dv">101</span>          <span class="dv">0</span>            <span class="dv">0</span>                   <span class="dv">0</span>           <span class="dv">0</span></span>
+<span id="cb47-17"><a href="#cb47-17" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">2</span> [<span class="dv">39</span>m        <span class="dv">100</span>          <span class="fl">0.097</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m       <span class="dv">0</span>                  <span class="dv">68</span>           <span class="dv">0</span></span>
+<span id="cb47-18"><a href="#cb47-18" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">3</span> [<span class="dv">39</span>m         <span class="dv">90</span>          <span class="fl">0.143</span>        <span class="fl">0.005</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m [<span class="dv">4</span>m1 [<span class="dv">24</span>m           <span class="dv">100</span>           <span class="dv">4</span></span>
+<span id="cb47-19"><a href="#cb47-19" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">4</span> [<span class="dv">39</span>m         <span class="dv">80</span>          <span class="fl">0.189</span>        <span class="fl">0.014</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m            <span class="dv">132</span>          <span class="dv">10</span></span>
+<span id="cb47-20"><a href="#cb47-20" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">5</span> [<span class="dv">39</span>m         <span class="dv">70</span>          <span class="fl">0.26</span>         <span class="fl">0.022</span> [<span class="dv">4</span>m9 [<span class="dv">24</span>m            <span class="dv">182</span>          <span class="dv">16</span></span>
+<span id="cb47-21"><a href="#cb47-21" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">6</span> [<span class="dv">39</span>m         <span class="dv">60</span>          <span class="fl">0.351</span>        <span class="fl">0.03</span>              <span class="dv">246</span>          <span class="dv">21</span></span>
+<span id="cb47-22"><a href="#cb47-22" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">7</span> [<span class="dv">39</span>m         <span class="dv">50</span>          <span class="fl">0.436</span>        <span class="fl">0.054</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m            <span class="dv">305</span>          <span class="dv">38</span></span>
+<span id="cb47-23"><a href="#cb47-23" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">8</span> [<span class="dv">39</span>m         <span class="dv">40</span>          <span class="fl">0.507</span>        <span class="fl">0.077</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m            <span class="dv">355</span>          <span class="dv">54</span></span>
+<span id="cb47-24"><a href="#cb47-24" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">9</span> [<span class="dv">39</span>m         <span class="dv">30</span>          <span class="fl">0.556</span>        <span class="fl">0.103</span>             <span class="dv">389</span>          <span class="dv">72</span></span>
+<span id="cb47-25"><a href="#cb47-25" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m10 [<span class="dv">39</span>m         <span class="dv">20</span>          <span class="fl">0.593</span>        <span class="fl">0.126</span>             <span class="dv">415</span>          <span class="dv">88</span></span>
+<span id="cb47-26"><a href="#cb47-26" tabindex="-1"></a></span>
+<span id="cb47-27"><a href="#cb47-27" tabindex="-1"></a>Plot<span class="sc">:</span> use <span class="fu">plot</span>(x), or save the object and extract x<span class="sc">$</span>plot</span></code></pre></div>
+<p>The pAUC is a <strong>partial</strong> area, so it is not on the
+familiar 0.5-to-1 scale of the full AUC. It covers false-ID rates from 0
+up to the largest observed, 0.126 here, so a perfect procedure would
+score 0.126 and chance (the diagonal) 0.008. The observed 0.053 is
+therefore well above chance. pAUC values are comparable only between
+curves integrated over the same false-ID range, which is what
+<code><a href="../reference/compare_pauc.html">compare_pauc()</a></code> enforces
+(<code><a href="../articles/pauc_statistical_comparison.html">vignette("pauc_statistical_comparison")</a></code>).</p>
 <p>The value returned by <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> is an ordinary
 <strong>ggplot2</strong> object, so you can adjust it with the usual
 <code>+</code> syntax rather than being limited to the arguments of the
 plotting function:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">roc1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Partial ROC, Nortje &amp; Tredoux mock-witness data"</span><span class="op">)</span></span></code></pre></div>
@@ -1490,9 +1591,9 @@ plotting function:</p>
 (2020) full ROC, which uses all responses — suspect IDs, filler IDs and
 rejections — rather than suspect IDs alone. The ordering method is shown
 in the plot subtitle, since it materially affects the result:</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>full_roc1 <span class="ot">&lt;-</span> <span class="fu">make_fullroc</span>(lineup_example, <span class="at">lineup_size =</span> <span class="dv">6</span>, <span class="at">show_plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb47-2"><a href="#cb47-2" tabindex="-1"></a>Ordering categories by their sample diagnosticity ratios is optimistically biased<span class="sc">:</span> the ordering is estimated from the same data used to compute the AUC. With roughly <span class="dv">700</span> lineups per arm the bias can be substantial. Use order <span class="ot">=</span> <span class="st">"apriori"</span> <span class="cf">for</span> inference or between<span class="sc">-</span>condition comparisons; see <span class="fu">vignette</span>(<span class="st">"fullroc_analysis"</span>).</span>
-<span id="cb47-3"><a href="#cb47-3" tabindex="-1"></a><span class="fu">plot</span>(full_roc1)</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>full_roc1 <span class="ot">&lt;-</span> <span class="fu">make_fullroc</span>(lineup_example, <span class="at">lineup_size =</span> <span class="dv">6</span>, <span class="at">show_plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a>Ordering categories by their sample diagnosticity ratios is optimistically biased<span class="sc">:</span> the ordering is estimated from the same data used to compute the AUC. With roughly <span class="dv">700</span> lineups per arm the bias can be substantial. Use order <span class="ot">=</span> <span class="st">"apriori"</span> <span class="cf">for</span> inference or between<span class="sc">-</span>condition comparisons; see <span class="fu">vignette</span>(<span class="st">"fullroc_analysis"</span>).</span>
+<span id="cb49-3"><a href="#cb49-3" tabindex="-1"></a><span class="fu">plot</span>(full_roc1)</span></code></pre></div>
 <p><img src="Vignette_files/figure-html/unnamed-chunk-46-1.png" class="r-plt" alt="" width="576"></p>
 <p>See the <a href="fullroc_analysis.html">Full ROC analysis</a>
 vignette for the details, including why <code>order = "apriori"</code>
@@ -1508,8 +1609,11 @@ is preferable for inference.</p>
 function, which prompted for image files and reported factor loadings —
 is <strong>no longer supported</strong>.</p>
 <p>It has been superseded by an approach based on modern face
-embeddings, which is both more accurate and reproducible from a script
-rather than a dialog box. See the <a href="face_similarity.html">Face
+embeddings, which is reproducible from a script rather than a dialog
+box. Embedding similarity is a property of the photographs as a
+face-recognition model sees them; it is not the same as resemblance
+judged by people, nor a measure of lineup fairness, and no validated
+cut-off links the two. See the <a href="face_similarity.html">Face
 similarity</a> vignette for the current methods, and note that these
 require the Python dependencies installed by
 <code><a href="../reference/install_r4lineups_python.html">install_r4lineups_python()</a></code>.</p>
@@ -1547,7 +1651,8 @@ require the Python dependencies installed by
 <td>Functional size</td>
 <td><code><a href="../reference/func_size.html">func_size()</a></code></td>
 <td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">choices of the suspect</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N / (\text{choices of the suspect})</annotation></semantics></math></td>
-<td>Undefined when nobody chooses the suspect</td>
+<td>Infinite when nobody chooses the suspect; intervals may also have an
+infinite upper limit</td>
 </tr>
 <tr class="odd">
 <td>Effective size (Malpass)</td>
@@ -1588,10 +1693,12 @@ size</strong>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>k</mi><mi>a</mi></msub><annotation encoding="application/x-tex">k_a</annotation></semantics></math>
 is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-less the null foils — members nobody chose. <strong>Effective
-size</strong> is an estimate of how many members function as genuine
-alternatives, and is generally not a whole number.</p>
-<p>The distinction matters because most functions here take
+less the null foils — members nobody chose in this sample, which, as
+noted above, may include functioning foils that happened to draw no
+choices. <strong>Effective size</strong> is an estimate of how many
+members function as genuine alternatives, and is generally not a whole
+number.</p>
+<p>The distinction is important because most functions here take
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
 as an argument and will not detect that it is wrong.
 <code><a href="../reference/lineup_table.html">lineup_table()</a></code> exists to make null foils visible before
@@ -1613,23 +1720,30 @@ boundary.</li>
 <li>
 <strong>Bootstrap intervals</strong> (<code><a href="../reference/esize_T_boot.html">esize_T_boot()</a></code>
 with <code><a href="https://rdrr.io/pkg/boot/man/boot.ci.html" class="external-link">boot::boot.ci()</a></code>, <code><a href="../reference/lineup_prop_boot.html">lineup_prop_boot()</a></code>) make
-no distributional assumption about the transformed statistic. Prefer
-them when a proportion is near 0 or 1, or when the sample is small —
-which for these measures is usual.</li>
+no distributional assumption about the transformed statistic, which
+helps for nonlinear measures such as effective size. They fail at a
+boundary, though: a member nobody chose gets a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 0]</annotation></semantics></math>
+interval however many resamples are drawn. For a member proportion near
+0 or 1 use the exact <code><a href="https://rdrr.io/r/stats/binom.test.html" class="external-link">binom.test()</a></code> interval or a
+posterior.</li>
 <li>
 <strong>Bayesian posteriors</strong> (<code><a href="../reference/esize_T_bayes.html">esize_T_bayes()</a></code>,
 <code><a href="../reference/func_size_bayes.html">func_size_bayes()</a></code>) give credible intervals and direct
 probability statements such as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>E</mi><mo>′</mo></msup><mo>&lt;</mo><mn>6</mn><mo>∣</mo><mtext mathvariant="normal">data</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(E' &lt; 6 \mid \text{data})</annotation></semantics></math>.
-See <code><a href="../articles/bayesian_inference.html">vignette("bayesian_inference")</a></code>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>E</mi><mo>′</mo></msup><mo>&lt;</mo><mn>4.5</mn><mo>∣</mo><mtext mathvariant="normal">data</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(E' &lt; 4.5 \mid \text{data})</annotation></semantics></math>.
+A threshold at the nominal size is uninformative, because
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>E</mi><mo>′</mo></msup><mo>&lt;</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">P(E' &lt; k) = 1</annotation></semantics></math>
+under any continuous posterior. See
+<code><a href="../articles/bayesian_inference.html">vignette("bayesian_inference")</a></code>.</li>
 </ul>
 <p>Bounded quantities are the recurring difficulty: E’ cannot exceed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
 and a proportion cannot leave
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>,
 but a normal-theory interval can and does cross those limits in small
-samples. That is the main reason to prefer the bootstrap or the
-posterior here.</p>
+samples. That is the main reason to prefer an exact interval, the
+posterior or, away from a boundary, the bootstrap.</p>
 </div>
 <div class="section level3">
 <h3 id="assumptions-common-to-the-fairness-measures">Assumptions common to the fairness measures<a class="anchor" aria-label="anchor" href="#assumptions-common-to-the-fairness-measures"></a>

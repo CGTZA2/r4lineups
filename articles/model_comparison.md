@@ -9,9 +9,9 @@
 ## Introduction
 
 Eyewitness identification data can be analyzed using multiple
-theoretical frameworks, each providing unique insights. This vignette
-demonstrates how to use r4lineups’ model comparison framework to fit and
-compare:
+theoretical frameworks, each providing different information. This
+vignette demonstrates how to use r4lineups’ model comparison framework
+to fit and compare:
 
 1.  **2-HT Model** (Winter et al., 2022): Multinomial Processing Tree
     model
@@ -31,17 +31,24 @@ The Two-High Threshold (2-HT) model is a multinomial processing tree
 (MPT) that separates identification decisions into distinct latent
 processes:
 
-**Parameters:** - **dP**: Detection of culprit presence (0-1) - **dA**:
-Detection of culprit absence (0-1) - **b**: Biased suspect selection
-(0-1) - **g**: Guessing-based selection (0-1)
+**Parameters:**
 
-**Model equations** (target-present): - P(suspect ID) = dP + (1-dP) ×
-\[b + (1-b) × g × (1/L)\] - P(filler ID) = (1-dP) × (1-b) × g ×
-((L-1)/L) - P(reject) = (1-dP) × (1-b) × (1-g)
+- **dP**: Detection of culprit presence (0-1)
+- **dA**: Detection of culprit absence (0-1)
+- **b**: Biased suspect selection (0-1)
+- **g**: Guessing-based selection (0-1)
 
-**Use when:** - You want to understand underlying cognitive mechanisms -
-Testing theories about detection vs. guessing - Comparing conditions
-with different bias levels
+**Model equations** (target-present):
+
+- P(suspect ID) = dP + (1-dP) × \[b + (1-b) × g × (1/L)\]
+- P(filler ID) = (1-dP) × (1-b) × g × ((L-1)/L)
+- P(reject) = (1-dP) × (1-b) × (1-g)
+
+**Use when:**
+
+- You want to understand underlying cognitive mechanisms
+- Testing theories about detection vs. guessing
+- Comparing conditions with different bias levels
 
 ### EIG: Information-Theoretic Measure
 
@@ -52,25 +59,38 @@ responses provide about guilt vs. innocence using Shannon entropy:
 
 where x = response category (e.g., “suspect_high_confidence”)
 
-**Interpretation:** - EIG = 0: No information (responses don’t
-distinguish guilty/innocent) - EIG = 1: Perfect information (complete
-resolution of uncertainty) - Higher EIG = more diagnostic procedure
+**Interpretation:**
 
-**Use when:** - Evaluating overall diagnosticity of procedures -
-Comparing different identification methods - Assessing policy-relevant
-cutoffs
+- EIG = 0: No information (responses don’t distinguish guilty/innocent)
+- The maximum is the prior entropy, reached when every response resolves
+  guilt completely. That is 1 bit only when the prior probability of
+  guilt is .5; at a prior of .1 it is about .47 bits. Compare EIG values
+  only at the same prior.
+- Higher EIG = more diagnostic procedure
+
+**Use when:**
+
+- Evaluating overall diagnosticity of procedures
+- Comparing different identification methods
+- Assessing policy-relevant cutoffs
 
 ### Full ROC: Investigator Discriminability
 
 Full ROC uses ALL witness responses (suspect IDs, filler IDs,
 rejections) to compute a threshold-free measure of discriminability:
 
-**Measure:** - AUC (Area Under the Curve) - Range: 0.5 (chance) to 1.0
-(perfect)
+**Measure:**
 
-**Use when:** - Measuring investigator discriminability - Comparing
-system variables (lineup procedures) - Need threshold-free performance
-measure
+- AUC (Area Under the Curve)
+- Range: 0 to 1. A value of .5 is the no-discrimination reference, not a
+  lower bound: with the a-priori ordering a procedure that does worse
+  than chance gives an AUC below .5.
+
+**Use when:**
+
+- Measuring investigator discriminability
+- Comparing system variables (lineup procedures)
+- Need threshold-free performance measure
 
 ## Basic Model Comparison
 
@@ -108,9 +128,8 @@ head(lineup_data)
 #> 6          5
 ```
 
-The `c_criterion = 0.9` is not incidental, and it is worth explaining
-because getting it wrong makes one of the three models impossible to
-fit.
+The `c_criterion = 0.9` is not incidental: getting it wrong makes one of
+the three models impossible to fit.
 
 `c_criterion` is a threshold on the **maximum** of the lineup members’
 memory strengths, not a textbook signal-detection criterion. The maximum
@@ -149,14 +168,12 @@ target-present and 300 target-absent lineups). {.table}
 
 The 2-HT model’s detect-absence parameter `dA` is identified almost
 entirely by rejections — it is the probability of correctly concluding
-the culprit is absent. With half a percent of witnesses rejecting, the
-likelihood is nearly flat in `dA` and the fit fails.
+the culprit is absent. Here only one witness in 600 rejects, so the
+likelihood carries almost no information about `dA` and the fit fails;
 [`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
-now detects this and says so; earlier versions failed with an opaque
-message about non-finite differences, and
-[`compare_models()`](https://cgtza2.github.io/r4lineups/reference/compare_models.md)
-simply omitted the model from its results, so every downstream section
-that referred to it silently produced nothing.
+stops with a message naming that cause. A low rejection percentage is
+not by itself fatal in a large sample; the information about `dA`
+depends on the number of rejections.
 
 ### Comparing All Models
 
@@ -250,7 +267,7 @@ summary(comparison)
 #>   - EIG: Higher values = more informative procedure
 #>   - Full ROC: Higher AUC = better investigator discriminability
 #> 
-#> Each model provides different insights -- consider using multiple models.
+#> Each model provides different information; consider reporting more than one.
 ```
 
 ### Visualizing Model Comparisons
@@ -258,7 +275,7 @@ summary(comparison)
 ``` r
 
 # Side-by-side plots
-plot(comparison, ncol = 2)
+plot(comparison, ncol = 3)
 ```
 
 ![](model_comparison_files/figure-html/visualize_models-1.png)
@@ -281,12 +298,12 @@ knitr::kable(
 )
 ```
 
-| Parameter | Estimate |    SE |
-|:----------|---------:|------:|
-| dP        |    0.485 | 0.035 |
-| dA        |    0.049 | 0.057 |
-| b         |    0.000 | 0.024 |
-| g         |    0.754 | 0.036 |
+| Parameter | Estimate |  SE |
+|:----------|---------:|----:|
+| dP        |    0.485 |  NA |
+| dA        |    0.049 |  NA |
+| b         |    0.000 |  NA |
+| g         |    0.754 |  NA |
 
 2-HT parameter estimates with standard errors, simulated data. {.table}
 
@@ -302,7 +319,7 @@ cat("AIC:", round(model_2ht$aic, 2),
 **Interpreting 2-HT parameters (when available):**
 
 - **dP**: Probability of detecting guilty suspect
-- **dA**: Probability of detecting innocent suspect
+- **dA**: Probability of detecting the culprit’s absence
 - **b**: Bias toward suspect
 - **g**: Tendency to guess vs. reject
 
@@ -389,18 +406,26 @@ not a common model-selection scale and the wrapper does not declare a
 
 ### When to Use Each Model
 
-**Use 2-HT when:** - Testing cognitive theories (detection, guessing,
-bias) - Need to separate memory from response bias - Comparing
-procedures that might differ in bias - Want to understand latent
-psychological processes
+**Use 2-HT when:**
 
-**Use EIG when:** - Evaluating overall diagnosticity - Comparing
-identification procedures - Need a single summary measure - Want
-information-theoretic interpretation
+- Testing cognitive theories (detection, guessing, bias)
+- Need to separate memory from response bias
+- Comparing procedures that might differ in bias
+- Want to understand latent psychological processes
 
-**Use Full ROC when:** - Need threshold-free discriminability measure -
-Comparing system variables - Want to use all available information -
-Policy/practical decision-making focus
+**Use EIG when:**
+
+- Evaluating overall diagnosticity
+- Comparing identification procedures
+- Need a single summary measure
+- Want information-theoretic interpretation
+
+**Use Full ROC when:**
+
+- Need threshold-free discriminability measure
+- Comparing system variables
+- Want to use all available information
+- Policy/practical decision-making focus
 
 ### Comparing Model Fits
 
@@ -408,7 +433,8 @@ The 2-HT fit reports AIC/BIC, but these values are comparative rather
 than absolute. They can only be compared with alternative likelihood
 models fitted to the same observations and outcome representation; they
 cannot be compared with EIG or AUC. A single-condition 2-HT fit is
-saturated.
+saturated: it has zero residual degrees of freedom, so it reproduces the
+observed counts exactly and its absolute fit cannot be tested.
 
 ``` r
 
@@ -594,10 +620,12 @@ print(sim_comparison)
 #> Available models: 2ht, eig, fullroc
 ```
 
-### Parameter Recovery Check
+### Sensitivity to the Generating d′
 
-A single fit tells you little. The useful check is whether the recovered
-parameters *move* as the generating parameter moves:
+A single fit tells you little. A useful check is whether the 2-HT
+parameters *move* as the generating d′ moves. The data come from a
+signal detection (MAX) model, not from the 2-HT model, so there are no
+true 2-HT parameter values to recover:
 
 ``` r
 
@@ -611,33 +639,36 @@ recovery <- do.call(rbind, lapply(c(0.5, 1.0, 1.5, 2.0, 2.5), function(dp) {
                         target_present = "target_present",
                         identification = "identification")
   data.frame(`True d'` = dp,
-             `Recovered dP` = round(fit$parameters[["dP"]], 3),
-             `Recovered dA` = round(fit$parameters[["dA"]], 3),
+             `Fitted dP` = round(fit$parameters[["dP"]], 3),
+             `Fitted dA` = round(fit$parameters[["dA"]], 3),
              check.names = FALSE)
 }))
 
 knitr::kable(
   recovery, row.names = FALSE,
-  caption = "2-HT detection parameters recovered from data simulated at known d', 400 lineups per arm."
+  caption = "2-HT detection parameters fitted to data simulated from a signal detection model at known d', 400 lineups per arm."
 )
 ```
 
-| True d’ | Recovered dP | Recovered dA |
-|--------:|-------------:|-------------:|
-|     0.5 |        0.113 |        0.038 |
-|     1.0 |        0.313 |        0.140 |
-|     1.5 |        0.522 |        0.169 |
-|     2.0 |        0.677 |        0.124 |
-|     2.5 |        0.806 |        0.214 |
+| True d’ | Fitted dP | Fitted dA |
+|--------:|----------:|----------:|
+|     0.5 |     0.113 |     0.038 |
+|     1.0 |     0.313 |     0.140 |
+|     1.5 |     0.522 |     0.169 |
+|     2.0 |     0.677 |     0.124 |
+|     2.5 |     0.806 |     0.214 |
 
-2-HT detection parameters recovered from data simulated at known d’, 400
-lineups per arm. {.table}
+2-HT detection parameters fitted to data simulated from a signal
+detection model at known d’, 400 lineups per arm. {.table}
 
-`dP` increases monotonically with the generating d′, which is the result
-the check is looking for. It is not on the same scale as d′ and should
-not be expected to equal it: the two models parameterise memory
-differently, and what validates the analysis is that the ordering is
-recovered.
+`dP` increases monotonically with the generating d′. That shows the
+parameter is sensitive to memory strength. It is not parameter recovery:
+`dP` is not on the same scale as d′, the generating model is not the
+2-HT model, and the check says nothing about bias, interval coverage or
+whether the process interpretation is correct. Recovery would need data
+simulated from
+[`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)’s
+own equations.
 
 ## Practical Examples
 
@@ -654,35 +685,38 @@ procedure_eval <- compare_models(
   models = c("2ht", "eig", "fullroc")
 )
 
-# Interpretation
-cat("Procedure Evaluation:\n\n")
-#> Procedure Evaluation:
-
-cat("2-HT: dP =", round(procedure_eval$fitted_models$`2ht`$parameters[["dP"]], 2),
-    "\n  → Detection ability is",
-    ifelse(procedure_eval$fitted_models$`2ht`$parameters[["dP"]] > 0.5,
-           "good", "moderate"), "\n\n")
-#> 2-HT: dP = 0.49 
-#>   → Detection ability is moderate
-
-if ("eig" %in% procedure_eval$models_fit) {
-  cat("EIG =", round(procedure_eval$fitted_models$eig$eig, 3), "bits\n")
-  cat("  → Provides",
-      round(procedure_eval$fitted_models$eig$eig /
-              procedure_eval$fitted_models$eig$prior_entropy * 100, 0),
-      "% of maximum information\n\n")
-}
-#> EIG = 0.187 bits
-#>   → Provides 19 % of maximum information
-
-if ("fullroc" %in% procedure_eval$models_fit) {
-  cat("Full ROC AUC =", round(procedure_eval$fitted_models$fullroc$auc, 3), "\n")
-  cat("  → Discriminability is",
-      ifelse(procedure_eval$fitted_models$fullroc$auc > 0.75, "good", "moderate"), "\n")
-}
-#> Full ROC AUC = 0.747 
-#>   → Discriminability is moderate
+fm <- procedure_eval$fitted_models
+knitr::kable(
+  data.frame(
+    Measure  = c("2-HT dP (SE)", "EIG, bits (share of prior entropy)",
+                 "Full ROC AUC (diagnosticity ordering)"),
+    Estimate = c(sprintf("%.3f (%.3f)", fm$`2ht`$parameters[["dP"]],
+                         fm$`2ht`$se[["dP"]]),
+                 sprintf("%.3f (%.0f%%)", fm$eig$eig,
+                         100 * fm$eig$eig / fm$eig$prior_entropy),
+                 sprintf("%.3f", fm$fullroc$auc))
+  ),
+  row.names = FALSE,
+  caption = "Three summaries of the same simulated procedure, prior guilt .5."
+)
 ```
+
+| Measure                               | Estimate    |
+|:--------------------------------------|:------------|
+| 2-HT dP (SE)                          | 0.485 (NA)  |
+| EIG, bits (share of prior entropy)    | 0.187 (19%) |
+| Full ROC AUC (diagnosticity ordering) | 0.747       |
+
+Three summaries of the same simulated procedure, prior guilt .5.
+{.table}
+
+The table reports estimates, not verdicts. No validated benchmarks exist
+that would let a value of `dP`, EIG or AUC be called good or poor in
+itself; the
+[`vignette("fullroc_analysis")`](https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.md)
+makes the same point about AUC. These numbers are informative when
+compared with another procedure or condition analysed the same way, with
+their uncertainty.
 
 ### Example 2: Identifying Sources of Bias
 
@@ -692,30 +726,33 @@ Use 2-HT model to check for bias:
 
 params <- comparison$fitted_models$`2ht`$parameters
 
-bias_param <- params[["b"]]
-bias_reading <- if (bias_param < 0.1) {
-  "Low: the suspect does not appear to stand out unfairly"
-} else if (bias_param > 0.3) {
-  "High: the suspect may stand out. Check lineup construction"
-} else {
-  "Moderate"
-}
-
+model_2ht <- comparison$fitted_models$`2ht`
 knitr::kable(
   data.frame(Parameter = "b (biased suspect selection)",
-             Estimate = round(bias_param, 3),
-             Reading = bias_reading),
+             Estimate = round(params[["b"]], 3),
+             `95% Wald interval` = sprintf("[%.3f, %.3f]",
+               max(0, params[["b"]] - 1.96 * model_2ht$se[["b"]]),
+               min(1, params[["b"]] + 1.96 * model_2ht$se[["b"]])),
+             check.names = FALSE),
   row.names = FALSE,
   caption = "2-HT bias parameter, simulated data (300 target-present and 300 target-absent lineups)."
 )
 ```
 
-| Parameter | Estimate | Reading |
-|:---|---:|:---|
-| b (biased suspect selection) | 0 | Low: the suspect does not appear to stand out unfairly |
+| Parameter                    | Estimate | 95% Wald interval |
+|:-----------------------------|---------:|:------------------|
+| b (biased suspect selection) |        0 | \[NA, NA\]        |
 
 2-HT bias parameter, simulated data (300 target-present and 300
 target-absent lineups). {.table}
+
+`b` is the probability that a witness who detects nothing picks the
+suspect because the suspect stands out. An interval clearly above zero
+is a reason to inspect the lineup; how large a `b` is acceptable is a
+policy judgement that the model cannot make. Note that the interval is a
+Wald interval clipped to \[0, 1\];
+[`boot_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/boot_winter_2ht.md)
+gives bootstrap intervals that respect the boundary.
 
 ### Example 3: Comparing Detection vs. Guessing
 
@@ -810,37 +847,22 @@ cat(table_md, sep = "\n")
 
 ## Interpretation Guidelines
 
-### 2-HT Parameters
+This vignette deliberately gives no poor/moderate/good bands for the
+2-HT parameters, EIG or AUC. No study has calibrated such bands, and
+cut-offs of that kind would read as findings when they are conventions.
+Interpret each estimate on its own scale, with its uncertainty and its
+assumptions:
 
-**dP (Detection of Presence)** - 0.0-0.3: Poor detection - 0.3-0.5:
-Moderate detection - 0.5-0.7: Good detection - 0.7-1.0: Excellent
-detection
-
-**dA (Detection of Absence)** - 0.0-0.2: Poor rejection ability -
-0.2-0.4: Moderate rejection ability - 0.4+: Good rejection ability
-
-**b (Bias)** - 0.0-0.1: Low bias (good lineup) - 0.1-0.3: Moderate
-bias - 0.3+: High bias (problematic lineup)
-
-**g (Guessing)** - 0.0-0.3: Conservative (prefer rejection) - 0.3-0.7:
-Moderate - 0.7-1.0: Liberal (prefer selection)
-
-### EIG Values
-
-- **0.0-0.1 bits**: Very low diagnosticity
-- **0.1-0.3 bits**: Low diagnosticity
-- **0.3-0.5 bits**: Moderate diagnosticity
-- **0.5-0.7 bits**: Good diagnosticity
-- **0.7+ bits**: Excellent diagnosticity
-
-### Full ROC AUC
-
-- **0.50**: Chance performance
-- **0.50-0.60**: Poor discriminability
-- **0.60-0.70**: Fair discriminability
-- **0.70-0.80**: Good discriminability
-- **0.80-0.90**: Very good discriminability
-- **0.90-1.00**: Excellent discriminability
+- **2-HT parameters** are probabilities of latent states. Compare them
+  across conditions, ideally with parameters constrained across
+  conditions so that the differences can be tested.
+- **EIG** runs from 0 to the prior entropy, which depends on
+  `prior_guilt` (1 bit only at .5). Compare procedures at the same
+  prior.
+- **Full-ROC AUC** lies between 0 and 1, with .5 the no-discrimination
+  reference. The default diagnosticity ordering is optimistically biased
+  (see Technical Details), so compare procedures with the a-priori
+  ordering.
 
 ## Common Pitfalls
 
@@ -865,9 +887,12 @@ cat("Recommend: n ≥ 100 per condition for reliable model fitting\n")
 
 ### 2. Model Convergence Issues
 
-If 2-HT model fails to converge: - Check data quality (sufficient
-variability) - Try different starting parameters - Ensure adequate
-sample size - Consider data preprocessing
+If 2-HT model fails to converge:
+
+- Check data quality (sufficient variability)
+- Try different starting parameters
+- Ensure adequate sample size
+- Consider data preprocessing
 
 ### 3. Comparing Non-Comparable Measures
 
@@ -879,19 +904,23 @@ cat("✗ Wrong: 'dP = 0.6 is better than EIG = 0.4'\n")
 #> ✗ Wrong: 'dP = 0.6 is better than EIG = 0.4'
 cat("  → These are different scales and constructs\n\n")
 #>   → These are different scales and constructs
-cat("✓ Right: 'dP = 0.6 indicates good detection AND\n")
-#> ✓ Right: 'dP = 0.6 indicates good detection AND
-cat("          EIG = 0.4 indicates moderate diagnosticity'\n")
-#>           EIG = 0.4 indicates moderate diagnosticity'
-cat("  → Each model provides unique insights\n")
-#>   → Each model provides unique insights
+cat("✓ Right: 'dP rose from 0.45 to 0.60 between conditions, and EIG\n")
+#> ✓ Right: 'dP rose from 0.45 to 0.60 between conditions, and EIG
+cat("          (prior .5) rose from 0.30 to 0.40 bits'\n")
+#>           (prior .5) rose from 0.30 to 0.40 bits'
+cat("  → Compare each measure with itself across conditions\n")
+#>   → Compare each measure with itself across conditions
 ```
 
 ## Best Practices
 
 ### 1. Fit Multiple Models
 
-Don’t rely on a single model, as each provides unique insights:
+Don’t rely on a single model: each answers a different question, as set
+out in [The Three Models](#the-three-models) above. The 2-HT model
+separates detection from guessing and bias, EIG summarises how much the
+responses tell an investigator about guilt, and the full ROC measures
+investigator discriminability.
 
 ``` r
 
@@ -925,8 +954,8 @@ cat("  • EIG: Value in bits, efficiency percentage\n")
 #>   • EIG: Value in bits, efficiency percentage
 cat("  • Full ROC: AUC, number of operating points\n")
 #>   • Full ROC: AUC, number of operating points
-cat("  • Interpretation of each model's insights\n")
-#>   • Interpretation of each model's insights
+cat("  • What each model's estimates say about the procedure\n")
+#>   • What each model's estimates say about the procedure
 ```
 
 ### 3. Check Model Assumptions
@@ -945,11 +974,11 @@ summary(comparison$fitted_models$`2ht`)
 #>   Lineup size:    6
 #> 
 #> Parameter Estimates:
-#>                       Estimate     SE Lower_95 Upper_95
-#> dP (culprit presence)   0.4853 0.0353   0.4162   0.5545
-#> dA (culprit absence)    0.0494 0.0572  -0.0627   0.1614
-#> b  (biased selection)   0.0000 0.0239  -0.0468   0.0468
-#> g  (guessing)           0.7539 0.0355   0.6843   0.8235
+#>                       Estimate SE Lower_95 Upper_95
+#> dP (culprit presence)   0.4853 NA       NA       NA
+#> dA (culprit absence)    0.0494 NA       NA       NA
+#> b  (biased selection)   0.0000 NA       NA       NA
+#> g  (guessing)           0.7539 NA       NA       NA
 #> 
 #> 
 #> Model Fit:
@@ -961,15 +990,15 @@ summary(comparison$fitted_models$`2ht`)
 #> 
 #> Target-Present Lineups:
 #>            Observed Expected      Residual
-#> Suspect ID      165      165  1.841166e-03
-#> Filler ID        97       97 -1.909498e-03
-#> Reject           38       38  6.833131e-05
+#> Suspect ID      165      165  1.001150e-06
+#> Filler ID        97       97 -6.398027e-07
+#> Reject           38       38 -3.613474e-07
 #> 
 #> Target-Absent Lineups:
-#>            Observed Expected     Residual
-#> Suspect ID       33     35.8 -2.833685981
-#> Filler ID       182    179.2  2.831570094
-#> Reject           85     85.0  0.002115887
+#>            Observed Expected      Residual
+#> Suspect ID       33     35.8 -2.833333e+00
+#> Filler ID       182    179.2  2.833334e+00
+#> Reject           85     85.0 -3.352462e-07
 #> 
 #> Model identification:
 #>   Saturated (just-identified): 4 parameters, 4 data df, 0 residual df.
@@ -978,10 +1007,13 @@ summary(comparison$fitted_models$`2ht`)
 #>   Residual obs-vs-expected discrepancy = 0.2688 (~= 0 confirms convergence).
 ```
 
-A chi-square p-value below 0.05 indicates that the model does not
-reproduce the observed response frequencies well. With large samples the
-test will detect small departures, so read it alongside the size of the
-discrepancies rather than as a pass/fail.
+The summary’s identification note is the part to read. With one
+target-present and one target-absent condition the 2-HT model has zero
+residual degrees of freedom, so it reproduces the counts exactly and
+there is no goodness-of-fit test to read. Convergence, identifiability
+(enough rejections to estimate `dA`) and fit are separate questions. Fit
+can be tested only with several conditions and parameters constrained
+across them, as in Winter et al. (2022).
 
 ## Technical Details
 
@@ -992,19 +1024,26 @@ be ranked against each other directly.
 
 | Model | Estimand | Scale | Inference available |
 |----|----|----|----|
-| 2-HT | Latent probabilities of detection, bias and guessing | Four probabilities in \[0, 1\] | Standard errors from the observed information matrix; goodness-of-fit chi-square |
-| EIG | Expected reduction in uncertainty about guilt | Bits, 0 to the prior entropy | None in this package |
-| Full ROC | Investigator discriminability | AUC in \[0.5, 1\] | None in this package; see the note on ordering bias below |
+| 2-HT | Latent probabilities of detection, bias and guessing | Four probabilities in \[0, 1\] | Standard errors from the observed information matrix; bootstrap intervals via [`boot_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/boot_winter_2ht.md). No fit test for a single condition (zero residual df) |
+| EIG | Expected reduction in uncertainty about guilt | Bits, 0 to the prior entropy | None in this package. Tuttle, Starns and Cohen (2025) give 95% credible intervals for EIG from a Bayesian multinomial model of the response proportions; adding this is planned |
+| Full ROC | Investigator discriminability | AUC in \[0, 1\], .5 = no discrimination | None in this package; see the note on ordering bias below |
 
 ### 2-HT estimation
 
 The model is a multinomial processing tree. Response probabilities are
 as given in the introduction, and the parameters are estimated by
 maximum likelihood over the six observed cell counts (three responses by
-two lineup types), so the model has four parameters for five free cells
-and one residual degree of freedom. Standard errors come from the
-numerically differentiated Hessian at the optimum, and the
-goodness-of-fit statistic is the usual multinomial chi-square.
+two lineup types). The target-present and target-absent totals are
+fixed, so the data have 2 × (3 − 1) = 4 degrees of freedom, the same as
+the number of parameters: a single-condition fit is saturated, with zero
+residual degrees of freedom (Winter et al., 2022, Figure 1). The
+standard errors measure how sharply the data pin each parameter down. At
+the best-fitting values, the log-likelihood falls away steeply in some
+directions and gently in others; that curvature, the *Hessian* matrix of
+second derivatives, is computed numerically, and its inverse gives the
+sampling variances of the estimates. A flat likelihood (little
+curvature) means a large standard error. Winter et al. (2022) describe
+the model and its estimation in full.
 
 **Identifiability.** The detect-absence parameter `dA` is identified
 almost entirely by rejections. If very few witnesses reject, the
@@ -1041,49 +1080,71 @@ inferential.
     partition the sample.
 2.  Target-present and target-absent lineups are independent samples.
 3.  All lineup members other than the suspect are functioning foils.
-    Where a lineup contains members nobody ever chooses, the effective
+    Where some members are implausible alternatives, the effective
     lineup size is smaller than the nominal `lineup_size` passed here,
-    and all three models will be misspecified in the same direction.
+    and all three models will be misspecified in the same direction. A
+    member nobody chose in the sample is not necessarily such a foil: in
+    a fair six-person lineup, a given member receives no choices from
+    ten witnesses with probability (5/6)^10 ≈ .16. Fitzgerald, Tredoux
+    and Juncu (2023) discuss correcting error-rate estimates for unequal
+    foil choices by using effective rather than nominal size; passing an
+    effective size to these models is planned for a future version.
 
 ## Summary
 
-**Key Functions:** -
-[`compare_models()`](https://cgtza2.github.io/r4lineups/reference/compare_models.md):
-Fit multiple models -
-[`print.model_comparison()`](https://cgtza2.github.io/r4lineups/reference/print.model_comparison.md):
-View comparison table -
-[`summary.model_comparison()`](https://cgtza2.github.io/r4lineups/reference/summary.model_comparison.md):
-Detailed results -
-[`plot.model_comparison()`](https://cgtza2.github.io/r4lineups/reference/plot.model_comparison.md):
-Visualizations -
-[`format_comparison_table()`](https://cgtza2.github.io/r4lineups/reference/format_comparison_table.md):
-Publication tables
+**Key Functions:**
 
-**When to Use Each Model:** - **2-HT**: Understanding cognitive
-processes - **EIG**: Overall diagnosticity assessment - **Full ROC**:
-Threshold-free discriminability
+- [`compare_models()`](https://cgtza2.github.io/r4lineups/reference/compare_models.md):
+  Fit multiple models
+- [`print.model_comparison()`](https://cgtza2.github.io/r4lineups/reference/print.model_comparison.md):
+  View comparison table
+- [`summary.model_comparison()`](https://cgtza2.github.io/r4lineups/reference/summary.model_comparison.md):
+  Detailed results
+- [`plot.model_comparison()`](https://cgtza2.github.io/r4lineups/reference/plot.model_comparison.md):
+  Visualizations
+- [`format_comparison_table()`](https://cgtza2.github.io/r4lineups/reference/format_comparison_table.md):
+  Publication tables
 
-**Best Practices:** - Fit multiple models for comprehensive analysis -
-Report all model results - Check model fit and convergence - Use
-adequate sample sizes (n ≥ 100 per condition) - Interpret each model’s
-unique insights
+**When to Use Each Model:**
+
+- **2-HT**: Understanding cognitive processes
+- **EIG**: Overall diagnosticity assessment
+- **Full ROC**: Threshold-free discriminability
+
+**Best Practices:**
+
+- Fit multiple models for comprehensive analysis
+- Report all model results
+- Check convergence and identifiability; test fit only across
+  constrained conditions
+- Use adequate sample sizes (n ≥ 100 per condition)
+- Interpret each model’s estimates on their own scale
 
 ## References
 
-Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental
-validation of a multinomial processing tree model for analyzing
-eyewitness identification decisions. *Scientific Reports, 12*, 15571.
-
-Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
-for assessing the effectiveness of eyewitness identification procedures:
-Expected information gain. *Psychological Review, 130*(3), 677–719.
-<https://doi.org/10.1037/rev0000332>
+Fitzgerald, R. J., Tredoux, C. G., & Juncu, S. (2023). Estimation of
+eyewitness error rates in fair and biased lineups. *Law and Human
+Behavior, 47*(4), 463-483.
 
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between
 investigator discriminability and eyewitness discriminability: A method
 for creating full receiver operating characteristic curves of lineup
 identification performance. *Perspectives on Psychological Science,
 15*(3), 589-607.
+
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
+for assessing the effectiveness of eyewitness identification procedures:
+Expected information gain. *Psychological Review, 130*(3), 677–719.
+<https://doi.org/10.1037/rev0000332>
+
+Tuttle, M. D., Starns, J. J., & Cohen, A. L. (2025). Protecting the
+innocent in eyewitness identification: An analysis of simultaneous and
+ranking lineups. *Journal of Memory and Language, 140*, 104581.
+<https://doi.org/10.1016/j.jml.2024.104581>
+
+Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental
+validation of a multinomial processing tree model for analyzing
+eyewitness identification decisions. *Scientific Reports, 12*, 15571.
 
 ## Further Reading
 

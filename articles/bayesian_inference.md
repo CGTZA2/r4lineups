@@ -12,7 +12,7 @@ This vignette shows the Bayesian posterior summaries in **r4lineups**
 for lineup fairness and confidence-based eyewitness measures.
 
 Use these functions when you want credible intervals or direct
-probability statements such as $`P(E' < 6 \mid data)`$,
+probability statements such as $`P(E' < 4.5 \mid data)`$,
 $`P(F < 6 \mid data)`$, or $`P(DR > 1 \mid data)`$. The examples use
 small posterior samples so that the vignette runs quickly during package
 checks; increase `S` for final analyses.
@@ -20,18 +20,20 @@ checks; increase `S` for final analyses.
 ### If you have only used frequentist methods
 
 Most readers of this package will have been trained in the frequentist
-tradition, so it is worth setting out plainly what is different here.
-Nothing in what follows requires accepting a philosophical position; it
-is mainly about what question the interval answers.
+tradition, so this section sets out what is different here. Nothing in
+what follows requires accepting a philosophical position; it is mainly
+about what question the interval answers.
 
 **The question you probably want to ask.** Having measured a six-person
-lineup and obtained an effective size of 4.8, the natural question is:
-*what is the probability that this lineup’s effective size is below 6?*
-A frequentist confidence interval cannot answer that. It is a statement
-about the procedure — that intervals constructed this way contain the
-true value 95% of the time — not about this lineup. The true effective
-size either is or is not below 6, and frequentist probability does not
-attach to it.
+lineup and obtained an effective size of 4.8, a natural question is:
+*what is the probability that this lineup’s effective size is below
+4.5,* a tolerance chosen before looking at the data? (Why not “below 6”
+is explained below: for effective size that question has the same
+answer, 1, whatever the data.) A frequentist confidence interval cannot
+answer that. It is a statement about the procedure — that intervals
+constructed this way contain the true value 95% of the time — not about
+this lineup. The true effective size either is or is not below 4.5, and
+frequentist probability does not attach to it.
 
 A Bayesian **credible interval** does answer it. “There is a 95%
 probability that E′ lies between 4.1 and 5.6, given these data” is a
@@ -48,17 +50,23 @@ distribution. Three steps:
 2.  The **data** update it through the likelihood.
 3.  The result is the **posterior**, a full distribution for the
     quantity, from which any summary can be read: a median, an interval,
-    or a direct probability such as $`P(E' < 6)`$.
+    or a direct probability such as $`P(E' < 4.5)`$.
 
 **Why the functions return draws rather than formulas.** Effective size
 is $`1/\sum p_i^2`$ — a nonlinear function of the choice probabilities.
 There is no tidy closed form for its posterior. Instead the functions
 sample `S` draws from the posterior of the probabilities and transform
 each draw. The resulting collection of `S` values *is* the posterior of
-E′, and any summary is computed from it. This is why `S` matters: too
-few draws and the summaries are noisy. Note that these are independent
-Monte Carlo draws, not MCMC, so there is no chain to check for
-convergence.
+E′, and any summary is computed from it. This is why `S` is important:
+too few draws and the summaries are noisy. Note that these are
+independent Monte Carlo draws, not MCMC. *Monte Carlo* means summarising
+a distribution from random draws taken from it. *Markov chain Monte
+Carlo* (MCMC) is the method used when a posterior cannot be sampled
+directly: it builds a chain of draws, each depending on the last, that
+only gradually settles into the posterior, so its draws are correlated
+and the chain has to be checked for convergence. Here the posteriors
+have standard forms and can be sampled directly, so every draw is
+independent and there is no chain to check (see Technical Details).
 
 **What you gain in practice**, beyond the interpretation:
 
@@ -69,13 +77,13 @@ convergence.
 - **Direct probabilities.** $`P(DR > 1)`$ is often exactly what a report
   needs, and is awkward to extract from a p-value.
 - **Small samples degrade gracefully.** With few mock witnesses the
-  posterior becomes wide, which is the honest result, rather than
-  producing a narrow interval resting on an asymptotic approximation
-  that does not hold.
+  posterior becomes wide, which reflects the real uncertainty, rather
+  than producing a narrow interval resting on an asymptotic
+  approximation that does not hold.
 
 **What it does not give you.** It is not a way of getting a decisive
 answer from thin data. A weak prior and a small sample give a wide
-posterior, and that width is the finding.
+posterior.
 
 ``` r
 
@@ -103,6 +111,18 @@ fits a Dirichlet-multinomial model to the lineup choice counts and
 transforms each posterior draw of the choice-probability vector to
 Tredoux’s effective size $`E'`$.
 
+The **Dirichlet distribution** is a distribution over sets of
+probabilities that sum to 1, here the probabilities $`p_1, \ldots, p_k`$
+that a mock witness chooses each of the $`k`$ lineup members. It is the
+multi-category generalisation of the beta distribution, which describes
+a single probability. It has one parameter per member, $`\alpha_i`$,
+which acts like a count of choices imagined before seeing the data. With
+mock-witness counts $`n_1, \ldots, n_k`$, the posterior is again
+Dirichlet, with parameters $`n_i + \alpha_i`$: the prior counts are
+simply added to the observed ones. That is why the prior has little
+influence once there are a few dozen real choices, and why the posterior
+can be sampled exactly.
+
 ``` r
 
 data(nortje2012)
@@ -111,12 +131,16 @@ lineup_vec <- nortje2012$lineup_1
 k <- max(lineup_vec, na.rm = TRUE)
 lineup_tab <- table(factor(lineup_vec, levels = seq_len(k)))
 
+# An illustrative tolerance. In a real analysis choose and justify it in
+# advance; the software cannot supply one.
+tolerance <- 0.75 * k
+
 set.seed(1)
 esize_post <- esize_T_bayes(
   lineup_tab,
   alpha = 0.5,
   S = 1000,
-  threshold = k
+  threshold = tolerance
 )
 
 esize_post
@@ -127,8 +151,8 @@ esize_post
 #>   Posterior mean:   5.614
 #>   Posterior median: 5.624
 #>   95% credible interval: [4.804, 6.355]
-#>   P(E' < 8.00 | data): 1.000
-#>   P(E' > 8.00 | data): 0.000
+#>   P(E' < 6.00 | data): 0.822
+#>   P(E' > 6.00 | data): 0.178
 ```
 
 ``` r
@@ -138,10 +162,46 @@ plot(esize_post)
 
 ![](bayesian_inference_files/figure-html/unnamed-chunk-3-1.png)
 
-The threshold argument makes the posterior useful for fairness
-benchmarks. For example, with a six-person lineup one might inspect
-$`P(E' < 6 \mid data)`$ as a posterior probability that the effective
-size falls below nominal size.
+**Why the threshold is not the nominal size.** For any choice
+probabilities over $`k`$ members, $`E' = 1/\sum p_i^2 \le k`$, with
+equality only when all $`k`$ probabilities are exactly equal. A
+continuous posterior gives that single point probability zero, so
+$`P(E' < k \mid data) = 1`$ for any data at all, including perfectly
+balanced counts;
+[`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md)
+warns if asked for it. Useful summaries are the credible interval for
+$`E'`$, the interval for the deficit $`k - E'`$, or the probability
+below a tolerance chosen in advance:
+
+``` r
+
+deficit <- k - esize_post$E_draws
+knitr::kable(
+  data.frame(
+    Summary  = c(sprintf("95%% interval for E' (k = %d)", k),
+                 "95% interval for the deficit k - E'",
+                 sprintf("P(E' < %.1f | data)", tolerance)),
+    Value    = c(sprintf("[%.2f, %.2f]", esize_post$credible_interval[["lower"]],
+                         esize_post$credible_interval[["upper"]]),
+                 sprintf("[%.2f, %.2f]", quantile(deficit, .025),
+                         quantile(deficit, .975)),
+                 sprintf("%.3f", esize_post$threshold_probs$P_below))
+  ),
+  row.names = FALSE,
+  caption = "Posterior summaries of effective size, nortje2012 lineup 1."
+)
+```
+
+| Summary                             | Value          |
+|:------------------------------------|:---------------|
+| 95% interval for E’ (k = 8)         | \[4.80, 6.36\] |
+| 95% interval for the deficit k - E’ | \[1.64, 3.20\] |
+| P(E’ \< 6.0 \| data)                | 0.822          |
+
+Posterior summaries of effective size, nortje2012 lineup 1. {.table}
+
+Functional size does not have this problem: it is not bounded above by
+$`k`$, so $`P(F < k \mid data)`$ is informative.
 
 ## Functional Size
 
@@ -227,6 +287,15 @@ identifications are more common in the target-present lineup than in the
 target-absent lineup.
 
 ## Calibration
+
+The Bayesian calibration model conditions on bin frequencies and treats
+correctness within each bin as exchangeable Bernoulli observations.
+Fixed target-present and target-absent trial totals do not generally
+imply that conditional binomial likelihood. Interpret these intervals as
+working-model summaries for that assumption, rather than automatically
+exact inference for a fixed-arm experiment. Filler-derived fractional
+counts add another approximation; see
+[`?calibration_bayes`](https://cgtza2.github.io/r4lineups/reference/calibration_bayes.md).
 
 [`calibration_bayes()`](https://cgtza2.github.io/r4lineups/reference/calibration_bayes.md)
 places beta posteriors on accuracy within confidence bins and propagates
@@ -327,7 +396,7 @@ and check sensitivity to the prior concentration, for example
 
 sensitivity <- do.call(rbind, lapply(c(0.1, 0.5, 1.0), function(a) {
   set.seed(11)
-  post <- esize_T_bayes(lineup_tab, alpha = a, S = 2000, threshold = k)
+  post <- esize_T_bayes(lineup_tab, alpha = a, S = 2000)
   data.frame(
     `Prior alpha`      = a,
     `Posterior median` = round(post$posterior_median, 3),
@@ -362,6 +431,24 @@ a prior.
 
 #### What is being sampled
 
+**One definition of E′.** Tredoux (1998) defined effective size through
+an index of diversity, $`I = 1 - \sum_i p_i^2`$, transformed back to a
+count of members: $`E' = 1/(1 - I)`$. Substituting $`I`$ gives
+$`E' = 1/\sum_i p_i^2`$, the reciprocal of Simpson’s concentration
+index, also known as the inverse Simpson or inverse Herfindahl index.
+The two forms are algebraically identical; they differ only in notation,
+and this package uses $`1/\sum_i p_i^2`$ throughout. What differs
+between functions is the input.
+[`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
+substitutes the observed proportions $`o_i/N`$;
+[`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md)
+applies the same formula to each posterior draw of the true
+probabilities. The posterior median therefore need not equal the
+classical point estimate, particularly in small samples, and that gap
+reflects estimation, not a different definition. The bias-corrected
+estimate from `esize_T(..., unbiased = TRUE)` is a third estimator of
+the same quantity.
+
 | Function | Model | Transformation applied to each draw |
 |----|----|----|
 | [`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md) | Dirichlet-multinomial on the k choice counts | $`E' = 1/\sum_i p_i^2`$ |
@@ -371,10 +458,10 @@ a prior.
 | [`sdt_compare()`](https://cgtza2.github.io/r4lineups/reference/sdt_compare.md) | Beta posteriors on hit and false-alarm rates | $`\Delta d' = d'_A - d'_B`$ |
 
 In each case the posterior of the *transformed* quantity is obtained by
-transforming draws, not by approximating the transformation. This
-matters for quantities like $`DR`$, a ratio whose sampling distribution
-is markedly skewed: the posterior inherits that skew correctly, where a
-symmetric normal-theory interval would not.
+transforming draws, not by approximating the transformation. This is
+important for quantities like $`DR`$, a ratio whose sampling
+distribution is markedly skewed: the posterior inherits that skew
+correctly, where a symmetric normal-theory interval would not.
 
 #### The prior
 
@@ -386,19 +473,49 @@ dominates, which the sensitivity check above is there to confirm.
 
 #### Monte Carlo error
 
-Summaries are computed from `S` independent draws, so they carry Monte
-Carlo error of order $`1/\sqrt{S}`$. These are not Markov chains, so
-autocorrelation and convergence diagnostics do not apply. `S = 1000` is
-adequate for a median, but tail probabilities and interval endpoints
-need more — use 10,000 or more where a reported number depends on them.
+The posteriors here are **conjugate**: a Dirichlet prior with
+multinomial counts gives a Dirichlet posterior, and a beta prior with
+binomial counts gives a beta posterior. Both are standard distributions
+with known forms, so the functions draw from the exact posterior
+directly (Dirichlet draws by normalising independent gamma draws, beta
+draws with [`rbeta()`](https://rdrr.io/r/stats/Beta.html)). Each draw is
+independent of the others.
+
+MCMC is needed only when a posterior cannot be sampled like this,
+typically because its normalising constant cannot be computed. A Markov
+chain is then constructed whose long-run distribution is the posterior;
+successive draws are correlated, early draws must be discarded as
+burn-in, and convergence has to be checked (for example with R-hat and
+the effective sample size). None of that applies here. $`E'`$, $`F`$ and
+the other summaries are fixed transformations of each draw, so the
+transformed values are also independent draws from their exact
+posteriors, even though those posteriors have no closed form.
+
+The practical consequences are that there is no burn-in, thinning or
+convergence diagnostic; the effective sample size is simply `S`; and
+Monte Carlo error falls as $`1/\sqrt{S}`$. The Monte Carlo standard
+error of a tail probability $`p`$, for example, is about
+$`\sqrt{p(1-p)/S}`$: 0.016 for $`p = 0.5`$ at `S = 1000`, and 0.005 at
+`S = 10000`. `S = 1000` is adequate for a median, but tail probabilities
+and interval endpoints need more; use 10,000 or more where a reported
+number depends on them. This simplicity rests on conjugacy:
+non-conjugate priors or hierarchical extensions would bring MCMC back.
 
 #### Assumptions
 
 1.  Choices are independent across witnesses, and each witness
     contributes one.
-2.  The Dirichlet-multinomial treats members as exchangeable *a priori*.
-    That is a statement about prior ignorance, not a claim that foils
-    are interchangeable in fact; the data are what distinguish them.
+2.  The Dirichlet-multinomial prior is symmetric: every member receives
+    the same prior count `alpha`, so before any choices are seen no
+    member is expected to draw more choices than another. That is a
+    statement of prior ignorance, not a claim that the foils are equally
+    good in fact. The prior counts are added to the observed choices, so
+    with even a moderate number of mock witnesses the observed
+    differences between members dominate, and the posterior can show
+    that a lineup is very unequal. The symmetric prior does pull small
+    samples slightly towards equal probabilities, and so towards a
+    larger E′, which is one reason to report the sensitivity check
+    above.
 3.  [`diag_ratio_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T_bayes.md)
     treats the two lineups as independent samples.
 4.  [`sdt_compare()`](https://cgtza2.github.io/r4lineups/reference/sdt_compare.md)
@@ -406,9 +523,6 @@ need more — use 10,000 or more where a reported number depends on them.
     does.
 
 ### References
-
-Agresti, A., & Agresti, B. F. (1978). Statistical analysis of
-qualitative variation. *Sociological Methodology, 9*, 204-237.
 
 Tredoux, C. G. (1998). Statistical inference on measures of lineup
 fairness. *Law and Human Behavior, 22*(2), 217-237.

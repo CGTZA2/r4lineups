@@ -56,7 +56,24 @@ tracker](https://github.com/CGTZA2/r4lineups/issues).
 
 ## Installation
 
-This repository is an R package. From R:
+From CRAN:
+
+``` r
+
+install.packages("r4lineups")
+```
+
+The current release is also available from r-universe, which is updated
+sooner than CRAN:
+
+``` r
+
+install.packages("r4lineups",
+                 repos = c("https://cgtza2.r-universe.dev",
+                           "https://cloud.r-project.org"))
+```
+
+Or from the source:
 
 ``` r
 

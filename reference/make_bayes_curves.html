@@ -140,7 +140,9 @@ $$p(guilty|x) = \frac{p(guilty) \cdot p(x|guilty)}{p(x)}$$</p>
 $$IG(x) = H(prior) - H(posterior)$$</p>
 <p>where H(p) is binary entropy.</p>
 <p>The information gain quantifies how much uncertainty is reduced by observing
-response x. Positive values indicate the response is diagnostic.</p>
+response x. It is negative when the response moves belief towards 0.5, as a
+suspect identification does at a low prior; that is a correct update that
+leaves more uncertainty, not misleading evidence.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

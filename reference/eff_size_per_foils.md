@@ -1,7 +1,8 @@
 # Effective Size per Foils
 
-Function for computing effective size (Malpass, 1981) counting foils who
-fall within the CI for chance guessing
+A package-specific count of members whose choice-proportion intervals
+include chance guessing. This is distinct from Malpass' continuous
+effective size.
 
 ## Usage
 

@@ -56,11 +56,13 @@ accurate identifications were indeed faster than inaccurate ones, the
 experiments — from about 5 seconds to about 29 seconds. There is a real
 speed-accuracy relationship; there is no universal number.
 
-The practical consequence is worth stating plainly, because it shapes
-how this vignette proceeds. **A time boundary should be estimated from
-the data in hand, with an interval around it, rather than imported from
-another study.** The [continuous
-approach](#a-continuous-alternative-to-binning) below does exactly that.
+The practical consequence shapes how this vignette proceeds. **A time
+boundary should be estimated from the data in hand rather than imported
+from another study.** The [continuous
+approach](#a-continuous-alternative-to-binning) below does that. It
+gives a point estimate of the boundary; an interval for the boundary
+itself would need a further step, such as bootstrapping the whole fit,
+which this vignette does not show.
 
 ## Setup
 
@@ -125,13 +127,12 @@ cor(lineup_data$response_time, lineup_data$confidence)
 
 ## Response Time and Accuracy: the simplest analysis
 
-Before any binning, it is worth looking at the plain correlation between
-response time and accuracy. Accuracy is binary, so this is a
-**point-biserial** correlation — which is just Pearson’s *r* with one
-dichotomous variable, and needs no special machinery.
+Before any binning, look at the plain correlation between response time
+and accuracy. Accuracy is binary, so this is a **point-biserial**
+correlation — which is just Pearson’s *r* with one dichotomous variable,
+and needs no special machinery.
 
-The choice of *which trials to include* turns out to matter a great
-deal:
+The choice of *which trials to include* is very important:
 
 ``` r
 
@@ -171,12 +172,14 @@ Correlation between response time and accuracy, simulated data (1200
 lineups of size 6). {.table}
 
 The correlation across all trials is close to zero; restricting to
-witnesses who identified the suspect roughly triples it. This is not a
-trick. Rejections are slow for a quite different reason than false
-identifications are — a witness who searches the lineup thoroughly and
-then declines to choose is being careful, not uncertain in the way a
-slow chooser is. Pooling the two mixes two different relationships
-between time and accuracy and mostly cancels them out.
+witnesses who identified the suspect roughly triples it. In these
+simulated data that is a consequence of how response time was generated:
+it depends on confidence alone, and rejections and identifications
+relate to accuracy differently, so pooling them mixes two relationships
+that partly cancel. In real data a further reason is often proposed,
+that a witness who searches the lineup thoroughly and then declines to
+choose is being careful rather than uncertain, but this simulation does
+not model that process and cannot show it.
 
 This is why RAC, like CAC, is computed on choosers. It is also a
 reminder that the headline correlation in a response-time study depends
@@ -205,7 +208,7 @@ round(quantile(choosers$response_time, c(0, 0.25, 0.5, 0.75, 1)))
 #>    0%   25%   50%   75%  100% 
 #>   800  7028  9938 12806 24244
 
-time_bins <- c(0, 5000, 7500, 10000, 20000)
+time_bins <- c(0, 5000, 7500, 10000, Inf)
 ```
 
 ### Compute and plot
@@ -232,9 +235,9 @@ print(rac_result)
 #>   response_time mean_time n_correct n_incorrect n_total accuracy     se
 #>   <chr>             <dbl>     <int>       <int>   <int>    <dbl>  <dbl>
 #> 1 [0,5000]          3429.        63           0      63    1     0     
-#> 2 (5000,7500]       6321.        52           8      60    0.867 0.0439
-#> 3 (7500,10000]      8838.        80          16      96    0.833 0.0380
-#> 4 (10000,20000]    13101.       166          46     212    0.783 0.0283
+#> 2 (5000,7500]       6350         52           8      60    0.867 0.0439
+#> 3 (7500,10000]      8882.        80          16      96    0.833 0.0380
+#> 4 (10000,Inf]      13245.       168          46     214    0.785 0.0281
 #> 
 #> Plot: save this object first, then extract it with x$plot
 ```
@@ -247,7 +250,7 @@ rac_result$plot + theme_minimal(base_size = 12)
 ![](rac_analysis_files/figure-html/plot_rac-1.png)
 
 Accuracy falls as responses get slower, from about 100% in the fastest
-bin to about 78% in the slowest. The relationship is real but shallower
+bin to about 79% in the slowest. The relationship is real but shallower
 than the corresponding CAC relationship, which is the usual finding:
 response time carries information about accuracy, but less of it than
 confidence does.
@@ -279,7 +282,7 @@ cac$plot + ggtitle("CAC: confidence and accuracy") +
 | **X-axis** | Response time | Confidence |
 | **Measure** | Recorded automatically | Self-reported |
 | **Interpretation** | Faster is taken to indicate stronger memory | Higher confidence is taken to indicate stronger memory |
-| **Robustness** | Not affected by feedback or post-event information | Can be inflated by confirming feedback |
+| **Robustness** | A recorded decision time cannot be changed by later feedback; earlier information, procedures and timing conventions can still affect it | Can be inflated by confirming feedback |
 | **Typical strength** | Weaker relationship with accuracy | Stronger relationship with accuracy |
 
 The two are related but not redundant: in these data the correlation
@@ -292,7 +295,7 @@ Finer bins reveal more structure, at the cost of stability:
 
 ``` r
 
-fine_bins <- seq(0, 20000, by = 2500)
+fine_bins <- c(seq(0, 20000, by = 2500), Inf)
 
 rac_fine <- make_rac(lineup_data, time_bins = fine_bins, show_plot = FALSE,
                      show_errorbars = TRUE, show_n = TRUE)
@@ -300,7 +303,7 @@ rac_fine <- make_rac(lineup_data, time_bins = fine_bins, show_plot = FALSE,
 knitr::kable(
   as.data.frame(rac_fine$rac_data)[, c("response_time", "n_total", "accuracy")],
   digits = 3, row.names = FALSE,
-  caption = "RAC with 2.5-second bins, simulated data. Note the small n in the extreme bins."
+  caption = "RAC with 2.5-second bins plus an overflow bin, simulated data. Note the small n in the extreme bins."
 )
 ```
 
@@ -314,9 +317,10 @@ knitr::kable(
 | (12500,15000\] |      71 |    0.775 |
 | (15000,17500\] |      36 |    0.750 |
 | (17500,20000\] |       8 |    0.750 |
+| (20000,Inf\]   |       2 |    1.000 |
 
-RAC with 2.5-second bins, simulated data. Note the small n in the
-extreme bins. {.table}
+RAC with 2.5-second bins plus an overflow bin, simulated data. Note the
+small n in the extreme bins. {.table}
 
 The extreme bins carry few observations, and their accuracy estimates
 should not be read as though they were as trustworthy as the
@@ -374,8 +378,8 @@ ggplot(grid, aes(x = response_time / 1000, y = accuracy)) +
 ![](rac_analysis_files/figure-html/continuous_plot-1.png)
 
 This uses every observation, requires no arbitrary boundaries, and comes
-with a confidence band that widens honestly where the data thin out —
-visible in the rug along the bottom.
+with a confidence band that widens where the data thin out — visible in
+the rug along the bottom.
 
 ### Estimating a time boundary
 
@@ -388,6 +392,10 @@ directly: **up to what response time is estimated accuracy at least
 above <- grid$response_time[grid$accuracy >= 0.90]
 boundary <- if (length(above) > 0) max(above) else NA
 
+# The fitted curve could cross 90% more than once. Count the crossings, so a
+# single "boundary" is not reported when accuracy dips and recovers.
+n_crossings <- sum(diff(grid$accuracy >= 0.90) != 0)
+
 cat("Estimated accuracy at  3 s:", round(approx(grid$response_time, grid$accuracy, 3000)$y, 3), "\n")
 #> Estimated accuracy at  3 s: 0.991
 cat("Estimated accuracy at  8 s:", round(approx(grid$response_time, grid$accuracy, 8000)$y, 3), "\n")
@@ -396,14 +404,23 @@ cat("Estimated accuracy at 15 s:", round(approx(grid$response_time, grid$accurac
 #> Estimated accuracy at 15 s: 0.773
 cat("Accuracy is at least 90% up to about", round(boundary / 1000, 1), "seconds\n")
 #> Accuracy is at least 90% up to about 6.9 seconds
+cat("Crossings of the 90% line:", n_crossings, "\n")
+#> Crossings of the 90% line: 1
 ```
 
 For these simulated data the boundary falls near 6.9 seconds. That
 number is a property of *this* dataset, and the point of Weber et
 al. (2004) is precisely that it will not transfer: had the simulation
 used a different criterion or a different d′, the boundary would move.
-Reporting it with the interval around it, and refitting on new data
-rather than importing the number, is the appropriate use of the method.
+Refitting on new data rather than importing the number is the
+appropriate use of the method.
+
+Two cautions. The shaded band in the plot is a pointwise interval for
+accuracy at each time; it is not an interval for the boundary, which
+would need the whole fit bootstrapped. And a spline can cross the 90%
+line more than once, in which case the largest qualifying time does not
+mean accuracy exceeded 90% at every shorter time. The curve here crosses
+it once; check this before reporting a single boundary.
 
 A note on what is being estimated. Because accuracy among suspect
 identifications is a positive predictive value, it depends on the
@@ -455,12 +472,12 @@ knitr::kable(
 )
 ```
 
-| Time bin       | Condition 1 (d’ = 2.0) | Condition 2 (d’ = 1.0) |
-|:---------------|-----------------------:|-----------------------:|
-| \[0,5000\]     |                  0.966 |                  0.923 |
-| (5000,7500\]   |                  0.926 |                  0.708 |
-| (7500,10000\]  |                  0.914 |                  0.721 |
-| (10000,20000\] |                  0.806 |                  0.798 |
+| Time bin      | Condition 1 (d’ = 2.0) | Condition 2 (d’ = 1.0) |
+|:--------------|-----------------------:|-----------------------:|
+| \[0,5000\]    |                  0.966 |                  0.923 |
+| (5000,7500\]  |                  0.926 |                  0.708 |
+| (7500,10000\] |                  0.914 |                  0.721 |
+| (10000,Inf\]  |                  0.807 |                  0.800 |
 
 RAC accuracy by condition, simulated data (400 target-present and 400
 target-absent lineups per condition). {.table}
@@ -565,7 +582,7 @@ Points to watch:
 1.  **Units.** Response times must all be in the same units. The package
     assumes milliseconds.
 2.  **Bins.** Inspect the distribution first, as above. Four to six bins
-    is common, but the number matters far less than whether each is
+    is common, but the number is far less important than whether each is
     populated.
 3.  **Extreme values.** Very long times often mean an interruption
     rather than deliberation. Consider capping rather than deleting, and
@@ -591,19 +608,19 @@ knitr::kable(rac_result$rac_data, digits = 3,
              caption = "RAC analysis results, simulated data.")
 ```
 
-| response_time  | mean_time | n_correct | n_incorrect | n_total | accuracy |    se |
-|:---------------|----------:|----------:|------------:|--------:|---------:|------:|
-| \[0,5000\]     |  3428.746 |        63 |           0 |      63 |    1.000 | 0.000 |
-| (5000,7500\]   |  6320.827 |        52 |           8 |      60 |    0.867 | 0.044 |
-| (7500,10000\]  |  8838.262 |        80 |          16 |      96 |    0.833 | 0.038 |
-| (10000,20000\] | 13101.422 |       166 |          46 |     212 |    0.783 | 0.028 |
+| response_time | mean_time | n_correct | n_incorrect | n_total | accuracy |    se |
+|:--------------|----------:|----------:|------------:|--------:|---------:|------:|
+| \[0,5000\]    |  3428.746 |        63 |           0 |      63 |    1.000 | 0.000 |
+| (5000,7500\]  |  6350.000 |        52 |           8 |      60 |    0.867 | 0.044 |
+| (7500,10000\] |  8882.167 |        80 |          16 |      96 |    0.833 | 0.038 |
+| (10000,Inf\]  | 13244.748 |       168 |          46 |     214 |    0.785 | 0.028 |
 
 RAC analysis results, simulated data. {.table}
 
 ## Summary
 
 RAC analysis puts response time on the same footing as the CAC plot puts
-confidence. Points worth carrying away:
+confidence. In summary:
 
 1.  The idea is old (Sporer, 1993); the plot is new.
 2.  Compute it on choosers. Pooling choosers with rejections mixes two
@@ -617,7 +634,7 @@ confidence. Points worth carrying away:
     spline uses every observation, needs no boundaries, and gives an
     honest confidence band.
 5.  Response time is a weaker indicator of accuracy than confidence, and
-    worth reporting alongside it rather than instead of it.
+    should be reported alongside it rather than instead of it.
 
 ## References
 

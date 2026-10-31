@@ -59,7 +59,9 @@ homog_diag_boot(
 Invisibly returns a list containing the observed mean diagnosticity,
 chi-square statistic with degrees of freedom and asymptotic p-value,
 percentile intervals, a `heterogeneous` flag, a `parameters` data frame
-of per-pair ratios and intervals, the bootstrap draws, and `R`.
+of per-pair ratios and intervals, all attempted bootstrap draws (failed
+rows retained as NA), `n_successful`, `n_failed`, and `R`. Intervals are
+conditional on successful draws when failures occur.
 
 ## Details
 

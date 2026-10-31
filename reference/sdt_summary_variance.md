@@ -57,6 +57,13 @@ sdt_summary_variance(
 
 A list with variance estimates for zH, zF, d', and c.
 
+## Details
+
+Miller enumeration is exact for a binomial distribution at its supplied
+probability. Here that probability is estimated from the observed
+counts. The resulting variance and downstream Wald test are plug-in
+approximations, not exact finite-sample inference.
+
 ## Examples
 
 ``` r

@@ -47,7 +47,7 @@ and the criteria rescale by the same factor, so the two produce
 identical fits. Reporting both as though they were separate
 model-selection evidence would be double counting.
 
-### Why it matters which one is right
+### Why it is important to know which one is right
 
 These are not interchangeable descriptions. They disagree about what
 makes a lineup fair. Under Independent Observations, foil quality
@@ -69,14 +69,14 @@ Not covered, and what each would require:
 | Not supported | What it would need |
 |----|----|
 | Designated-suspect target-absent distributions | Target-absent suspect choices are currently pooled with target-absent filler choices. Separating them needs the upstream processor to accept a designated innocent suspect, which the audited revision does not expose |
-| Unfair lineups | The models assume every foil is a functioning alternative. An unfair lineup has a smaller effective than nominal size, so `lineup_size` is misspecified. Fitting with effective rather than nominal size is a workaround, not a solution |
-| Sequential lineups | The decision variable is defined over simultaneously available members. Sequential viewing needs a different model, not a different parameterisation |
+| Unfair lineups | The models assume every foil is a functioning alternative. An unfair lineup has a smaller effective than nominal size, so `lineup_size` is misspecified. Fitting with effective rather than nominal size is a workaround, not yet validated in this interface; an explicit model of unequal members would be needed to fit an unfair lineup properly |
+| Sequential lineups | The decision variable is defined over simultaneously available members. Sequential viewing needs a different model |
 | Reaction-time models | Would require a decision process with a time dimension, e.g. a drift-diffusion account |
 | Hierarchical participant/item effects | Fitting is by minimum Pearson chi-square on aggregate cell counts, which discards the participant and item structure entirely. Random effects would need a trial-level likelihood |
 
-The first two are the ones most likely to bite in practice, since real
-lineups are rarely perfectly fair. If your lineup has null foils —
-members nobody ever chooses — see
+The first two are the most common in practice, since real lineups are
+rarely perfectly fair. If your lineup has null foils — members nobody
+ever chooses — see
 [`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
 and the effective-size measures in the main vignette before fitting
 anything here.
@@ -216,13 +216,18 @@ fit_started <- fit_lineup_models(
 fit_started$comparison$converged
 ```
 
-## Does the fit recover the generating model?
+## Can the fit tell the generating rules apart?
 
-The most informative check is whether fitting recovers the rule that
+An informative check is whether fitting picks out the rule that
 generated the data.
 [`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
-implements the same three decision rules, so this can be tested
-directly.
+implements the same three decision rules, so this can be explored
+directly. One mismatch should be kept in mind: the data below are
+simulated with unequal foils (`foil_bias`), while
+[`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
+assumes a fair lineup with exchangeable fillers. Every fitted model is
+therefore somewhat misspecified, even the one matching the generating
+rule.
 
 ``` r
 
@@ -267,17 +272,19 @@ of freedom — so the model with more parameters is favoured by a raw
 chi-square comparison purely by being more flexible. Ranking the models
 by chi-square alone is not a comparison the statistic licenses.
 
-With that in mind, two things emerge.
+A p-value here is the probability of a discrepancy this large if that
+model were true; it is not the probability that the model is the correct
+one, and p-values from non-nested models do not rank them on a common
+scale. With that in mind, two things emerge.
 
-The MAX and Integration rows recover their generating model decisively:
-the generating model fits well and the others are rejected outright.
+In the MAX and Integration rows the model matching the generating rule
+fits acceptably and the others are rejected outright.
 
 The Ensemble row does not. Independent Observations and Ensemble return
 essentially **identical** p-values, and neither can be rejected. This is
 not a case of the wrong model winning; it is a case of the two models
 being **indistinguishable** on these data.
 
-That is the substantive finding rather than a defect in the fitting.
 Independent Observations and Ensemble make very similar predictions for
 a *fair* lineup. Separating them requires either much larger samples or
 a design built to separate them — most obviously one that manipulates
@@ -344,13 +351,12 @@ distribution mean (`targetMean`), the confidence criteria (`c1`, `c2`,
 
 ### Why AIC and BIC are NA
 
-This is the point most likely to cause trouble, so it is worth being
-explicit. `loglik_at_estimate` is the multinomial log likelihood
-**evaluated at the minimum-Pearson estimate**. It is not a maximised
-likelihood. AIC and BIC are defined in terms of the maximum of the
-likelihood, so computing them from this quantity would be invalid, and
-the package returns `NA` rather than a number that would look usable and
-be wrong.
+It is important to make a point of clarification here.
+`loglik_at_estimate` is the multinomial log likelihood **evaluated at
+the minimum-Pearson estimate**. It is not a maximised likelihood. AIC
+and BIC are defined in terms of the maximum of the likelihood, so
+computing them from this quantity would be invalid, and the package
+returns `NA` rather than a number that would look usable and be wrong.
 
 Model comparison here therefore rests on the Pearson chi-square and its
 degrees of freedom, not on information criteria. Comparing models with
@@ -387,6 +393,7 @@ pyWitness 1.0: A Python eyewitness identification analysis toolkit.
 
 Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
 lineup memory. *Cognitive Psychology, 105*, 81-114.
+<https://doi.org/10.1016/j.cogpsych.2018.06.001>
 
 ## Further Reading
 

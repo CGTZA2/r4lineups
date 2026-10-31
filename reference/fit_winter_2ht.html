@@ -175,6 +175,11 @@ residual goodness-of-fit degrees of freedom. Inference about model fit or
 restrictions requires additional conditions, parameter constraints, or
 participant/item-level replication; the reported AIC/BIC describe this
 likelihood fit but do not by themselves validate the process interpretation.</p>
+<p>A feasible inverse of the published tree supplies the saturated
+  interior solution; otherwise bounded optimization uses multiple starts.
+  Regular Hessian SEs are returned only for interior fits. Boundary fits
+  retain their estimates but have unavailable regular SEs. A low rejection
+  percentage alone is not used as a criterion for refusing a fit.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -191,6 +196,7 @@ decisions. Scientific Reports, 12, 15571. https://doi.org/10.1038/s41598-022-195
 <span class="r-in"><span>  n_ta_suspect <span class="op">=</span> <span class="fl">38</span>, n_ta_filler <span class="op">=</span> <span class="fl">138</span>, n_ta_reject <span class="op">=</span> <span class="fl">206</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">fit_winter_2ht</span><span class="op">(</span><span class="va">counts</span>, lineup_size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>2-HT estimate is on a parameter boundary; regular Hessian standard errors are unavailable. Bootstrap intervals also need boundary qualification.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Winter et al. (2022) Two-High Threshold MPT Model</span>
@@ -203,11 +209,11 @@ decisions. Scientific Reports, 12, 15571. https://doi.org/10.1038/s41598-022-195
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Lineup size:    6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Parameter Estimates:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       Estimate     SE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dP (culprit presence)   0.3169 0.0308</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dA (culprit absence)    0.0000 0.0931</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> b  (biased selection)   0.0273 0.0178</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> g  (guessing)           0.4452 0.0328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       Estimate SE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dP (culprit presence)   0.3169 NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dA (culprit absence)    0.0000 NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b  (biased selection)   0.0273 NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g  (guessing)           0.4452 NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log-likelihood: -768.13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> AIC: 1544.26</span>
@@ -224,11 +230,11 @@ decisions. Scientific Reports, 12, 15571. https://doi.org/10.1038/s41598-022-195
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Lineup size:    6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Parameter Estimates:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       Estimate     SE Lower_95 Upper_95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dP (culprit presence)   0.3169 0.0308   0.2565   0.3772</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dA (culprit absence)    0.0000 0.0931  -0.1824   0.1824</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> b  (biased selection)   0.0273 0.0178  -0.0076   0.0623</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> g  (guessing)           0.4452 0.0328   0.3808   0.5095</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       Estimate SE Lower_95 Upper_95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dP (culprit presence)   0.3169 NA       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dA (culprit absence)    0.0000 NA       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b  (biased selection)   0.0273 NA       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g  (guessing)           0.4452 NA       NA       NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Model Fit:</span>
@@ -240,21 +246,21 @@ decisions. Scientific Reports, 12, 15571. https://doi.org/10.1038/s41598-022-195
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target-Present Lineups:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Observed Expected      Residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Suspect ID      147    147.0 -9.695104e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Filler ID        94     94.2 -1.619035e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Reject          141    140.8  1.619132e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Suspect ID      147    147.0 -1.223799e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Filler ID        94     94.2 -1.623483e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Reject          141    140.8  1.623496e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Target-Absent Lineups:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Observed Expected      Residual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Suspect ID       38     38.0 -0.0009206009</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Filler ID       138    137.8  0.1633640745</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Reject          206    206.2 -0.1624434735</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Suspect ID       38     38.0 -1.963184e-08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Filler ID       138    137.8  1.623490e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Reject          206    206.2 -1.623489e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Model identification:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Saturated (just-identified): 4 parameters, 4 data df, 0 residual df.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Absolute fit is not testable from a single condition (the model reproduces the</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   data by construction); use multiple conditions or constraints to test fit.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Residual obs-vs-expected discrepancy = 0.0007862 (~= 0 confirms convergence).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Residual obs-vs-expected discrepancy = 0.0007861 (~= 0 confirms convergence).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Using a data frame</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">lineup_example</span><span class="op">)</span></span></span>

@@ -17,7 +17,7 @@ library(ggplot2)
 Eyewitness researchers frequently need to decide whether one
 identification procedure is better than another: whether simultaneous
 lineups beat sequential ones, whether a longer retention interval hurts,
-whether lineup size matters.
+whether lineup size is important.
 
 Since about 2012 the dominant way of answering such questions has been
 to compare **ROC curves**, and usually to reduce each curve to a single
@@ -74,7 +74,7 @@ knitr::kable(
 
 | confidence | n_correct_ids | n_false_ids | correct_id_rate | false_id_rate |
 |-----------:|--------------:|------------:|----------------:|--------------:|
-|          0 |             0 |           0 |          0.0000 |        0.0000 |
+|          6 |             0 |           0 |          0.0000 |        0.0000 |
 |          5 |            81 |           1 |          0.2025 |        0.0025 |
 |          4 |           135 |           3 |          0.3375 |        0.0075 |
 |          3 |           202 |          12 |          0.5050 |        0.0300 |
@@ -111,14 +111,14 @@ cautious witness identifies rarely; a willing one identifies often.
 Changing the criterion moves you *along* a curve without changing which
 curve you are on.
 
-The distinction matters because a procedure can change identification
-rates without improving anything. If sequential lineups simply make
-witnesses more cautious, they will produce fewer false identifications
-*and* fewer correct ones, and a comparison of raw rates will make them
-look better or worse depending on which rate the reader happens to
-weight. The ROC curve answers the question that survives a criterion
-shift: at the same false identification rate, which procedure gets more
-correct identifications?
+The distinction is important because a procedure can change
+identification rates without improving anything. If sequential lineups
+simply make witnesses more cautious, they will produce fewer false
+identifications *and* fewer correct ones, and a comparison of raw rates
+will make them look better or worse depending on which rate the reader
+happens to weight. The ROC curve answers the question that survives a
+criterion shift: at the same false identification rate, which procedure
+gets more correct identifications?
 
 This is the argument Wixted and Mickes (2012) made in urging the field
 to abandon the diagnosticity ratio in favour of ROC analysis, and it is
@@ -161,7 +161,7 @@ counted, however hesitant. There is no way to push further to the right:
 doing so would require witnesses to identify someone more often than
 they are willing to, and the experiment provides no lever for that.
 
-Two consequences follow, and both matter:
+Two consequences follow, and both are important:
 
 1.  **The full area under the curve cannot be computed** without
     inventing the part of the curve that was never observed. Anything
@@ -201,7 +201,7 @@ ggplot(roc_df, aes(x = false_id_rate, y = correct_id_rate)) +
 
 ![](pauc_statistical_comparison_files/figure-html/pauc_region_figure-1.png)
 
-Partial AUC is defended on four grounds, which are worth separating
+Partial AUC is defended on four grounds, which are taken separately here
 because they are not equally strong:
 
 1.  **It is computable.** Unlike full AUC, it requires no extrapolation
@@ -271,21 +271,15 @@ knitr::kable(
 The two simulated conditions stop at different points, so there is no
 single region both fully cover. {.table}
 
-Earlier versions of this package defaulted to the *larger* of the two
-maxima, which silently integrated each curve only as far as its own data
-went — so the two areas covered different intervals and the comparison
-was biased against whichever curve stopped sooner. That default has been
-corrected.
-
 ### The deeper objection
 
 Smith, Lampinen, Wells, Smalarz and Mackovichova (2019) go further and
 argue that pAUC does not measure what researchers want it to measure.
 Their claim is that pAUC fails to track the **diagnostic utility** of a
-lineup — the thing that actually matters for deciding which procedure a
-police force should adopt — and that neither choice of region repairs
-this. They propose *deviation from perfect performance* (DPP) instead,
-which is implemented in this package and covered in
+lineup — the thing that is actually important for deciding which
+procedure a police force should adopt — and that neither choice of
+region repairs this. They propose *deviation from perfect performance*
+(DPP) instead, which is implemented in this package and covered in
 [`vignette("calibration_decision_analysis")`](https://cgtza2.github.io/r4lineups/articles/calibration_decision_analysis.md).
 
 ### What the curve leaves out
@@ -331,13 +325,13 @@ Z = \frac{\widehat{pAUC}_1 - \widehat{pAUC}_2}{\widehat{SE}(\widehat{pAUC}_1 - \
 
 and refers $`Z`$ to a standard normal distribution.
 
-It is worth being precise about what kind of test this is, because it is
-easy to assume it is something it is not. **It is a Wald test**: an
-estimate divided by an estimate of its own standard error. It is *not* a
-comparison of two standard normal deviates, and it is not a test on
-transformed proportions. The normal reference distribution comes from
-the asymptotic normality of the estimator, not from any assumption that
-the underlying data are normal.
+It is important to make a point of clarification here about what kind of
+test this is, because it is easy to assume it is something it is not.
+**It is a Wald test**: an estimate divided by an estimate of its own
+standard error. It is *not* a comparison of two standard normal
+deviates, and it is not a test on transformed proportions. The normal
+reference distribution comes from the asymptotic normality of the
+estimator, not from any assumption that the underlying data are normal.
 
 The standard error in the denominator is obtained by **bootstrap**: the
 witnesses in each condition are resampled with replacement, the whole
@@ -357,7 +351,7 @@ in doing so.
 ### Is normality reasonable?
 
 The Wald test assumes the *difference in pAUC* is approximately normally
-distributed. That is checkable, and worth checking rather than assuming:
+distributed. That can be checked, rather than assumed:
 
 ``` r
 
@@ -423,10 +417,10 @@ ggplot(data.frame(diff = boot_diff), aes(x = diff)) +
 Typically the distribution is close to normal but not exactly so — mild
 skew is common, because pAUC is bounded and the region is
 data-determined. With several hundred resamples a formal normality test
-will often reject even when the departure is too small to matter. The
-practical question is not whether normality holds exactly but whether it
-holds well enough that the interval is about right, and that is best
-answered by comparing the two intervals directly:
+will often reject even when the departure is too small to be important.
+The practical question is not whether normality holds exactly but
+whether it holds well enough that the interval is about right, and that
+is best answered by comparing the two intervals directly:
 
 ``` r
 
@@ -519,7 +513,7 @@ summary(comparison)
 #>   Z-score: 2.6 
 #>   p-value: 0.009329 
 #> 
-#> Effect size (d): 3.781 
+#> SE-standardized difference (depends on sample size; not Cohen d): 3.781 
 #> 
 #> Analysis Details:
 #>   Max false ID rate cutoff: 0.1125 
@@ -668,9 +662,12 @@ rule over the observed points:
 
 If $`f_{\max}`$ falls between two observed points, the curve is linearly
 interpolated to that point. If $`f_{\max}`$ lies beyond the last
-observed point, **no extrapolation is performed** — the sum simply stops
-at the data, which is why supplying a cutoff beyond a curve’s reach
-produces a warning rather than a number.
+observed point, **no extrapolation is performed**: the sum simply stops
+at the data. Supplying a cutoff beyond a curve’s reach therefore
+produces a warning **and** an area truncated at the observed reach,
+which is smaller than the area up to the requested cutoff would be. Read
+the warning; it means the two areas being compared may not cover the
+same false-ID range.
 
 ### How the standard error is obtained
 

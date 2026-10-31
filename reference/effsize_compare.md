@@ -28,7 +28,13 @@ theory, percentile & bias-corrected)
 ## Details
 
 This function is a master function, calling other functions it needs,
-and reporting results in some detail
+and reporting results in some detail Each lineup is resampled
+independently; row alignment has no sampling meaning. Confidence
+intervals are bootstrap approximations and can be unreliable for small
+or nearly uniform empirical choice distributions. Normal and BCa
+intervals can under-cover in finite concentrated samples; percentile
+intervals can be conservative near uniformity. None provides a
+distribution-free level-.05 test of equal population effective sizes.
 
 ## References
 
@@ -75,7 +81,7 @@ x <- effsize_compare(linedf, R = 100)
 #> The two Effective sizes are  5.847953   5.411255
 #> If the interval includes 0, ns at p = .05
 #> Confidence intervals of difference [95%]
-#> Normal Theory -0.425 1.242
-#> Bootstrap: percentile (R = 100) -0.386 1.281
-#> Bootstrap: bias-corrected (R = 100) -0.395 1.279
+#> Normal Theory -0.284 1.236
+#> Bootstrap: percentile (R = 100) -0.336 1.367
+#> Bootstrap: bias-corrected (R = 100) -0.195 1.533
 ```

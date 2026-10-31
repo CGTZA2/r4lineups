@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-30</h4>
+            <h4 data-toc-skip class="date">2026-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/winter_2ht_model.Rmd" class="external-link"><code>vignettes/winter_2ht_model.Rmd</code></a></small>
       <div class="d-none name"><code>winter_2ht_model.Rmd</code></div>
@@ -109,8 +109,8 @@ reused.</p>
 <h3 id="the-general-approach">The general approach<a class="anchor" aria-label="anchor" href="#the-general-approach"></a>
 </h3>
 <p>The model is a <strong>multinomial processing tree</strong> (MPT).
-The idea behind that family is worth stating, because it is different
-from signal detection theory and the two are easily confused.</p>
+MPT models differ from signal detection theory, and the two are easily
+confused.</p>
 <p>Signal detection theory posits a continuous evidence variable and a
 criterion placed on it. An MPT instead posits a small number of
 <strong>discrete latent states</strong>, each reached with some
@@ -210,8 +210,8 @@ already contains the required columns:</p>
 <span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_winter_2ht.html">fit_winter_2ht</a></span><span class="op">(</span><span class="va">counts</span>, lineup_size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="va">parameters</span></span>
-<span><span class="co">#&gt;         dP         dA          b          g </span></span>
-<span><span class="co">#&gt; 0.52617951 0.10669261 0.00927434 0.79610359</span></span></code></pre></div>
+<span><span class="co">#&gt;          dP          dA           b           g </span></span>
+<span><span class="co">#&gt; 0.526176573 0.106690695 0.009275303 0.796104687</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="model-diagnostics-and-plots">2. Model diagnostics and plots<a class="anchor" aria-label="anchor" href="#model-diagnostics-and-plots"></a>
@@ -242,28 +242,27 @@ data, and the parameters should not be read as though it were.</p>
 <span></span>
 <span><span class="va">boot_fit</span><span class="op">$</span><span class="va">ci</span></span>
 <span><span class="co">#&gt;         Lower      Upper</span></span>
-<span><span class="co">#&gt; dP 0.48255377 0.56813183</span></span>
-<span><span class="co">#&gt; dA 0.03540606 0.17454599</span></span>
-<span><span class="co">#&gt; b  0.00000000 0.04342048</span></span>
-<span><span class="co">#&gt; g  0.75086446 0.84055629</span></span></code></pre></div>
-<p>The bootstrap intervals are preferable to the normal approximation
-for these parameters, and <code><a href="../reference/plot_2ht_parameters.html">plot_2ht_parameters()</a></code> uses them
-when given a bootstrap object:</p>
+<span><span class="co">#&gt; dP 0.47233774 0.56248806</span></span>
+<span><span class="co">#&gt; dA 0.02781788 0.17171187</span></span>
+<span><span class="co">#&gt; b  0.00000000 0.04308407</span></span>
+<span><span class="co">#&gt; g  0.74713037 0.83854453</span></span></code></pre></div>
+<p>The percentile intervals stay inside the parameter space, and
+<code><a href="../reference/plot_2ht_parameters.html">plot_2ht_parameters()</a></code> uses them when given a bootstrap
+object:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_2ht_parameters.html">plot_2ht_parameters</a></span><span class="op">(</span><span class="va">boot_fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="winter_2ht_model_files/figure-html/plot_boot-1.png" class="r-plt" alt="" width="672"></p>
-<p>All four parameters are probabilities bounded in [0, 1], so an
-estimate close to a boundary — <code>b</code> here — has a normal
-interval that runs outside the parameter space. The percentile interval
-cannot.</p>
+<p>All four parameters are probabilities bounded in [0, 1]. At a
+boundary — <code>b</code> here — regular Hessian standard errors are
+unavailable. Percentile intervals respect the parameter space, but this
+alone does not establish nominal coverage at a boundary.</p>
 <p>For larger datasets, increase <code>nboot</code> to 1000 or more for
 stable intervals.</p>
 </div>
 <div class="section level2">
 <h2 id="what-b-tells-you-about-lineup-fairness">4. What <code>b</code> tells you about lineup fairness<a class="anchor" aria-label="anchor" href="#what-b-tells-you-about-lineup-fairness"></a>
 </h2>
-<p>This is arguably the most useful thing the model does, and it
-deserves more than a line.</p>
+<p>This is arguably the most useful thing the model does.</p>
 <p>Classical lineup fairness measures — Tredoux’s E′, functional size,
 the proportion of mock witnesses choosing the suspect — are computed
 from <strong>mock-witness data</strong>: people who never saw the
@@ -286,22 +285,21 @@ interval.</p>
 <div class="section level3">
 <h3 id="does-it-work">Does it work?<a class="anchor" aria-label="anchor" href="#does-it-work"></a>
 </h3>
-<p>That is a checkable claim rather than a promise, so here it is
-checked against two established measures computed from the same
-data:</p>
-<ul>
-<li>
-<strong>E′ (Tredoux, 1998)</strong>, <code><a href="../reference/esize_T.html">esize_T()</a></code>, the
-inverse-Simpson index
+<p>The claim can be checked against Tredoux’s (1998) E′, computed with
+<code><a href="../reference/esize_T.html">esize_T()</a></code> as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mo>∑</mo><msubsup><mi>p</mi><mi>i</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">1/\sum p_i^2</annotation></semantics></math>
-over choices across all six members. It measures the <strong>effective
-number of functioning alternatives</strong>. Note where E′ comes from
-here: the <strong>target-absent lineups</strong>. A target-absent lineup
-is functionally a mock-witness lineup — the witness has no culprit to
-recognise — so the choice distribution across members gives E′ without
-running a separate mock-witness study. See the main vignette on the
-small-sample properties of that estimate, which are not negligible.</li>
-</ul>
+over choices across all six members (it is defined in the main
+vignette). E′ measures the <strong>effective number of functioning
+alternatives</strong>.</p>
+<p>Note where E′ comes from here: the <strong>target-absent
+lineups</strong>. Their choice distribution across members gives a
+<em>resultant</em> effective size, as used by Fitzgerald, Tredoux and
+Juncu (2023), without running a separate mock-witness study. It is not
+the same measurement as a mock-witness E′: real witnesses have a memory
+of the culprit and may reject the lineup, whereas mock witnesses choose
+from a description, and the two families of measures can differ (Lee,
+Mansour and Penrod, 2024). See the main vignette on the small-sample
+properties of the estimate, which are not negligible.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scenarios</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Fair: foils match suspect"</span>      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span> <span class="fl">0.0</span>, <span class="fl">5</span><span class="op">)</span>,</span>
@@ -415,13 +413,19 @@ with a high <code>b</code> is not evidence of a good procedure.</p>
 </h3>
 <p>Parameters are estimated by maximum likelihood over the six observed
 cell counts (three responses by two lineup types), using the multinomial
-likelihood implied by the equations above. The model has four free
-parameters against five free cells, leaving <strong>one residual degree
-of freedom</strong> — so it is testable, but only just. Standard errors
-come from the numerically differentiated Hessian at the optimum, and
-<code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> reports AIC, BIC and the log-likelihood,
-all of which are well defined here because this is a genuine
-maximum-likelihood fit.</p>
+likelihood implied by the equations above. The target-present and
+target-absent totals are each fixed, so each three-category multinomial
+contributes two independent proportions: four data degrees of freedom
+against four free parameters, leaving <strong>zero residual degrees of
+freedom</strong>. A single-condition fit is therefore saturated (just
+identified), as Winter et al. (2022, Figure 1) state and as
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> reports. The model reproduces the observed counts
+by construction, so its absolute fit cannot be tested from one
+condition. Testing it needs several conditions with parameters
+constrained across them. Standard errors come from the numerically
+differentiated Hessian at the optimum, and <code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code>
+reports AIC, BIC and the log-likelihood, all of which are well defined
+here because this is a genuine maximum-likelihood fit.</p>
 <p>Note the contrast with <code><a href="../reference/fit_lineup_models.html">fit_lineup_models()</a></code> in
 <code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code>, which minimises Pearson
 chi-square rather than maximising a likelihood, and for which AIC and
@@ -433,23 +437,24 @@ compared by information criteria.</p>
 </h3>
 <p><code>dA</code> is identified almost entirely by rejections: it is
 the probability of correctly concluding the culprit is absent, and a
-witness in that state rejects. If very few witnesses reject, the
-likelihood is close to flat in <code>dA</code> and the fit fails.
-<code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> checks for this and stops with a message
-naming the cause. In simulated data the usual reason is a decision
-criterion set too liberally — see
+witness in that state rejects. The amount of information depends on both
+the response probabilities and sample size. A low rejection percentage
+alone does not establish nonidentifiability. Inspect sparse cells,
+boundary estimates and convergence; regular Hessian uncertainty is not
+available at a boundary. In simulated data a liberal criterion can
+produce few rejections — see
 <code><a href="../articles/simulation_power_analysis.html">vignette("simulation_power_analysis")</a></code> on why
 <code>c_criterion = 0</code> is not a neutral value.</p>
 </div>
 <div class="section level3">
 <h3 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a>
 </h3>
-<p><code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> returns standard errors, from which
-normal intervals can be formed, but all four parameters are
-probabilities bounded in [0, 1] and a normal interval around an estimate
-near a boundary runs outside that range. Prefer
-<code><a href="../reference/boot_winter_2ht.html">boot_winter_2ht()</a></code>, which gives percentile intervals that
-cannot. The plotting function uses whichever it is given.</p>
+<p><code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> returns regular Hessian standard errors
+for interior fits; they are unavailable at a parameter boundary.
+<code><a href="../reference/boot_winter_2ht.html">boot_winter_2ht()</a></code> gives approximate percentile or BCa
+intervals while keeping TP and TA totals fixed. Respecting the parameter
+space is useful, but does not establish coverage near a boundary. The
+plotting function uses the supplied intervals.</p>
 </div>
 <div class="section level3">
 <h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
@@ -477,6 +482,13 @@ fitting.</li>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div class="hanging-indent">
+<p>Fitzgerald, R. J., Tredoux, C. G., &amp; Juncu, S. (2023). Estimation
+of eyewitness error rates in fair and biased lineups. <em>Law and Human
+Behavior, 47</em>(4), 463-483.</p>
+<p>Lee, J., Mansour, J. K., &amp; Penrod, S. D. (2024). How to measure
+lineup fairness: Concurrent and predictive validity of lineup-fairness
+measures. <em>Psychology, Crime &amp; Law</em>. <a href="https://doi.org/10.1080/1068316X.2024.2307358" class="external-link uri">https://doi.org/10.1080/1068316X.2024.2307358</a></p>
 <p>Malpass, R. S. (1981). Effective size and defendant bias in
 eyewitness identification lineups. <em>Law and Human Behavior,
 5</em>(4), 299-309.</p>
@@ -486,6 +498,7 @@ fairness. <em>Law and Human Behavior, 22</em>(2), 217-237.</p>
 Experimental validation of a multinomial processing tree model for
 analyzing eyewitness identification decisions. <em>Scientific Reports,
 12</em>, 15571.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>

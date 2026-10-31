@@ -100,7 +100,13 @@ Default 0.95.</p></dd>
 <dd><p>Optional finite scalar. When supplied, the function
 also reports P(E' &lt; threshold | data) and P(E' &gt; threshold | data),
 enabling direct probability statements about whether the lineup is
-functioning below or above a fairness benchmark.</p></dd>
+functioning below or above a fairness benchmark. Because E' &lt;= k for
+every choice-probability vector, with equality only when all k
+probabilities are exactly equal, P(E' &lt; k | data) is 1 under any
+continuous posterior, however uniform the data. A threshold of k or more
+therefore carries no information, and the function warns. Use a tolerance
+below k that you choose and justify in advance (for example 0.8 k), or
+report the credible interval for E' or for the deficit k - E'.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -191,9 +197,9 @@ functioning below or above a fairness benchmark.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------------------</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   k (positions): 6    N (choices): 40    S (draws): 10000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Prior: Dirichlet(alpha = 0.50)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Posterior mean:   3.760</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Posterior median: 3.747</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   95% credible interval: [2.645, 4.932]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Posterior mean:   3.757</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Posterior median: 3.742</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   95% credible interval: [2.641, 4.938]</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># With a fairness threshold</span></span></span>
 <span class="r-in"><span><span class="va">result2</span> <span class="op">&lt;-</span> <span class="fu">esize_T_bayes</span><span class="op">(</span><span class="va">lineup_tab</span>, threshold <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
@@ -203,10 +209,10 @@ functioning below or above a fairness benchmark.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   k (positions): 6    N (choices): 40    S (draws): 10000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Prior: Dirichlet(alpha = 0.50)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Posterior mean:   3.767</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Posterior median: 3.757</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   95% credible interval: [2.648, 4.930]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   P(E' &lt; 4.00 | data): 0.648</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   P(E' &gt; 4.00 | data): 0.352</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Posterior median: 3.764</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   95% credible interval: [2.647, 4.952]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   P(E' &lt; 4.00 | data): 0.653</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   P(E' &gt; 4.00 | data): 0.347</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot the posterior</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></span>

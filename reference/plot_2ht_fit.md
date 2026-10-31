@@ -31,6 +31,7 @@ counts <- c(
   n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
 )
 fit <- fit_winter_2ht(counts, lineup_size = 6)
+#> Warning: 2-HT estimate is on a parameter boundary; regular Hessian standard errors are unavailable. Bootstrap intervals also need boundary qualification.
 plot_2ht_fit(fit)
 
 ```

@@ -144,6 +144,12 @@ constraints, or participant/item-level replication; the reported AIC/BIC
 describe this likelihood fit but do not by themselves validate the
 process interpretation.
 
+A feasible inverse of the published tree supplies the saturated interior
+solution; otherwise bounded optimization uses multiple starts. Regular
+Hessian SEs are returned only for interior fits. Boundary fits retain
+their estimates but have unavailable regular SEs. A low rejection
+percentage alone is not used as a criterion for refusing a fit.
+
 ## References
 
 Winter, K., Menne, N. M., Bell, R., & Buchner, A. (2022). Experimental
@@ -160,6 +166,7 @@ counts <- c(
   n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
 )
 fit <- fit_winter_2ht(counts, lineup_size = 6)
+#> Warning: 2-HT estimate is on a parameter boundary; regular Hessian standard errors are unavailable. Bootstrap intervals also need boundary qualification.
 print(fit)
 #> 
 #> Winter et al. (2022) Two-High Threshold MPT Model
@@ -172,11 +179,11 @@ print(fit)
 #>   Lineup size:    6
 #> 
 #> Parameter Estimates:
-#>                       Estimate     SE
-#> dP (culprit presence)   0.3169 0.0308
-#> dA (culprit absence)    0.0000 0.0931
-#> b  (biased selection)   0.0273 0.0178
-#> g  (guessing)           0.4452 0.0328
+#>                       Estimate SE
+#> dP (culprit presence)   0.3169 NA
+#> dA (culprit absence)    0.0000 NA
+#> b  (biased selection)   0.0273 NA
+#> g  (guessing)           0.4452 NA
 #> 
 #> Log-likelihood: -768.13
 #> AIC: 1544.26
@@ -193,11 +200,11 @@ summary(fit)
 #>   Lineup size:    6
 #> 
 #> Parameter Estimates:
-#>                       Estimate     SE Lower_95 Upper_95
-#> dP (culprit presence)   0.3169 0.0308   0.2565   0.3772
-#> dA (culprit absence)    0.0000 0.0931  -0.1824   0.1824
-#> b  (biased selection)   0.0273 0.0178  -0.0076   0.0623
-#> g  (guessing)           0.4452 0.0328   0.3808   0.5095
+#>                       Estimate SE Lower_95 Upper_95
+#> dP (culprit presence)   0.3169 NA       NA       NA
+#> dA (culprit absence)    0.0000 NA       NA       NA
+#> b  (biased selection)   0.0273 NA       NA       NA
+#> g  (guessing)           0.4452 NA       NA       NA
 #> 
 #> 
 #> Model Fit:
@@ -209,21 +216,21 @@ summary(fit)
 #> 
 #> Target-Present Lineups:
 #>            Observed Expected      Residual
-#> Suspect ID      147    147.0 -9.695104e-06
-#> Filler ID        94     94.2 -1.619035e-01
-#> Reject          141    140.8  1.619132e-01
+#> Suspect ID      147    147.0 -1.223799e-06
+#> Filler ID        94     94.2 -1.623483e-01
+#> Reject          141    140.8  1.623496e-01
 #> 
 #> Target-Absent Lineups:
 #>            Observed Expected      Residual
-#> Suspect ID       38     38.0 -0.0009206009
-#> Filler ID       138    137.8  0.1633640745
-#> Reject          206    206.2 -0.1624434735
+#> Suspect ID       38     38.0 -1.963184e-08
+#> Filler ID       138    137.8  1.623490e-01
+#> Reject          206    206.2 -1.623489e-01
 #> 
 #> Model identification:
 #>   Saturated (just-identified): 4 parameters, 4 data df, 0 residual df.
 #>   Absolute fit is not testable from a single condition (the model reproduces the
 #>   data by construction); use multiple conditions or constraints to test fit.
-#>   Residual obs-vs-expected discrepancy = 0.0007862 (~= 0 confirms convergence).
+#>   Residual obs-vs-expected discrepancy = 0.0007861 (~= 0 confirms convergence).
 
 # Example 2: Using a data frame
 data(lineup_example)

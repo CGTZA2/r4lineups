@@ -22,11 +22,10 @@ eyewitness identification data in **r4lineups**:
 5.  **ANRI** - Bias-corrected resolution index with bootstrap inference
 
 These methods complement the traditional lineup fairness measures by
-providing sophisticated analyses of identification accuracy, confidence
-calibration, and decision-making utility.
+providing analyses of identification accuracy, confidence calibration,
+and decision-making utility.
 
-They answer different questions, and it is worth being clear which is
-which before working through them.
+They answer different questions.
 
 **Calibration analysis** asks whether a witness’s confidence *means*
 what it appears to mean: when witnesses say they are 90% sure, are they
@@ -46,8 +45,8 @@ a property of the investigation and not of the witness.
 policy *should* be. Given the costs of a wrongful identification and the
 benefits of a correct one, at what confidence level should an
 identification be acted upon? Lampinen, Smith and Wells (2019) set out
-the framework and, importantly, show that it can disagree with ROC-based
-conclusions about which procedure is better.
+the framework and show that it can disagree with ROC-based conclusions
+about which procedure is better.
 
 **Deviation from perfect performance (DPP)** is a discriminability
 measure, proposed by Smith, Lampinen, Wells, Smalarz and Mackovichova
@@ -89,9 +88,8 @@ head(lineup_example)
 
 ### Why there is a `lineup_member` column
 
-`lineup_example` records two further columns, and the reason is worth
-stating because it applies to any lineup data you collect or simulate
-yourself.
+`lineup_example` records two further columns, for a reason that applies
+to any lineup data you collect or simulate yourself.
 
 `identification` collapses a witness’s decision into three categories.
 That is what the analysis functions consume, but it is *not* what should
@@ -113,8 +111,8 @@ head(classify_lineup_choices(
 6             0           1         reject
 ```
 
-This matters because **foils are not interchangeable**. They differ in
-how plausible they are, and a foil that nobody ever chooses is not a
+This is important because **foils are not interchangeable**. They differ
+in how plausible they are, and a foil that nobody ever chooses is not a
 functioning alternative to the suspect at all — it is precisely what
 makes a lineup unfair. Recording only “filler” throws that information
 away. In `lineup_example` the five foils attract very different numbers
@@ -281,104 +279,37 @@ procedures <- rbind(
 ```
 
 ``` r
+
 cal_by_cond <- make_calibration_by_condition(
   procedures,
-  condition_var = "procedure",
+  condition_vars = "procedure",
   confidence_bins = c(0, 60, 80, 100)
 )
 
-print(cal_by_cond)
-$by_condition
-$by_condition$`Procedure A`
-$by_condition$`Procedure A`$calibration_data
- [38;5;246m# A tibble: 3 × 7 [39m
-  bin          n mean_confidence accuracy n_correct n_incorrect
-   [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m     [3m [38;5;246m<dbl> [39m [23m      [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m1 [39m [0,60]     184            41.5    0.745       137          47
- [38;5;250m2 [39m (60,80]     71            75.4    0.887        63           8
- [38;5;250m3 [39m (80,100]    88            97.3    0.977        86           2
- [38;5;246m# ℹ 1 more variable: mean_confidence_prop <dbl> [39m
-
-$by_condition$`Procedure A`$C
-[1] 0.06189919
-
-$by_condition$`Procedure A`$OU
-[1] -0.2055394
-
-$by_condition$`Procedure A`$NRI
-[1] 0.07322035
-
-$by_condition$`Procedure A`$overall_accuracy
-[1] 0.8338192
-
-$by_condition$`Procedure A`$overall_confidence
-[1] 0.6282799
-
-$by_condition$`Procedure A`$n_total
-[1] 343
-
-$by_condition$`Procedure A`$choosers_only
-[1] TRUE
-
-$by_condition$`Procedure A`$confidence_scale
-[1] 100
-
-$by_condition$`Procedure A`$innocent_suspect_method
-[1] "designated"
-
-
-$by_condition$`Procedure B`
-$by_condition$`Procedure B`$calibration_data
- [38;5;246m# A tibble: 3 × 7 [39m
-  bin          n mean_confidence accuracy n_correct n_incorrect
-   [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m     [3m [38;5;246m<dbl> [39m [23m      [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m1 [39m [0,60]     162            41.0    0.747       121          41
- [38;5;250m2 [39m (60,80]     35            74      0.829        29           6
- [38;5;250m3 [39m (80,100]    22            96.8    1            22           0
- [38;5;246m# ℹ 1 more variable: mean_confidence_prop <dbl> [39m
-
-$by_condition$`Procedure B`$C
-[1] 0.08538386
-
-$by_condition$`Procedure B`$OU
-[1] -0.2666667
-
-$by_condition$`Procedure B`$NRI
-[1] 0.03571501
-
-$by_condition$`Procedure B`$overall_accuracy
-[1] 0.7853881
-
-$by_condition$`Procedure B`$overall_confidence
-[1] 0.5187215
-
-$by_condition$`Procedure B`$n_total
-[1] 219
-
-$by_condition$`Procedure B`$choosers_only
-[1] TRUE
-
-$by_condition$`Procedure B`$confidence_scale
-[1] 100
-
-$by_condition$`Procedure B`$innocent_suspect_method
-[1] "designated"
-
-
-
-$condition_summary
- [38;5;246m# A tibble: 2 × 7 [39m
-  condition       n      C     OU    NRI overall_accuracy overall_confidence
- [38;5;250m* [39m  [3m [38;5;246m<chr> [39m [23m        [3m [38;5;246m<dbl> [39m [23m   [3m [38;5;246m<dbl> [39m [23m   [3m [38;5;246m<dbl> [39m [23m   [3m [38;5;246m<dbl> [39m [23m             [3m [38;5;246m<dbl> [39m [23m               [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m1 [39m Procedure A   343 0.061 [4m9 [24m - [31m0 [39m [31m. [39m [31m206 [39m 0.073 [4m2 [24m            0.834              0.628
- [38;5;250m2 [39m Procedure B   219 0.085 [4m4 [24m - [31m0 [39m [31m. [39m [31m267 [39m 0.035 [4m7 [24m            0.785              0.519
-
-$condition_vars
-[1] "procedure"
-
-cal_by_cond$plot
-NULL
+knitr::kable(
+  cal_by_cond$condition_summary, digits = 3,
+  caption = "Calibration statistics by procedure, simulated data (choosers only)."
+)
 ```
+
+| condition   |   n |     C |     OU |   NRI | overall_accuracy | overall_confidence |
+|:------------|----:|------:|-------:|------:|-----------------:|-------------------:|
+| Procedure A | 343 | 0.062 | -0.206 | 0.073 |            0.834 |              0.628 |
+| Procedure B | 219 | 0.085 | -0.267 | 0.036 |            0.785 |              0.519 |
+
+Calibration statistics by procedure, simulated data (choosers only).
+{.table}
+
+The per-bin detail for each procedure is in `cal_by_cond$by_condition`.
+The object does not carry a plot; draw one with
+[`make_calibration_by_condition_gg()`](https://cgtza2.github.io/r4lineups/reference/make_calibration_by_condition_gg.md):
+
+``` r
+
+make_calibration_by_condition_gg(cal_by_cond)
+```
+
+![](calibration_decision_analysis_files/figure-html/calibration-by-condition-plot-1.png)
 
 ## 2. Bayesian Information-Gain Analysis
 
@@ -530,29 +461,36 @@ The plot shows how each response type updates prior belief:
   of guilt)
 - **Lines below diagonal**: Evidence decreases guilt belief (diagnostic
   of innocence)
-- **Steeper slopes**: More diagnostic evidence
+- **Distance from the diagonal**: at a given prior, the further a curve
+  lies from the diagonal, the larger the likelihood ratio of that
+  response. Compare curves at the same prior, not by their local slopes.
 
 The prior-posterior curve is due to Wells, Yang and Smalarz (2015), who
 introduced it along with the base-rate effect-equivalency curve used
 later in this vignette. The implementation here is written directly from
-that paper; it is not adapted from another package.
+that paper.
 
-**On the shape of these curves.** They are strongly curved, and that
-curvature is not an artefact of any smoothing — no loess or spline is
-fitted anywhere in these plots. The curve is the exact plot of the
-equation above as $`P(G)`$ varies from 0 to 1, and Bayes’ theorem is
-nonlinear in the prior. The characteristic S-shape is the substantive
-point of the display: the same identification moves belief a great deal
-when the prior is middling, and very little when the prior is already
-near 0 or near 1. Evidence that would transform a genuinely uncertain
-case can do almost nothing to a case that is already close to settled.
+**On the shape of these curves.** They are curved, and that curvature is
+not an artefact of any smoothing: no loess or spline is fitted anywhere
+in these plots. For a response with likelihood ratio $`L`$, the
+posterior as a function of the prior $`p`$ is
+``` math
+q(p) = \frac{Lp}{1 + (L - 1)p}, \qquad
+q''(p) = \frac{-2L(L - 1)}{[1 + (L - 1)p]^3}.
+```
+The curvature has one sign throughout: the curve is concave (bowed above
+the diagonal) when $`L > 1`$, convex (bowed below it) when $`L < 1`$,
+and the diagonal itself when $`L = 1`$. It is not S-shaped. What the
+display shows is that the same response moves belief most, in absolute
+terms, at middling priors, and very little when the prior is already
+near 0 or near 1.
 
 ### Information Gain
 
-Information gain quantifies uncertainty reduction, measured in bits.
-Where the posterior curve says *where belief ends up*, information gain
-says *how much was learned*, which is greatest when the prior leaves
-most room for revision:
+Information gain quantifies uncertainty reduction, measured in bits: the
+entropy of the prior minus the entropy of the posterior. Where the
+posterior curve says *where belief ends up*, information gain says *how
+much uncertainty was removed*:
 
 ``` r
 
@@ -563,9 +501,22 @@ plot_bayes_information_gain(bayes_result)
 
 Interpretation:
 
-- **Positive values**: Response reduces uncertainty (diagnostic)
-- **Negative values**: Response increases uncertainty (misleading)
-- **Higher magnitude**: Stronger diagnostic value
+- **Positive values**: the response moves belief towards certainty
+  (towards 0 or 1), so uncertainty falls.
+- **Negative values**: the response moves belief towards 50/50, so
+  uncertainty rises. That is not a sign of misleading evidence: a
+  suspect identification given a low prior raises the probability of
+  guilt towards .5, which is the correct update and also the most
+  uncertain state.
+- **Where each curve peaks** depends on the direction of the evidence.
+  Responses that point to guilt (suspect identifications) gain most at
+  priors above .5, where they push belief towards 1; responses that
+  point to innocence (rejections, filler identifications) gain most at
+  priors below .5.
+
+The curves bend sharply because binary entropy changes fastest near 0
+and 1. That shape is a property of the measure, not of these data or of
+any smoothing.
 
 ### Confidence-Based Bayesian Analysis
 
@@ -613,9 +564,22 @@ A got from 20%, then A is worth as much as a doubling of the base rate —
 and a doubling of the base rate is something an investigator has an
 intuition about, in a way that a difference in pAUC is not.
 
-Plotting that correspondence for every prior gives the BREE curve. The
-diagonal is the null result of no difference; the further the curve
-departs from it, the larger the advantage.
+Plotting that correspondence for every prior gives the BREE curve.
+[`plot_bree()`](https://cgtza2.github.io/r4lineups/reference/plot_bree.md)
+draws the base-rate shift $`\Delta`$ = prior needed by B − prior used by
+A, against A’s prior. The dashed horizontal line at $`\Delta = 0`$ is
+the null result of no difference; positive $`\Delta`$ means B needs the
+larger prior, so A’s suspect identification is the more diagnostic, and
+the further the curve lies above zero, the larger A’s advantage.
+(Plotting B’s prior directly against A’s would put the reference on the
+diagonal instead, with A’s advantage above it.)
+
+The two procedures are the ones simulated in the [Calibration by
+Condition](#calibration-by-condition) section: `data_proc_a` and
+`data_proc_b` are data frames of target-present and target-absent
+identifications with confidence, one row per witness (not lineup
+vectors). Procedure A has the stronger memory evidence (d′ = 1.8 against
+1.1).
 
 ``` r
 
@@ -630,12 +594,13 @@ plot_bree(bree_result)
 
 ![](calibration_decision_analysis_files/figure-html/bree-1.png)
 
-The curve lies below the diagonal throughout, meaning Procedure B
-requires a *higher* prior probability of guilt to reach any given
-posterior — which is simply to say that a suspect identification from
-Procedure A is worth more. The gap is widest at low base rates, which is
-the practically important region: it is exactly where cases are most
-uncertain that the difference between the two procedures matters most.
+The shift is positive throughout, from 0.003 to 0.079, so Procedure B
+always needs a *higher* prior probability of guilt to reach the
+posterior that A reaches — which is to say that a suspect identification
+from Procedure A is worth more. At a prior of 0.2 for A, B needs 0.255.
+The shift is largest, 0.079, near a prior of 0.46, and shrinks towards
+both ends of the scale, where neither procedure’s evidence can move
+belief much.
 
 ## 3. Expected Utility Analysis
 
@@ -680,9 +645,9 @@ identification’s benefit. That is a moral and legal judgement, not a
 statistical one, and it is the natural place for disagreement. Someone
 who set `fp = -10` would be expressing Blackstone’s ratio; the analysis
 below would then recommend a considerably stricter confidence threshold.
-Because the choice matters this much, it is worth reporting the
-sensitivity of the conclusion to it, which is what the base-rate section
-does for the other key assumption.
+Because the choice is this important, report the sensitivity of the
+conclusion to it, which is what the base-rate section does for the other
+key assumption.
 
 ### Compute Utility Curves
 
@@ -697,19 +662,20 @@ util_result <- make_utility_curves(
 
 print(util_result)
 $utility_data
- [38;5;246m# A tibble: 10 × 6 [39m
-   criterion hit_rate false_alarm_rate expected_utility n_ids_tp n_ids_ta
-        [3m [38;5;246m<dbl> [39m [23m     [3m [38;5;246m<dbl> [39m [23m             [3m [38;5;246m<dbl> [39m [23m             [3m [38;5;246m<dbl> [39m [23m     [3m [38;5;246m<dbl> [39m [23m     [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m       100   0.097 [4m1 [24m          0                 0.072 [4m9 [24m       68        0
- [38;5;250m 2 [39m        90   0.143           0.005 [4m7 [24m [4m1 [24m           0.1         100        4
- [38;5;250m 3 [39m        80   0.189           0.014 [4m3 [24m            0.124       132       10
- [38;5;250m 4 [39m        70   0.26            0.022 [4m9 [24m            0.166       182       16
- [38;5;250m 5 [39m        60   0.351           0.03              0.226       246       21
- [38;5;250m 6 [39m        50   0.436           0.054 [4m3 [24m            0.259       305       38
- [38;5;250m 7 [39m        40   0.507           0.077 [4m1 [24m            0.284       355       54
- [38;5;250m 8 [39m        30   0.556           0.103             0.288       389       72
- [38;5;250m 9 [39m        20   0.593           0.126             0.288       415       88
- [38;5;250m10 [39m        19   0               0                 0             0        0
+ [38;5;246m# A tibble: 10 × 7 [39m
+   criterion strategy   hit_rate false_alarm_rate expected_utility n_ids_tp
+        [3m [38;5;246m<dbl> [39m [23m  [3m [38;5;246m<chr> [39m [23m          [3m [38;5;246m<dbl> [39m [23m             [3m [38;5;246m<dbl> [39m [23m             [3m [38;5;246m<dbl> [39m [23m     [3m [38;5;246m<dbl> [39m [23m
+ [38;5;250m 1 [39m       100 threshold    0.097 [4m1 [24m          0                 0.072 [4m9 [24m       68
+ [38;5;250m 2 [39m        90 threshold    0.143           0.005 [4m7 [24m [4m1 [24m           0.1         100
+ [38;5;250m 3 [39m        80 threshold    0.189           0.014 [4m3 [24m            0.124       132
+ [38;5;250m 4 [39m        70 threshold    0.26            0.022 [4m9 [24m            0.166       182
+ [38;5;250m 5 [39m        60 threshold    0.351           0.03              0.226       246
+ [38;5;250m 6 [39m        50 threshold    0.436           0.054 [4m3 [24m            0.259       305
+ [38;5;250m 7 [39m        40 threshold    0.507           0.077 [4m1 [24m            0.284       355
+ [38;5;250m 8 [39m        30 threshold    0.556           0.103             0.288       389
+ [38;5;250m 9 [39m        20 threshold    0.593           0.126             0.288       415
+ [38;5;250m10 [39m       101 reject_all   0               0                 0             0
+ [38;5;246m# ℹ 1 more variable: n_ids_ta <dbl> [39m
 
 $max_utility
 $max_utility$expected_utility
@@ -718,6 +684,9 @@ $max_utility$expected_utility
 
 $max_utility$criterion
 [1] 30
+
+$max_utility$strategy
+[1] "threshold"
 
 $max_utility$hit_rate
 [1] 0.5557143
@@ -784,9 +753,21 @@ expected utility together with the criterion that achieves it, and the
 hit and false-alarm rates at that criterion. Ask for the element you
 want.
 
+The optimum can be a confidence criterion or the decision to reject
+every identification. `max_utility$strategy` says which, so a small
+helper turns the result into a rule that can be stated:
+
 ``` r
 
-# Compare the two procedures simulated in the BREE section above
+utility_rule <- function(m) {
+  if (m$strategy == "reject_all") "Act on no identification"
+  else paste0("Act on confidence >= ", m$criterion)
+}
+```
+
+``` r
+
+# Compare the two procedures simulated in the Calibration by Condition section
 util_proc_a <- make_utility_curves(data_proc_a, base_rate = 0.5,
                                    utility_matrix = utility_matrix)
 util_proc_b <- make_utility_curves(data_proc_b, base_rate = 0.5,
@@ -797,18 +778,18 @@ knitr::kable(
     Procedure = c("A (d' = 1.8)", "B (d' = 1.1)"),
     `Max expected utility` = round(c(util_proc_a$max_utility$expected_utility,
                                      util_proc_b$max_utility$expected_utility), 3),
-    `Optimal criterion` = c(util_proc_a$max_utility$criterion,
-                            util_proc_b$max_utility$criterion),
+    `Optimal rule` = c(utility_rule(util_proc_a$max_utility),
+                       utility_rule(util_proc_b$max_utility)),
     check.names = FALSE
   ),
   caption = "Expected utility at the optimal confidence criterion, simulated data (200 target-present and 200 target-absent lineups per procedure)."
 )
 ```
 
-| Procedure    | Max expected utility | Optimal criterion |
-|:-------------|---------------------:|------------------:|
-| A (d’ = 1.8) |                0.367 |                40 |
-| B (d’ = 1.1) |                0.185 |                30 |
+| Procedure    | Max expected utility | Optimal rule             |
+|:-------------|---------------------:|:-------------------------|
+| A (d’ = 1.8) |                0.367 | Act on confidence \>= 40 |
+| B (d’ = 1.1) |                0.185 | Act on confidence \>= 30 |
 
 Expected utility at the optimal confidence criterion, simulated data
 (200 target-present and 200 target-absent lineups per procedure).
@@ -834,7 +815,7 @@ sensitivity <- do.call(rbind, lapply(base_rates, function(br) {
   data.frame(
     `Base rate` = br,
     `Max expected utility` = round(util$max_utility$expected_utility, 3),
-    `Optimal criterion` = util$max_utility$criterion,
+    `Optimal rule` = utility_rule(util$max_utility),
     check.names = FALSE
   )
 }))
@@ -846,19 +827,24 @@ knitr::kable(
 )
 ```
 
-| Base rate | Max expected utility | Optimal criterion |
-|----------:|---------------------:|------------------:|
-|       0.2 |                0.345 |                60 |
-|       0.5 |                0.288 |                30 |
-|       0.8 |                0.349 |                20 |
+| Base rate | Max expected utility | Optimal rule             |
+|----------:|---------------------:|:-------------------------|
+|       0.2 |                0.345 | Act on confidence \>= 60 |
+|       0.5 |                0.288 | Act on confidence \>= 30 |
+|       0.8 |                0.349 | Act on confidence \>= 20 |
 
 Sensitivity of expected utility to the assumed base rate, lineup_example
 data. {.table}
 
-Base rate matters a great deal. When guilty suspects are rare, a false
-identification is both more likely and more costly relative to the
-benefit of a correct one, so the optimal criterion becomes stricter and
-the attainable utility falls.
+Base rate is very important. When guilty suspects are rare, any given
+identification is more likely to be a false one, so the optimal
+criterion becomes stricter: here “act on confidence \>= 60” at a base
+rate of 0.2, against “act on confidence \>= 20” at 0.8. The attainable
+utility is not ordered by base rate in any simple way, because it also
+depends on how the cost matrix values the outcomes that become more
+common; here it is 0.345, 0.288 and 0.349 at the three base rates.
+Compare utilities across procedures at the same base rate, not across
+base rates.
 
 ## 4. Deviation from Perfect Performance (DPP)
 
@@ -867,17 +853,16 @@ and it is robust to ROC truncation — that is, to witnesses not using the
 full confidence scale.
 
 It was proposed by Smith, Lampinen, Wells, Smalarz and Mackovichova
-(2019) as a replacement for partial area under the ROC curve, and the
-reason is worth stating because it is contested. Lineup ROC curves
-cannot be traced over their full range: the observed false-alarm rate
-only extends as far as witnesses’ willingness to choose takes it, and
-that endpoint differs between procedures. pAUC handles this by
-integrating over a restricted region, but the choice of region is then
-itself a problem. Take the region from the procedure with the shorter
-curve and information from the other is discarded; take a common region
-and the comparison is made somewhere neither procedure was actually
-operating. Smith et al. argue that pAUC consequently fails to track
-which procedure has greater diagnostic utility, and that DPP does.
+(2019) as a replacement for partial area under the ROC curve, but it is
+contested. Lineup ROC curves cannot be traced over their full range: the
+observed false-alarm rate only extends as far as witnesses’ willingness
+to choose takes it, and that endpoint differs between procedures. pAUC
+handles this by integrating over a restricted region, but the choice of
+region is then itself a problem. Take the region from the procedure with
+the shorter curve and information from the other is discarded; take a
+common region and the comparison is made somewhere neither procedure was
+actually operating. Smith et al. argue that pAUC consequently fails to
+track which procedure has greater diagnostic utility, and that DPP does.
 
 DPP takes a different approach. Rather than integrating over a region,
 it is computed at every operating point of the ROC, that is, at every
@@ -1015,9 +1000,9 @@ Resolution is the third of the properties confidence can have, alongside
 calibration and over/underconfidence. A witness could be poorly
 calibrated — systematically over- or underconfident — and yet have
 excellent resolution, if their confidence still ranked correct
-identifications above incorrect ones. Resolution is arguably the
-property that matters most in practice, since a systematic bias can be
-corrected for once known, whereas an inability to discriminate cannot.
+identifications above incorrect ones. Resolution is arguably the most
+important property in practice, since a systematic bias can be corrected
+for once known, whereas an inability to discriminate cannot.
 
 NRI (Yaniv, Yates & Smith, 1991) measures this, but it is **positively
 biased**: some apparent resolution arises from sampling noise alone.
@@ -1107,10 +1092,17 @@ knitr::kable(
 | Statistic             | Estimate | 95% CI           |
 |:----------------------|---------:|:-----------------|
 | NRI (uncorrected)     |    0.045 | —                |
-| ANRI (bias-corrected) |    0.041 | \[0.021, 0.076\] |
+| ANRI (bias-corrected) |    0.041 | \[0.025, 0.068\] |
 
 Resolution with bootstrap interval, lineup_example, 3 confidence bins.
 {.table}
+
+No interval is given for NRI because it would add nothing. ANRI is a
+linear rescaling of NRI, $`ANRI = (N \cdot NRI - J + 1)/(N - J + 1)`$,
+so with $`N =`$ 503 suspect identifications and $`J =`$ 3 bins the two
+differ only by the bias correction (0.045 against 0.041 here). An
+interval for NRI would be the ANRI interval shifted upward by that bias,
+so it is ANRI and its interval that should be reported and compared.
 
 ### Compare Groups
 
@@ -1145,10 +1137,10 @@ $difference
 [1] 0.04095711
 
 $ci_lower
-[1] -0.008108478
+[1] -0.0162656
 
 $ci_upper
-[1] 0.08953339
+[1] 0.09288628
 
 $conf_level
 [1] 0.95
@@ -1163,6 +1155,12 @@ $group_names
 $n_bootstrap
 [1] 100
 
+$n_bootstrap_requested
+[1] 100
+
+$n_failed
+[1] 0
+
 $bootstrap_results_group1
 $bootstrap_results_group1$anri
 [1] 0.06778469
@@ -1171,16 +1169,22 @@ $bootstrap_results_group1$nri
 [1] 0.07322035
 
 $bootstrap_results_group1$ci_lower
-[1] 0.0336087
+[1] 0.02912137
 
 $bootstrap_results_group1$ci_upper
-[1] 0.1164634
+[1] 0.1149089
 
 $bootstrap_results_group1$conf_level
 [1] 0.95
 
 $bootstrap_results_group1$n_bootstrap
 [1] 100
+
+$bootstrap_results_group1$n_bootstrap_requested
+[1] 100
+
+$bootstrap_results_group1$n_failed
+[1] 0
 
 $bootstrap_results_group1$n_total
 [1] 343
@@ -1189,23 +1193,23 @@ $bootstrap_results_group1$n_bins
 [1] 3
 
 $bootstrap_results_group1$bootstrap_distribution
-  [1] 0.03792035 0.10230640 0.07128750 0.09972424 0.03213718 0.06769488
-  [7] 0.05146193 0.08428818 0.05697483 0.06450267 0.04643998 0.05204378
- [13] 0.04052060 0.05626850 0.08046377 0.05508151 0.07542900 0.05429258
- [19] 0.03339433 0.03949982 0.03314501 0.12294947 0.06149616 0.08899741
- [25] 0.08887571 0.05678356 0.08559018 0.08993446 0.03384564 0.07501329
- [31] 0.10901750 0.03843067 0.07237962 0.04681311 0.08234473 0.07169593
- [37] 0.05393085 0.04605020 0.04416228 0.08616716 0.05979818 0.07163163
- [43] 0.06592243 0.06227943 0.05380252 0.08467802 0.05825533 0.03794652
- [49] 0.04897432 0.05309413 0.05712630 0.11953708 0.10506389 0.09455008
- [55] 0.07545982 0.07001821 0.07813977 0.07755299 0.07582407 0.06920125
- [61] 0.05581948 0.09070718 0.11306627 0.08195092 0.05373707 0.07570843
- [67] 0.05920084 0.04019088 0.06619352 0.06693720 0.10473087 0.05404773
- [73] 0.07227918 0.05755365 0.06346656 0.05302063 0.06614226 0.07395793
- [79] 0.08212438 0.04497331 0.11215098 0.07525709 0.08608872 0.09973898
- [85] 0.12193547 0.05719782 0.07908794 0.05332117 0.05546346 0.07763277
- [91] 0.05515692 0.09137111 0.05421248 0.05186790 0.06845404 0.08821952
- [97] 0.08745584 0.07771619 0.06039380 0.09771786
+  [1] 0.06708598 0.06570604 0.08047661 0.04987933 0.07221240 0.06148205
+  [7] 0.07212585 0.08571190 0.06816675 0.06999423 0.05916390 0.09510135
+ [13] 0.03142914 0.04505713 0.05639861 0.09915104 0.03885619 0.07716533
+ [19] 0.05518367 0.06160329 0.08011800 0.03582855 0.05369086 0.08262844
+ [25] 0.11270127 0.09078520 0.11118346 0.06107025 0.11095935 0.03686786
+ [31] 0.07824433 0.10365266 0.06466421 0.07758830 0.06246753 0.04141894
+ [37] 0.08328425 0.08469806 0.08008407 0.06726736 0.02703340 0.06715568
+ [43] 0.06081143 0.04384714 0.06404480 0.08060125 0.09375399 0.04073706
+ [49] 0.05561147 0.06537103 0.08259529 0.07587945 0.06234151 0.11957211
+ [55] 0.06314098 0.02570420 0.04332888 0.09238761 0.10012490 0.11869072
+ [61] 0.05276179 0.09538591 0.07677354 0.04634813 0.08990006 0.05857359
+ [67] 0.10507931 0.07623093 0.11105741 0.07602279 0.08272019 0.04113382
+ [73] 0.08082205 0.05360715 0.09284835 0.01839824 0.03796410 0.07069711
+ [79] 0.07777091 0.08588510 0.11690619 0.06030880 0.10590118 0.10782745
+ [85] 0.06639759 0.06499843 0.07933454 0.06463416 0.09112998 0.06640864
+ [91] 0.06755599 0.07182240 0.09123954 0.07012033 0.09326807 0.08488978
+ [97] 0.08600358 0.07038152 0.06785717 0.03480324
 
 
 $bootstrap_results_group2
@@ -1216,16 +1220,22 @@ $bootstrap_results_group2$nri
 [1] 0.03571501
 
 $bootstrap_results_group2$ci_lower
-[1] 0.01183448
+[1] 0.009110349
 
 $bootstrap_results_group2$ci_upper
-[1] 0.0666507
+[1] 0.06445527
 
 $bootstrap_results_group2$conf_level
 [1] 0.95
 
 $bootstrap_results_group2$n_bootstrap
 [1] 100
+
+$bootstrap_results_group2$n_bootstrap_requested
+[1] 100
+
+$bootstrap_results_group2$n_failed
+[1] 0
 
 $bootstrap_results_group2$n_total
 [1] 219
@@ -1234,46 +1244,46 @@ $bootstrap_results_group2$n_bins
 [1] 3
 
 $bootstrap_results_group2$bootstrap_distribution
-  [1] 0.02827003 0.04079840 0.02517238 0.03062012 0.02181972 0.01049838
-  [7] 0.01899978 0.03036700 0.02552104 0.02271060 0.05713917 0.02578298
- [13] 0.03016016 0.02054713 0.03918945 0.02557476 0.06779379 0.03874987
- [19] 0.01051332 0.03233665 0.01733051 0.03296402 0.02803529 0.03895519
- [25] 0.03858131 0.01528382 0.03298276 0.01736324 0.03464778 0.02914002
- [31] 0.03573929 0.01157663 0.04527195 0.05739101 0.04756280 0.04921251
- [37] 0.04395061 0.02516586 0.01504147 0.02946546 0.03826375 0.01386205
- [43] 0.05332499 0.01690167 0.01447765 0.05670686 0.02829661 0.03629397
- [49] 0.05534675 0.02370688 0.01755271 0.02891908 0.01502363 0.02507785
- [55] 0.03040495 0.02453349 0.04079696 0.02576999 0.05562779 0.01936541
- [61] 0.03889947 0.01721450 0.04392177 0.02245940 0.03280615 0.03121139
- [67] 0.03159972 0.04362042 0.01838025 0.05005197 0.04072979 0.02646716
- [73] 0.02649673 0.05504240 0.01767153 0.02731134 0.02837761 0.03833251
- [79] 0.07664124 0.01767752 0.04196244 0.06601501 0.04125118 0.03145147
- [85] 0.03290173 0.03288050 0.02903352 0.02191484 0.03724168 0.02525612
- [91] 0.06442027 0.02237895 0.02130252 0.01918565 0.01211948 0.01694000
- [97] 0.05328292 0.02129131 0.06722584 0.01440498
+  [1] 0.054817973 0.022421218 0.026550014 0.047942448 0.026436048 0.051313022
+  [7] 0.026715655 0.035606414 0.049266532 0.033202453 0.065100176 0.019272279
+ [13] 0.017972351 0.024914903 0.031759105 0.023415879 0.039935663 0.016485797
+ [19] 0.028106056 0.026755049 0.042393733 0.014044901 0.047430438 0.025694351
+ [25] 0.009603482 0.031974042 0.025750449 0.023649520 0.016634482 0.034929618
+ [31] 0.044207564 0.042362668 0.025991477 0.033185154 0.037640835 0.026160620
+ [37] 0.011972828 0.007036663 0.041360143 0.024607043 0.027630872 0.030317349
+ [43] 0.032542761 0.019641566 0.022733987 0.010714669 0.031485628 0.021524720
+ [49] 0.021008661 0.029182388 0.023620195 0.032096170 0.032127258 0.039164861
+ [55] 0.022085988 0.045748433 0.022176174 0.023266895 0.034157548 0.023283074
+ [61] 0.064850996 0.008664181 0.014826744 0.024504903 0.010977051 0.019082504
+ [67] 0.013783056 0.023553399 0.032484769 0.026147752 0.022248487 0.030642495
+ [73] 0.007978659 0.057524655 0.027271420 0.064017894 0.080392203 0.014551924
+ [79] 0.051559618 0.026730444 0.026491746 0.023184755 0.035857128 0.028955733
+ [85] 0.019554188 0.048800873 0.022485638 0.034746265 0.046738180 0.030777372
+ [91] 0.026480496 0.025514253 0.037440071 0.038654235 0.034623890 0.033019727
+ [97] 0.053811990 0.030239350 0.028706437 0.010009702
 
 
 $difference_distribution
-  [1]  0.009650324  0.061508003  0.046115121  0.069104122  0.010317458
-  [6]  0.057196503  0.032462146  0.053921182  0.031453794  0.041792070
- [11] -0.010699198  0.026260792  0.010360434  0.035721373  0.041274323
- [16]  0.029506748  0.007635216  0.015542702  0.022881012  0.007163168
- [21]  0.015814504  0.089985455  0.033460873  0.050042216  0.050294396
- [26]  0.041499746  0.052607411  0.072571219 -0.000802140  0.045873268
- [31]  0.073278205  0.026854038  0.027107675 -0.010577897  0.034781935
- [36]  0.022483411  0.009980238  0.020884337  0.029120813  0.056701703
- [41]  0.021534433  0.057769577  0.012597441  0.045377767  0.039324873
- [46]  0.027971162  0.029958720  0.001652550 -0.006372430  0.029387246
- [51]  0.039573589  0.090618006  0.090040259  0.069472226  0.045054866
- [56]  0.045484712  0.037342808  0.051783007  0.020196282  0.049835837
- [61]  0.016920011  0.073492679  0.069144496  0.059491524  0.020930921
- [66]  0.044497036  0.027601119 -0.003429540  0.047813274  0.016885229
- [71]  0.064001073  0.027580575  0.045782455  0.002511241  0.045795035
- [76]  0.025709292  0.037764650  0.035625420  0.005483140  0.027295784
- [81]  0.070188537  0.009242086  0.044837538  0.068287508  0.089033735
- [86]  0.024317320  0.050054417  0.031406323  0.018221782  0.052376654
- [91] -0.009263345  0.068992157  0.032909964  0.032682244  0.056334568
- [96]  0.071279519  0.034172918  0.056424889 -0.006832047  0.083312884
+  [1]  0.0122680065  0.0432848222  0.0539265958  0.0019368818  0.0457763559
+  [6]  0.0101690294  0.0454101932  0.0501054840  0.0189002169  0.0367917783
+ [11] -0.0059362774  0.0758290756  0.0134567857  0.0201422261  0.0246395094
+ [16]  0.0757351573 -0.0010794705  0.0606795334  0.0270776135  0.0348482420
+ [21]  0.0377242712  0.0217836462  0.0062604171  0.0569340862  0.1030977881
+ [26]  0.0588111547  0.0854330116  0.0374207301  0.0943248658  0.0019382433
+ [31]  0.0340367627  0.0612899930  0.0386727321  0.0444031450  0.0248266917
+ [36]  0.0152583218  0.0713114246  0.0776613940  0.0387239227  0.0426603164
+ [41] -0.0005974759  0.0368383268  0.0282686652  0.0242055779  0.0413108181
+ [46]  0.0698865853  0.0622683605  0.0192123438  0.0346028060  0.0361886426
+ [51]  0.0589750985  0.0437832779  0.0302142505  0.0804072525  0.0410549946
+ [56] -0.0200442308  0.0211527091  0.0691207197  0.0659673547  0.0954076458
+ [61] -0.0120892085  0.0867217281  0.0619467959  0.0218432288  0.0789230117
+ [66]  0.0394910885  0.0912962539  0.0526775336  0.0785726379  0.0498750399
+ [71]  0.0604717015  0.0104913202  0.0728433901 -0.0039175017  0.0655769263
+ [76] -0.0456196567 -0.0424281019  0.0561451813  0.0262112892  0.0591546516
+ [81]  0.0904144437  0.0371240484  0.0700440502  0.0788717134  0.0468434025
+ [86]  0.0161975531  0.0568489007  0.0298878990  0.0443917958  0.0356312668
+ [91]  0.0410754920  0.0463081431  0.0537994645  0.0314660929  0.0586441834
+ [96]  0.0518700487  0.0321915922  0.0401421675  0.0391507322  0.0247935330
 
 plot_anri_comparison(anri_comparison)
 ```
@@ -1288,8 +1298,8 @@ The comparison provides:
 
 The bootstrap difference distribution is available as
 `plot_anri_difference_distribution(anri_comparison)` if you want to
-inspect its shape — worth doing when an interval looks surprising, since
-a heavily skewed or multimodal distribution is a sign the bins are too
+inspect its shape. Inspect it when an interval looks surprising: a
+heavily skewed or multimodal distribution is a sign the bins are too
 thin somewhere.
 
 ### When to Use ANRI vs NRI
@@ -1373,8 +1383,7 @@ Summary across all five methods, lineup_example. {.table}
 
 Every number below is computed from the objects created above rather
 than typed in, so this passage cannot drift out of step with the
-analysis it describes. The same discipline is worth adopting in a
-manuscript.
+analysis it describes. The same practice suits a manuscript.
 
 > We analysed identification performance using calibration analysis,
 > deviation from perfect performance (DPP), and the adjusted normalized
@@ -1386,15 +1395,15 @@ manuscript.
 > band was substantially higher than stated confidence implied. Average
 > DPP was 0.7 (0 = perfect, 1 = chance), and the operating point of
 > maximum utility was confidence of 20 or above (DPP = 0.533).
-> Resolution, measured by ANRI, was 0.041 (95% CI \[0.02, 0.077\]),
+> Resolution, measured by ANRI, was 0.041 (95% CI \[0.021, 0.072\]),
 > against an uncorrected NRI of 0.045.
 >
 > Expected utility analysis assumed a base rate of 50% and the cost
 > matrix u(correct suspect ID) = 1, u(missed guilty suspect) = -0.5,
 > u(innocent suspect ID) = -2, u(correct rejection) = 0.5; that is, a
 > wrongful identification was weighted four times as heavily as a missed
-> one. Under those assumptions a confidence criterion of 30 maximised
-> expected utility (EU = 0.288).
+> one. Under those assumptions the rule “act on confidence \>= 30”
+> maximised expected utility (EU = 0.288).
 >
 > Bayesian analysis showed that high-confidence suspect identifications
 > were the most informative response, with a likelihood ratio of 25
@@ -1407,54 +1416,40 @@ is what allows a reader to judge how much weight it will bear.
 
 ## References
 
-**Calibration:**
+Brewer, N., & Wells, G. L. (2006). The confidence-accuracy relationship
+in eyewitness identification: Effects of lineup instructions, foil
+similarity, and target-absent base rates. *Journal of Experimental
+Psychology: Applied, 12*(1), 11-30.
 
-- Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and
-  diagnosticity of confidence in eyewitness identification: Comments on
-  what can be inferred from the low confidence-accuracy correlation.
-  *Journal of Experimental Psychology: Learning, Memory, and Cognition,
-  22*(5), 1304-1316.
-- Brewer, N., & Wells, G. L. (2006). The confidence-accuracy
-  relationship in eyewitness identification: Effects of lineup
-  instructions, foil similarity, and target-absent base rates. *Journal
-  of Experimental Psychology: Applied, 12*(1), 11-30.
+Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and
+diagnosticity of confidence in eyewitness identification: Comments on
+what can be inferred from the low confidence-accuracy correlation.
+*Journal of Experimental Psychology: Learning, Memory, and Cognition,
+22*(5), 1304-1316.
 
-**Bayesian information gain and BREE:**
+Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
+eyewitness identification practice: Dissociations between receiver
+operating characteristic (ROC) analysis and expected utility analysis.
+*Law and Human Behavior, 43*(1), 26-44.
 
-- Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness
-  identification: Bayesian information gain, base-rate
-  effect-equivalency curves, and reasonable suspicion. *Law and Human
-  Behavior, 39*(2), 99-122.
+Mickes, L. (2015). Receiver operating characteristic analysis and
+confidence-accuracy characteristic analysis in investigations of system
+variables and estimator variables that affect eyewitness memory.
+*Journal of Applied Research in Memory and Cognition, 4*(2), 93-102.
 
-**Expected Utility:**
+Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., &
+Mackovichova, S. (2019). Deviation from perfect performance measures the
+diagnostic utility of eyewitness lineups but partial area under the ROC
+curve does not. *Journal of Applied Research in Memory and Cognition,
+8*(1), 50-59. <https://doi.org/10.1016/j.jarmac.2018.09.003>
 
-- Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities
-  in eyewitness identification practice: Dissociations between receiver
-  operating characteristic (ROC) analysis and expected utility analysis.
-  *Law and Human Behavior, 43*(1), 26-44.
+Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
+Bayesian information gain, base-rate effect-equivalency curves, and
+reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
 
-**DPP:**
-
-- Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., &
-  Mackovichova, S. (2019). Deviation from perfect performance measures
-  the diagnostic utility of eyewitness lineups but partial area under
-  the ROC curve does not. *Journal of Applied Research in Memory and
-  Cognition, 8*(1), 50-59.
-  <https://doi.org/10.1016/j.jarmac.2018.09.003>
-
-**ANRI:**
-
-- Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of
-  discrimination skill in probabilistic judgment. *Psychological
-  Bulletin, 110*(3), 611-617.
-
-**Related, on CAC analysis:**
-
-- Mickes, L. (2015). Receiver operating characteristic analysis and
-  confidence-accuracy characteristic analysis in investigations of
-  system variables and estimator variables that affect eyewitness
-  memory. *Journal of Applied Research in Memory and Cognition, 4*(2),
-  93-102.
+Yaniv, I., Yates, J. F., & Smith, J. E. K. (1991). Measures of
+discrimination skill in probabilistic judgment. *Psychological Bulletin,
+110*(3), 611-617.
 
 ## Session Info
 

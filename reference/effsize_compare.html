@@ -83,7 +83,13 @@ hold data for 2 independent lineups</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function is a master function, calling other functions
-        it needs, and reporting results in some detail</p>
+        it needs, and reporting results in some detail
+        Each lineup is resampled independently; row alignment has no sampling
+        meaning. Confidence intervals are bootstrap approximations and can be
+        unreliable for small or nearly uniform empirical choice distributions.
+        Normal and BCa intervals can under-cover in finite concentrated samples;
+        percentile intervals can be conservative near uniformity. None provides
+        a distribution-free level-.05 test of equal population effective sizes.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -122,9 +128,9 @@ hold data for 2 independent lineups</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> The two Effective sizes are  5.847953   5.411255</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> If the interval includes 0, ns at p = .05</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence intervals of difference [95%]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Normal Theory -0.425 1.242</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap: percentile (R = 100) -0.386 1.281</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap: bias-corrected (R = 100) -0.395 1.279</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Normal Theory -0.284 1.236</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap: percentile (R = 100) -0.336 1.367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap: bias-corrected (R = 100) -0.195 1.533</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

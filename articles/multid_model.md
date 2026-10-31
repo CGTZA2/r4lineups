@@ -303,17 +303,18 @@ computed from raw proportions.
 
 ## References
 
-Lee, J., & Penrod, S. D. (2019). New signal detection theory-based
-framework for eyewitness performance in lineups. *Law and Human
-Behavior*.
-
 Lee, J., Mansour, J. K., & Penrod, S. D. (2022). Validity of
 mock-witness measures for assessing lineup fairness. *Psychology, Crime
-& Law*.
+& Law*. <https://doi.org/10.1080/1068316X.2021.1905811>
 
 Lee, J., Mansour, J. K., & Penrod, S. D. (2024). How to measure lineup
 fairness: Concurrent and predictive validity of lineup-fairness
 measures. *Psychology, Crime & Law*.
+<https://doi.org/10.1080/1068316X.2024.2307358>
+
+Lee, J., & Penrod, S. D. (2019). New signal detection theory-based
+framework for eyewitness performance in lineups. *Law and Human
+Behavior*. <https://doi.org/10.1037/lhb0000343>
 
 Steblay, N., Dysart, J., Fulero, S., & Lindsay, R. C. L. (2003).
 Eyewitness accuracy rates in police showup and lineup presentations: A

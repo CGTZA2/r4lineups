@@ -199,7 +199,7 @@ summary(comparison)
 #>   - EIG: Higher values = more informative procedure
 #>   - Full ROC: Higher AUC = better investigator discriminability
 #> 
-#> Each model provides different insights -- consider using multiple models.
+#> Each model provides different information; consider reporting more than one.
 
 # Fit specific models
 comparison <- compare_models(lineup_example, models = c("2ht", "eig"))

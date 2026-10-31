@@ -91,10 +91,14 @@ make_utility_curves(
 
 A list containing:
 
-- utility_data: Dataframe with criterion, hit rate, false alarm rate,
-  and expected utility
+- utility_data: Dataframe with criterion, strategy, hit rate, false
+  alarm rate, and expected utility. Each row is the rule "accept suspect
+  IDs with confidence \>= criterion". The `"reject_all"` row has a
+  criterion above the observed identification confidences and supplied
+  grid (possibly `Inf`), so that applying it accepts no identification.
 
-- max_utility: Maximum expected utility and corresponding criterion
+- max_utility: Maximum expected utility, with the corresponding
+  criterion and strategy
 
 - avg_utility: Average expected utility across all criteria
 
@@ -159,6 +163,9 @@ util$max_utility
 #> 
 #> $criterion
 #> [1] 30
+#> 
+#> $strategy
+#> [1] "threshold"
 #> 
 #> $hit_rate
 #> [1] 0.5557143

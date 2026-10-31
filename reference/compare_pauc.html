@@ -156,7 +156,7 @@ otherwise, with a message.</p></dd>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function implements a rigorous statistical test for comparing ROC curves
+    <p>This function implements an approximate statistical test for comparing ROC curves
 between two conditions (e.g., simultaneous vs. sequential lineups, different
 retention intervals, etc.).</p>
 <p>**Method:**</p><ol><li><p>Computes pAUC for each condition (optionally up to a maximum false ID rate)</p></li>
@@ -168,7 +168,12 @@ not implement a paired or clustered bootstrap.</p>
 <p>**Interpretation:**</p><ul><li><p>Positive pAUC difference: Condition 1 has better discriminability</p></li>
 <li><p>Negative pAUC difference: Condition 2 has better discriminability</p></li>
 <li><p>p &lt; 0.05: Significant difference between conditions</p></li>
-</ul></div>
+</ul><p>The independent-sample bootstrap estimates uncertainty in an empirical
+  partial-area functional; the final comparison uses a normal/Wald interval.
+  It is approximate and can be liberal in finite samples. A data-selected
+  cutoff, sparse high-confidence cells, or resamples that do not reach the
+  cutoff require additional caution. It is not an exact discrimination test.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S. (2024). pyWitness 1.0:

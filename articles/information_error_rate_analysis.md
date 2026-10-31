@@ -78,12 +78,11 @@ EIG is the average of those, weighted by how often each response occurs:
 \mathrm{EIG} = \sum_x P(x)\,\Bigl[H\bigl(P(G)\bigr) - H\bigl(P(G \mid x)\bigr)\Bigr]
 ```
 
-Two consequences are worth noting. Individual responses can have
-**negative** information gain — a response that moves belief towards 0.5
-increases uncertainty — but the expectation over all responses cannot be
-negative. And EIG depends on the prior $`P(G)`$, which is set by
-`prior_guilt` and is a property of the investigation, not of the
-procedure.
+Two consequences follow. Individual responses can have **negative**
+information gain — a response that moves belief towards 0.5 increases
+uncertainty — but the expectation over all responses cannot be negative.
+And EIG depends on the prior $`P(G)`$, which is set by `prior_guilt` and
+is a property of the investigation, not of the procedure.
 
 ``` r
 
@@ -209,11 +208,17 @@ says so when it happens.
 
 ### When they diverge
 
-The corrections matter when no innocent suspect is designated — the
-usual situation with field data. We can create that case by relabelling
-the target-absent suspect identifications as foil identifications, which
-is exactly the information loss that occurs when the lineup did not
-nominate a suspect in advance:
+The corrections are important when no innocent suspect is designated —
+the usual situation with field data. We can create that case by
+relabelling the target-absent suspect identifications as foil
+identifications **and** removing the `suspect_pos` column, which is
+exactly the information loss that occurs when the lineup did not
+nominate a suspect in advance. Both steps are needed: a non-missing
+`suspect_pos` tells
+[`make_ppv_range()`](https://cgtza2.github.io/r4lineups/reference/make_ppv_range.md)
+that a suspect was designated, and the design would then stay designated
+with zero innocent-suspect identifications, giving PPV = 1 under every
+correction.
 
 ``` r
 
@@ -221,10 +226,12 @@ no_designation <- lineup_example
 ta_suspect <- !no_designation$target_present &
                no_designation$identification == "suspect"
 no_designation$identification[ta_suspect] <- "filler"
+no_designation$suspect_pos <- NULL
 
 ppv_estimated <- make_ppv_range(
   no_designation,
   lineup_size = 6,
+  innocent_suspect = "estimated",  # state the design rather than rely on "auto"
   show_plots = FALSE
 )
 
@@ -245,18 +252,17 @@ knitr::kable(
 
 | Correction               | Overall PPV |
 |:-------------------------|------------:|
-| Nominal size (best case) |           1 |
-| Effective size           |           1 |
-| None (worst case)        |           1 |
+| Nominal size (best case) |      0.8331 |
+| Effective size           |      0.7691 |
+| None (worst case)        |      0.4540 |
 
 PPV under three corrections, same data with the innocent-suspect
 designation removed. This is the range the method exists to report.
 {.table}
 
-The spread is large — from about 1 to about 1 — and that spread is the
-finding. An analysis reporting only the nominal-size figure would be
-asserting that the lineup was perfectly fair, which is precisely what is
-unknown.
+The spread is large, from about 0.45 to about 0.83. An analysis
+reporting only the nominal-size figure would be asserting that the
+lineup was perfectly fair, which is precisely what is unknown.
 
 The effective-size correction sits between the two because the lineup’s
 members do not attract choices equally:
@@ -277,15 +283,15 @@ knitr::kable(
 
 | Confidence bin | Effective size | Error rate |
 |:---------------|---------------:|-----------:|
-| 20             |             NA |      0.314 |
-| 30             |             NA |      1.000 |
-| 40             |             NA |      1.000 |
-| 50             |             NA |      1.000 |
-| 60             |             NA |      1.000 |
-| 70             |             NA |      1.000 |
-| 80             |             NA |      1.000 |
-| 90             |             NA |      1.000 |
-| 100            |             NA |      1.000 |
+| 20             |           4.55 |      0.314 |
+| 30             |           4.58 |      1.000 |
+| 40             |           3.98 |      1.000 |
+| 50             |           4.07 |      1.000 |
+| 60             |           3.45 |      1.000 |
+| 70             |           3.33 |      1.000 |
+| 80             |           3.77 |      1.000 |
+| 90             |           3.63 |      1.000 |
+| 100            |           3.33 |      1.000 |
 
 Effective size estimated within each confidence bin, against a nominal
 size of 6. {.table}
@@ -360,12 +366,13 @@ follows as hits / (hits + estimated innocent-suspect identifications).
 3.  Effective size is estimated per confidence bin, so bins with few
     observations give unstable corrections — check the counts before
     relying on a bin.
-4.  Effective size is itself a plug-in estimate and is biased downward
-    at small samples; see the “Small-sample bias” section of
+4.  Effective size is itself a plug-in estimate with small-sample bias;
+    see the “Small-sample bias” section of
     [`?esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md).
-    A downward-biased effective size makes the correction *more*
-    conservative, so the effect is in the safe direction, but it is not
-    negligible.
+    In near-fair lineups the bias is downward, which makes the
+    correction more conservative, but its direction is not guaranteed:
+    with strongly unequal choices the plug-in estimate can be biased
+    upward. Bins with few target-absent choices deserve particular care.
 
 ## References
 

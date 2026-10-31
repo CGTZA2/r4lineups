@@ -144,7 +144,10 @@ correct from incorrect responses:
 $$NRI = \frac{\frac{1}{N} \sum_{j=1}^{J} n_j (a_j - \bar{a})^2}{\bar{a}(1-\bar{a})}$$</p>
 <p>When <code>choosers_only = TRUE</code>, only suspect identifications are included (standard
 for eyewitness calibration analysis). When <code>choosers_only = FALSE</code>, all responses
-are included with fillers and rejections counted as incorrect.</p>
+are included with fillers and rejections counted as incorrect.
+Consequently that option measures correct-suspect identification across all
+responses, not general decision accuracy: a correct TA rejection still scores
+zero. Do not interpret it as calibration of the correctness of every decision.</p>
 <p>If target-absent data contain designated innocent-suspect identifications,
 those observations are used directly. Otherwise, each target-absent filler
 identification contributes weight <code>1 / lineup_size</code> as an estimate of

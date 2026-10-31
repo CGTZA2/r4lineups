@@ -6,6 +6,16 @@
 > occasion editing the text. Responsibility for the content rests with
 > the authors.
 
+The current release is also available from r-universe, which is updated
+sooner than CRAN:
+
+``` r
+
+install.packages("r4lineups",
+                 repos = c("https://cgtza2.r-universe.dev",
+                           "https://cloud.r-project.org"))
+```
+
 ``` r
 
 library(r4lineups)
@@ -139,9 +149,15 @@ null_foil_vec
 4 4 4 4 4 4 4 
 ```
 
-Null foils matter, because they are exactly the members that make a
-lineup unfair: a foil nobody ever picks is not a functioning alternative
-to the suspect. Use
+Null foils are important, because a foil nobody would pick is not a
+functioning alternative to the suspect. They are one of several things
+that can make a lineup unfair: poor foils that draw only a few choices
+weaken it in the same way, and a suspect who stands out does so whatever
+the foils are like. A zero in a sample is also weaker evidence than it
+looks. Even in a perfectly fair six-person lineup, a given member
+receives no choices from ten mock witnesses with probability
+$`(5/6)^{10} \approx .16`$. Treat an unchosen member as a prompt to look
+at that photograph, not as proof that it fails as a foil. Use
 [`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
 instead, which tabulates over all `k` positions, keeps unchosen members
 as explicit zeroes, and says so:
@@ -242,6 +258,16 @@ Each dataset is loaded by name, e.g. `data(nortje2012)` or
 documentation for each dataset,
 e.g. [`?nortje2012`](https://cgtza2.github.io/r4lineups/reference/nortje2012.md).
 
+The package can also generate data.
+[`simulate_lineup_data()`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)
+simulates target-present and target-absent lineups with confidence
+ratings from a signal detection model, with control over
+discriminability, decision criterion, lineup size and the quality of
+each foil, and returns data in the format the ROC, CAC and model-fitting
+functions expect. It is useful for trying out an analysis before data
+are collected and for power analysis; see
+[`vignette("simulation_power_analysis")`](https://cgtza2.github.io/r4lineups/articles/simulation_power_analysis.md).
+
 ------------------------------------------------------------------------
 
 ## Lineup Proportion
@@ -303,8 +329,11 @@ approximation to a normal distribution, and the size of the lineup
 places hard limits that are often not observed by computed confidence
 intervals.
 
-We therefore recommend computing bootstrapped estimates of all lineup
-measures, and especially the sampling variability around estimates.
+The bootstrap is a useful alternative for the sampling variability of
+most lineup measures, especially the nonlinear ones such as effective
+size. For a single member’s proportion, though, an exact binomial
+interval is usually the better choice, for the reason shown at the end
+of this section.
 
 To calculate a bootstrapped lineup proportion for a single lineup
 member, we pass the
@@ -364,10 +393,10 @@ vector of types.
 
 #### Comparing against a normal-theory interval
 
-It is worth seeing how the bootstrap interval compares with the
-classical interval, which is what the earlier literature used. There is
-no r4lineups function for this, because base R already provides it: a
-lineup proportion is just a binomial proportion, so
+The bootstrap interval can be compared with the classical interval,
+which is what the earlier literature used. There is no r4lineups
+function for this, because base R already provides it: a lineup
+proportion is just a binomial proportion, so
 [`stats::binom.test()`](https://rdrr.io/r/stats/binom.test.html) (exact)
 and [`stats::prop.test()`](https://rdrr.io/r/stats/prop.test.html)
 (normal approximation with continuity correction) apply directly.
@@ -391,9 +420,31 @@ attr(,"conf.level")
 
 Compare these with the BCa interval above. For a proportion near the
 middle of its range and a reasonable sample size the three tend to agree
-closely; they diverge when the proportion is near 0 or 1, or when the
-sample of mock witnesses is small, which is precisely the situation the
-bootstrap handles better.
+closely. They diverge when the proportion is near 0 or 1, or when the
+sample of mock witnesses is small, and there the ordinary bootstrap is
+**not** the safer choice. A resample can only contain choices that
+occurred in the sample, so a member nobody chose is never chosen in any
+resample:
+
+``` r
+never_chosen <- rep(2:6, 6)   # 30 mock witnesses; member 1 never chosen
+b0 <- boot::boot(never_chosen, lineup_prop_boot, target_pos = 1, R = 1000)
+range(b0$t)                              # every resample gives 0
+[1] 0 0
+binom.test(0, length(never_chosen))$conf.int
+[1] 0.0000000 0.1157033
+attr(,"conf.level")
+[1] 0.95
+```
+
+The percentile interval is $`[0, 0]`$, which claims certainty that the
+member is never chosen, and the BCa interval cannot be computed at all.
+More resamples do not help, because the bootstrap cannot generate an
+outcome the sample lacks. The exact Clopper–Pearson interval,
+$`[0, .116]`$ here, is the appropriate summary for a member proportion
+at or near a boundary, and a Bayesian posterior
+([`vignette("bayesian_inference")`](https://cgtza2.github.io/r4lineups/articles/bayesian_inference.md))
+is another option.
 
 ### Calculating proportion for each lineup member
 
@@ -434,12 +485,12 @@ lineuprops_ci <- lineup_boot_allprop(lineup_vec, k = 8, R = 1000)
 lineuprops_ci
        ci_low    ci_high
 1 0.082706767 0.19548872
-2 0.075187970 0.18796992
-3 0.075187970 0.19548872
+2 0.082706767 0.18796992
+3 0.081853490 0.20300752
 4 0.015037594 0.08270677
-5 0.210526316 0.36842105
-6 0.015037594 0.08663526
-7 0.105263158 0.24060150
+5 0.205667634 0.36090226
+6 0.015037594 0.08270677
+7 0.112781955 0.24060150
 8 0.007518797 0.06015038
 ```
 
@@ -461,13 +512,13 @@ interval, e.g. a Bonferroni-style `conf = 1 - 0.05 / k`:
 ``` r
 lineup_boot_allprop(lineup_vec, k = 8, conf = 1 - 0.05 / 8, R = 1000)
        ci_low    ci_high
-1 0.067669173 0.23308271
-2 0.052631579 0.22628626
-3 0.063938000 0.23292968
-4 0.007518797 0.10239777
-5 0.178355546 0.39849624
-6 0.007518797 0.11874538
-7 0.097744361 0.26771452
+1 0.065932074 0.24386511
+2 0.060150376 0.21804511
+3 0.067669173 0.23473395
+4 0.007518797 0.10094435
+5 0.163254847 0.39308379
+6 0.007518797 0.11663662
+7 0.090225564 0.26335704
 8 0.000000000 0.09022556
 ```
 
@@ -529,9 +580,9 @@ target position, and another indicating nominal size:
 func_size_report(lineup_vec, target_pos = 3, k = 8, R = 1000)
 Functional size of lineup is 7
 Confidence intervals [95%]
-Normal Theory 4.93 11.628 
-Bootstrap: percentile (R = 1000) 4.926 12.063 
-Bootstrap: bias-corrected (R = 1000) 4.926 11.889 
+Normal Theory 4.921 11.668 
+Bootstrap: percentile (R = 1000) 4.926 12.091 
+Bootstrap: bias-corrected (R = 1000) 4.926 12.091 
 Exact (Clopper-Pearson) 4.671 11.331 
 ```
 
@@ -651,10 +702,10 @@ lineupsizes <- gen_esize_m(bootdata, k = 8)
 # to calculate lower and upper CIs with the desired level of alpha
 gen_esize_m_ci(lineupsizes, perc = .025)
     2.5% 
-5.323308 
+5.345865 
 gen_esize_m_ci(lineupsizes, perc = .975)
    97.5% 
-6.263158 
+6.285714 
 ```
 
 #### Compute bootstrap descriptive statistics
@@ -667,12 +718,12 @@ Descriptive statistics are reported in some detail.
 
 ``` r
 gen_boot_propmean_se(lineupsizes)
-Boot prop. (mean)   =  5.815564 
-Boot prop. (median) =  5.804511 
-SD of boot prop     =  0.2473418 
-SE of boot prop     =  0.247 
-2.5% boot CI lvl    =  5.323308 
-97.5% boot CI lvl   =  6.263158 
+Boot prop. (mean)   =  5.820346 
+Boot prop. (median) =  5.827068 
+SD of boot prop     =  0.2395503 
+SE of boot prop     =  0.24 
+2.5% boot CI lvl    =  5.345865 
+97.5% boot CI lvl   =  6.285714 
 ```
 
 ### 2. Tredoux’s measure of Effective Size, E’
@@ -683,6 +734,14 @@ statistical inference using distribution theory.
 E’ = $`\frac{1}{1-I}`$, where I = $`1-\sum_{i=1}^k(\frac{O_i}{N})^2`$
 
 and where k, N, and $`O_i`$ are all as defined earlier.
+
+Substituting for I gives $`E' = 1/\sum_{i=1}^k (O_i/N)^2`$. This is the
+reciprocal of Simpson’s (1949) concentration index, known in ecology as
+the inverse Simpson index and in economics as the inverse Herfindahl
+index, and it can be read as the effective number of members drawing
+choices: if all k members are chosen equally often, E’ = k, and if one
+member draws every choice, E’ = 1. The other vignettes use this
+$`1/\sum p_i^2`$ form; it is the same quantity as Tredoux’s E’.
 
 To compute Tredoux’s measure of effective size, E’, use the function
 [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md).
@@ -713,7 +772,7 @@ boot::boot(data = lineup_vec, statistic = esize_T_boot, R = 1000)
 
 Bootstrap Statistics :
     original     bias    std. error
-t1* 5.693273 -0.1680123   0.4080961
+t1* 5.693273 -0.1578132   0.4144991
 ```
 
 When requesting confidence intervals, name the types you actually want:
@@ -729,14 +788,14 @@ boot::boot.ci(boot.out = esize_boot, type = c("perc", "bca"))
 
 Intervals : 
 Level     Percentile            BCa          
-95%   ( 4.691,  6.306 )   ( 5.070,  6.649 )  
+95%   ( 4.681,  6.333 )   ( 5.029,  6.589 )  
 Calculations and Intervals on Original Scale
 Some BCa intervals may be unstable
 ```
 
 Calling `boot.ci()` without a `type` argument asks for *all* interval
-types, and produces two warnings that are worth understanding rather
-than ignoring:
+types, and produces two warnings that should be understood rather than
+ignored:
 
 - *“bootstrap variances needed for studentized intervals”*. The
   studentized (bootstrap-t) interval needs an estimate of the variance
@@ -750,10 +809,18 @@ than ignoring:
   where it is unstable. The remedy is more replicates (a larger `R`),
   not a different interval type.
 
-Neither the studentized nor the normal-approximation interval is of much
-interest for a statistic like E’, so requesting `"perc"` and `"bca"`
-explicitly, as above, both avoids the warnings and reflects what you
-actually want.
+These calls demonstrate empirical bootstrap intervals, which have
+important inferential limits. **Do not test exact fairness by checking
+whether a percentile or BCa interval for plug-in E’ contains nominal
+size.** At N=100 and k=6, the most even possible count vector is
+(17,17,17,17,16,16), so the largest empirical E’ is 10000/1668 = 5.9952.
+Every bootstrap value is at most that number: an interval made from its
+quantiles cannot contain the perfectly fair population value 6. More
+resamples do not fix this nonregular boundary problem. Normal-theory and
+corrected-estimator intervals also require separate sampling assessment;
+none is a universally reliable replacement. Bayesian credible intervals
+describe the stated posterior and should not be treated as tests of
+exact equality to k.
 
 You can also look at the whole bootstrap distribution:
 
@@ -765,13 +832,16 @@ plot_esize_distribution(esize_dist, metric = "E' (Tredoux, 1998)")
 
 ![](Vignette_files/figure-html/unnamed-chunk-27-1.png)
 
-#### E’ is biased downward in small samples
+#### E’ has small-sample bias, downward for fair lineups
 
 The estimator above is a **plug-in**: sample proportions are substituted
-for the unknown choice probabilities. Plug-in estimators of
-$`\sum p_i^2`$ are biased upward, so E’ — its reciprocal — is biased
-**downward**. For $`N`$ choices spread evenly over $`k`$ members the
-bias is approximately
+for the unknown choice probabilities. The plug-in estimate of the
+concentration $`\sum p_i^2`$ is biased upward. That does not by itself
+fix the direction of the bias in its reciprocal, E’, because the
+expectation of a nonlinear function is not the function of the
+expectation. For fair and near-fair lineups, where the question is
+usually important, E’ is biased **downward**. For $`N`$ choices spread
+evenly over $`k`$ members the bias is approximately
 
 ``` math
 E[\hat{E}'] \approx \frac{Nk}{N + k - 1}, \qquad
@@ -817,10 +887,19 @@ knitr::kable(
 Mean E’ from simulated fair six-person lineups, where the true effective
 size is exactly 6. Simulated data, 2000 replications per row. {.table}
 
+The downward bias is not universal. When one member draws most choices
+it can reverse: for two members chosen with probabilities .9 and .1 and
+$`N = 10`$, exact enumeration over all binomial outcomes gives a mean
+plug-in E′ of 1.230 against a true value of 1.220.
+
 [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)
-accepts `unbiased = TRUE`, which substitutes the unbiased estimator of
-$`\sum p_i^2`$, namely $`N(N-1)/\sum O_i(O_i-1)`$. The default is
-unchanged, so nothing previously computed moves; the correction is
+accepts `unbiased = TRUE`, which replaces the concentration with its
+unbiased estimator, $`\sum O_i(O_i-1)/(N(N-1))`$, and reports the
+reciprocal, $`N(N-1)/\sum O_i(O_i-1)`$. The reciprocal of an unbiased
+estimate is not itself unbiased: the corrected E′ removes most of the
+bias for near-fair lineups, as the table shows, but it is more variable,
+and in the concentrated two-member example above it overshoots further
+(mean 1.269). The default is the plug-in estimator; the correction is
 available when wanted:
 
 ``` r
@@ -832,19 +911,24 @@ c(plug_in = esize_T(lineup_tab),
 
 Which to report depends on the question. For **describing** the choice
 distribution actually observed, the plug-in value is the quantity of
-interest. For **inference** about the lineup that produced those choices
-— which is the framing of Tredoux (1998) — the corrected form is the
-better estimator. Either way, state which was used.
+interest. For **inference** about the lineup that produced those
+choices, which is the framing of Tredoux (1998), the corrected form
+usually has less bias when choices are spread across members, at the
+cost of more variance. Neither is uniformly better. Either way, state
+which was used.
 
 #### Getting the choice distribution without mock witnesses
 
 E’ needs a distribution of choices across lineup members, which normally
-means running a mock-witness study. There is an alternative worth
-knowing about: **target-absent lineups from an identification experiment
-supply the same thing**. A witness viewing a target-absent lineup has no
-culprit to recognise, so their choice reflects how the members compare
-to their memory and to the description — functionally what a mock
-witness provides.
+means running a mock-witness study. There is an alternative:
+**target-absent lineups from an identification experiment supply a
+choice distribution too**. Its effective size is a *resultant* measure
+of how choices spread in practice, and Fitzgerald, Tredoux and Juncu
+(2023) use it this way. It is not the same measurement as a mock-witness
+E′: a witness viewing a target-absent lineup has a memory of the culprit
+and may reject the lineup, whereas a mock witness chooses from a
+description, and the two families of measures can disagree (Lee, Mansour
+& Penrod, 2024).
 
 If your data record which member was chosen, E’ follows directly:
 
@@ -865,8 +949,9 @@ the collapsed `identification` label: a dataset that stores just
 suspect/filler/reject cannot support this calculation, because it no
 longer knows *which* filler was chosen. Note that the bias above applies
 here too, and target-absent choosers are often fewer than mock witnesses
-would be, so the correction matters more rather than less. \### 3.
-Effective Size Per Foils
+would be, so the correction is more important rather than less.
+
+### 3. Effective Size Per Foils
 
 Malpass (1981) proposed an additional method for computing effective
 size, based on the number of foils who are chosen at a rate nearly equal
@@ -891,7 +976,18 @@ distinguishable from chance.
 Note that the value returned is a **count of members**, not a continuous
 quantity, so it moves only in whole steps as `conf` is varied, and it
 stays flat across any range of `conf` in which no member’s interval
-crosses 1/k. Widening the interval can only ever increase the count.
+crosses 1/k.
+
+The direction of the change with `conf` can look backwards at first. A
+member is counted when its interval **contains** chance, that is, when
+its choice rate cannot be distinguished from 1/k. A higher `conf` gives
+wider intervals, which makes it harder to show that any member departs
+from chance, so more members are counted and the effective size rises. A
+higher confidence level is a stricter test of *unfairness*, and so a
+more lenient test of each foil. The same logic means the measure rises
+when there are few mock witnesses, because every interval is then wide:
+with a small sample, a large count can reflect low power rather than a
+fair lineup.
 
 ``` r
 
@@ -932,9 +1028,9 @@ effsize_compare(linedf)
 The two Effective sizes are  5.693273   4.967425
 If the interval includes 0, ns at p = .05
 Confidence intervals of difference [95%]
-Normal Theory -0.231 1.788
-Bootstrap: percentile (R = 1000) -0.389 1.702
-Bootstrap: bias-corrected (R = 1000) -0.325 1.743
+Normal Theory -0.302 1.887
+Bootstrap: percentile (R = 1000) -0.4 1.737
+Bootstrap: bias-corrected (R = 1000) -0.292 1.836
 ```
 
 The effective size for lineup_1 is therefore not significantly different
@@ -980,18 +1076,17 @@ diag_ratio_T(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 = 8, k2 = 8)
 [1] 5.571429
 ```
 
-We can also calculate the variance of the diagnosticity ratio, which is
-useful for applying some inferential methods:
+We can also calculate the large-sample variance of the log diagnosticity
+ratio, which is useful for applying some inferential methods:
 
 ``` r
 var_diag_ratio(TP_lineup, TA_lineup, 3, 7, 8, 8)
 [1] 0.3709273
 ```
 
-*Note:*
-[`var_diag_ratio()`](https://cgtza2.github.io/r4lineups/reference/var_diag_ratio.md)
-relies on Wells & Lindsay’s original formula for computing diagnosticity
-ratio. See Tredoux (1998) for further details.
+*Note:* This variance is on the **log-ratio scale**, not the raw ratio
+scale. A delta-method variance on the raw scale multiplies it by the
+squared ratio. See Tredoux (1998) for the large-sample assumptions.
 
 ### Differences between Independent Diagnosticity Ratios
 
@@ -1014,9 +1109,9 @@ All these calculations are built into
 [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md),
 and so do not need to be calculated separately.
 
-**Two different questions.** Before running anything it is worth being
-explicit about what this test does and does not tell you, because its
-output is easy to misread. The chi-square is Cochran’s *Q*,
+**Two different questions.** It is important to make a point of
+clarification here about what this test does and does not tell you,
+because its output is easy to misread. The chi-square is Cochran’s *Q*,
 
 ``` math
 Q = \sum_{i=1}^{k} w_i \left( \ln d_i - \ln \bar{d} \right)^2 ,
@@ -1219,8 +1314,8 @@ bootstrap replications. It also requires suspect positions: they cannot
 be inferred from the observed choices.
 
 The percentile interval it reports for the mean is an interval on the
-**pooled** ratio, so the same caution applies: it is only worth
-interpreting when the chi-square has not rejected homogeneity.
+**pooled** ratio, so the same caution applies: interpret it only when
+the chi-square has not rejected homogeneity.
 
 ``` r
 homog_diag_boot(lineup_pres_list = het_pres,
@@ -1254,7 +1349,7 @@ the mean, \[2.06, 3.70\], excludes 1 — the set of lineups is diagnostic
 on average — while the chi-square still says the three ratios are not
 interchangeable.
 
-Running the same call on the cautionary data makes the trap concrete:
+Running the same call on the cautionary data illustrates the problem:
 
 ``` r
 homog_diag_boot(lineup_pres_list = mixed_pres,
@@ -1360,8 +1455,7 @@ lineup_example (first 8 rows of 1400) {.table}
 
 ### Computing and plotting the ROC
 
-Each ROC and CAC analysis comes in two forms, and it is worth being
-clear about the difference:
+Each ROC and CAC analysis comes in two forms:
 
 - [`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md),
   [`make_cacdata()`](https://cgtza2.github.io/r4lineups/reference/make_cacdata.md)
@@ -1407,7 +1501,7 @@ ROC Data:
  [38;5;246m# A tibble: 10 × 5 [39m
    confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
          [3m [38;5;246m<dbl> [39m [23m            [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m          [3m [38;5;246m<dbl> [39m [23m        [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m         19          0            0                   0           0
+ [38;5;250m 1 [39m        101          0            0                   0           0
  [38;5;250m 2 [39m        100          0.097 [4m1 [24m       0                  68           0
  [38;5;250m 3 [39m         90          0.143        0.005 [4m7 [24m [4m1 [24m           100           4
  [38;5;250m 4 [39m         80          0.189        0.014 [4m3 [24m            132          10
@@ -1420,6 +1514,16 @@ ROC Data:
 
 Plot: use plot(x), or save the object and extract x$plot
 ```
+
+The pAUC is a **partial** area, so it is not on the familiar 0.5-to-1
+scale of the full AUC. It covers false-ID rates from 0 up to the largest
+observed, 0.126 here, so a perfect procedure would score 0.126 and
+chance (the diagonal) 0.008. The observed 0.053 is therefore well above
+chance. pAUC values are comparable only between curves integrated over
+the same false-ID range, which is what
+[`compare_pauc()`](https://cgtza2.github.io/r4lineups/reference/compare_pauc.md)
+enforces
+([`vignette("pauc_statistical_comparison")`](https://cgtza2.github.io/r4lineups/articles/pauc_statistical_comparison.md)).
 
 The value returned by
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) is an ordinary
@@ -1465,8 +1569,11 @@ the interactive `face_sim()` function, which prompted for image files
 and reported factor loadings — is **no longer supported**.
 
 It has been superseded by an approach based on modern face embeddings,
-which is both more accurate and reproducible from a script rather than a
-dialog box. See the [Face
+which is reproducible from a script rather than a dialog box. Embedding
+similarity is a property of the photographs as a face-recognition model
+sees them; it is not the same as resemblance judged by people, nor a
+measure of lineup fairness, and no validated cut-off links the two. See
+the [Face
 similarity](https://cgtza2.github.io/r4lineups/articles/face_similarity.md)
 vignette for the current methods, and note that these require the Python
 dependencies installed by
@@ -1481,7 +1588,7 @@ dependencies installed by
 | Measure | Function | Estimand | Key assumption |
 |----|----|----|----|
 | Lineup proportion | [`lineup_prop_vec()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_vec.md) | Share of witnesses choosing one member | Binomial; chance value is $`1/k`$ |
-| Functional size | [`func_size()`](https://cgtza2.github.io/r4lineups/reference/func_size.md) | $`N / (\text{choices of the suspect})`$ | Undefined when nobody chooses the suspect |
+| Functional size | [`func_size()`](https://cgtza2.github.io/r4lineups/reference/func_size.md) | $`N / (\text{choices of the suspect})`$ | Infinite when nobody chooses the suspect; intervals may also have an infinite upper limit |
 | Effective size (Malpass) | [`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md) | Number of plausible alternatives, absolute-deviation form | Adjusted version counts all $`k`$; original counts only chosen members |
 | Effective size E’ | [`esize_T()`](https://cgtza2.github.io/r4lineups/reference/esize_T.md) | $`1/\sum p_i^2`$, the inverse-Simpson index | Plug-in form biased downward at small $`N`$; see above |
 | Diagnosticity ratio | [`diag_ratio_T()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T.md) | Ratio of suspect-choice rates, target-present against target-absent | The two lineups are independent samples |
@@ -1492,11 +1599,13 @@ Three different counts appear throughout and are easily confused.
 
 **Nominal size** $`k`$ is how many people stand in the lineup.
 **Adjusted nominal size** $`k_a`$ is $`k`$ less the null foils — members
-nobody chose. **Effective size** is an estimate of how many members
-function as genuine alternatives, and is generally not a whole number.
+nobody chose in this sample, which, as noted above, may include
+functioning foils that happened to draw no choices. **Effective size**
+is an estimate of how many members function as genuine alternatives, and
+is generally not a whole number.
 
-The distinction matters because most functions here take $`k`$ as an
-argument and will not detect that it is wrong.
+The distinction is important because most functions here take $`k`$ as
+an argument and will not detect that it is wrong.
 [`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
 exists to make null foils visible before that happens:
 [`table()`](https://rdrr.io/r/base/table.html) silently omits members
@@ -1517,20 +1626,27 @@ questions:
   ([`esize_T_boot()`](https://cgtza2.github.io/r4lineups/reference/esize_T_boot.md)
   with [`boot::boot.ci()`](https://rdrr.io/pkg/boot/man/boot.ci.html),
   [`lineup_prop_boot()`](https://cgtza2.github.io/r4lineups/reference/lineup_prop_boot.md))
-  make no distributional assumption about the transformed statistic.
-  Prefer them when a proportion is near 0 or 1, or when the sample is
-  small — which for these measures is usual.
+  make no distributional assumption about the transformed statistic,
+  which helps for nonlinear measures such as effective size. They fail
+  at a boundary, though: a member nobody chose gets a $`[0, 0]`$
+  interval however many resamples are drawn. For a member proportion
+  near 0 or 1 use the exact
+  [`binom.test()`](https://rdrr.io/r/stats/binom.test.html) interval or
+  a posterior.
 - **Bayesian posteriors**
   ([`esize_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/esize_T_bayes.md),
   [`func_size_bayes()`](https://cgtza2.github.io/r4lineups/reference/func_size_bayes.md))
   give credible intervals and direct probability statements such as
-  $`P(E' < 6 \mid \text{data})`$. See
+  $`P(E' < 4.5 \mid \text{data})`$. A threshold at the nominal size is
+  uninformative, because $`P(E' < k) = 1`$ under any continuous
+  posterior. See
   [`vignette("bayesian_inference")`](https://cgtza2.github.io/r4lineups/articles/bayesian_inference.md).
 
 Bounded quantities are the recurring difficulty: E’ cannot exceed $`k`$
 and a proportion cannot leave $`[0, 1]`$, but a normal-theory interval
 can and does cross those limits in small samples. That is the main
-reason to prefer the bootstrap or the posterior here.
+reason to prefer an exact interval, the posterior or, away from a
+boundary, the bootstrap.
 
 ### Assumptions common to the fairness measures
 

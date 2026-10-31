@@ -137,16 +137,16 @@ as in fit_winter_2ht().</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The bootstrap procedure resamples observations from the original data with replacement
-to create bootstrap datasets. For each bootstrap sample, the 2-HT model is re-fitted,
+    <p>The bootstrap procedure resamples within TP and TA strata with replacement
+to keep both experimental totals fixed. For each bootstrap sample, the 2-HT model is re-fitted,
 and the distribution of parameter estimates across bootstrap samples is used to
 construct confidence intervals.</p>
 <p>Two types of confidence intervals are available:</p><ul><li><p><strong>percentile</strong>: Uses quantiles of the bootstrap distribution</p></li>
 <li><p><strong>bca</strong>: Bias-corrected and accelerated intervals (Efron,
     1987). The bias correction counts bootstrap ties with the estimate as
     half, and the acceleration comes from the jackknife over individual
-    observations, which needs at most six refits because the data are six
-    response counts.</p></li>
+    observations, centered and scaled within TP/TA strata, using at most six
+    distinct leave-one-out response-count fits.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -162,6 +162,7 @@ the American Statistical Association, 82</em>(397), 171-185.</p>
 <span class="r-in"><span>  n_ta_suspect <span class="op">=</span> <span class="fl">38</span>, n_ta_filler <span class="op">=</span> <span class="fl">138</span>, n_ta_reject <span class="op">=</span> <span class="fl">206</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fit_winter_2ht.html">fit_winter_2ht</a></span><span class="op">(</span><span class="va">counts</span>, lineup_size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>2-HT estimate is on a parameter boundary; regular Hessian standard errors are unavailable. Bootstrap intervals also need boundary qualification.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Bootstrap CIs</span></span></span>
 <span class="r-in"><span><span class="va">boot_fit</span> <span class="op">&lt;-</span> <span class="fu">boot_winter_2ht</span><span class="op">(</span><span class="va">fit</span>, nboot <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span></span>
@@ -178,10 +179,10 @@ the American Statistical Association, 82</em>(397), 171-185.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Parameter Estimates with Bootstrap CIs:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Estimate Boot_Lower Boot_Upper Boot_SE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dP   0.3169     0.2511     0.3699  0.0296</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dA   0.0000     0.0000     0.1621  0.0489</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> b    0.0273     0.0016     0.0646  0.0155</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> g    0.4452     0.4107     0.5071  0.0252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dP   0.3169     0.2580     0.3675  0.0304</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dA   0.0000     0.0000     0.1888  0.0541</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b    0.0273     0.0012     0.0677  0.0176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g    0.4452     0.4122     0.5182  0.0275</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">boot_fit</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span>

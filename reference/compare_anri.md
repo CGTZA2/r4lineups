@@ -127,6 +127,6 @@ cmp <- compare_anri(data, group_var = "condition",
 cmp$difference
 #> [1] -0.008229687
 c(cmp$ci_lower, cmp$ci_upper)
-#> [1] -0.1783907  0.1099995
+#> [1] -0.1141146  0.1586221
 # }
 ```

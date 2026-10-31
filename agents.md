@@ -462,7 +462,35 @@ unknown distributions) nonparametric mixture test (Wright & Skagerberg,
 2008). - Additional SDT models (BEST‑REST, ensemble/integration) + z‑ROC
 estimation. - Standardized data‑format helper for confidence‑based
 analyses. - Showup‑specific handling. - Expanded unit tests + edge‑case
-validation for recent additions.
+validation for recent additions. - EIG uncertainty: 95% credible
+intervals for expected information gain (and for differences between
+procedures) from a Bayesian multinomial model of the response
+proportions, following Tuttle, Starns & Cohen (2025, *Journal of Memory
+and Language*, 140, 104581) (Colin, 31 Oct 2026). - Standardised pAUC
+(McClish, 1989) on the .5–1 scale as an option in
+[`make_rocdata()`](https://cgtza2.github.io/r4lineups/reference/make_rocdata.md)
+/
+[`compare_pauc()`](https://cgtza2.github.io/r4lineups/reference/compare_pauc.md);
+readers expect AUC-like values above .5 (Colin, 31 Oct 2026). - mSDT
+extensions (correlated fillers via a one-factor model; unequal variance,
+which needs
+[`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
+and a recovery study): plan in `notes/plans/msdt_extensions.md` (Colin,
+30 Oct 2026). - Benjamini–Hochberg (false discovery rate) option for the
+k member intervals in
+[`lineup_boot_allprop()`](https://cgtza2.github.io/r4lineups/reference/lineup_boot_allprop.md)
+/
+[`eff_size_per_foils()`](https://cgtza2.github.io/r4lineups/reference/eff_size_per_foils.md),
+as a less conservative alternative to the Bonferroni-style
+`conf = 1 - 0.05 / k` the main vignette suggests (Colin, 30 Oct 2026). -
+Option to pass an effective lineup size (rather than nominal
+`lineup_size`) to the 2-HT, EIG and full-ROC models, following
+Fitzgerald, Tredoux & Juncu (2023) (Colin, 30 Oct 2026). - Lee &
+Penrod’s d’(IFa) lineup-bias index: develop a rescaled version with
+sensible minimum and maximum values (a fair lineup does not give 0
+because the filler rate pools all fillers; see
+[`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md)’s
+fair reference) (Colin, 30 Oct 2026).
 
 ## Notes for agents
 

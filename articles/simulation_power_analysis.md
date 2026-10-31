@@ -9,8 +9,7 @@
 ## Introduction
 
 Simulation is useful in lineup research for four rather different
-purposes, and it is worth separating them because they make different
-demands on the simulation.
+purposes, and they make different demands on the simulation.
 
 - **Planning a study.** How many participants are needed to detect the
   effect you expect? This is power analysis, and it needs a hypothesis
@@ -31,8 +30,8 @@ library(r4lineups)
 
 ## Signal Detection Theory, briefly
 
-Signal detection theory (SDT) is the framework the simulator uses, so it
-is worth stating what it assumes.
+Signal detection theory (SDT) is the framework the simulator uses. Its
+assumptions are as follows.
 
 The idea is that a witness viewing a lineup member experiences some
 degree of **memory strength** — a sense of familiarity or match to their
@@ -50,8 +49,8 @@ Two quantities describe this:
   foils and innocent suspects from Normal(0, 1).
 - **The criterion** is how much strength the witness requires before
   they are willing to identify anybody at all. It captures willingness
-  to choose, which is a separate matter from memory quality — a witness
-  with excellent memory may still be reluctant to commit.
+  to choose, which is a separate question from memory quality — a
+  witness with excellent memory may still be reluctant to commit.
 
 Keeping these separate is the central contribution of SDT to this area.
 Two procedures can produce identical identification rates for quite
@@ -76,14 +75,13 @@ Wixted, Vul, Mickes and Wilson (2018):
 
 These are equal-variance, independent-signal versions of those models.
 
-To be clear about a point that has caused confusion: **you are not
-obliged to adopt one of these models to plan a lineup study.** They are
-how this simulator generates data, so if you use it for power analysis
-you are assuming one of them holds. That assumption is no different in
-kind from assuming a normal distribution when using a conventional power
-calculator. If you have pilot data, checking that the simulated
-identification rates resemble it is a reasonable guard against the
-assumption doing damage.
+**You are not obliged to adopt one of these models to plan a lineup
+study.** They are how this simulator generates data, so if you use it
+for power analysis you are assuming one of them holds. That assumption
+is no different in kind from assuming a normal distribution when using a
+conventional power calculator. If you have pilot data, checking that the
+simulated identification rates resemble it is a reasonable guard against
+the assumption doing damage.
 
 **Attribution.** The decision rules follow Wixted et al. (2018). The
 `"max"`, `"best_rest"` and `"ensemble"` implementations were written
@@ -100,12 +98,11 @@ for the pyWitness bridge itself.
 witness will identify anyone. Raise it and witnesses reject more often;
 lower it and they choose more often.
 
-One point trips people up, and the guidance in earlier versions of this
-vignette got it wrong. In textbook SDT, a criterion of 0 is “neutral”.
-**That is not true here**, because the criterion applies to the
-*maximum* of several members’ strengths, not to a single item. The
-maximum of six draws from Normal(0, 1) averages about 1.27, so a
-criterion of 0 is passed by nearly every lineup:
+It is important to make a point of clarification here. In textbook SDT,
+a criterion of 0 is “neutral”. **That is not true here**, because the
+criterion applies to the *maximum* of several members’ strengths, not to
+a single item. The maximum of six draws from Normal(0, 1) averages about
+1.27, so a criterion of 0 is passed by nearly every lineup:
 
 ``` r
 
@@ -139,10 +136,14 @@ knitr::kable(
 Rejection rate in target-absent lineups as the criterion varies,
 simulated data (800 lineups of size 6 per point, d’ = 1.5). {.table}
 
-A criterion of 0 rejects almost nothing. The roughly neutral value —
-where target-absent lineups are rejected about half the time — is near
-1.27, which is exactly the expected maximum of six standard normal
-draws.
+A criterion of 0 rejects almost nothing. The neutral value, where
+target-absent lineups are rejected half the time, is the **median** of
+the maximum of six standard normal draws. In a fair target-absent lineup
+every member’s strength is Normal(0, 1), so the maximum is below $`x`$
+with probability $`\Phi(x)^6`$, and the median is
+$`\Phi^{-1}(0.5^{1/6}) \approx`$ 1.231. The mean of the maximum, about
+1.27, is close but not the same: used as the criterion it gives a
+rejection rate of about 52.2%.
 
 That value therefore **depends on lineup size**, which is why no fixed
 table of “liberal / neutral / conservative” values can be given:
@@ -150,30 +151,30 @@ table of “liberal / neutral / conservative” values can be given:
 ``` r
 
 sizes <- c(4, 6, 8, 10, 12)
-set.seed(1)
-expected_max <- vapply(sizes, function(k) {
-  mean(replicate(20000, max(stats::rnorm(k))))
-}, numeric(1))
 
 knitr::kable(
   data.frame(`Lineup size` = sizes,
-             `Roughly neutral criterion` = round(expected_max, 2),
+             `Neutral criterion` = round(qnorm(0.5^(1 / sizes)), 3),
              check.names = FALSE),
   row.names = FALSE,
-  caption = "Approximately neutral criterion by lineup size: the expected maximum of k standard normal draws."
+  caption = "Criterion giving 50% target-absent rejections in a fair lineup: the median of the maximum of k standard normal draws."
 )
 ```
 
-| Lineup size | Roughly neutral criterion |
-|------------:|--------------------------:|
-|           4 |                      1.03 |
-|           6 |                      1.27 |
-|           8 |                      1.42 |
-|          10 |                      1.54 |
-|          12 |                      1.63 |
+| Lineup size | Neutral criterion |
+|------------:|------------------:|
+|           4 |             0.998 |
+|           6 |             1.231 |
+|           8 |             1.385 |
+|          10 |             1.499 |
+|          12 |             1.588 |
 
-Approximately neutral criterion by lineup size: the expected maximum of
-k standard normal draws. {.table}
+Criterion giving 50% target-absent rejections in a fair lineup: the
+median of the maximum of k standard normal draws. {.table}
+
+The same formula gives any other target rejection rate $`r`$:
+$`\Phi^{-1}(r^{1/k})`$. It assumes a fair lineup with `foil_bias` at its
+default, so treat it as a starting point when foils are unequal.
 
 A practical approach is to choose the criterion by the rejection rate it
 produces, rather than by its nominal value: simulate, look at the
@@ -220,7 +221,7 @@ the choice happened to fall on the suspect:
   from the two columns above by
   [`classify_lineup_choices()`](https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.md)
 
-This matters because foils are not interchangeable. By default the
+This is important because foils are not interchangeable. By default the
 simulator draws every foil from the same distribution, which makes them
 statistically equivalent even though they are simulated separately. Real
 lineups are not like that: some foils are plausible alternatives to the
@@ -276,17 +277,15 @@ Each simulated study is tested with
 a bootstrap comparison of partial area under the ROC curve, and power is
 the proportion of studies whose p-value falls below `alpha`.
 
-> **Note on earlier versions.** Before r4lineups 2.1.0.9000 this
-> function computed power as the proportion of simulations in which the
-> pAUC exceeded zero. Since an area is always positive, that proportion
-> was always 1, and the power curve was a flat line at the top of the
-> plot regardless of sample size or effect size. If you have output from
-> an earlier version, discard it.
-
 ### A worked power analysis
 
-The question: how many participants per condition are needed to show
-that a procedure with d′ = 1.0 discriminates better than chance?
+The question: how many witnesses are needed to show that a procedure
+with d′ = 1.0 discriminates better than chance?
+
+Be clear about the unit first. A `sample_size` of n simulates n
+target-present **and** n target-absent witnesses in each of the two
+conditions being compared, so 2n witnesses per condition and 4n in all;
+the `n_total` column gives the total.
 
 ``` r
 
@@ -303,29 +302,34 @@ power_result <- simulate_power_analysis(
 )
 
 knitr::kable(
-  as.data.frame(power_result)[, c("sample_size", "power", "power_se",
-                                  "mean_effect")],
+  setNames(as.data.frame(power_result)[, c("sample_size", "n_total", "power",
+                                           "power_se", "mean_effect")],
+           c("TP (= TA) per condition", "Total witnesses", "Power",
+             "Power SE", "Mean effect")),
   digits = 3, row.names = FALSE,
   caption = "Power to detect d' = 1.0 against chance, 30 simulated studies per sample size."
 )
 ```
 
-| sample_size | power | power_se | mean_effect |
-|------------:|------:|---------:|------------:|
-|          25 | 0.367 |    0.088 |       0.033 |
-|          50 | 0.733 |    0.081 |       0.026 |
-|         100 | 0.833 |    0.068 |       0.026 |
-|         200 | 1.000 |    0.000 |       0.032 |
+| TP (= TA) per condition | Total witnesses | Power | Power SE | Mean effect |
+|------------------------:|----------------:|------:|---------:|------------:|
+|                      25 |             100 | 0.367 |    0.088 |       0.033 |
+|                      50 |             200 | 0.733 |    0.081 |       0.026 |
+|                     100 |             400 | 0.833 |    0.068 |       0.026 |
+|                     200 |             800 | 1.000 |    0.000 |       0.032 |
 
 Power to detect d’ = 1.0 against chance, 30 simulated studies per sample
-size. {.table}
+size. {.table style="width:100%;"}
 
-Two things to read off. Power rises with sample size, as it must,
-crossing 80% somewhere between 25 and 50 participants per condition. And
-`mean_effect` — the average observed difference in pAUC — stays roughly
-constant across sample sizes, which is the sanity check: sample size
-does not change the size of an effect, only how precisely it is
-measured, and `sd_effect` duly shrinks.
+Two things to read off. Power rises with sample size, crossing 80%
+between 50 and 100 target-present (and as many target-absent) witnesses
+per condition, that is between 200 and 400 witnesses in the whole
+simulated experiment. With only 30 simulations per point the crossing is
+itself uncertain (see the standard errors). And `mean_effect` — the
+average observed difference in pAUC — stays roughly constant across
+sample sizes, which is a check: sample size does not change the size of
+an effect, only how precisely it is measured, and `sd_effect` duly
+shrinks.
 
 ### Plotting, and adjusting the plot
 
@@ -361,12 +365,14 @@ interpretation.** For planning a real study, 500 to 1000 simulations per
 sample size is a more reasonable setting, at proportionately greater
 cost.
 
-## Method Validation: Parameter Recovery
+## Method Check: Sensitivity to d′
 
 A different use of simulation: generate data with a known d′, fit a
 model, and check that the model’s parameters move as they should. Here
 the 2-high-threshold model of Winter et al. is fitted to data simulated
-across a range of d′.
+across a range of d′. The data come from a signal detection (MAX) model,
+so there are no true 2-HT parameter values; this checks sensitivity, not
+recovery.
 
 ``` r
 
@@ -388,7 +394,7 @@ recovery <- do.call(rbind, lapply(true_dprimes, function(dp) {
 
 knitr::kable(
   recovery, row.names = FALSE,
-  caption = "2HT detection parameters recovered from data simulated at known d', 500 lineups per condition."
+  caption = "2-HT detection parameters fitted to data simulated from a signal detection model at known d', 500 lineups per condition."
 )
 ```
 
@@ -401,15 +407,17 @@ knitr::kable(
 |     2.5 | 0.804 | 0.202 |
 |     3.0 | 0.917 | 0.177 |
 
-2HT detection parameters recovered from data simulated at known d’, 500
-lineups per condition. {.table}
+2-HT detection parameters fitted to data simulated from a signal
+detection model at known d’, 500 lineups per condition. {.table}
 
 The detection parameter `dP` increases monotonically with the d′ used to
-generate the data, from about 0.11 to about 0.92. That is the result the
-exercise is looking for. Note that `dP` is not on the same scale as d′
-and should not be expected to equal it — the two models parameterise
-memory differently, and what validates the analysis is that the ordering
-and the spacing are recovered, not that the numbers coincide.
+generate the data, from about 0.11 to about 0.92. That shows `dP` is
+sensitive to memory strength. It does not validate the 2-HT model: `dP`
+is not on the same scale as d′, the generating model is a different
+model, and the exercise says nothing about bias, interval coverage or
+the process interpretation. Parameter recovery in the strict sense would
+simulate from the 2-HT equations themselves and check that the known
+parameters come back.
 
 The model fits without difficulty on data of this kind. If a fit does
 fail, resist the temptation to wrap it in
@@ -459,11 +467,11 @@ knitr::kable(
 
 | Lineup size | Criterion used | Correct ID rate (%) | False ID rate (%) |
 |------------:|---------------:|--------------------:|------------------:|
-|           4 |           1.02 |                61.8 |               9.8 |
-|           6 |           1.27 |                48.4 |               9.0 |
-|           8 |           1.43 |                47.0 |               6.8 |
+|           4 |           1.01 |                62.2 |               9.8 |
+|           6 |           1.26 |                49.2 |               9.0 |
+|           8 |           1.41 |                47.8 |               6.8 |
 |          10 |           1.54 |                39.8 |               3.2 |
-|          12 |           1.65 |                38.0 |               4.2 |
+|          12 |           1.64 |                38.0 |               4.2 |
 
 Identification rates by lineup size at a size-matched criterion,
 simulated data (500 target-present and 500 target-absent lineups per
@@ -518,7 +526,7 @@ print(roc_result)
 #> # A tibble: 6 × 5
 #>   confidence correct_id_rate false_id_rate n_correct_ids n_false_ids
 #>        <dbl>           <dbl>         <dbl>         <dbl>       <dbl>
-#> 1          0           0           0                   0           0
+#> 1          6           0           0                   0           0
 #> 2          5           0.13        0                  39           0
 #> 3          4           0.243       0.00333            73           1
 #> 4          3           0.437       0.02              131           6
@@ -606,7 +614,7 @@ round(quantile(sim_rac$response_time, c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE))
 #>    0%   25%   50%   75%  100% 
 #>  1628  5279  6100  6906 11167
 
-rac_result <- make_rac(sim_rac, time_bins = c(0, 4500, 5500, 6500, 12000),
+rac_result <- make_rac(sim_rac, time_bins = c(0, 4500, 5500, 6500, Inf),
                        show_plot = FALSE)
 print(rac_result)
 #> 
@@ -620,22 +628,21 @@ print(rac_result)
 #> # A tibble: 4 × 7
 #>   response_time mean_time n_correct n_incorrect n_total accuracy     se
 #>   <chr>             <dbl>     <int>       <int>   <int>    <dbl>  <dbl>
-#> 1 [0,4500]          3928.        82           9      91    0.901 0.0313
-#> 2 (4500,5500]       5031.       177          38     215    0.823 0.0260
-#> 3 (5500,6500]       5958.       185          43     228    0.811 0.0259
-#> 4 (6500,12000]      7113.       147          29     176    0.835 0.0280
+#> 1 [0,4500]          3957.        82           9      91    0.901 0.0313
+#> 2 (4500,5500]       5032.       177          38     215    0.823 0.0260
+#> 3 (5500,6500]       5961.       185          43     228    0.811 0.0259
+#> 4 (6500,Inf]        7131.       147          29     176    0.835 0.0280
 #> 
 #> Plot: save this object first, then extract it with x$plot
 ```
 
 The fastest responders are the most accurate, at about 90% against
 roughly 82% for everyone else, after which the relationship flattens.
-That is a weaker and less orderly pattern than the CAC above, and the
-reason is worth noting: the simulator’s response-time model is
-deliberately simple, and the noise it adds is of comparable size to the
-systematic component. Do not read this as evidence about response times
-in real witnesses — it demonstrates the mechanics of the analysis, not a
-substantive finding.
+That is a weaker and less orderly pattern than the CAC above, because
+the simulator’s response-time model is deliberately simple, and the
+noise it adds is of comparable size to the systematic component. Do not
+read this as evidence about response times in real witnesses — it
+demonstrates the mechanics of the analysis, not a substantive finding.
 
 Choosing bins is the part that needs care. Bins fixed in advance without
 reference to the data will often be empty at one end, and an accuracy
@@ -704,8 +711,8 @@ for the argument behind it.
 
 ## Choosing Parameter Values
 
-These are starting points rather than rules, and they are worth
-revisiting against whatever literature is closest to your own design.
+These are starting points rather than rules; revisit them against
+whatever literature is closest to your own design.
 
 **Discriminability (d′).** Values around 1.0 are weak, 1.5 moderate, and
 2.0 to 2.5 strong. Values above 3.0 are rarely observed in eyewitness
@@ -742,7 +749,7 @@ Key functions:
 - [`classify_lineup_choices()`](https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.md):
   derive identification outcomes from raw choices
 
-Points worth carrying away:
+In summary:
 
 1.  Power analysis needs a hypothesis test, and therefore two
     conditions.

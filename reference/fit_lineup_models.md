@@ -58,7 +58,11 @@ fit_lineup_models(
 - control:
 
   Named list controlling `maxiter`, optimizer `method`, numerical
-  `integration_sigma`, `chi2_variance`, and `verbose`.
+  `integration_sigma`, `chi2_variance`, `objective`, and `verbose`.
+  `objective = "corrected"` (the default) applies the per-fit correction
+  described in Details; `objective = "pywitness"` leaves the engine's
+  own objective and optimizer untouched, which reproduces results from
+  pyWitness itself, including published fits.
 
 - envname:
 
@@ -81,11 +85,17 @@ supported. If the input includes a `condition` or `procedure` column, it
 must contain only one non-missing value; otherwise the data must be
 subset before fitting.
 
-The audited pyWitness revision estimates parameters by minimizing
-Pearson chi-squared. Thus, `loglik_at_estimate` is a multinomial
-likelihood evaluated at the minimum-Pearson estimate, not a maximized
-likelihood. AIC and BIC are returned as `NA`; computing them from a
-non-likelihood optimum would be invalid.
+By default the bridge corrects the pinned engine's reversed
+observed/expected rejection-cell variance denominators in memory for
+each fit, without changing its installed environment;
+`control = list(objective = "pywitness")` turns the correction off. With
+the default `chi2_variance = "expected"`, every cell therefore uses the
+Pearson denominator. With `"observed"`, every cell uses the observed
+denominator (the Neyman discrepancy), requiring positive observed cells.
+Thus, `loglik_at_estimate` is a multinomial likelihood evaluated at the
+minimum-Pearson estimate, not a maximized likelihood. AIC and BIC are
+returned as `NA`; computing them from a non-likelihood optimum would be
+invalid.
 
 BEST-Rest and Ensemble obey \$\$DV\_{ensemble} = (k -
 1)DV\_{best-rest}/k.\$\$ They fit identically after rescaling criteria

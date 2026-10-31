@@ -1,7 +1,8 @@
 # Plot Lineup Similarity Results
 
 Creates a bar plot showing the similarity of each foil to the target
-face, useful for visualizing lineup fairness.
+face, describing scores in a recognition model's embedding space, not
+measuring or certifying lineup fairness.
 
 ## Usage
 

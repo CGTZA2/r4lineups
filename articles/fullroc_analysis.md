@@ -47,8 +47,8 @@ The full ROC method uses all six.
 
 ### Why the partial ROC curve does not span the full range
 
-This is worth being concrete about, because it is the practical reason
-full ROC was proposed.
+A concrete example follows, because this is the practical reason full
+ROC was proposed.
 
 An ROC curve is traced by progressively relaxing the criterion for
 accepting evidence. In conventional lineup ROC analysis, the only lever
@@ -104,7 +104,7 @@ are not in competition; they are computed over different ranges from
 different subsets of the data. Never report one as though it were the
 other.
 
-## The key insight: two signal detection tasks
+## The key idea: two signal detection tasks
 
 Smith et al. (2020) argue that a lineup involves **two** signal
 detection problems, and that the conventional analysis conflates them.
@@ -122,7 +122,7 @@ evidence that the witness could not recognise the culprit.
 The full ROC measures **investigator discriminability**: how well
 someone using the witness’s response as evidence can separate guilty
 from innocent suspects. That is a different quantity from eyewitness
-discriminability, and it is arguably the one that matters for policy,
+discriminability, and it is arguably the most important for policy,
 since it is the investigator who acts.
 
 This is also the source of the main objection to the method — that an
@@ -234,7 +234,7 @@ Building the curve requires the response categories — every combination
 of decision and confidence level — to be placed in order from “strongest
 evidence of guilt” to “strongest evidence of innocence”. The two
 available orderings differ in where that order comes from, and the
-difference matters a great deal more than it might appear.
+difference is very important more than it might appear.
 
 ### A-priori ordering
 
@@ -261,10 +261,10 @@ area under it. The result is optimistically biased.
 
 ### How large is the bias?
 
-Large enough to matter. The following simulates data with **no signal
-whatsoever** — the response distribution is identical in target-present
-and target-absent lineups, so the true AUC is exactly 0.5 — and computes
-the AUC both ways.
+Large enough to be important. The following simulates data with **no
+signal whatsoever** — the response distribution is identical in
+target-present and target-absent lineups, so the true AUC is exactly 0.5
+— and computes the AUC both ways.
 
 ``` r
 
@@ -612,7 +612,7 @@ Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between
 investigator discriminability and eyewitness discriminability: A method
 for creating full receiver operating characteristic curves of lineup
 identification performance. *Perspectives on Psychological Science,
-15*(3), 589-607.
+15*(3), 589-607. <https://doi.org/10.1177/1745691620902426>
 
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect equivalency curves, and

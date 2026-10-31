@@ -110,7 +110,10 @@ discriminates correct from incorrect responses: \$\$NRI =
 When `choosers_only = TRUE`, only suspect identifications are included
 (standard for eyewitness calibration analysis). When
 `choosers_only = FALSE`, all responses are included with fillers and
-rejections counted as incorrect.
+rejections counted as incorrect. Consequently that option measures
+correct-suspect identification across all responses, not general
+decision accuracy: a correct TA rejection still scores zero. Do not
+interpret it as calibration of the correctness of every decision.
 
 If target-absent data contain designated innocent-suspect
 identifications, those observations are used directly. Otherwise, each

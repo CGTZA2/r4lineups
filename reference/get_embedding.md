@@ -70,13 +70,16 @@ The embedding dimension depends on the model:
 
 - VGG-Face: 4096 dimensions
 
-For best results in research applications, use:
+One example configuration used in the package is:
 
-- model = "ArcFace" (best accuracy)
+- model = "ArcFace"
 
-- detector = "retinaface" (best detection)
+- detector = "retinaface"
 
 - align = TRUE
+
+These defaults do not establish superior accuracy for every population,
+image source or research question, or validate lineup fairness.
 
 ## Examples
 

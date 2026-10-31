@@ -1,7 +1,8 @@
 # Plot Parameter Estimates from 2-HT Model
 
 Creates a visual display of the parameter estimates from a fitted 2-HT
-model, with error bars showing 95% confidence intervals.
+model, with error bars showing the supplied bootstrap intervals, or
+regular 95% normal intervals where available.
 
 ## Usage
 
@@ -45,6 +46,7 @@ counts <- c(
   n_ta_suspect = 38, n_ta_filler = 138, n_ta_reject = 206
 )
 fit <- fit_winter_2ht(counts, lineup_size = 6)
+#> Warning: 2-HT estimate is on a parameter boundary; regular Hessian standard errors are unavailable. Bootstrap intervals also need boundary qualification.
 plot_2ht_parameters(fit)
 
 ```
