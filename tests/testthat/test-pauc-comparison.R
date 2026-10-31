@@ -146,7 +146,7 @@ test_that("summary.pauc_comparison works", {
 
   expect_output(summary(comparison), "pAUC Comparison Summary")
   expect_output(summary(comparison), "Sample size")
-  expect_output(summary(comparison), "Effect size")
+  expect_output(summary(comparison), "SE-standardized difference")
 })
 
 test_that("compare_pauc validates input data", {

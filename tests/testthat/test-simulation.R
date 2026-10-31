@@ -295,8 +295,8 @@ test_that("simulate_power_analysis validates its inputs", {
   # No detectable effect is a user error worth flagging, not a silent result
   expect_warning(
     simulate_power_analysis(sample_sizes = c(30), d_prime = 1,
-                            d_prime_null = 1.5, n_simulations = 2,
+                            d_prime_null = 1, n_simulations = 2,
                             n_bootstrap = 20, conf_levels = 5, verbose = FALSE),
-    "no effect to detect"
+    "null rejection rate"
   )
 })

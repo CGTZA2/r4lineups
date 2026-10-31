@@ -111,5 +111,6 @@ test_that("esize_boot_dist can bootstrap the corrected E'", {
   set.seed(5)
   expect_warning(few <- esize_boot_dist(c(1, 2), k = 6, R = 100, unbiased = TRUE),
                  "unbounded")
-  expect_equal(length(few) + attr(few, "n_undefined"), 100)
+  expect_length(few, 100)
+  expect_equal(sum(is.infinite(few)), attr(few, "n_undefined"))
 })

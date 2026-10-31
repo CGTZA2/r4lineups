@@ -149,6 +149,10 @@ test_that("bridge matches a direct pyWitness call and variance paths run", {
   direct <- pyw$ModelFitIndependentObservationSimple(
     processed, integrationSigma = 8, chi2Var = "expected"
   )
+  adapter <- new.env(parent = baseenv())
+  reticulate::source_python(system.file("python", "chi_square_adapter.py",
+                                       package = "r4lineups"), envir = adapter)
+  adapter$correct_chi_square_objective(direct)
   direct$setEqualVariance()
   direct$targetBetweenSigma$value <- 0
   direct$targetBetweenSigma$fixed <- TRUE
@@ -157,6 +161,29 @@ test_that("bridge matches a direct pyWitness call and variance paths run", {
   )
   expect_equal(wrapper$comparison$pearson_chisq,
                as.numeric(direct$chi2), tolerance = 1e-8)
+  cells <- wrapper$cells
+  expect_equal(wrapper$comparison$pearson_chisq,
+               sum((cells$observed - cells$expected)^2 / cells$expected),
+               tolerance = 1e-8)
+
+  # objective = "pywitness" leaves the engine untouched and reproduces it.
+  uncorrected <- fit_lineup_models(
+    dat, models = "independent", lineup_size = 6,
+    variance = "equal", shared_variance = "zero",
+    control = list(maxiter = 300L, objective = "pywitness"), envname = envname
+  )
+  plain <- pyw$ModelFitIndependentObservationSimple(
+    processed, integrationSigma = 8, chi2Var = "expected"
+  )
+  plain$setEqualVariance()
+  plain$targetBetweenSigma$value <- 0
+  plain$targetBetweenSigma$fixed <- TRUE
+  reticulate::py_capture_output(
+    plain$fit(maxiter = 300L, method = "Nelder-Mead"), type = "stdout"
+  )
+  expect_equal(uncorrected$comparison$pearson_chisq,
+               as.numeric(plain$chi2), tolerance = 1e-8)
+  expect_match(uncorrected$specification$estimator, "uncorrected")
 
   expect_warning(
     failed <- fit_lineup_models(
