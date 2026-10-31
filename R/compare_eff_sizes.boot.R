@@ -1,15 +1,17 @@
 #'Comparing Effective Size: Base function for bootstrapping
 #'
-#'A base function for bootstrapping a dataframe of choices for 2 independent lineups
+#'A row-resampling statistic for two columns of lineup choices.
 #'
 #'@param linedf A dataframe of lineup data. Must consist of 2 columns, each
 #'              containing data for 2 independent lineups
 #'@param d Indices for bootstrap sample. Argument used by boot function to
 #'         select samples for bootstrapping
-#'@details The approach here is to compute the effective size of each lineup
-#'         separately, and to take the difference between them. This is then
-#'         bootstrapped, and if the bootstrap does not contain 0, we
-#'          conclude the effective size estimates are different at p = alpha
+#'@details This statistic applies the same row indices to both columns. Using
+#' it with an ordinary row bootstrap therefore resamples paired observations.
+#' For independent lineup samples use \code{\link{effsize_compare}}, which
+#' resamples each sample independently. Bootstrap intervals remain approximations;
+#' inclusion or exclusion of zero does not establish calibration in small or
+#' nearly uniform samples.
 #'@references Davison,  A.C. & Hinkley,  D.V. (1997). \emph{Bootstrap methods and their
 #'            application}. Cambridge University Press.
 #'
@@ -37,9 +39,8 @@
 #'                      lineup2 = sample(1:6, 50, replace = TRUE))
 #' # Difference in effective size for the observed data
 #' compare_eff_sizes.boot(linedf, seq_len(nrow(linedf)))
-#' # Bootstrap the difference
-#' boot_diff <- boot::boot(linedf, compare_eff_sizes.boot, R = 100)
-#' boot::boot.ci(boot_diff, type = "perc")
+#' # Resample the independent lineups separately
+#' effsize_compare(linedf, R = 100)
 #'@export
 
 compare_eff_sizes.boot <- function(linedf, d){

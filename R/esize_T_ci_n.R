@@ -11,13 +11,20 @@
 #'   \deqn{\mathrm{Var}(I) \approx \frac{4}{N}\left(\sum_i p_i^3 - \left(\sum_i p_i^2\right)^2\right).}
 #'   Normal quantiles are applied to I and the resulting bounds are back-transformed
 #'   to the E' scale via \eqn{E' = 1/(1-I)}. For small samples or skewed distributions,
-#'   bootstrap methods (\code{\link{esize_boot_dist}}) or the Bayesian posterior
-#'   (\code{\link{esize_T_bayes}}) may be preferred.
+#'   all interval methods require qualification. In particular, plug-in bootstrap
+#'   intervals also fail at exact uniform fairness; see \code{\link{esize_boot_dist}}.
+#'   Bayesian credible intervals describe a stated posterior rather than
+#'   guaranteeing fixed-parameter frequentist coverage.
 #'
 #'   Note that this concerns the \emph{interval}. The point estimate itself is
-#'   also biased downward at small samples, since \eqn{E'} is a plug-in
+#'   also biased downward near uniform choice distributions at small samples,
+#'   although the direction is not universal, since \eqn{E'} is a plug-in
 #'   estimator; see the \dQuote{Small-sample bias} section of
 #'   \code{\link{esize_T}}. This function uses the plug-in form.
+#'   This first-order interval is unreliable in small samples and at uniform or
+#'   concentrated boundary distributions. A zero estimated variance yields a
+#'   degenerate interval, not evidence of zero population uncertainty. An ordinary
+#'   bootstrap is also not a general solution to these boundary problems.
 #'@references Malpass, R. S. (1981). Effective size and defendant bias in
 #'            eyewitness identification lineups. \emph{Law and Human Behavior, 5}(4), 299-309.
 #'
@@ -57,6 +64,8 @@ esize_T_ci_n <- function(lineup_tab, alpha){
     b <- sum((lineup_tab/N)^3)
     c <- (sum((lineup_tab/N)^2)^2)
     var_i <- a*(b-c)
+    if (var_i <= .Machine$double.eps) warning("The first-order diversity variance is zero; the degenerate normal interval does not establish zero population uncertainty.", call. = FALSE)
+    var_i <- max(var_i, 0)
     sd_i <- sqrt(var_i)
     ci_low <- i_esize_T(lineup_tab) + qnorm((1-alpha)/2)*sd_i
     ci_high <- i_esize_T(lineup_tab) + qnorm(alpha+((1-alpha)/2))*sd_i

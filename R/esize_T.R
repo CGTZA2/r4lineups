@@ -32,16 +32,21 @@
 #'       \mathrm{bias} = -\frac{k(k-1)}{N + k - 1}.}
 #' A perfectly fair six-person lineup assessed with 50 choices therefore returns
 #' about 5.47 rather than 6, and with 20 choices about 4.87. The bias is
-#' negligible above a few hundred choices.
+#' depends on both nominal size and the choice distribution; no single sample
+#' size makes it negligible for every lineup.
 #'
 #' With \code{unbiased = TRUE} the function substitutes the unbiased estimator
 #' of the concentration, \eqn{\sum_i o_i(o_i - 1) / (N(N-1))}, and returns its
 #' reciprocal,
 #' \deqn{\hat{E}'_{\mathrm{corr}} = \frac{N(N-1)}{\sum_i o_i(o_i - 1)}.}
 #' The reciprocal of an unbiased estimate is not itself unbiased. For
-#' near-fair lineups this removes most of the bias, at a modest increase in
-#' variance that disappears by \eqn{N \approx 100}; in concentrated
+#' near-fair lineups this can reduce bias, with increased variability; in concentrated
 #' distributions it can overshoot (mean 1.269 in the two-member example).
+#' When fewer than two choices are available the correction is undefined and
+#' returns \code{NA} with a warning. When every choice is on a different member,
+#' the corrected reciprocal is \code{Inf}, retained with a warning. If
+#' \eqn{N \le k}, that event can have positive probability, so the corrected
+#' estimator can have an infinite sampling mean. It is not uniformly superior.
 #'
 #' Which to use depends on what is being reported. For a description of the
 #' choice distribution actually observed, the plug-in value is the quantity of
@@ -95,19 +100,21 @@ esize_T <- function(lineup_tab, unbiased = FALSE){
   # Unbiased estimator of sum(p^2): the probability that two draws without
   # replacement fall on the same member. Undefined with fewer than two choices,
   # and zero when every choice fell on a different member -- in which case the
-  # reciprocal is infinite and the plug-in value is the only usable answer.
+  # reciprocal is infinite. Do not substitute a different estimator.
+  if (any(counts != floor(counts))) {
+    stop("The small-sample correction requires whole observation counts.", call. = FALSE)
+  }
   n <- sum(counts)
   if (n < 2) {
-    warning("Fewer than two choices; the bias correction is undefined. ",
-            "Returning the plug-in estimate.", call. = FALSE)
-    return(sum(counts)^2 / sum(counts^2))
+    warning("Fewer than two choices; the bias correction is undefined; returning NA.", call. = FALSE)
+    return(NA_real_)
   }
   concentration <- sum(counts * (counts - 1))
   if (concentration <= 0) {
     warning("Every choice fell on a different lineup member, so the corrected ",
-            "estimate is unbounded. Returning the plug-in estimate.",
+            "estimate is unbounded; returning Inf.",
             call. = FALSE)
-    return(sum(counts)^2 / sum(counts^2))
+    return(Inf)
   }
   n * (n - 1) / concentration
 }

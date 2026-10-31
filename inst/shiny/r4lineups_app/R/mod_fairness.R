@@ -114,7 +114,7 @@ fairness_server <- function(id) {
     output$vb_esize <- renderText(fmt_num(result()$esize, 2))
     output$vb_esize_ci <- renderText({
       r <- result()
-      sprintf("95%% CI %s · k = %d",
+      sprintf("Bootstrap range %s · k = %d; not an exact-fairness test",
               fmt_ci(stats::quantile(r$esize_boot, c(0.025, 0.975)), 2), r$L$k)
     })
     output$vb_func <- renderText({
