@@ -162,7 +162,7 @@ make_multid <- function(data = NULL,
   }
 
   if (!is.null(data)) {
-    .validate_lineup_analysis(data, require_confidence = isTRUE(by_confidence))
+    .validate_lineup_analysis(data, require_confidence = isTRUE(by_confidence), lineup_size = lineup_size)
     innocent_suspect <- .resolve_innocent_suspect(data, innocent_suspect)
     raw <- .multid_counts_from_data(data, innocent_suspect)
   } else {

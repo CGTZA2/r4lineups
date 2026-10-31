@@ -42,6 +42,15 @@
 #' \deqn{NRI^{(s)} = \frac{\sum_j \frac{n_j}{N}(a_j^{(s)} - \bar{a}^{(s)})^2}{\bar{a}^{(s)}(1-\bar{a}^{(s)})}}
 #' where \eqn{c_j} is the mean confidence (proportion scale) in bin \eqn{j} and
 #' \eqn{\bar{c}} is the overall mean confidence.
+#' This model assumes exchangeable Bernoulli correctness within each bin.
+#' In experiments with fixed TP and TA totals, conditioning on the number of
+#' identifications in a bin does not generally give a binomial correct count.
+#' These intervals are therefore conditional working-model summaries, rather
+#' than automatically exact posterior inference for that fixed-arm design.
+#' If innocent IDs are estimated from fillers, the fractional effective counts
+#' produce a working Beta posterior, not the exact likelihood for observed
+#' designated-suspect counts. Its intervals do not propagate all uncertainty
+#' in that estimation. Bin frequencies and mean confidence are conditioned on.
 #'
 #' @references
 #' Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity of

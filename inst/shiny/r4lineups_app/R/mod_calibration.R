@@ -234,7 +234,7 @@ calibration_server <- function(id, data) {
       validate(need(d$has_rt, "RAC needs a response_time column in the data."))
       bins <- parse_bins(input$time_bins)
       if (is.null(bins)) {
-        rt <- d$data$response_time[d$data$identification == "suspect"]
+        rt <- d$data$response_time
         bins <- unique(stats::quantile(rt, seq(0, 1, 0.2), na.rm = TRUE, names = FALSE))
       }
       r4lineups::make_racdata(d$data, lineup_size = d$lineup_size,
