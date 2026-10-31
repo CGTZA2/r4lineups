@@ -1,5 +1,17 @@
 # cran-comments
 
+## Resubmission
+
+The automatic pretest of the first 2.3.0 submission (31 October 2026)
+reported two NOTEs on Windows and Debian. Both are fixed:
+
+* "Possibly misspelled words in DESCRIPTION: embeddings". The word was correct,
+  but the Description now says "numeric face representations" instead.
+* Examples with elapsed time over 5 s (`fit_max_sdt`, `compare_max_sdt`,
+  `compare_dpp`). The two-condition MAX model fits, which take several seconds
+  each, are now in `\donttest{}`; the single-condition fit still runs. The
+  `compare_dpp()` example uses 50 bootstrap resamples instead of 200.
+
 ## Release summary
 
 r4lineups 2.3.0 is a major update from the 0.1.x series on CRAN. It expands

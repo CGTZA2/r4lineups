@@ -73,8 +73,9 @@ replicate, so every replicate averages over the same criteria.
 data(lineup_example)
 # Compare two halves of the example data (odd vs even rows)
 odd <- seq(1, nrow(lineup_example), by = 2)
+# 50 resamples keep the example quick; use 1000 or more in an analysis
 cmp <- compare_dpp(lineup_example[odd, ], lineup_example[-odd, ],
-                   n_bootstrap = 200, seed = 1)
+                   n_bootstrap = 50, seed = 1)
 cmp
 
 }
