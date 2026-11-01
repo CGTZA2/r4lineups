@@ -60,8 +60,10 @@ None of these files is in the build. See NEWS.md.
   confirmation email was sent to colin.tredoux@uct.ac.za.
 - [x] CRAN's automatic pretest returned 2 NOTEs on Windows and Debian (a
   flagged word in DESCRIPTION and slow examples); fixed in PR #12.
-- [ ] Resubmit the `cran_submission_2026-10-31b/` archive through the web form
-  (on Colin's go-ahead, planned for 1 November 2026).
+- [x] Resubmitted the `cran_submission_2026-10-31b/` archive (SHA-256
+  `dfda255e…2b5386`) on 1 November 2026 through the web form (submission ID
+  361029); the maintainer confirmation email was sent to
+  colin.tredoux@uct.ac.za.
 - [ ] Maintainer clicks the confirmation link; CRAN pretest and review.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
   `v2.3.0` and create the GitHub release.
