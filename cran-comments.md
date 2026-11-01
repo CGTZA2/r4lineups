@@ -79,3 +79,5 @@ release no longer uses or imports `rerun()` (it was replaced by
   check-time reliability; publication-grade settings are shown in unevaluated
   examples.
 * This is a resubmission of a package previously on CRAN as r4lineups 0.1.x.
+* The license changes from CC0 (0.1.1) to MIT + file LICENSE. Both authors
+  agreed to the change, and NEWS.md records it.
