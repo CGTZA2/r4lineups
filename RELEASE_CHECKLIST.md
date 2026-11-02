@@ -29,19 +29,18 @@ None of these files is in the build. See NEWS.md.
   regression test.
 - [x] The JOSS manuscript names 2.3.0 and renders cleanly in the Open
   Journals job.
-- [x] Checked candidate: `cran_submission_2026-10-31b/r4lineups_2.3.0.tar.gz`,
-  2,298,002 bytes, SHA-256
-  `dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386`,
-  built from the merge commit `7315cf3`, which fixes the two pretest NOTEs.
-  Earlier archives (`cran_submission_2026-10-31/` and before) are superseded.
+- [x] Checked candidate: `cran_submission_2026-11-02/r4lineups_2.3.0.tar.gz`,
+  2,347,222 bytes, SHA-256
+  `441cabddae64f4841629659f75a45ed609d4eafb603436cc7e337049b65d1273`,
+  built from the merge commit `94fcb14`, which cuts the check time. Earlier
+  archives (`cran_submission_2026-10-31b/` and before) are superseded.
 
 ## Publication gates
 
 - [x] MIT-relicensing consent recorded for both authors: Colin Tredoux
   confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.
 - [x] The R release/devel/oldrel-1 operating-system matrix passes on the
-  resubmitted revision: GitHub Actions run `41242178346` (tree identical to
-  `7315cf3`).
+  resubmitted revision: GitHub Actions run `41420279002` on `94fcb14`.
 - [x] The TeX-equipped reference-manual job produces a PDF (same run).
 - [x] The official JOSS/Open Journals job produces a clean `paper.pdf`.
 - [x] The Linux/macOS/Windows pinned-pyWitness workflow passes on commit
@@ -68,8 +67,13 @@ None of these files is in the build. See NEWS.md.
   November 2026) returned 361029 because the whole check took 14 minutes on
   Windows (limit 10). Slow tests now skip on CRAN and the slowest vignette
   chunks load precomputed results (PR #13).
-- [ ] Rebuild from `main` after PR #13, check, and resubmit on Colin's
-  go-ahead.
+- [x] Rebuilt from `main` (`94fcb14`); local `R CMD check --as-cran` with
+  network: Status OK (tests 14 s, vignettes 159 s including the locally
+  installed pyWitness vignette).
+- [x] win-builder R-devel (Windows, 2026-11-01 r90825) on the same archive:
+  Status OK, check time 400 s (tests 62 s, vignettes 116 s; previously 297 s
+  and 328 s on CRAN's Windows pretest).
+- [ ] Resubmit on Colin's go-ahead.
 - [ ] Maintainer clicks the confirmation link; CRAN pretest and review.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
   `v2.3.0` and create the GitHub release.

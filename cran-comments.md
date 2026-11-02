@@ -19,8 +19,8 @@ reduced:
   (39 KB). The rendered output is identical to a full computation. Rendering
   all 16 vignettes takes 26 s locally instead of 79 s.
 
-Locally, tests and vignettes take about a third of the earlier time, so we
-expect the Windows check to take about 6 to 7 minutes.
+On win-builder (R-devel, Windows) the resubmitted archive checks with Status
+OK in 400 s: tests 62 s and vignette re-building 116 s.
 
 ### Pretest NOTEs (first submission, 31 October 2026)
 
@@ -59,8 +59,7 @@ full changelog.
 * GitHub Actions Ubuntu, R devel, release, and oldrel-1
 
 All five jobs passed on the resubmitted revision in GitHub Actions run
-`41242178346` (its source tree is identical to the submitted merge commit
-`7315cf3`), and the TeX-equipped job in that run built the PDF reference
+`41420279002` on the submitted merge commit `94fcb14`, and the TeX-equipped job in that run built the PDF reference
 manual. The opt-in pinned-pyWitness parity tests passed locally on macOS
 (24 expectations).
 
@@ -74,9 +73,9 @@ including the CRAN incoming feasibility checks and the PDF manual:
 The tests, examples, installation, and all 16 vignettes completed
 successfully.
 
-The submitted archive is `r4lineups_2.3.0.tar.gz` (2,298,002 bytes), SHA-256
-`dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386`, built
-from commit `7315cf3`.
+The submitted archive is `r4lineups_2.3.0.tar.gz` (2,347,222 bytes), SHA-256
+`441cabddae64f4841629659f75a45ed609d4eafb603436cc7e337049b65d1273`, built
+from commit `94fcb14`.
 
 ## purrr::rerun() notice
 
