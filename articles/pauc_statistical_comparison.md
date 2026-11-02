@@ -355,6 +355,7 @@ distributed. That can be checked, rather than assumed:
 
 ``` r
 
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 comparison <- compare_pauc(
   strong, weak,
   lineup_size = 6,
@@ -363,6 +364,9 @@ comparison <- compare_pauc(
   n_bootstrap = 600,
   seed = 123
 )
+```
+
+``` r
 
 boot_diff <- comparison$bootstrap_results$diff_boot
 
@@ -590,7 +594,11 @@ pairs <- list(
   `Strong vs Weak`   = list(strong, weak),
   `Medium vs Weak`   = list(medium, weak)
 )
+```
 
+``` r
+
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 results <- do.call(rbind, lapply(names(pairs), function(nm) {
   cmp <- compare_pauc(pairs[[nm]][[1]], pairs[[nm]][[2]],
                       lineup_size = 6, n_bootstrap = 200, seed = 41)
@@ -600,6 +608,9 @@ results <- do.call(rbind, lapply(names(pairs), function(nm) {
              p = signif(cmp$p_value, 4),
              check.names = FALSE)
 }))
+```
+
+``` r
 
 results$`p (Bonferroni)` <- signif(p.adjust(results$p, method = "bonferroni"), 4)
 

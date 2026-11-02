@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-31</h4>
+            <h4 data-toc-skip class="date">2026-11-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/sdt_summary_comparisons.Rmd" class="external-link"><code>vignettes/sdt_summary_comparisons.Rmd</code></a></small>
       <div class="d-none name"><code>sdt_summary_comparisons.Rmd</code></div>
@@ -433,13 +433,14 @@ the data on which the reference implementation of this model was
 written: two conditions, each with 96 target-present and 96 or 106
 target-absent lineups of size 6.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_free</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_max_sdt.html">fit_max_sdt</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.</span></span>
+<span><span class="va">fit_free</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_max_sdt.html">fit_max_sdt</a></span><span class="op">(</span></span>
 <span>  n_hit <span class="op">=</span> <span class="fl">69</span>, n_tp_choose <span class="op">=</span> <span class="fl">82</span>, n_fa <span class="op">=</span> <span class="fl">64</span>, N_tp <span class="op">=</span> <span class="fl">96</span>, N_ta <span class="op">=</span> <span class="fl">106</span>,</span>
 <span>  n_hit_2 <span class="op">=</span> <span class="fl">68</span>, n_tp_choose_2 <span class="op">=</span> <span class="fl">78</span>, n_fa_2 <span class="op">=</span> <span class="fl">42</span>, N_tp_2 <span class="op">=</span> <span class="fl">96</span>, N_ta_2 <span class="op">=</span> <span class="fl">96</span>,</span>
 <span>  n <span class="op">=</span> <span class="fl">6</span>, nboot <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">11</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Condition 1"</span>, <span class="st">"Condition 2"</span><span class="op">)</span>,</span>
 <span>    `d'`      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_free</span><span class="op">$</span><span class="va">dprime_1</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">dprime_2</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
@@ -482,7 +483,7 @@ replicates.</caption>
 distribution: replicates are simulated from the fitted model and
 refitted, so the spread reflects the estimator’s behaviour rather than
 an asymptotic approximation.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Goodness of fit: chi-square ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_free</span><span class="op">$</span><span class="va">chisq</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>    <span class="st">"on"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">df</span>, <span class="st">"df, p ="</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_free</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"</span></span>
 <span><span class="st">"</span><span class="op">)</span></span>
@@ -490,7 +491,7 @@ an asymptotic approximation.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Bootstrap replicates used:"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_n_used</span>,</span>
 <span>    <span class="st">" failed:"</span>, <span class="va">fit_free</span><span class="op">$</span><span class="va">boot_n_failed</span>, <span class="st">"</span></span>
 <span><span class="st">"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Bootstrap replicates used: 298  failed: 2</span></span></code></pre></div>
+<span><span class="co">#&gt; Bootstrap replicates used: 299  failed: 1</span></span></code></pre></div>
 <p>Unlike the exactly-identified summary estimators, this model has
 residual degrees of freedom, so it <strong>can</strong> be found to fit
 badly — which is informative in itself.</p>
@@ -501,7 +502,7 @@ badly — which is informative in itself.</p>
 <p>The comparison is a nested test rather than a Wald test on a
 difference: fit the model with d’ free across conditions, refit with d’
 constrained equal, and compare the chi-square change.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_equal_d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_max_sdt.html">fit_max_sdt</a></span><span class="op">(</span></span>
 <span>  n_hit <span class="op">=</span> <span class="fl">69</span>, n_tp_choose <span class="op">=</span> <span class="fl">82</span>, n_fa <span class="op">=</span> <span class="fl">64</span>, N_tp <span class="op">=</span> <span class="fl">96</span>, N_ta <span class="op">=</span> <span class="fl">106</span>,</span>
 <span>  n_hit_2 <span class="op">=</span> <span class="fl">68</span>, n_tp_choose_2 <span class="op">=</span> <span class="fl">78</span>, n_fa_2 <span class="op">=</span> <span class="fl">42</span>, N_tp_2 <span class="op">=</span> <span class="fl">96</span>, N_ta_2 <span class="op">=</span> <span class="fl">96</span>,</span>

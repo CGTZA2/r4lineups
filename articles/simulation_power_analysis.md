@@ -289,6 +289,7 @@ the `n_total` column gives the total.
 
 ``` r
 
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 power_result <- simulate_power_analysis(
   sample_sizes  = c(25, 50, 100, 200),
   d_prime       = 1.0,
@@ -300,6 +301,9 @@ power_result <- simulate_power_analysis(
   seed          = 2026,
   verbose       = FALSE
 )
+```
+
+``` r
 
 knitr::kable(
   setNames(as.data.frame(power_result)[, c("sample_size", "n_total", "power",
@@ -441,6 +445,7 @@ each criterion to the expected maximum for its lineup size.
 ``` r
 
 sizes <- c(4, 6, 8, 10, 12)
+set.seed(77)
 
 design <- do.call(rbind, lapply(sizes, function(k) {
   # Criterion matched to lineup size, so willingness to choose is held constant
@@ -467,11 +472,11 @@ knitr::kable(
 
 | Lineup size | Criterion used | Correct ID rate (%) | False ID rate (%) |
 |------------:|---------------:|--------------------:|------------------:|
-|           4 |           1.01 |                62.2 |               9.8 |
-|           6 |           1.26 |                49.2 |               9.0 |
-|           8 |           1.41 |                47.8 |               6.8 |
-|          10 |           1.54 |                39.8 |               3.2 |
-|          12 |           1.64 |                38.0 |               4.2 |
+|           4 |           1.04 |                61.2 |               9.8 |
+|           6 |           1.25 |                49.2 |               9.2 |
+|           8 |           1.42 |                47.6 |               6.8 |
+|          10 |           1.55 |                39.8 |               3.0 |
+|          12 |           1.63 |                38.2 |               4.2 |
 
 Identification rates by lineup size at a size-matched criterion,
 simulated data (500 target-present and 500 target-absent lineups per

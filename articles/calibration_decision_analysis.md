@@ -956,6 +956,8 @@ target-present and target-absent trials separately within each
 procedure:
 
 ``` r
+
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 dpp_comparison <- compare_dpp(
   data_proc_a,
   data_proc_b,
@@ -963,7 +965,9 @@ dpp_comparison <- compare_dpp(
   n_bootstrap = 500,
   seed = 2026
 )
+```
 
+``` r
 dpp_comparison
 
 === DPP Comparison ===
@@ -977,7 +981,7 @@ Bootstrap SE:              0.0268
 plot_dpp_comparison(dpp_comparison)
 ```
 
-![](calibration_decision_analysis_files/figure-html/dpp-comparison-1.png)
+![](calibration_decision_analysis_files/figure-html/dpp-comparison-results-1.png)
 
 A negative difference favours Procedure A. The interval is a percentile
 bootstrap interval for the difference in average DPP.

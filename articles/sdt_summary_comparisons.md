@@ -339,11 +339,15 @@ lineups of size 6.
 
 ``` r
 
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 fit_free <- fit_max_sdt(
   n_hit = 69, n_tp_choose = 82, n_fa = 64, N_tp = 96, N_ta = 106,
   n_hit_2 = 68, n_tp_choose_2 = 78, n_fa_2 = 42, N_tp_2 = 96, N_ta_2 = 96,
   n = 6, nboot = 300, seed = 11
 )
+```
+
+``` r
 
 knitr::kable(
   data.frame(
@@ -383,7 +387,7 @@ cat("Goodness of fit: chi-square =", round(fit_free$chisq, 3),
 cat("Bootstrap replicates used:", fit_free$boot_n_used,
     " failed:", fit_free$boot_n_failed, "
 ")
-#> Bootstrap replicates used: 298  failed: 2
+#> Bootstrap replicates used: 299  failed: 1
 ```
 
 Unlike the exactly-identified summary estimators, this model has

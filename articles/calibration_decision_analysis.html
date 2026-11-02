@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-10-31</h4>
+            <h4 data-toc-skip class="date">2026-11-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/calibration_decision_analysis.Rmd" class="external-link"><code>vignettes/calibration_decision_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>calibration_decision_analysis.Rmd</code></div>
@@ -1141,26 +1141,27 @@ Procedure A should show the smaller deviation. As Smith et al. did,
 <code><a href="../reference/compare_dpp.html">compare_dpp()</a></code> tests the difference with a nonparametric
 bootstrap, resampling target-present and target-absent trials separately
 within each procedure:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>dpp_comparison <span class="ot">&lt;-</span> <span class="fu">compare_dpp</span>(</span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>  data_proc_a,</span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>  data_proc_b,</span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>  <span class="at">lineup_size =</span> <span class="dv">6</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>  <span class="at">n_bootstrap =</span> <span class="dv">500</span>,</span>
-<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">2026</span></span>
-<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>)</span>
-<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a></span>
-<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>dpp_comparison</span>
-<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a></span>
-<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span> DPP Comparison <span class="sc">==</span><span class="er">=</span></span>
-<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a></span>
-<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a>Average DPP, procedure A<span class="sc">:</span>  <span class="fl">0.6022</span> </span>
-<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a>Average DPP, procedure B<span class="sc">:</span>  <span class="fl">0.8247</span> </span>
-<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a><span class="fu">Difference</span> (A <span class="sc">-</span> B)<span class="sc">:</span>        <span class="sc">-</span><span class="fl">0.2225</span>  (<span class="at">negative =</span> A better)</span>
-<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a>Bootstrap SE<span class="sc">:</span>              <span class="fl">0.0268</span></span>
-<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a><span class="dv">95</span>% percentile interval<span class="sc">:</span>  [<span class="sc">-</span><span class="fl">0.2797</span>, <span class="sc">-</span><span class="fl">0.1726</span>]  (<span class="dv">500</span> resamples)</span>
-<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a></span>
-<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a><span class="fu">plot_dpp_comparison</span>(dpp_comparison)</span></code></pre></div>
-<p><img src="calibration_decision_analysis_files/figure-html/dpp-comparison-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.</span></span>
+<span><span class="va">dpp_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_dpp.html">compare_dpp</a></span><span class="op">(</span></span>
+<span>  <span class="va">data_proc_a</span>,</span>
+<span>  <span class="va">data_proc_b</span>,</span>
+<span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  n_bootstrap <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>dpp_comparison</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span> DPP Comparison <span class="sc">==</span><span class="er">=</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>Average DPP, procedure A<span class="sc">:</span>  <span class="fl">0.6022</span> </span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>Average DPP, procedure B<span class="sc">:</span>  <span class="fl">0.8247</span> </span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="fu">Difference</span> (A <span class="sc">-</span> B)<span class="sc">:</span>        <span class="sc">-</span><span class="fl">0.2225</span>  (<span class="at">negative =</span> A better)</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>Bootstrap SE<span class="sc">:</span>              <span class="fl">0.0268</span></span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="dv">95</span>% percentile interval<span class="sc">:</span>  [<span class="sc">-</span><span class="fl">0.2797</span>, <span class="sc">-</span><span class="fl">0.1726</span>]  (<span class="dv">500</span> resamples)</span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a><span class="fu">plot_dpp_comparison</span>(dpp_comparison)</span></code></pre></div>
+<p><img src="calibration_decision_analysis_files/figure-html/dpp-comparison-results-1.png" class="r-plt" alt="" width="672"></p>
 <p>A negative difference favours Procedure A. The interval is a
 percentile bootstrap interval for the difference in average DPP.</p>
 </div>
@@ -1199,42 +1200,42 @@ estimates and removes that bias.</p>
 <div class="section level3">
 <h3 id="basic-anri">Basic ANRI<a class="anchor" aria-label="anchor" href="#basic-anri"></a>
 </h3>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="co"># Compute ANRI</span></span>
-<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>anri_result <span class="ot">&lt;-</span> <span class="fu">compute_anri</span>(</span>
-<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>  lineup_example,</span>
-<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>  <span class="at">confidence_bins =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">60</span>, <span class="dv">80</span>, <span class="dv">100</span>)</span>
-<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>)</span>
-<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a></span>
-<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="fu">print</span>(anri_result)</span>
-<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a><span class="sc">$</span>anri</span>
-<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.04145948</span></span>
-<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a><span class="sc">$</span>nri</span>
-<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.04527077</span></span>
-<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a></span>
-<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a><span class="sc">$</span>n_total</span>
-<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">503</span></span>
-<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a></span>
-<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a><span class="sc">$</span>n_bins</span>
-<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span></span>
-<span id="cb24-19"><a href="#cb24-19" tabindex="-1"></a></span>
-<span id="cb24-20"><a href="#cb24-20" tabindex="-1"></a><span class="sc">$</span>calibration_data</span>
-<span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 3 × 7 [39m</span></span>
-<span id="cb24-22"><a href="#cb24-22" tabindex="-1"></a>  bin          n mean_confidence accuracy n_correct n_incorrect</span>
-<span id="cb24-23"><a href="#cb24-23" tabindex="-1"></a>   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m     [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m            [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m     [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m        [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
-<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m [<span class="dv">0</span>,<span class="dv">60</span>]     <span class="dv">305</span>            <span class="fl">42.6</span>    <span class="fl">0.764</span>       <span class="dv">233</span>          <span class="dv">72</span></span>
-<span id="cb24-25"><a href="#cb24-25" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m2 [<span class="dv">39</span><span class="fu">m</span> (<span class="dv">60</span>,<span class="dv">80</span>]     <span class="dv">94</span>            <span class="fl">74.0</span>    <span class="fl">0.872</span>        <span class="dv">82</span>          <span class="dv">12</span></span>
-<span id="cb24-26"><a href="#cb24-26" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m3 [<span class="dv">39</span><span class="fu">m</span> (<span class="dv">80</span>,<span class="dv">100</span>]   <span class="dv">104</span>            <span class="fl">96.5</span>    <span class="fl">0.962</span>       <span class="dv">100</span>           <span class="dv">4</span></span>
-<span id="cb24-27"><a href="#cb24-27" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># ℹ 1 more variable: mean_confidence_prop &lt;dbl&gt; [39m</span></span>
-<span id="cb24-28"><a href="#cb24-28" tabindex="-1"></a></span>
-<span id="cb24-29"><a href="#cb24-29" tabindex="-1"></a><span class="sc">$</span>overall_accuracy</span>
-<span id="cb24-30"><a href="#cb24-30" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.8250497</span></span>
-<span id="cb24-31"><a href="#cb24-31" tabindex="-1"></a></span>
-<span id="cb24-32"><a href="#cb24-32" tabindex="-1"></a><span class="sc">$</span>overall_confidence</span>
-<span id="cb24-33"><a href="#cb24-33" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.5960239</span></span>
-<span id="cb24-34"><a href="#cb24-34" tabindex="-1"></a></span>
-<span id="cb24-35"><a href="#cb24-35" tabindex="-1"></a><span class="sc">$</span>choosers_only</span>
-<span id="cb24-36"><a href="#cb24-36" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Compute ANRI</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>anri_result <span class="ot">&lt;-</span> <span class="fu">compute_anri</span>(</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>  lineup_example,</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>  <span class="at">confidence_bins =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">60</span>, <span class="dv">80</span>, <span class="dv">100</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>)</span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="fu">print</span>(anri_result)</span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a><span class="sc">$</span>anri</span>
+<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.04145948</span></span>
+<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a><span class="sc">$</span>nri</span>
+<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.04527077</span></span>
+<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="#cb25-14" tabindex="-1"></a><span class="sc">$</span>n_total</span>
+<span id="cb25-15"><a href="#cb25-15" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">503</span></span>
+<span id="cb25-16"><a href="#cb25-16" tabindex="-1"></a></span>
+<span id="cb25-17"><a href="#cb25-17" tabindex="-1"></a><span class="sc">$</span>n_bins</span>
+<span id="cb25-18"><a href="#cb25-18" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span></span>
+<span id="cb25-19"><a href="#cb25-19" tabindex="-1"></a></span>
+<span id="cb25-20"><a href="#cb25-20" tabindex="-1"></a><span class="sc">$</span>calibration_data</span>
+<span id="cb25-21"><a href="#cb25-21" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 3 × 7 [39m</span></span>
+<span id="cb25-22"><a href="#cb25-22" tabindex="-1"></a>  bin          n mean_confidence accuracy n_correct n_incorrect</span>
+<span id="cb25-23"><a href="#cb25-23" tabindex="-1"></a>   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m     [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m            [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m     [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m        [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
+<span id="cb25-24"><a href="#cb25-24" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m [<span class="dv">0</span>,<span class="dv">60</span>]     <span class="dv">305</span>            <span class="fl">42.6</span>    <span class="fl">0.764</span>       <span class="dv">233</span>          <span class="dv">72</span></span>
+<span id="cb25-25"><a href="#cb25-25" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m2 [<span class="dv">39</span><span class="fu">m</span> (<span class="dv">60</span>,<span class="dv">80</span>]     <span class="dv">94</span>            <span class="fl">74.0</span>    <span class="fl">0.872</span>        <span class="dv">82</span>          <span class="dv">12</span></span>
+<span id="cb25-26"><a href="#cb25-26" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m3 [<span class="dv">39</span><span class="fu">m</span> (<span class="dv">80</span>,<span class="dv">100</span>]   <span class="dv">104</span>            <span class="fl">96.5</span>    <span class="fl">0.962</span>       <span class="dv">100</span>           <span class="dv">4</span></span>
+<span id="cb25-27"><a href="#cb25-27" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># ℹ 1 more variable: mean_confidence_prop &lt;dbl&gt; [39m</span></span>
+<span id="cb25-28"><a href="#cb25-28" tabindex="-1"></a></span>
+<span id="cb25-29"><a href="#cb25-29" tabindex="-1"></a><span class="sc">$</span>overall_accuracy</span>
+<span id="cb25-30"><a href="#cb25-30" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.8250497</span></span>
+<span id="cb25-31"><a href="#cb25-31" tabindex="-1"></a></span>
+<span id="cb25-32"><a href="#cb25-32" tabindex="-1"></a><span class="sc">$</span>overall_confidence</span>
+<span id="cb25-33"><a href="#cb25-33" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.5960239</span></span>
+<span id="cb25-34"><a href="#cb25-34" tabindex="-1"></a></span>
+<span id="cb25-35"><a href="#cb25-35" tabindex="-1"></a><span class="sc">$</span>choosers_only</span>
+<span id="cb25-36"><a href="#cb25-36" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">TRUE</span></span></code></pre></div>
 <p>ANRI is always ≤ NRI because it removes positive bias. The bias
 correction is larger when:</p>
 <ul>
@@ -1249,7 +1250,7 @@ correction is larger when:</p>
 <p>A point estimate is not much use on its own, so the interval comes
 from a bootstrap. <code>n_bootstrap = 100</code> keeps this vignette
 quick; use 2000 or more for anything you intend to report.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anri_boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bootstrap_anri.html">bootstrap_anri</a></span><span class="op">(</span></span>
 <span>  <span class="va">lineup_example</span>,</span>
 <span>  confidence_bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span>,</span>
@@ -1309,180 +1310,180 @@ compared.</p>
 strength of the evidence they generate. Because they were simulated with
 genuinely different parameters, any difference found here reflects that
 design rather than chance group assignment.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>anri_comparison <span class="ot">&lt;-</span> <span class="fu">compare_anri</span>(</span>
-<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>  procedures,</span>
-<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>  <span class="at">group_var =</span> <span class="st">"procedure"</span>,</span>
-<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>  <span class="at">confidence_bins =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">60</span>, <span class="dv">80</span>, <span class="dv">100</span>),</span>
-<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>  <span class="at">n_bootstrap =</span> <span class="dv">100</span>,</span>
-<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">456</span></span>
-<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>)</span>
-<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a></span>
-<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a><span class="fu">print</span>(anri_comparison)</span>
-<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a><span class="sc">$</span>anri_group1</span>
-<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.06778469</span></span>
-<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a></span>
-<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a><span class="sc">$</span>anri_group2</span>
-<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.02682759</span></span>
-<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a></span>
-<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a><span class="sc">$</span>nri_group1</span>
-<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.07322035</span></span>
-<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a></span>
-<span id="cb26-19"><a href="#cb26-19" tabindex="-1"></a><span class="sc">$</span>nri_group2</span>
-<span id="cb26-20"><a href="#cb26-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.03571501</span></span>
-<span id="cb26-21"><a href="#cb26-21" tabindex="-1"></a></span>
-<span id="cb26-22"><a href="#cb26-22" tabindex="-1"></a><span class="sc">$</span>difference</span>
-<span id="cb26-23"><a href="#cb26-23" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.04095711</span></span>
-<span id="cb26-24"><a href="#cb26-24" tabindex="-1"></a></span>
-<span id="cb26-25"><a href="#cb26-25" tabindex="-1"></a><span class="sc">$</span>ci_lower</span>
-<span id="cb26-26"><a href="#cb26-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="sc">-</span><span class="fl">0.0162656</span></span>
-<span id="cb26-27"><a href="#cb26-27" tabindex="-1"></a></span>
-<span id="cb26-28"><a href="#cb26-28" tabindex="-1"></a><span class="sc">$</span>ci_upper</span>
-<span id="cb26-29"><a href="#cb26-29" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.09288628</span></span>
-<span id="cb26-30"><a href="#cb26-30" tabindex="-1"></a></span>
-<span id="cb26-31"><a href="#cb26-31" tabindex="-1"></a><span class="sc">$</span>conf_level</span>
-<span id="cb26-32"><a href="#cb26-32" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
-<span id="cb26-33"><a href="#cb26-33" tabindex="-1"></a></span>
-<span id="cb26-34"><a href="#cb26-34" tabindex="-1"></a><span class="sc">$</span>significant</span>
-<span id="cb26-35"><a href="#cb26-35" tabindex="-1"></a> <span class="fl">2.5</span>% </span>
-<span id="cb26-36"><a href="#cb26-36" tabindex="-1"></a><span class="cn">FALSE</span> </span>
-<span id="cb26-37"><a href="#cb26-37" tabindex="-1"></a></span>
-<span id="cb26-38"><a href="#cb26-38" tabindex="-1"></a><span class="sc">$</span>group_names</span>
-<span id="cb26-39"><a href="#cb26-39" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Procedure A"</span> <span class="st">"Procedure B"</span></span>
-<span id="cb26-40"><a href="#cb26-40" tabindex="-1"></a></span>
-<span id="cb26-41"><a href="#cb26-41" tabindex="-1"></a><span class="sc">$</span>n_bootstrap</span>
-<span id="cb26-42"><a href="#cb26-42" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
-<span id="cb26-43"><a href="#cb26-43" tabindex="-1"></a></span>
-<span id="cb26-44"><a href="#cb26-44" tabindex="-1"></a><span class="sc">$</span>n_bootstrap_requested</span>
-<span id="cb26-45"><a href="#cb26-45" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
-<span id="cb26-46"><a href="#cb26-46" tabindex="-1"></a></span>
-<span id="cb26-47"><a href="#cb26-47" tabindex="-1"></a><span class="sc">$</span>n_failed</span>
-<span id="cb26-48"><a href="#cb26-48" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb26-49"><a href="#cb26-49" tabindex="-1"></a></span>
-<span id="cb26-50"><a href="#cb26-50" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1</span>
-<span id="cb26-51"><a href="#cb26-51" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>anri</span>
-<span id="cb26-52"><a href="#cb26-52" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.06778469</span></span>
-<span id="cb26-53"><a href="#cb26-53" tabindex="-1"></a></span>
-<span id="cb26-54"><a href="#cb26-54" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>nri</span>
-<span id="cb26-55"><a href="#cb26-55" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.07322035</span></span>
-<span id="cb26-56"><a href="#cb26-56" tabindex="-1"></a></span>
-<span id="cb26-57"><a href="#cb26-57" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>ci_lower</span>
-<span id="cb26-58"><a href="#cb26-58" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.02912137</span></span>
-<span id="cb26-59"><a href="#cb26-59" tabindex="-1"></a></span>
-<span id="cb26-60"><a href="#cb26-60" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>ci_upper</span>
-<span id="cb26-61"><a href="#cb26-61" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.1149089</span></span>
-<span id="cb26-62"><a href="#cb26-62" tabindex="-1"></a></span>
-<span id="cb26-63"><a href="#cb26-63" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>conf_level</span>
-<span id="cb26-64"><a href="#cb26-64" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
-<span id="cb26-65"><a href="#cb26-65" tabindex="-1"></a></span>
-<span id="cb26-66"><a href="#cb26-66" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_bootstrap</span>
-<span id="cb26-67"><a href="#cb26-67" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
-<span id="cb26-68"><a href="#cb26-68" tabindex="-1"></a></span>
-<span id="cb26-69"><a href="#cb26-69" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_bootstrap_requested</span>
-<span id="cb26-70"><a href="#cb26-70" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
-<span id="cb26-71"><a href="#cb26-71" tabindex="-1"></a></span>
-<span id="cb26-72"><a href="#cb26-72" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_failed</span>
-<span id="cb26-73"><a href="#cb26-73" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb26-74"><a href="#cb26-74" tabindex="-1"></a></span>
-<span id="cb26-75"><a href="#cb26-75" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_total</span>
-<span id="cb26-76"><a href="#cb26-76" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">343</span></span>
-<span id="cb26-77"><a href="#cb26-77" tabindex="-1"></a></span>
-<span id="cb26-78"><a href="#cb26-78" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_bins</span>
-<span id="cb26-79"><a href="#cb26-79" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span></span>
-<span id="cb26-80"><a href="#cb26-80" tabindex="-1"></a></span>
-<span id="cb26-81"><a href="#cb26-81" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>bootstrap_distribution</span>
-<span id="cb26-82"><a href="#cb26-82" tabindex="-1"></a>  [<span class="dv">1</span>] <span class="fl">0.06708598</span> <span class="fl">0.06570604</span> <span class="fl">0.08047661</span> <span class="fl">0.04987933</span> <span class="fl">0.07221240</span> <span class="fl">0.06148205</span></span>
-<span id="cb26-83"><a href="#cb26-83" tabindex="-1"></a>  [<span class="dv">7</span>] <span class="fl">0.07212585</span> <span class="fl">0.08571190</span> <span class="fl">0.06816675</span> <span class="fl">0.06999423</span> <span class="fl">0.05916390</span> <span class="fl">0.09510135</span></span>
-<span id="cb26-84"><a href="#cb26-84" tabindex="-1"></a> [<span class="dv">13</span>] <span class="fl">0.03142914</span> <span class="fl">0.04505713</span> <span class="fl">0.05639861</span> <span class="fl">0.09915104</span> <span class="fl">0.03885619</span> <span class="fl">0.07716533</span></span>
-<span id="cb26-85"><a href="#cb26-85" tabindex="-1"></a> [<span class="dv">19</span>] <span class="fl">0.05518367</span> <span class="fl">0.06160329</span> <span class="fl">0.08011800</span> <span class="fl">0.03582855</span> <span class="fl">0.05369086</span> <span class="fl">0.08262844</span></span>
-<span id="cb26-86"><a href="#cb26-86" tabindex="-1"></a> [<span class="dv">25</span>] <span class="fl">0.11270127</span> <span class="fl">0.09078520</span> <span class="fl">0.11118346</span> <span class="fl">0.06107025</span> <span class="fl">0.11095935</span> <span class="fl">0.03686786</span></span>
-<span id="cb26-87"><a href="#cb26-87" tabindex="-1"></a> [<span class="dv">31</span>] <span class="fl">0.07824433</span> <span class="fl">0.10365266</span> <span class="fl">0.06466421</span> <span class="fl">0.07758830</span> <span class="fl">0.06246753</span> <span class="fl">0.04141894</span></span>
-<span id="cb26-88"><a href="#cb26-88" tabindex="-1"></a> [<span class="dv">37</span>] <span class="fl">0.08328425</span> <span class="fl">0.08469806</span> <span class="fl">0.08008407</span> <span class="fl">0.06726736</span> <span class="fl">0.02703340</span> <span class="fl">0.06715568</span></span>
-<span id="cb26-89"><a href="#cb26-89" tabindex="-1"></a> [<span class="dv">43</span>] <span class="fl">0.06081143</span> <span class="fl">0.04384714</span> <span class="fl">0.06404480</span> <span class="fl">0.08060125</span> <span class="fl">0.09375399</span> <span class="fl">0.04073706</span></span>
-<span id="cb26-90"><a href="#cb26-90" tabindex="-1"></a> [<span class="dv">49</span>] <span class="fl">0.05561147</span> <span class="fl">0.06537103</span> <span class="fl">0.08259529</span> <span class="fl">0.07587945</span> <span class="fl">0.06234151</span> <span class="fl">0.11957211</span></span>
-<span id="cb26-91"><a href="#cb26-91" tabindex="-1"></a> [<span class="dv">55</span>] <span class="fl">0.06314098</span> <span class="fl">0.02570420</span> <span class="fl">0.04332888</span> <span class="fl">0.09238761</span> <span class="fl">0.10012490</span> <span class="fl">0.11869072</span></span>
-<span id="cb26-92"><a href="#cb26-92" tabindex="-1"></a> [<span class="dv">61</span>] <span class="fl">0.05276179</span> <span class="fl">0.09538591</span> <span class="fl">0.07677354</span> <span class="fl">0.04634813</span> <span class="fl">0.08990006</span> <span class="fl">0.05857359</span></span>
-<span id="cb26-93"><a href="#cb26-93" tabindex="-1"></a> [<span class="dv">67</span>] <span class="fl">0.10507931</span> <span class="fl">0.07623093</span> <span class="fl">0.11105741</span> <span class="fl">0.07602279</span> <span class="fl">0.08272019</span> <span class="fl">0.04113382</span></span>
-<span id="cb26-94"><a href="#cb26-94" tabindex="-1"></a> [<span class="dv">73</span>] <span class="fl">0.08082205</span> <span class="fl">0.05360715</span> <span class="fl">0.09284835</span> <span class="fl">0.01839824</span> <span class="fl">0.03796410</span> <span class="fl">0.07069711</span></span>
-<span id="cb26-95"><a href="#cb26-95" tabindex="-1"></a> [<span class="dv">79</span>] <span class="fl">0.07777091</span> <span class="fl">0.08588510</span> <span class="fl">0.11690619</span> <span class="fl">0.06030880</span> <span class="fl">0.10590118</span> <span class="fl">0.10782745</span></span>
-<span id="cb26-96"><a href="#cb26-96" tabindex="-1"></a> [<span class="dv">85</span>] <span class="fl">0.06639759</span> <span class="fl">0.06499843</span> <span class="fl">0.07933454</span> <span class="fl">0.06463416</span> <span class="fl">0.09112998</span> <span class="fl">0.06640864</span></span>
-<span id="cb26-97"><a href="#cb26-97" tabindex="-1"></a> [<span class="dv">91</span>] <span class="fl">0.06755599</span> <span class="fl">0.07182240</span> <span class="fl">0.09123954</span> <span class="fl">0.07012033</span> <span class="fl">0.09326807</span> <span class="fl">0.08488978</span></span>
-<span id="cb26-98"><a href="#cb26-98" tabindex="-1"></a> [<span class="dv">97</span>] <span class="fl">0.08600358</span> <span class="fl">0.07038152</span> <span class="fl">0.06785717</span> <span class="fl">0.03480324</span></span>
-<span id="cb26-99"><a href="#cb26-99" tabindex="-1"></a></span>
-<span id="cb26-100"><a href="#cb26-100" tabindex="-1"></a></span>
-<span id="cb26-101"><a href="#cb26-101" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2</span>
-<span id="cb26-102"><a href="#cb26-102" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>anri</span>
-<span id="cb26-103"><a href="#cb26-103" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.02682759</span></span>
-<span id="cb26-104"><a href="#cb26-104" tabindex="-1"></a></span>
-<span id="cb26-105"><a href="#cb26-105" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>nri</span>
-<span id="cb26-106"><a href="#cb26-106" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.03571501</span></span>
-<span id="cb26-107"><a href="#cb26-107" tabindex="-1"></a></span>
-<span id="cb26-108"><a href="#cb26-108" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>ci_lower</span>
-<span id="cb26-109"><a href="#cb26-109" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.009110349</span></span>
-<span id="cb26-110"><a href="#cb26-110" tabindex="-1"></a></span>
-<span id="cb26-111"><a href="#cb26-111" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>ci_upper</span>
-<span id="cb26-112"><a href="#cb26-112" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.06445527</span></span>
-<span id="cb26-113"><a href="#cb26-113" tabindex="-1"></a></span>
-<span id="cb26-114"><a href="#cb26-114" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>conf_level</span>
-<span id="cb26-115"><a href="#cb26-115" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
-<span id="cb26-116"><a href="#cb26-116" tabindex="-1"></a></span>
-<span id="cb26-117"><a href="#cb26-117" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_bootstrap</span>
-<span id="cb26-118"><a href="#cb26-118" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
-<span id="cb26-119"><a href="#cb26-119" tabindex="-1"></a></span>
-<span id="cb26-120"><a href="#cb26-120" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_bootstrap_requested</span>
-<span id="cb26-121"><a href="#cb26-121" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
-<span id="cb26-122"><a href="#cb26-122" tabindex="-1"></a></span>
-<span id="cb26-123"><a href="#cb26-123" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_failed</span>
-<span id="cb26-124"><a href="#cb26-124" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb26-125"><a href="#cb26-125" tabindex="-1"></a></span>
-<span id="cb26-126"><a href="#cb26-126" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_total</span>
-<span id="cb26-127"><a href="#cb26-127" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">219</span></span>
-<span id="cb26-128"><a href="#cb26-128" tabindex="-1"></a></span>
-<span id="cb26-129"><a href="#cb26-129" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_bins</span>
-<span id="cb26-130"><a href="#cb26-130" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span></span>
-<span id="cb26-131"><a href="#cb26-131" tabindex="-1"></a></span>
-<span id="cb26-132"><a href="#cb26-132" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>bootstrap_distribution</span>
-<span id="cb26-133"><a href="#cb26-133" tabindex="-1"></a>  [<span class="dv">1</span>] <span class="fl">0.054817973</span> <span class="fl">0.022421218</span> <span class="fl">0.026550014</span> <span class="fl">0.047942448</span> <span class="fl">0.026436048</span> <span class="fl">0.051313022</span></span>
-<span id="cb26-134"><a href="#cb26-134" tabindex="-1"></a>  [<span class="dv">7</span>] <span class="fl">0.026715655</span> <span class="fl">0.035606414</span> <span class="fl">0.049266532</span> <span class="fl">0.033202453</span> <span class="fl">0.065100176</span> <span class="fl">0.019272279</span></span>
-<span id="cb26-135"><a href="#cb26-135" tabindex="-1"></a> [<span class="dv">13</span>] <span class="fl">0.017972351</span> <span class="fl">0.024914903</span> <span class="fl">0.031759105</span> <span class="fl">0.023415879</span> <span class="fl">0.039935663</span> <span class="fl">0.016485797</span></span>
-<span id="cb26-136"><a href="#cb26-136" tabindex="-1"></a> [<span class="dv">19</span>] <span class="fl">0.028106056</span> <span class="fl">0.026755049</span> <span class="fl">0.042393733</span> <span class="fl">0.014044901</span> <span class="fl">0.047430438</span> <span class="fl">0.025694351</span></span>
-<span id="cb26-137"><a href="#cb26-137" tabindex="-1"></a> [<span class="dv">25</span>] <span class="fl">0.009603482</span> <span class="fl">0.031974042</span> <span class="fl">0.025750449</span> <span class="fl">0.023649520</span> <span class="fl">0.016634482</span> <span class="fl">0.034929618</span></span>
-<span id="cb26-138"><a href="#cb26-138" tabindex="-1"></a> [<span class="dv">31</span>] <span class="fl">0.044207564</span> <span class="fl">0.042362668</span> <span class="fl">0.025991477</span> <span class="fl">0.033185154</span> <span class="fl">0.037640835</span> <span class="fl">0.026160620</span></span>
-<span id="cb26-139"><a href="#cb26-139" tabindex="-1"></a> [<span class="dv">37</span>] <span class="fl">0.011972828</span> <span class="fl">0.007036663</span> <span class="fl">0.041360143</span> <span class="fl">0.024607043</span> <span class="fl">0.027630872</span> <span class="fl">0.030317349</span></span>
-<span id="cb26-140"><a href="#cb26-140" tabindex="-1"></a> [<span class="dv">43</span>] <span class="fl">0.032542761</span> <span class="fl">0.019641566</span> <span class="fl">0.022733987</span> <span class="fl">0.010714669</span> <span class="fl">0.031485628</span> <span class="fl">0.021524720</span></span>
-<span id="cb26-141"><a href="#cb26-141" tabindex="-1"></a> [<span class="dv">49</span>] <span class="fl">0.021008661</span> <span class="fl">0.029182388</span> <span class="fl">0.023620195</span> <span class="fl">0.032096170</span> <span class="fl">0.032127258</span> <span class="fl">0.039164861</span></span>
-<span id="cb26-142"><a href="#cb26-142" tabindex="-1"></a> [<span class="dv">55</span>] <span class="fl">0.022085988</span> <span class="fl">0.045748433</span> <span class="fl">0.022176174</span> <span class="fl">0.023266895</span> <span class="fl">0.034157548</span> <span class="fl">0.023283074</span></span>
-<span id="cb26-143"><a href="#cb26-143" tabindex="-1"></a> [<span class="dv">61</span>] <span class="fl">0.064850996</span> <span class="fl">0.008664181</span> <span class="fl">0.014826744</span> <span class="fl">0.024504903</span> <span class="fl">0.010977051</span> <span class="fl">0.019082504</span></span>
-<span id="cb26-144"><a href="#cb26-144" tabindex="-1"></a> [<span class="dv">67</span>] <span class="fl">0.013783056</span> <span class="fl">0.023553399</span> <span class="fl">0.032484769</span> <span class="fl">0.026147752</span> <span class="fl">0.022248487</span> <span class="fl">0.030642495</span></span>
-<span id="cb26-145"><a href="#cb26-145" tabindex="-1"></a> [<span class="dv">73</span>] <span class="fl">0.007978659</span> <span class="fl">0.057524655</span> <span class="fl">0.027271420</span> <span class="fl">0.064017894</span> <span class="fl">0.080392203</span> <span class="fl">0.014551924</span></span>
-<span id="cb26-146"><a href="#cb26-146" tabindex="-1"></a> [<span class="dv">79</span>] <span class="fl">0.051559618</span> <span class="fl">0.026730444</span> <span class="fl">0.026491746</span> <span class="fl">0.023184755</span> <span class="fl">0.035857128</span> <span class="fl">0.028955733</span></span>
-<span id="cb26-147"><a href="#cb26-147" tabindex="-1"></a> [<span class="dv">85</span>] <span class="fl">0.019554188</span> <span class="fl">0.048800873</span> <span class="fl">0.022485638</span> <span class="fl">0.034746265</span> <span class="fl">0.046738180</span> <span class="fl">0.030777372</span></span>
-<span id="cb26-148"><a href="#cb26-148" tabindex="-1"></a> [<span class="dv">91</span>] <span class="fl">0.026480496</span> <span class="fl">0.025514253</span> <span class="fl">0.037440071</span> <span class="fl">0.038654235</span> <span class="fl">0.034623890</span> <span class="fl">0.033019727</span></span>
-<span id="cb26-149"><a href="#cb26-149" tabindex="-1"></a> [<span class="dv">97</span>] <span class="fl">0.053811990</span> <span class="fl">0.030239350</span> <span class="fl">0.028706437</span> <span class="fl">0.010009702</span></span>
-<span id="cb26-150"><a href="#cb26-150" tabindex="-1"></a></span>
-<span id="cb26-151"><a href="#cb26-151" tabindex="-1"></a></span>
-<span id="cb26-152"><a href="#cb26-152" tabindex="-1"></a><span class="sc">$</span>difference_distribution</span>
-<span id="cb26-153"><a href="#cb26-153" tabindex="-1"></a>  [<span class="dv">1</span>]  <span class="fl">0.0122680065</span>  <span class="fl">0.0432848222</span>  <span class="fl">0.0539265958</span>  <span class="fl">0.0019368818</span>  <span class="fl">0.0457763559</span></span>
-<span id="cb26-154"><a href="#cb26-154" tabindex="-1"></a>  [<span class="dv">6</span>]  <span class="fl">0.0101690294</span>  <span class="fl">0.0454101932</span>  <span class="fl">0.0501054840</span>  <span class="fl">0.0189002169</span>  <span class="fl">0.0367917783</span></span>
-<span id="cb26-155"><a href="#cb26-155" tabindex="-1"></a> [<span class="dv">11</span>] <span class="sc">-</span><span class="fl">0.0059362774</span>  <span class="fl">0.0758290756</span>  <span class="fl">0.0134567857</span>  <span class="fl">0.0201422261</span>  <span class="fl">0.0246395094</span></span>
-<span id="cb26-156"><a href="#cb26-156" tabindex="-1"></a> [<span class="dv">16</span>]  <span class="fl">0.0757351573</span> <span class="sc">-</span><span class="fl">0.0010794705</span>  <span class="fl">0.0606795334</span>  <span class="fl">0.0270776135</span>  <span class="fl">0.0348482420</span></span>
-<span id="cb26-157"><a href="#cb26-157" tabindex="-1"></a> [<span class="dv">21</span>]  <span class="fl">0.0377242712</span>  <span class="fl">0.0217836462</span>  <span class="fl">0.0062604171</span>  <span class="fl">0.0569340862</span>  <span class="fl">0.1030977881</span></span>
-<span id="cb26-158"><a href="#cb26-158" tabindex="-1"></a> [<span class="dv">26</span>]  <span class="fl">0.0588111547</span>  <span class="fl">0.0854330116</span>  <span class="fl">0.0374207301</span>  <span class="fl">0.0943248658</span>  <span class="fl">0.0019382433</span></span>
-<span id="cb26-159"><a href="#cb26-159" tabindex="-1"></a> [<span class="dv">31</span>]  <span class="fl">0.0340367627</span>  <span class="fl">0.0612899930</span>  <span class="fl">0.0386727321</span>  <span class="fl">0.0444031450</span>  <span class="fl">0.0248266917</span></span>
-<span id="cb26-160"><a href="#cb26-160" tabindex="-1"></a> [<span class="dv">36</span>]  <span class="fl">0.0152583218</span>  <span class="fl">0.0713114246</span>  <span class="fl">0.0776613940</span>  <span class="fl">0.0387239227</span>  <span class="fl">0.0426603164</span></span>
-<span id="cb26-161"><a href="#cb26-161" tabindex="-1"></a> [<span class="dv">41</span>] <span class="sc">-</span><span class="fl">0.0005974759</span>  <span class="fl">0.0368383268</span>  <span class="fl">0.0282686652</span>  <span class="fl">0.0242055779</span>  <span class="fl">0.0413108181</span></span>
-<span id="cb26-162"><a href="#cb26-162" tabindex="-1"></a> [<span class="dv">46</span>]  <span class="fl">0.0698865853</span>  <span class="fl">0.0622683605</span>  <span class="fl">0.0192123438</span>  <span class="fl">0.0346028060</span>  <span class="fl">0.0361886426</span></span>
-<span id="cb26-163"><a href="#cb26-163" tabindex="-1"></a> [<span class="dv">51</span>]  <span class="fl">0.0589750985</span>  <span class="fl">0.0437832779</span>  <span class="fl">0.0302142505</span>  <span class="fl">0.0804072525</span>  <span class="fl">0.0410549946</span></span>
-<span id="cb26-164"><a href="#cb26-164" tabindex="-1"></a> [<span class="dv">56</span>] <span class="sc">-</span><span class="fl">0.0200442308</span>  <span class="fl">0.0211527091</span>  <span class="fl">0.0691207197</span>  <span class="fl">0.0659673547</span>  <span class="fl">0.0954076458</span></span>
-<span id="cb26-165"><a href="#cb26-165" tabindex="-1"></a> [<span class="dv">61</span>] <span class="sc">-</span><span class="fl">0.0120892085</span>  <span class="fl">0.0867217281</span>  <span class="fl">0.0619467959</span>  <span class="fl">0.0218432288</span>  <span class="fl">0.0789230117</span></span>
-<span id="cb26-166"><a href="#cb26-166" tabindex="-1"></a> [<span class="dv">66</span>]  <span class="fl">0.0394910885</span>  <span class="fl">0.0912962539</span>  <span class="fl">0.0526775336</span>  <span class="fl">0.0785726379</span>  <span class="fl">0.0498750399</span></span>
-<span id="cb26-167"><a href="#cb26-167" tabindex="-1"></a> [<span class="dv">71</span>]  <span class="fl">0.0604717015</span>  <span class="fl">0.0104913202</span>  <span class="fl">0.0728433901</span> <span class="sc">-</span><span class="fl">0.0039175017</span>  <span class="fl">0.0655769263</span></span>
-<span id="cb26-168"><a href="#cb26-168" tabindex="-1"></a> [<span class="dv">76</span>] <span class="sc">-</span><span class="fl">0.0456196567</span> <span class="sc">-</span><span class="fl">0.0424281019</span>  <span class="fl">0.0561451813</span>  <span class="fl">0.0262112892</span>  <span class="fl">0.0591546516</span></span>
-<span id="cb26-169"><a href="#cb26-169" tabindex="-1"></a> [<span class="dv">81</span>]  <span class="fl">0.0904144437</span>  <span class="fl">0.0371240484</span>  <span class="fl">0.0700440502</span>  <span class="fl">0.0788717134</span>  <span class="fl">0.0468434025</span></span>
-<span id="cb26-170"><a href="#cb26-170" tabindex="-1"></a> [<span class="dv">86</span>]  <span class="fl">0.0161975531</span>  <span class="fl">0.0568489007</span>  <span class="fl">0.0298878990</span>  <span class="fl">0.0443917958</span>  <span class="fl">0.0356312668</span></span>
-<span id="cb26-171"><a href="#cb26-171" tabindex="-1"></a> [<span class="dv">91</span>]  <span class="fl">0.0410754920</span>  <span class="fl">0.0463081431</span>  <span class="fl">0.0537994645</span>  <span class="fl">0.0314660929</span>  <span class="fl">0.0586441834</span></span>
-<span id="cb26-172"><a href="#cb26-172" tabindex="-1"></a> [<span class="dv">96</span>]  <span class="fl">0.0518700487</span>  <span class="fl">0.0321915922</span>  <span class="fl">0.0401421675</span>  <span class="fl">0.0391507322</span>  <span class="fl">0.0247935330</span></span>
-<span id="cb26-173"><a href="#cb26-173" tabindex="-1"></a></span>
-<span id="cb26-174"><a href="#cb26-174" tabindex="-1"></a><span class="fu">plot_anri_comparison</span>(anri_comparison)</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>anri_comparison <span class="ot">&lt;-</span> <span class="fu">compare_anri</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>  procedures,</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>  <span class="at">group_var =</span> <span class="st">"procedure"</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>  <span class="at">confidence_bins =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">60</span>, <span class="dv">80</span>, <span class="dv">100</span>),</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>  <span class="at">n_bootstrap =</span> <span class="dv">100</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">456</span></span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>)</span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a><span class="fu">print</span>(anri_comparison)</span>
+<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a><span class="sc">$</span>anri_group1</span>
+<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.06778469</span></span>
+<span id="cb27-12"><a href="#cb27-12" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" tabindex="-1"></a><span class="sc">$</span>anri_group2</span>
+<span id="cb27-14"><a href="#cb27-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.02682759</span></span>
+<span id="cb27-15"><a href="#cb27-15" tabindex="-1"></a></span>
+<span id="cb27-16"><a href="#cb27-16" tabindex="-1"></a><span class="sc">$</span>nri_group1</span>
+<span id="cb27-17"><a href="#cb27-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.07322035</span></span>
+<span id="cb27-18"><a href="#cb27-18" tabindex="-1"></a></span>
+<span id="cb27-19"><a href="#cb27-19" tabindex="-1"></a><span class="sc">$</span>nri_group2</span>
+<span id="cb27-20"><a href="#cb27-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.03571501</span></span>
+<span id="cb27-21"><a href="#cb27-21" tabindex="-1"></a></span>
+<span id="cb27-22"><a href="#cb27-22" tabindex="-1"></a><span class="sc">$</span>difference</span>
+<span id="cb27-23"><a href="#cb27-23" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.04095711</span></span>
+<span id="cb27-24"><a href="#cb27-24" tabindex="-1"></a></span>
+<span id="cb27-25"><a href="#cb27-25" tabindex="-1"></a><span class="sc">$</span>ci_lower</span>
+<span id="cb27-26"><a href="#cb27-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="sc">-</span><span class="fl">0.0162656</span></span>
+<span id="cb27-27"><a href="#cb27-27" tabindex="-1"></a></span>
+<span id="cb27-28"><a href="#cb27-28" tabindex="-1"></a><span class="sc">$</span>ci_upper</span>
+<span id="cb27-29"><a href="#cb27-29" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.09288628</span></span>
+<span id="cb27-30"><a href="#cb27-30" tabindex="-1"></a></span>
+<span id="cb27-31"><a href="#cb27-31" tabindex="-1"></a><span class="sc">$</span>conf_level</span>
+<span id="cb27-32"><a href="#cb27-32" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
+<span id="cb27-33"><a href="#cb27-33" tabindex="-1"></a></span>
+<span id="cb27-34"><a href="#cb27-34" tabindex="-1"></a><span class="sc">$</span>significant</span>
+<span id="cb27-35"><a href="#cb27-35" tabindex="-1"></a> <span class="fl">2.5</span>% </span>
+<span id="cb27-36"><a href="#cb27-36" tabindex="-1"></a><span class="cn">FALSE</span> </span>
+<span id="cb27-37"><a href="#cb27-37" tabindex="-1"></a></span>
+<span id="cb27-38"><a href="#cb27-38" tabindex="-1"></a><span class="sc">$</span>group_names</span>
+<span id="cb27-39"><a href="#cb27-39" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Procedure A"</span> <span class="st">"Procedure B"</span></span>
+<span id="cb27-40"><a href="#cb27-40" tabindex="-1"></a></span>
+<span id="cb27-41"><a href="#cb27-41" tabindex="-1"></a><span class="sc">$</span>n_bootstrap</span>
+<span id="cb27-42"><a href="#cb27-42" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
+<span id="cb27-43"><a href="#cb27-43" tabindex="-1"></a></span>
+<span id="cb27-44"><a href="#cb27-44" tabindex="-1"></a><span class="sc">$</span>n_bootstrap_requested</span>
+<span id="cb27-45"><a href="#cb27-45" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
+<span id="cb27-46"><a href="#cb27-46" tabindex="-1"></a></span>
+<span id="cb27-47"><a href="#cb27-47" tabindex="-1"></a><span class="sc">$</span>n_failed</span>
+<span id="cb27-48"><a href="#cb27-48" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb27-49"><a href="#cb27-49" tabindex="-1"></a></span>
+<span id="cb27-50"><a href="#cb27-50" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1</span>
+<span id="cb27-51"><a href="#cb27-51" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>anri</span>
+<span id="cb27-52"><a href="#cb27-52" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.06778469</span></span>
+<span id="cb27-53"><a href="#cb27-53" tabindex="-1"></a></span>
+<span id="cb27-54"><a href="#cb27-54" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>nri</span>
+<span id="cb27-55"><a href="#cb27-55" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.07322035</span></span>
+<span id="cb27-56"><a href="#cb27-56" tabindex="-1"></a></span>
+<span id="cb27-57"><a href="#cb27-57" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>ci_lower</span>
+<span id="cb27-58"><a href="#cb27-58" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.02912137</span></span>
+<span id="cb27-59"><a href="#cb27-59" tabindex="-1"></a></span>
+<span id="cb27-60"><a href="#cb27-60" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>ci_upper</span>
+<span id="cb27-61"><a href="#cb27-61" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.1149089</span></span>
+<span id="cb27-62"><a href="#cb27-62" tabindex="-1"></a></span>
+<span id="cb27-63"><a href="#cb27-63" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>conf_level</span>
+<span id="cb27-64"><a href="#cb27-64" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
+<span id="cb27-65"><a href="#cb27-65" tabindex="-1"></a></span>
+<span id="cb27-66"><a href="#cb27-66" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_bootstrap</span>
+<span id="cb27-67"><a href="#cb27-67" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
+<span id="cb27-68"><a href="#cb27-68" tabindex="-1"></a></span>
+<span id="cb27-69"><a href="#cb27-69" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_bootstrap_requested</span>
+<span id="cb27-70"><a href="#cb27-70" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
+<span id="cb27-71"><a href="#cb27-71" tabindex="-1"></a></span>
+<span id="cb27-72"><a href="#cb27-72" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_failed</span>
+<span id="cb27-73"><a href="#cb27-73" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb27-74"><a href="#cb27-74" tabindex="-1"></a></span>
+<span id="cb27-75"><a href="#cb27-75" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_total</span>
+<span id="cb27-76"><a href="#cb27-76" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">343</span></span>
+<span id="cb27-77"><a href="#cb27-77" tabindex="-1"></a></span>
+<span id="cb27-78"><a href="#cb27-78" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>n_bins</span>
+<span id="cb27-79"><a href="#cb27-79" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span></span>
+<span id="cb27-80"><a href="#cb27-80" tabindex="-1"></a></span>
+<span id="cb27-81"><a href="#cb27-81" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group1<span class="sc">$</span>bootstrap_distribution</span>
+<span id="cb27-82"><a href="#cb27-82" tabindex="-1"></a>  [<span class="dv">1</span>] <span class="fl">0.06708598</span> <span class="fl">0.06570604</span> <span class="fl">0.08047661</span> <span class="fl">0.04987933</span> <span class="fl">0.07221240</span> <span class="fl">0.06148205</span></span>
+<span id="cb27-83"><a href="#cb27-83" tabindex="-1"></a>  [<span class="dv">7</span>] <span class="fl">0.07212585</span> <span class="fl">0.08571190</span> <span class="fl">0.06816675</span> <span class="fl">0.06999423</span> <span class="fl">0.05916390</span> <span class="fl">0.09510135</span></span>
+<span id="cb27-84"><a href="#cb27-84" tabindex="-1"></a> [<span class="dv">13</span>] <span class="fl">0.03142914</span> <span class="fl">0.04505713</span> <span class="fl">0.05639861</span> <span class="fl">0.09915104</span> <span class="fl">0.03885619</span> <span class="fl">0.07716533</span></span>
+<span id="cb27-85"><a href="#cb27-85" tabindex="-1"></a> [<span class="dv">19</span>] <span class="fl">0.05518367</span> <span class="fl">0.06160329</span> <span class="fl">0.08011800</span> <span class="fl">0.03582855</span> <span class="fl">0.05369086</span> <span class="fl">0.08262844</span></span>
+<span id="cb27-86"><a href="#cb27-86" tabindex="-1"></a> [<span class="dv">25</span>] <span class="fl">0.11270127</span> <span class="fl">0.09078520</span> <span class="fl">0.11118346</span> <span class="fl">0.06107025</span> <span class="fl">0.11095935</span> <span class="fl">0.03686786</span></span>
+<span id="cb27-87"><a href="#cb27-87" tabindex="-1"></a> [<span class="dv">31</span>] <span class="fl">0.07824433</span> <span class="fl">0.10365266</span> <span class="fl">0.06466421</span> <span class="fl">0.07758830</span> <span class="fl">0.06246753</span> <span class="fl">0.04141894</span></span>
+<span id="cb27-88"><a href="#cb27-88" tabindex="-1"></a> [<span class="dv">37</span>] <span class="fl">0.08328425</span> <span class="fl">0.08469806</span> <span class="fl">0.08008407</span> <span class="fl">0.06726736</span> <span class="fl">0.02703340</span> <span class="fl">0.06715568</span></span>
+<span id="cb27-89"><a href="#cb27-89" tabindex="-1"></a> [<span class="dv">43</span>] <span class="fl">0.06081143</span> <span class="fl">0.04384714</span> <span class="fl">0.06404480</span> <span class="fl">0.08060125</span> <span class="fl">0.09375399</span> <span class="fl">0.04073706</span></span>
+<span id="cb27-90"><a href="#cb27-90" tabindex="-1"></a> [<span class="dv">49</span>] <span class="fl">0.05561147</span> <span class="fl">0.06537103</span> <span class="fl">0.08259529</span> <span class="fl">0.07587945</span> <span class="fl">0.06234151</span> <span class="fl">0.11957211</span></span>
+<span id="cb27-91"><a href="#cb27-91" tabindex="-1"></a> [<span class="dv">55</span>] <span class="fl">0.06314098</span> <span class="fl">0.02570420</span> <span class="fl">0.04332888</span> <span class="fl">0.09238761</span> <span class="fl">0.10012490</span> <span class="fl">0.11869072</span></span>
+<span id="cb27-92"><a href="#cb27-92" tabindex="-1"></a> [<span class="dv">61</span>] <span class="fl">0.05276179</span> <span class="fl">0.09538591</span> <span class="fl">0.07677354</span> <span class="fl">0.04634813</span> <span class="fl">0.08990006</span> <span class="fl">0.05857359</span></span>
+<span id="cb27-93"><a href="#cb27-93" tabindex="-1"></a> [<span class="dv">67</span>] <span class="fl">0.10507931</span> <span class="fl">0.07623093</span> <span class="fl">0.11105741</span> <span class="fl">0.07602279</span> <span class="fl">0.08272019</span> <span class="fl">0.04113382</span></span>
+<span id="cb27-94"><a href="#cb27-94" tabindex="-1"></a> [<span class="dv">73</span>] <span class="fl">0.08082205</span> <span class="fl">0.05360715</span> <span class="fl">0.09284835</span> <span class="fl">0.01839824</span> <span class="fl">0.03796410</span> <span class="fl">0.07069711</span></span>
+<span id="cb27-95"><a href="#cb27-95" tabindex="-1"></a> [<span class="dv">79</span>] <span class="fl">0.07777091</span> <span class="fl">0.08588510</span> <span class="fl">0.11690619</span> <span class="fl">0.06030880</span> <span class="fl">0.10590118</span> <span class="fl">0.10782745</span></span>
+<span id="cb27-96"><a href="#cb27-96" tabindex="-1"></a> [<span class="dv">85</span>] <span class="fl">0.06639759</span> <span class="fl">0.06499843</span> <span class="fl">0.07933454</span> <span class="fl">0.06463416</span> <span class="fl">0.09112998</span> <span class="fl">0.06640864</span></span>
+<span id="cb27-97"><a href="#cb27-97" tabindex="-1"></a> [<span class="dv">91</span>] <span class="fl">0.06755599</span> <span class="fl">0.07182240</span> <span class="fl">0.09123954</span> <span class="fl">0.07012033</span> <span class="fl">0.09326807</span> <span class="fl">0.08488978</span></span>
+<span id="cb27-98"><a href="#cb27-98" tabindex="-1"></a> [<span class="dv">97</span>] <span class="fl">0.08600358</span> <span class="fl">0.07038152</span> <span class="fl">0.06785717</span> <span class="fl">0.03480324</span></span>
+<span id="cb27-99"><a href="#cb27-99" tabindex="-1"></a></span>
+<span id="cb27-100"><a href="#cb27-100" tabindex="-1"></a></span>
+<span id="cb27-101"><a href="#cb27-101" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2</span>
+<span id="cb27-102"><a href="#cb27-102" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>anri</span>
+<span id="cb27-103"><a href="#cb27-103" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.02682759</span></span>
+<span id="cb27-104"><a href="#cb27-104" tabindex="-1"></a></span>
+<span id="cb27-105"><a href="#cb27-105" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>nri</span>
+<span id="cb27-106"><a href="#cb27-106" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.03571501</span></span>
+<span id="cb27-107"><a href="#cb27-107" tabindex="-1"></a></span>
+<span id="cb27-108"><a href="#cb27-108" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>ci_lower</span>
+<span id="cb27-109"><a href="#cb27-109" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.009110349</span></span>
+<span id="cb27-110"><a href="#cb27-110" tabindex="-1"></a></span>
+<span id="cb27-111"><a href="#cb27-111" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>ci_upper</span>
+<span id="cb27-112"><a href="#cb27-112" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.06445527</span></span>
+<span id="cb27-113"><a href="#cb27-113" tabindex="-1"></a></span>
+<span id="cb27-114"><a href="#cb27-114" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>conf_level</span>
+<span id="cb27-115"><a href="#cb27-115" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.95</span></span>
+<span id="cb27-116"><a href="#cb27-116" tabindex="-1"></a></span>
+<span id="cb27-117"><a href="#cb27-117" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_bootstrap</span>
+<span id="cb27-118"><a href="#cb27-118" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
+<span id="cb27-119"><a href="#cb27-119" tabindex="-1"></a></span>
+<span id="cb27-120"><a href="#cb27-120" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_bootstrap_requested</span>
+<span id="cb27-121"><a href="#cb27-121" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">100</span></span>
+<span id="cb27-122"><a href="#cb27-122" tabindex="-1"></a></span>
+<span id="cb27-123"><a href="#cb27-123" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_failed</span>
+<span id="cb27-124"><a href="#cb27-124" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb27-125"><a href="#cb27-125" tabindex="-1"></a></span>
+<span id="cb27-126"><a href="#cb27-126" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_total</span>
+<span id="cb27-127"><a href="#cb27-127" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">219</span></span>
+<span id="cb27-128"><a href="#cb27-128" tabindex="-1"></a></span>
+<span id="cb27-129"><a href="#cb27-129" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>n_bins</span>
+<span id="cb27-130"><a href="#cb27-130" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span></span>
+<span id="cb27-131"><a href="#cb27-131" tabindex="-1"></a></span>
+<span id="cb27-132"><a href="#cb27-132" tabindex="-1"></a><span class="sc">$</span>bootstrap_results_group2<span class="sc">$</span>bootstrap_distribution</span>
+<span id="cb27-133"><a href="#cb27-133" tabindex="-1"></a>  [<span class="dv">1</span>] <span class="fl">0.054817973</span> <span class="fl">0.022421218</span> <span class="fl">0.026550014</span> <span class="fl">0.047942448</span> <span class="fl">0.026436048</span> <span class="fl">0.051313022</span></span>
+<span id="cb27-134"><a href="#cb27-134" tabindex="-1"></a>  [<span class="dv">7</span>] <span class="fl">0.026715655</span> <span class="fl">0.035606414</span> <span class="fl">0.049266532</span> <span class="fl">0.033202453</span> <span class="fl">0.065100176</span> <span class="fl">0.019272279</span></span>
+<span id="cb27-135"><a href="#cb27-135" tabindex="-1"></a> [<span class="dv">13</span>] <span class="fl">0.017972351</span> <span class="fl">0.024914903</span> <span class="fl">0.031759105</span> <span class="fl">0.023415879</span> <span class="fl">0.039935663</span> <span class="fl">0.016485797</span></span>
+<span id="cb27-136"><a href="#cb27-136" tabindex="-1"></a> [<span class="dv">19</span>] <span class="fl">0.028106056</span> <span class="fl">0.026755049</span> <span class="fl">0.042393733</span> <span class="fl">0.014044901</span> <span class="fl">0.047430438</span> <span class="fl">0.025694351</span></span>
+<span id="cb27-137"><a href="#cb27-137" tabindex="-1"></a> [<span class="dv">25</span>] <span class="fl">0.009603482</span> <span class="fl">0.031974042</span> <span class="fl">0.025750449</span> <span class="fl">0.023649520</span> <span class="fl">0.016634482</span> <span class="fl">0.034929618</span></span>
+<span id="cb27-138"><a href="#cb27-138" tabindex="-1"></a> [<span class="dv">31</span>] <span class="fl">0.044207564</span> <span class="fl">0.042362668</span> <span class="fl">0.025991477</span> <span class="fl">0.033185154</span> <span class="fl">0.037640835</span> <span class="fl">0.026160620</span></span>
+<span id="cb27-139"><a href="#cb27-139" tabindex="-1"></a> [<span class="dv">37</span>] <span class="fl">0.011972828</span> <span class="fl">0.007036663</span> <span class="fl">0.041360143</span> <span class="fl">0.024607043</span> <span class="fl">0.027630872</span> <span class="fl">0.030317349</span></span>
+<span id="cb27-140"><a href="#cb27-140" tabindex="-1"></a> [<span class="dv">43</span>] <span class="fl">0.032542761</span> <span class="fl">0.019641566</span> <span class="fl">0.022733987</span> <span class="fl">0.010714669</span> <span class="fl">0.031485628</span> <span class="fl">0.021524720</span></span>
+<span id="cb27-141"><a href="#cb27-141" tabindex="-1"></a> [<span class="dv">49</span>] <span class="fl">0.021008661</span> <span class="fl">0.029182388</span> <span class="fl">0.023620195</span> <span class="fl">0.032096170</span> <span class="fl">0.032127258</span> <span class="fl">0.039164861</span></span>
+<span id="cb27-142"><a href="#cb27-142" tabindex="-1"></a> [<span class="dv">55</span>] <span class="fl">0.022085988</span> <span class="fl">0.045748433</span> <span class="fl">0.022176174</span> <span class="fl">0.023266895</span> <span class="fl">0.034157548</span> <span class="fl">0.023283074</span></span>
+<span id="cb27-143"><a href="#cb27-143" tabindex="-1"></a> [<span class="dv">61</span>] <span class="fl">0.064850996</span> <span class="fl">0.008664181</span> <span class="fl">0.014826744</span> <span class="fl">0.024504903</span> <span class="fl">0.010977051</span> <span class="fl">0.019082504</span></span>
+<span id="cb27-144"><a href="#cb27-144" tabindex="-1"></a> [<span class="dv">67</span>] <span class="fl">0.013783056</span> <span class="fl">0.023553399</span> <span class="fl">0.032484769</span> <span class="fl">0.026147752</span> <span class="fl">0.022248487</span> <span class="fl">0.030642495</span></span>
+<span id="cb27-145"><a href="#cb27-145" tabindex="-1"></a> [<span class="dv">73</span>] <span class="fl">0.007978659</span> <span class="fl">0.057524655</span> <span class="fl">0.027271420</span> <span class="fl">0.064017894</span> <span class="fl">0.080392203</span> <span class="fl">0.014551924</span></span>
+<span id="cb27-146"><a href="#cb27-146" tabindex="-1"></a> [<span class="dv">79</span>] <span class="fl">0.051559618</span> <span class="fl">0.026730444</span> <span class="fl">0.026491746</span> <span class="fl">0.023184755</span> <span class="fl">0.035857128</span> <span class="fl">0.028955733</span></span>
+<span id="cb27-147"><a href="#cb27-147" tabindex="-1"></a> [<span class="dv">85</span>] <span class="fl">0.019554188</span> <span class="fl">0.048800873</span> <span class="fl">0.022485638</span> <span class="fl">0.034746265</span> <span class="fl">0.046738180</span> <span class="fl">0.030777372</span></span>
+<span id="cb27-148"><a href="#cb27-148" tabindex="-1"></a> [<span class="dv">91</span>] <span class="fl">0.026480496</span> <span class="fl">0.025514253</span> <span class="fl">0.037440071</span> <span class="fl">0.038654235</span> <span class="fl">0.034623890</span> <span class="fl">0.033019727</span></span>
+<span id="cb27-149"><a href="#cb27-149" tabindex="-1"></a> [<span class="dv">97</span>] <span class="fl">0.053811990</span> <span class="fl">0.030239350</span> <span class="fl">0.028706437</span> <span class="fl">0.010009702</span></span>
+<span id="cb27-150"><a href="#cb27-150" tabindex="-1"></a></span>
+<span id="cb27-151"><a href="#cb27-151" tabindex="-1"></a></span>
+<span id="cb27-152"><a href="#cb27-152" tabindex="-1"></a><span class="sc">$</span>difference_distribution</span>
+<span id="cb27-153"><a href="#cb27-153" tabindex="-1"></a>  [<span class="dv">1</span>]  <span class="fl">0.0122680065</span>  <span class="fl">0.0432848222</span>  <span class="fl">0.0539265958</span>  <span class="fl">0.0019368818</span>  <span class="fl">0.0457763559</span></span>
+<span id="cb27-154"><a href="#cb27-154" tabindex="-1"></a>  [<span class="dv">6</span>]  <span class="fl">0.0101690294</span>  <span class="fl">0.0454101932</span>  <span class="fl">0.0501054840</span>  <span class="fl">0.0189002169</span>  <span class="fl">0.0367917783</span></span>
+<span id="cb27-155"><a href="#cb27-155" tabindex="-1"></a> [<span class="dv">11</span>] <span class="sc">-</span><span class="fl">0.0059362774</span>  <span class="fl">0.0758290756</span>  <span class="fl">0.0134567857</span>  <span class="fl">0.0201422261</span>  <span class="fl">0.0246395094</span></span>
+<span id="cb27-156"><a href="#cb27-156" tabindex="-1"></a> [<span class="dv">16</span>]  <span class="fl">0.0757351573</span> <span class="sc">-</span><span class="fl">0.0010794705</span>  <span class="fl">0.0606795334</span>  <span class="fl">0.0270776135</span>  <span class="fl">0.0348482420</span></span>
+<span id="cb27-157"><a href="#cb27-157" tabindex="-1"></a> [<span class="dv">21</span>]  <span class="fl">0.0377242712</span>  <span class="fl">0.0217836462</span>  <span class="fl">0.0062604171</span>  <span class="fl">0.0569340862</span>  <span class="fl">0.1030977881</span></span>
+<span id="cb27-158"><a href="#cb27-158" tabindex="-1"></a> [<span class="dv">26</span>]  <span class="fl">0.0588111547</span>  <span class="fl">0.0854330116</span>  <span class="fl">0.0374207301</span>  <span class="fl">0.0943248658</span>  <span class="fl">0.0019382433</span></span>
+<span id="cb27-159"><a href="#cb27-159" tabindex="-1"></a> [<span class="dv">31</span>]  <span class="fl">0.0340367627</span>  <span class="fl">0.0612899930</span>  <span class="fl">0.0386727321</span>  <span class="fl">0.0444031450</span>  <span class="fl">0.0248266917</span></span>
+<span id="cb27-160"><a href="#cb27-160" tabindex="-1"></a> [<span class="dv">36</span>]  <span class="fl">0.0152583218</span>  <span class="fl">0.0713114246</span>  <span class="fl">0.0776613940</span>  <span class="fl">0.0387239227</span>  <span class="fl">0.0426603164</span></span>
+<span id="cb27-161"><a href="#cb27-161" tabindex="-1"></a> [<span class="dv">41</span>] <span class="sc">-</span><span class="fl">0.0005974759</span>  <span class="fl">0.0368383268</span>  <span class="fl">0.0282686652</span>  <span class="fl">0.0242055779</span>  <span class="fl">0.0413108181</span></span>
+<span id="cb27-162"><a href="#cb27-162" tabindex="-1"></a> [<span class="dv">46</span>]  <span class="fl">0.0698865853</span>  <span class="fl">0.0622683605</span>  <span class="fl">0.0192123438</span>  <span class="fl">0.0346028060</span>  <span class="fl">0.0361886426</span></span>
+<span id="cb27-163"><a href="#cb27-163" tabindex="-1"></a> [<span class="dv">51</span>]  <span class="fl">0.0589750985</span>  <span class="fl">0.0437832779</span>  <span class="fl">0.0302142505</span>  <span class="fl">0.0804072525</span>  <span class="fl">0.0410549946</span></span>
+<span id="cb27-164"><a href="#cb27-164" tabindex="-1"></a> [<span class="dv">56</span>] <span class="sc">-</span><span class="fl">0.0200442308</span>  <span class="fl">0.0211527091</span>  <span class="fl">0.0691207197</span>  <span class="fl">0.0659673547</span>  <span class="fl">0.0954076458</span></span>
+<span id="cb27-165"><a href="#cb27-165" tabindex="-1"></a> [<span class="dv">61</span>] <span class="sc">-</span><span class="fl">0.0120892085</span>  <span class="fl">0.0867217281</span>  <span class="fl">0.0619467959</span>  <span class="fl">0.0218432288</span>  <span class="fl">0.0789230117</span></span>
+<span id="cb27-166"><a href="#cb27-166" tabindex="-1"></a> [<span class="dv">66</span>]  <span class="fl">0.0394910885</span>  <span class="fl">0.0912962539</span>  <span class="fl">0.0526775336</span>  <span class="fl">0.0785726379</span>  <span class="fl">0.0498750399</span></span>
+<span id="cb27-167"><a href="#cb27-167" tabindex="-1"></a> [<span class="dv">71</span>]  <span class="fl">0.0604717015</span>  <span class="fl">0.0104913202</span>  <span class="fl">0.0728433901</span> <span class="sc">-</span><span class="fl">0.0039175017</span>  <span class="fl">0.0655769263</span></span>
+<span id="cb27-168"><a href="#cb27-168" tabindex="-1"></a> [<span class="dv">76</span>] <span class="sc">-</span><span class="fl">0.0456196567</span> <span class="sc">-</span><span class="fl">0.0424281019</span>  <span class="fl">0.0561451813</span>  <span class="fl">0.0262112892</span>  <span class="fl">0.0591546516</span></span>
+<span id="cb27-169"><a href="#cb27-169" tabindex="-1"></a> [<span class="dv">81</span>]  <span class="fl">0.0904144437</span>  <span class="fl">0.0371240484</span>  <span class="fl">0.0700440502</span>  <span class="fl">0.0788717134</span>  <span class="fl">0.0468434025</span></span>
+<span id="cb27-170"><a href="#cb27-170" tabindex="-1"></a> [<span class="dv">86</span>]  <span class="fl">0.0161975531</span>  <span class="fl">0.0568489007</span>  <span class="fl">0.0298878990</span>  <span class="fl">0.0443917958</span>  <span class="fl">0.0356312668</span></span>
+<span id="cb27-171"><a href="#cb27-171" tabindex="-1"></a> [<span class="dv">91</span>]  <span class="fl">0.0410754920</span>  <span class="fl">0.0463081431</span>  <span class="fl">0.0537994645</span>  <span class="fl">0.0314660929</span>  <span class="fl">0.0586441834</span></span>
+<span id="cb27-172"><a href="#cb27-172" tabindex="-1"></a> [<span class="dv">96</span>]  <span class="fl">0.0518700487</span>  <span class="fl">0.0321915922</span>  <span class="fl">0.0401421675</span>  <span class="fl">0.0391507322</span>  <span class="fl">0.0247935330</span></span>
+<span id="cb27-173"><a href="#cb27-173" tabindex="-1"></a></span>
+<span id="cb27-174"><a href="#cb27-174" tabindex="-1"></a><span class="fu">plot_anri_comparison</span>(anri_comparison)</span></code></pre></div>
 <p><img src="calibration_decision_analysis_files/figure-html/anri-comparison-1.png" class="r-plt" alt="" width="672"></p>
 <p>The comparison provides:</p>
 <ul>
@@ -1528,7 +1529,7 @@ reader see the size of the correction for themselves.</p>
 <p>Each method answers a different question, so a full analysis runs
 several. The five calls below use <code>lineup_example</code>;
 substitute your own data frame.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, <span class="fl">80</span>, <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 1. Calibration: does confidence mean what it says?</span></span>
@@ -1667,45 +1668,45 @@ Bulletin, 110</em>(3), 611-617.</p>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>R version <span class="dv">4</span>.<span class="fl">6.2</span> (<span class="dv">2026-10-29</span>)</span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>Platform<span class="sc">:</span> x86_64<span class="sc">-</span>pc<span class="sc">-</span>linux<span class="sc">-</span>gnu</span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>Running under<span class="sc">:</span> Ubuntu <span class="dv">26</span>.<span class="fl">04.1</span> LTS</span>
-<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a></span>
-<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a>Matrix products<span class="sc">:</span> default</span>
-<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a>BLAS<span class="sc">:</span>   <span class="er">/</span>usr<span class="sc">/</span>lib<span class="sc">/</span>x86_64<span class="sc">-</span>linux<span class="sc">-</span>gnu<span class="sc">/</span>openblas<span class="sc">-</span>pthread<span class="sc">/</span>libblas.so<span class="fl">.3</span> </span>
-<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a>LAPACK<span class="sc">:</span> <span class="er">/</span>usr<span class="sc">/</span>lib<span class="sc">/</span>x86_64<span class="sc">-</span>linux<span class="sc">-</span>gnu<span class="sc">/</span>openblas<span class="sc">-</span>pthread<span class="sc">/</span>libopenblasp<span class="sc">-</span>r0.<span class="dv">3</span>.<span class="fl">32.</span>so;  LAPACK version <span class="dv">3</span>.<span class="fl">12.0</span></span>
-<span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a></span>
-<span id="cb28-10"><a href="#cb28-10" tabindex="-1"></a>locale<span class="sc">:</span></span>
-<span id="cb28-11"><a href="#cb28-11" tabindex="-1"></a> [<span class="dv">1</span>] LC_CTYPE<span class="ot">=</span>C.UTF<span class="dv">-8</span>       LC_NUMERIC<span class="ot">=</span>C           LC_TIME<span class="ot">=</span>C.UTF<span class="dv">-8</span>       </span>
-<span id="cb28-12"><a href="#cb28-12" tabindex="-1"></a> [<span class="dv">4</span>] LC_COLLATE<span class="ot">=</span>C.UTF<span class="dv">-8</span>     LC_MONETARY<span class="ot">=</span>C.UTF<span class="dv">-8</span>    LC_MESSAGES<span class="ot">=</span>C.UTF<span class="dv">-8</span>   </span>
-<span id="cb28-13"><a href="#cb28-13" tabindex="-1"></a> [<span class="dv">7</span>] LC_PAPER<span class="ot">=</span>C.UTF<span class="dv">-8</span>       LC_NAME<span class="ot">=</span>C              LC_ADDRESS<span class="ot">=</span>C          </span>
-<span id="cb28-14"><a href="#cb28-14" tabindex="-1"></a>[<span class="dv">10</span>] LC_TELEPHONE<span class="ot">=</span>C         LC_MEASUREMENT<span class="ot">=</span>C.UTF<span class="dv">-8</span> LC_IDENTIFICATION<span class="ot">=</span>C   </span>
-<span id="cb28-15"><a href="#cb28-15" tabindex="-1"></a></span>
-<span id="cb28-16"><a href="#cb28-16" tabindex="-1"></a>time zone<span class="sc">:</span> UTC</span>
-<span id="cb28-17"><a href="#cb28-17" tabindex="-1"></a>tzcode source<span class="sc">:</span> <span class="fu">system</span> (glibc)</span>
-<span id="cb28-18"><a href="#cb28-18" tabindex="-1"></a></span>
-<span id="cb28-19"><a href="#cb28-19" tabindex="-1"></a>attached base packages<span class="sc">:</span></span>
-<span id="cb28-20"><a href="#cb28-20" tabindex="-1"></a>[<span class="dv">1</span>] stats     graphics  grDevices utils     datasets  methods   base     </span>
-<span id="cb28-21"><a href="#cb28-21" tabindex="-1"></a></span>
-<span id="cb28-22"><a href="#cb28-22" tabindex="-1"></a>other attached packages<span class="sc">:</span></span>
-<span id="cb28-23"><a href="#cb28-23" tabindex="-1"></a>[<span class="dv">1</span>] r4lineups_2.<span class="fl">3.0</span></span>
-<span id="cb28-24"><a href="#cb28-24" tabindex="-1"></a></span>
-<span id="cb28-25"><a href="#cb28-25" tabindex="-1"></a>loaded via a <span class="fu">namespace</span> (and not attached)<span class="sc">:</span></span>
-<span id="cb28-26"><a href="#cb28-26" tabindex="-1"></a> [<span class="dv">1</span>] Matrix_1<span class="fl">.7</span><span class="dv">-6</span>       gtable_0.<span class="fl">3.6</span>       jsonlite_2.<span class="fl">0.0</span>     dplyr_1.<span class="fl">2.1</span>       </span>
-<span id="cb28-27"><a href="#cb28-27" tabindex="-1"></a> [<span class="dv">5</span>] compiler_4.<span class="fl">6.2</span>     tidyselect_1.<span class="fl">2.1</span>   Rcpp_1.<span class="fl">1.2</span>         gridExtra_2.<span class="fl">3.1</span>   </span>
-<span id="cb28-28"><a href="#cb28-28" tabindex="-1"></a> [<span class="dv">9</span>] jquerylib_0.<span class="fl">1.4</span>    png_0<span class="fl">.1</span><span class="dv">-9</span>          systemfonts_1.<span class="fl">3.2</span>  scales_1.<span class="fl">4.0</span>      </span>
-<span id="cb28-29"><a href="#cb28-29" tabindex="-1"></a>[<span class="dv">13</span>] textshaping_1.<span class="fl">0.5</span>  boot_1<span class="fl">.3</span><span class="dv">-32</span>        yaml_2.<span class="fl">3.12</span>        fastmap_1.<span class="fl">2.0</span>     </span>
-<span id="cb28-30"><a href="#cb28-30" tabindex="-1"></a>[<span class="dv">17</span>] lattice_0<span class="fl">.23</span><span class="dv">-1</span>     reticulate_1.<span class="fl">47.0</span>  ggplot2_4.<span class="fl">0.3</span>      R6_2.<span class="fl">6.1</span>          </span>
-<span id="cb28-31"><a href="#cb28-31" tabindex="-1"></a>[<span class="dv">21</span>] labeling_0.<span class="fl">4.3</span>     generics_0.<span class="fl">1.4</span>     knitr_1<span class="fl">.52</span>         htmlwidgets_1.<span class="fl">6.4</span> </span>
-<span id="cb28-32"><a href="#cb28-32" tabindex="-1"></a>[<span class="dv">25</span>] ggrepel_0.<span class="fl">9.8</span>      tibble_3.<span class="fl">3.1</span>       desc_1.<span class="fl">4.3</span>         bslib_0.<span class="fl">12.0</span>      </span>
-<span id="cb28-33"><a href="#cb28-33" tabindex="-1"></a>[<span class="dv">29</span>] pillar_1.<span class="fl">11.1</span>      RColorBrewer_1<span class="fl">.1</span><span class="dv">-3</span> rlang_1.<span class="fl">3.0</span>        utf8_1.<span class="fl">2.6</span>        </span>
-<span id="cb28-34"><a href="#cb28-34" tabindex="-1"></a>[<span class="dv">33</span>] cachem_1.<span class="fl">1.0</span>       xfun_0<span class="fl">.62</span>          fs_2.<span class="fl">1.0</span>           sass_0.<span class="fl">4.10</span>       </span>
-<span id="cb28-35"><a href="#cb28-35" tabindex="-1"></a>[<span class="dv">37</span>] S7_0.<span class="fl">2.2</span>           otel_0.<span class="fl">2.0</span>         cli_3.<span class="fl">6.6</span>          withr_3.<span class="fl">0.3</span>       </span>
-<span id="cb28-36"><a href="#cb28-36" tabindex="-1"></a>[<span class="dv">41</span>] pkgdown_2.<span class="fl">2.1</span>      magrittr_2.<span class="fl">0.5</span>     digest_0.<span class="fl">6.39</span>      grid_4.<span class="fl">6.2</span>        </span>
-<span id="cb28-37"><a href="#cb28-37" tabindex="-1"></a>[<span class="dv">45</span>] lifecycle_1.<span class="fl">0.5</span>    vctrs_0.<span class="fl">7.3</span>        evaluate_1.<span class="fl">0.5</span>     glue_1.<span class="fl">8.1</span>        </span>
-<span id="cb28-38"><a href="#cb28-38" tabindex="-1"></a>[<span class="dv">49</span>] farver_2.<span class="fl">1.2</span>       ragg_1.<span class="fl">5.2</span>         purrr_1.<span class="fl">2.2</span>        rmarkdown_2<span class="fl">.32</span>    </span>
-<span id="cb28-39"><a href="#cb28-39" tabindex="-1"></a>[<span class="dv">53</span>] tools_4.<span class="fl">6.2</span>        pkgconfig_2.<span class="fl">0.3</span>    htmltools_0.<span class="fl">5.9</span>   </span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>R version <span class="dv">4</span>.<span class="fl">6.2</span> (<span class="dv">2026-10-29</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>Platform<span class="sc">:</span> x86_64<span class="sc">-</span>pc<span class="sc">-</span>linux<span class="sc">-</span>gnu</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>Running under<span class="sc">:</span> Ubuntu <span class="dv">26</span>.<span class="fl">04.1</span> LTS</span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>Matrix products<span class="sc">:</span> default</span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>BLAS<span class="sc">:</span>   <span class="er">/</span>usr<span class="sc">/</span>lib<span class="sc">/</span>x86_64<span class="sc">-</span>linux<span class="sc">-</span>gnu<span class="sc">/</span>openblas<span class="sc">-</span>pthread<span class="sc">/</span>libblas.so<span class="fl">.3</span> </span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>LAPACK<span class="sc">:</span> <span class="er">/</span>usr<span class="sc">/</span>lib<span class="sc">/</span>x86_64<span class="sc">-</span>linux<span class="sc">-</span>gnu<span class="sc">/</span>openblas<span class="sc">-</span>pthread<span class="sc">/</span>libopenblasp<span class="sc">-</span>r0.<span class="dv">3</span>.<span class="fl">32.</span>so;  LAPACK version <span class="dv">3</span>.<span class="fl">12.0</span></span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a>locale<span class="sc">:</span></span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a> [<span class="dv">1</span>] LC_CTYPE<span class="ot">=</span>C.UTF<span class="dv">-8</span>       LC_NUMERIC<span class="ot">=</span>C           LC_TIME<span class="ot">=</span>C.UTF<span class="dv">-8</span>       </span>
+<span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a> [<span class="dv">4</span>] LC_COLLATE<span class="ot">=</span>C.UTF<span class="dv">-8</span>     LC_MONETARY<span class="ot">=</span>C.UTF<span class="dv">-8</span>    LC_MESSAGES<span class="ot">=</span>C.UTF<span class="dv">-8</span>   </span>
+<span id="cb29-13"><a href="#cb29-13" tabindex="-1"></a> [<span class="dv">7</span>] LC_PAPER<span class="ot">=</span>C.UTF<span class="dv">-8</span>       LC_NAME<span class="ot">=</span>C              LC_ADDRESS<span class="ot">=</span>C          </span>
+<span id="cb29-14"><a href="#cb29-14" tabindex="-1"></a>[<span class="dv">10</span>] LC_TELEPHONE<span class="ot">=</span>C         LC_MEASUREMENT<span class="ot">=</span>C.UTF<span class="dv">-8</span> LC_IDENTIFICATION<span class="ot">=</span>C   </span>
+<span id="cb29-15"><a href="#cb29-15" tabindex="-1"></a></span>
+<span id="cb29-16"><a href="#cb29-16" tabindex="-1"></a>time zone<span class="sc">:</span> UTC</span>
+<span id="cb29-17"><a href="#cb29-17" tabindex="-1"></a>tzcode source<span class="sc">:</span> <span class="fu">system</span> (glibc)</span>
+<span id="cb29-18"><a href="#cb29-18" tabindex="-1"></a></span>
+<span id="cb29-19"><a href="#cb29-19" tabindex="-1"></a>attached base packages<span class="sc">:</span></span>
+<span id="cb29-20"><a href="#cb29-20" tabindex="-1"></a>[<span class="dv">1</span>] stats     graphics  grDevices utils     datasets  methods   base     </span>
+<span id="cb29-21"><a href="#cb29-21" tabindex="-1"></a></span>
+<span id="cb29-22"><a href="#cb29-22" tabindex="-1"></a>other attached packages<span class="sc">:</span></span>
+<span id="cb29-23"><a href="#cb29-23" tabindex="-1"></a>[<span class="dv">1</span>] r4lineups_2.<span class="fl">3.0</span></span>
+<span id="cb29-24"><a href="#cb29-24" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" tabindex="-1"></a>loaded via a <span class="fu">namespace</span> (and not attached)<span class="sc">:</span></span>
+<span id="cb29-26"><a href="#cb29-26" tabindex="-1"></a> [<span class="dv">1</span>] Matrix_1<span class="fl">.7</span><span class="dv">-6</span>       gtable_0.<span class="fl">3.6</span>       jsonlite_2.<span class="fl">0.0</span>     dplyr_1.<span class="fl">2.1</span>       </span>
+<span id="cb29-27"><a href="#cb29-27" tabindex="-1"></a> [<span class="dv">5</span>] compiler_4.<span class="fl">6.2</span>     tidyselect_1.<span class="fl">2.1</span>   Rcpp_1.<span class="fl">1.2</span>         gridExtra_2.<span class="fl">3.1</span>   </span>
+<span id="cb29-28"><a href="#cb29-28" tabindex="-1"></a> [<span class="dv">9</span>] jquerylib_0.<span class="fl">1.4</span>    png_0<span class="fl">.1</span><span class="dv">-9</span>          systemfonts_1.<span class="fl">3.2</span>  scales_1.<span class="fl">4.0</span>      </span>
+<span id="cb29-29"><a href="#cb29-29" tabindex="-1"></a>[<span class="dv">13</span>] textshaping_1.<span class="fl">0.5</span>  boot_1<span class="fl">.3</span><span class="dv">-32</span>        yaml_2.<span class="fl">3.12</span>        fastmap_1.<span class="fl">2.0</span>     </span>
+<span id="cb29-30"><a href="#cb29-30" tabindex="-1"></a>[<span class="dv">17</span>] lattice_0<span class="fl">.23</span><span class="dv">-1</span>     reticulate_1.<span class="fl">47.0</span>  ggplot2_4.<span class="fl">0.3</span>      R6_2.<span class="fl">6.1</span>          </span>
+<span id="cb29-31"><a href="#cb29-31" tabindex="-1"></a>[<span class="dv">21</span>] labeling_0.<span class="fl">4.3</span>     generics_0.<span class="fl">1.4</span>     knitr_1<span class="fl">.52</span>         htmlwidgets_1.<span class="fl">6.4</span> </span>
+<span id="cb29-32"><a href="#cb29-32" tabindex="-1"></a>[<span class="dv">25</span>] ggrepel_0.<span class="fl">9.8</span>      tibble_3.<span class="fl">3.1</span>       desc_1.<span class="fl">4.3</span>         bslib_0.<span class="fl">12.0</span>      </span>
+<span id="cb29-33"><a href="#cb29-33" tabindex="-1"></a>[<span class="dv">29</span>] pillar_1.<span class="fl">11.1</span>      RColorBrewer_1<span class="fl">.1</span><span class="dv">-3</span> rlang_1.<span class="fl">3.0</span>        utf8_1.<span class="fl">2.6</span>        </span>
+<span id="cb29-34"><a href="#cb29-34" tabindex="-1"></a>[<span class="dv">33</span>] cachem_1.<span class="fl">1.0</span>       xfun_0<span class="fl">.62</span>          fs_2.<span class="fl">1.0</span>           sass_0.<span class="fl">4.10</span>       </span>
+<span id="cb29-35"><a href="#cb29-35" tabindex="-1"></a>[<span class="dv">37</span>] S7_0.<span class="fl">2.2</span>           otel_0.<span class="fl">2.0</span>         cli_3.<span class="fl">6.6</span>          withr_3.<span class="fl">0.3</span>       </span>
+<span id="cb29-36"><a href="#cb29-36" tabindex="-1"></a>[<span class="dv">41</span>] pkgdown_2.<span class="fl">2.1</span>      magrittr_2.<span class="fl">0.5</span>     digest_0.<span class="fl">6.39</span>      grid_4.<span class="fl">6.2</span>        </span>
+<span id="cb29-37"><a href="#cb29-37" tabindex="-1"></a>[<span class="dv">45</span>] lifecycle_1.<span class="fl">0.5</span>    vctrs_0.<span class="fl">7.3</span>        evaluate_1.<span class="fl">0.5</span>     glue_1.<span class="fl">8.1</span>        </span>
+<span id="cb29-38"><a href="#cb29-38" tabindex="-1"></a>[<span class="dv">49</span>] farver_2.<span class="fl">1.2</span>       ragg_1.<span class="fl">5.2</span>         purrr_1.<span class="fl">2.2</span>        rmarkdown_2<span class="fl">.32</span>    </span>
+<span id="cb29-39"><a href="#cb29-39" tabindex="-1"></a>[<span class="dv">53</span>] tools_4.<span class="fl">6.2</span>        pkgconfig_2.<span class="fl">0.3</span>    htmltools_0.<span class="fl">5.9</span>   </span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -526,3 +526,11 @@ fair reference) (Colin, 30 Oct 2026).
   [`shiny::testServer()`](https://rdrr.io/pkg/shiny/man/testServer.html);
   `test-shiny-app-browser.R` is an opt-in headless-Chrome smoke test
   (install the package, then set `R4LINEUPS_TEST_APP=true`).
+- CRAN limits the whole check to 10 minutes. Tests that take more than
+  about 0.3 s, and the Shiny module tests, call `skip_on_cran()`, so
+  they run only when `NOT_CRAN=true` (devtools, rcmdcheck and GitHub
+  Actions set it). The slowest vignette chunks show their code with
+  `eval = precompute` and load stored results from
+  `vignettes/precomputed/` (with the random-number state); rerun
+  `Rscript data-raw/vignette_precompute.R` after any change that could
+  alter them.

@@ -38,11 +38,12 @@ regression test.
 The JOSS manuscript names 2.3.0 and renders cleanly in the Open Journals
 job.
 
-Checked candidate: `cran_submission_2026-10-31/r4lineups_2.3.0.tar.gz`,
-2,297,508 bytes, SHA-256
-`2dd8679fb26a0a29e7d7a1f3dcbc057ab4f21832d2dd5cdeaa85f8465b50468f`,
-built from the release merge commit `c124581`. Earlier archives
-(`cran_submission_2026-10-29/` and before) are superseded.
+Checked candidate: `cran_submission_2026-10-31b/r4lineups_2.3.0.tar.gz`,
+2,298,002 bytes, SHA-256
+`dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386`,
+built from the merge commit `7315cf3`, which fixes the two pretest
+NOTEs. Earlier archives (`cran_submission_2026-10-31/` and before) are
+superseded.
 
 ## Publication gates
 
@@ -50,8 +51,8 @@ MIT-relicensing consent recorded for both authors: Colin Tredoux
 confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.
 
 The R release/devel/oldrel-1 operating-system matrix passes on the
-release revision: GitHub Actions run `41221763862` (tree identical to
-`c124581`).
+resubmitted revision: GitHub Actions run `41242178346` (tree identical
+to `7315cf3`).
 
 The TeX-equipped reference-manual job produces a PDF (same run).
 
@@ -77,6 +78,22 @@ deployed app bundles r4lineups 2.3.0.
 Submitted the 31 October archive (SHA-256 `2dd8679f…0468f`) to CRAN on
 31 October 2026 through the web form (submission ID 360999); the
 maintainer confirmation email was sent to <colin.tredoux@uct.ac.za>.
+
+CRAN’s automatic pretest returned 2 NOTEs on Windows and Debian (a
+flagged word in DESCRIPTION and slow examples); fixed in PR \#12.
+
+Resubmitted the `cran_submission_2026-10-31b/` archive (SHA-256
+`dfda255e…2b5386`) on 1 November 2026 through the web form (submission
+ID 361029); the maintainer confirmation email was sent to
+<colin.tredoux@uct.ac.za>.
+
+Maintainer confirmed; both pretests were OK, but CRAN (Uwe Ligges, 1
+November 2026) returned 361029 because the whole check took 14 minutes
+on Windows (limit 10). Slow tests now skip on CRAN and the slowest
+vignette chunks load precomputed results (PR \#13).
+
+Rebuild from `main` after PR \#13, check, and resubmit on Colin’s
+go-ahead.
 
 Maintainer clicks the confirmation link; CRAN pretest and review.
 
