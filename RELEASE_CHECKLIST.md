@@ -73,7 +73,9 @@ None of these files is in the build. See NEWS.md.
 - [x] win-builder R-devel (Windows, 2026-11-01 r90825) on the same archive:
   Status OK, check time 400 s (tests 62 s, vignettes 116 s; previously 297 s
   and 328 s on CRAN's Windows pretest).
-- [ ] Resubmit on Colin's go-ahead.
+- [x] Resubmitted the `cran_submission_2026-11-02/` archive (SHA-256
+  `441cabdd…1273`) on 2 November 2026 through the web form (submission ID
+  361198); the maintainer confirmation email was sent.
 - [ ] Maintainer clicks the confirmation link; CRAN pretest and review.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
   `v2.3.0` and create the GitHub release.
