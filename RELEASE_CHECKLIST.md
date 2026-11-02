@@ -79,7 +79,8 @@ None of these files is in the build. See NEWS.md.
 - [x] Maintainer confirmed 361198; CRAN accepted 2.3.0 on 2 November 2026
   ("package r4lineups_2.3.0.tar.gz is on its way to CRAN").
 - [x] Tagged the accepted commit `94fcb14` as `v2.3.0`.
-- [ ] Create the GitHub release for `v2.3.0` with the accepted archive.
+- [x] Created the GitHub release for `v2.3.0` with the accepted archive
+  (https://github.com/CGTZA2/r4lineups/releases/tag/v2.3.0).
 - [ ] Submit the JOSS paper.
 - [ ] At successful JOSS review, archive the accepted release, add the archive
   DOI to JOSS metadata, and verify that author lists agree.
