@@ -258,6 +258,7 @@ test_that("simulate_power_analysis returns the documented structure", {
 })
 
 test_that("power is not trivially 1 when there is no effect to detect", {
+  skip_on_cran()
   # Regression test. The previous implementation computed power as
   # mean(stats > 0) where stats were pAUC values. Because an area is always
   # positive, power was 1 for every sample size and every effect size, and the

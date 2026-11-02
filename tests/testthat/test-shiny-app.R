@@ -1,6 +1,7 @@
 # Server-side tests for the bundled Shiny app. Each module is checked against
 # a direct call to the package function it wraps, and its outputs must render.
 
+skip_on_cran()
 skip_if_not_installed("shiny")
 skip_if_not_installed("bslib")
 skip_if_not_installed("DT")

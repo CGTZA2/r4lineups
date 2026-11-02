@@ -25,6 +25,26 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+
+# The slowest results are computed with the code shown and stored in
+# precomputed/, together with the random-number state, so that the rest of the
+# vignette is unchanged. Set R4LINEUPS_PRECOMPUTE=true to recompute them
+# (data-raw/vignette_precompute.R).
+precompute <- identical(Sys.getenv("R4LINEUPS_PRECOMPUTE"), "true")
+stored <- function(name, objects) {
+  path <- file.path("precomputed", paste0(name, ".rds"))
+  env <- knitr::knit_global()
+  if (precompute) {
+    saveRDS(list(objects = mget(objects, envir = env),
+                 seed = globalenv()[[".Random.seed"]]),
+            path, compress = "xz")
+  } else {
+    s <- readRDS(path)
+    list2env(s$objects, envir = env)
+    if (!is.null(s$seed)) assign(".Random.seed", s$seed, envir = globalenv())
+  }
+  invisible(NULL)
+}
 ```
 
 ```{r libraries}
@@ -326,7 +346,8 @@ directly and makes no distributional assumption in doing so.
 The Wald test assumes the *difference in pAUC* is approximately normally
 distributed. That can be checked, rather than assumed:
 
-```{r bootstrap_normality}
+```{r bootstrap_normality, eval = precompute}
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 comparison <- compare_pauc(
   strong, weak,
   lineup_size = 6,
@@ -335,7 +356,13 @@ comparison <- compare_pauc(
   n_bootstrap = 600,
   seed = 123
 )
+```
 
+```{r bootstrap_normality_stored, include = FALSE}
+stored("bootstrap_normality", "comparison")
+```
+
+```{r bootstrap_normality_shape}
 boot_diff <- comparison$bootstrap_results$diff_boot
 
 knitr::kable(
@@ -469,7 +496,10 @@ pairs <- list(
   `Strong vs Weak`   = list(strong, weak),
   `Medium vs Weak`   = list(medium, weak)
 )
+```
 
+```{r multiple_comparisons_run, eval = precompute}
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 results <- do.call(rbind, lapply(names(pairs), function(nm) {
   cmp <- compare_pauc(pairs[[nm]][[1]], pairs[[nm]][[2]],
                       lineup_size = 6, n_bootstrap = 200, seed = 41)
@@ -479,7 +509,13 @@ results <- do.call(rbind, lapply(names(pairs), function(nm) {
              p = signif(cmp$p_value, 4),
              check.names = FALSE)
 }))
+```
 
+```{r multiple_comparisons_stored, include = FALSE}
+stored("multiple_comparisons", "results")
+```
+
+```{r multiple_comparisons_adjust}
 results$`p (Bonferroni)` <- signif(p.adjust(results$p, method = "bonferroni"), 4)
 
 knitr::kable(
