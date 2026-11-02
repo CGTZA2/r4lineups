@@ -35,7 +35,7 @@ analysis, and models of lineup decisions [@wells1979; @wells1980;
 It provides classical and modern measures of lineup fairness,
 bootstrap and Bayesian uncertainty summaries, ROC/CAC/RAC and full-ROC
 analyses, calibration and evidential measures, signal-detection and
-two-high-threshold models, the multi-$d'$ framework, simulation and power tools, and optional face-similarity and
+two-high-threshold models, the Multi-$d'$ framework, simulation and power tools, and optional face-similarity and
 lineup-memory-model workflows. An interactive application covers most of
 these analyses and runs in a web browser without installation. The intended
 users are eyewitness researchers, forensic psychologists, students, and applied
@@ -56,7 +56,7 @@ between the z-transformed rates at which witnesses choose the innocent suspect
 and the fillers from target-absent lineups as a resultant index of lineup bias
 [@lee2019]. Analysts therefore need both lineup-construction
 measures---including suspect-selection proportion, foil bias, functional size,
-Malpass' effective size, and Tredoux's effective size---and measures of
+Malpass's effective size, and Tredoux's effective size---and measures of
 identification performance and evidential value [@doob1973; @wells1979; @malpass1981; @tredoux1998].
 
 Before `r4lineups`, these computations were commonly distributed across
@@ -88,8 +88,8 @@ remaining comparable with the reference implementation [@wixted2018]. A separate
 
 # Software design
 
-The core design separates two input families. Fairness functions accept 'lineup
-choice vectors' or 'lineup tables'. Confidence-based functions use trial-level data with
+The core design separates two input families. Fairness functions accept "lineup
+choice vectors" or "lineup tables". Confidence-based functions use trial-level data with
 `target_present`, `identification`, and `confidence`, with optional fields such
 as response time and experimental condition. Analysis wrappers return
 structured S3 objects with `print()`, `summary()`, and `plot()` methods, making
@@ -155,7 +155,7 @@ and this paper: Anthropic Claude (Sonnet 4 and 5; Opus 4.6, 4.8 and 5.5) and
 OpenAI Codex with GPT-5-family models (including GPT-5.5 and GPT-5.6 Sol) and
 GPT-6.1 Sol. In the software, they generated and refactored code, including the
 interactive application, scaffolded tests, and assisted with code review,
-debugging and package-check remediation. They were used to assist drafting of documentation and
+debugging and package-check remediation. They were used to assist with drafting documentation and
 vignettes. They helped draft this paper under close control by the authors,
 and checked its language for spelling and grammatical issues. The statistical audit described above was conducted
 by the authors with assistance from OpenAI Codex (GPT-6.1 Sol).
