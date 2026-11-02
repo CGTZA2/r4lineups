@@ -76,9 +76,10 @@ None of these files is in the build. See NEWS.md.
 - [x] Resubmitted the `cran_submission_2026-11-02/` archive (SHA-256
   `441cabdd…1273`) on 2 November 2026 through the web form (submission ID
   361198); the maintainer confirmation email was sent.
-- [ ] Maintainer clicks the confirmation link; CRAN pretest and review.
-- [ ] After CRAN accepts the unchanged source, tag the matching commit
-  `v2.3.0` and create the GitHub release.
+- [x] Maintainer confirmed 361198; CRAN accepted 2.3.0 on 2 November 2026
+  ("package r4lineups_2.3.0.tar.gz is on its way to CRAN").
+- [x] Tagged the accepted commit `94fcb14` as `v2.3.0`.
+- [ ] Create the GitHub release for `v2.3.0` with the accepted archive.
 - [ ] Submit the JOSS paper.
 - [ ] At successful JOSS review, archive the accepted release, add the archive
   DOI to JOSS metadata, and verify that author lists agree.
