@@ -2,8 +2,30 @@
 
 ## Resubmission
 
-The automatic pretest of the first 2.3.0 submission (31 October 2026)
-reported two NOTEs on Windows and Debian. Both are fixed:
+### Check time (second submission, 1 November 2026)
+
+Uwe Ligges reported "Overall checktime 14 min > 10 min", mainly from tests
+(297 s) and re-building of vignette outputs (328 s) on Windows. Both are
+reduced:
+
+* Tests. Tests that take more than about 0.3 s (two-condition MAX model fits,
+  bootstrap variants, a power simulation) and the Shiny module tests now call
+  `skip_on_cran()`, so they run only where `NOT_CRAN=true` (locally and on
+  GitHub Actions, where all 1,334 expectations pass). The 1,188 expectations
+  that run on CRAN take 16 s locally instead of about 70 s.
+* Vignettes. The five slowest chunks (a power simulation, three bootstrap
+  comparisons and a two-condition MAX fit with bootstrap) show their code and
+  load results precomputed with that code from `vignettes/precomputed/`
+  (39 KB). The rendered output is identical to a full computation. Rendering
+  all 16 vignettes takes 26 s locally instead of 79 s.
+
+Locally, tests and vignettes take about a third of the earlier time, so we
+expect the Windows check to take about 6 to 7 minutes.
+
+### Pretest NOTEs (first submission, 31 October 2026)
+
+The automatic pretest of the first 2.3.0 submission reported two NOTEs on
+Windows and Debian. Both are fixed:
 
 * "Possibly misspelled words in DESCRIPTION: embeddings". The word was correct,
   but the Description now says "numeric face representations" instead.
@@ -36,9 +58,9 @@ full changelog.
 * GitHub Actions Windows, R release
 * GitHub Actions Ubuntu, R devel, release, and oldrel-1
 
-All five jobs passed on the release revision in GitHub Actions run
-`41221763862` (its source tree is identical to the submitted merge commit
-`c124581`), and the TeX-equipped job in that run built the PDF reference
+All five jobs passed on the resubmitted revision in GitHub Actions run
+`41242178346` (its source tree is identical to the submitted merge commit
+`7315cf3`), and the TeX-equipped job in that run built the PDF reference
 manual. The opt-in pinned-pyWitness parity tests passed locally on macOS
 (24 expectations).
 
@@ -52,9 +74,9 @@ including the CRAN incoming feasibility checks and the PDF manual:
 The tests, examples, installation, and all 16 vignettes completed
 successfully.
 
-The submitted archive is `r4lineups_2.3.0.tar.gz` (2,297,508 bytes), SHA-256
-`2dd8679fb26a0a29e7d7a1f3dcbc057ab4f21832d2dd5cdeaa85f8465b50468f`, built
-from commit `c124581`.
+The submitted archive is `r4lineups_2.3.0.tar.gz` (2,298,002 bytes), SHA-256
+`dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386`, built
+from commit `7315cf3`.
 
 ## purrr::rerun() notice
 
@@ -79,3 +101,5 @@ release no longer uses or imports `rerun()` (it was replaced by
   check-time reliability; publication-grade settings are shown in unevaluated
   examples.
 * This is a resubmission of a package previously on CRAN as r4lineups 0.1.x.
+* The license changes from CC0 (0.1.1) to MIT + file LICENSE. Both authors
+  agreed to the change, and NEWS.md records it.

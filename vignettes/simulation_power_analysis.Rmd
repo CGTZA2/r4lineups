@@ -25,6 +25,26 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+
+# The slowest results are computed with the code shown and stored in
+# precomputed/, together with the random-number state, so that the rest of the
+# vignette is unchanged. Set R4LINEUPS_PRECOMPUTE=true to recompute them
+# (data-raw/vignette_precompute.R).
+precompute <- identical(Sys.getenv("R4LINEUPS_PRECOMPUTE"), "true")
+stored <- function(name, objects) {
+  path <- file.path("precomputed", paste0(name, ".rds"))
+  env <- knitr::knit_global()
+  if (precompute) {
+    saveRDS(list(objects = mget(objects, envir = env),
+                 seed = globalenv()[[".Random.seed"]]),
+            path, compress = "xz")
+  } else {
+    s <- readRDS(path)
+    list2env(s$objects, envir = env)
+    if (!is.null(s$seed)) assign(".Random.seed", s$seed, envir = globalenv())
+  }
+  invisible(NULL)
+}
 ```
 
 ## Introduction
@@ -244,7 +264,8 @@ Be clear about the unit first. A `sample_size` of n simulates n target-present
 so 2n witnesses per condition and 4n in all; the `n_total` column gives the
 total.
 
-```{r power_analysis, cache = FALSE}
+```{r power_analysis, eval = precompute}
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 power_result <- simulate_power_analysis(
   sample_sizes  = c(25, 50, 100, 200),
   d_prime       = 1.0,
@@ -256,7 +277,13 @@ power_result <- simulate_power_analysis(
   seed          = 2026,
   verbose       = FALSE
 )
+```
 
+```{r power_analysis_stored, include = FALSE}
+stored("power_analysis", "power_result")
+```
+
+```{r power_table}
 knitr::kable(
   setNames(as.data.frame(power_result)[, c("sample_size", "n_total", "power",
                                            "power_se", "mean_effect")],
@@ -369,6 +396,7 @@ maximum for its lineup size.
 
 ```{r design_comparison}
 sizes <- c(4, 6, 8, 10, 12)
+set.seed(77)
 
 design <- do.call(rbind, lapply(sizes, function(k) {
   # Criterion matched to lineup size, so willingness to choose is held constant

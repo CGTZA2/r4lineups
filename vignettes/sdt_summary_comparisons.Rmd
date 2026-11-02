@@ -19,6 +19,26 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
                       warning = FALSE, message = FALSE)
+
+# The slowest results are computed with the code shown and stored in
+# precomputed/, together with the random-number state, so that the rest of the
+# vignette is unchanged. Set R4LINEUPS_PRECOMPUTE=true to recompute them
+# (data-raw/vignette_precompute.R).
+precompute <- identical(Sys.getenv("R4LINEUPS_PRECOMPUTE"), "true")
+stored <- function(name, objects) {
+  path <- file.path("precomputed", paste0(name, ".rds"))
+  env <- knitr::knit_global()
+  if (precompute) {
+    saveRDS(list(objects = mget(objects, envir = env),
+                 seed = globalenv()[[".Random.seed"]]),
+            path, compress = "xz")
+  } else {
+    s <- readRDS(path)
+    list2env(s$objects, envir = env)
+    if (!is.null(s$seed)) assign(".Random.seed", s$seed, envir = globalenv())
+  }
+  invisible(NULL)
+}
 ```
 
 # Overview
@@ -161,13 +181,20 @@ These are the Profile-lineup counts from Reisberg and Pezdek (2024), the data on
 which the reference implementation of this model was written: two conditions,
 each with 96 target-present and 96 or 106 target-absent lineups of size 6.
 
-```{r compound_fit}
+```{r compound_fit, eval = precompute}
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 fit_free <- fit_max_sdt(
   n_hit = 69, n_tp_choose = 82, n_fa = 64, N_tp = 96, N_ta = 106,
   n_hit_2 = 68, n_tp_choose_2 = 78, n_fa_2 = 42, N_tp_2 = 96, N_ta_2 = 96,
   n = 6, nboot = 300, seed = 11
 )
+```
 
+```{r compound_fit_stored, include = FALSE}
+stored("compound_fit", "fit_free")
+```
+
+```{r compound_table}
 knitr::kable(
   data.frame(
     Condition = c("Condition 1", "Condition 2"),

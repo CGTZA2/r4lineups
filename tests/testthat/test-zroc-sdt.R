@@ -211,6 +211,7 @@ test_that("fit_sdt_roc different d' values", {
 
 
 test_that("fit_sdt_roc confidence levels", {
+  skip_on_cran()
   test_data <- create_test_sdt_data()
 
   # Fit with default confidence level
@@ -242,6 +243,7 @@ test_that("fit_sdt_roc confidence levels", {
 
 
 test_that("fit_sdt_roc seed reproducibility", {
+  skip_on_cran()
   test_data <- create_test_sdt_data()
 
   sdt1 <- fit_sdt_roc(
@@ -316,6 +318,7 @@ test_that("fit_sdt_roc model diagnostics", {
 })
 
 test_that("0/1 target_present coding bootstraps like logical coding", {
+  skip_on_cran()
   # Codex review 2, finding 4: which() on 0/1 coding failed in every
   # replicate, and fit_sdt_roc() silently returned NA intervals.
   d <- simulate_lineup_data(n_tp = 100, n_ta = 100, seed = 1)

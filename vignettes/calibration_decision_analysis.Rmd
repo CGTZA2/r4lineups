@@ -26,6 +26,26 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+
+# The slowest results are computed with the code shown and stored in
+# precomputed/, together with the random-number state, so that the rest of the
+# vignette is unchanged. Set R4LINEUPS_PRECOMPUTE=true to recompute them
+# (data-raw/vignette_precompute.R).
+precompute <- identical(Sys.getenv("R4LINEUPS_PRECOMPUTE"), "true")
+stored <- function(name, objects) {
+  path <- file.path("precomputed", paste0(name, ".rds"))
+  env <- knitr::knit_global()
+  if (precompute) {
+    saveRDS(list(objects = mget(objects, envir = env),
+                 seed = globalenv()[[".Random.seed"]]),
+            path, compress = "xz")
+  } else {
+    s <- readRDS(path)
+    list2env(s$objects, envir = env)
+    if (!is.null(s$seed)) assign(".Random.seed", s$seed, envir = globalenv())
+  }
+  invisible(NULL)
+}
 ```
 
 ## Introduction
@@ -699,7 +719,8 @@ the smaller deviation. As Smith et al. did, `compare_dpp()` tests the
 difference with a nonparametric bootstrap, resampling target-present and
 target-absent trials separately within each procedure:
 
-```{r dpp-comparison}
+```{r dpp-comparison, eval = precompute}
+# Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
 dpp_comparison <- compare_dpp(
   data_proc_a,
   data_proc_b,
@@ -707,7 +728,13 @@ dpp_comparison <- compare_dpp(
   n_bootstrap = 500,
   seed = 2026
 )
+```
 
+```{r dpp-comparison-stored, include = FALSE}
+stored("dpp_comparison", "dpp_comparison")
+```
+
+```{r dpp-comparison-results}
 dpp_comparison
 
 plot_dpp_comparison(dpp_comparison)

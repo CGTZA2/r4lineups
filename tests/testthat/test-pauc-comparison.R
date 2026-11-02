@@ -65,6 +65,7 @@ test_that("compare_pauc returns valid statistics", {
 })
 
 test_that("compare_pauc with custom cutoff", {
+  skip_on_cran()
   data1 <- create_test_data_pauc()
   data2 <- create_test_data_pauc(seed = 999)
 
@@ -81,6 +82,7 @@ test_that("compare_pauc with custom cutoff", {
 })
 
 test_that("compare_pauc with custom labels", {
+  skip_on_cran()
   data1 <- create_test_data_pauc()
   data2 <- create_test_data_pauc(seed = 888)
 
@@ -98,6 +100,7 @@ test_that("compare_pauc with custom labels", {
 })
 
 test_that("compare_pauc bootstrap results", {
+  skip_on_cran()
   data1 <- create_test_data_pauc()
   data2 <- create_test_data_pauc(seed = 777)
 
@@ -176,6 +179,7 @@ test_that("compare_pauc with different sample sizes", {
 })
 
 test_that("compare_pauc confidence level", {
+  skip_on_cran()
   data1 <- create_test_data_pauc()
   data2 <- create_test_data_pauc(seed = 444)
 
@@ -201,6 +205,7 @@ test_that("compare_pauc confidence level", {
 })
 
 test_that("compare_pauc seed reproducibility", {
+  skip_on_cran()
   data1 <- create_test_data_pauc()
   data2 <- create_test_data_pauc(seed = 123)
 

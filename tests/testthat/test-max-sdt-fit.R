@@ -87,6 +87,7 @@ test_that("single-condition df == 1 (3 independent cells - 2 params)", {
 })
 
 test_that("two-condition unconstrained df == 2 (6 independent cells - 4 params)", {
+  skip_on_cran()
   res <- fit_max_sdt(
     n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
     n_hit_2=40, n_tp_choose_2=65, n_fa_2=20, N_tp_2=100, N_ta_2=100
@@ -97,6 +98,7 @@ test_that("two-condition unconstrained df == 2 (6 independent cells - 4 params)"
 # --- two-condition models ---
 
 test_that("two-condition result has correct n_conditions", {
+  skip_on_cran()
   res <- fit_max_sdt(
     n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
     n_hit_2=40, n_tp_choose_2=65, n_fa_2=20, N_tp_2=100, N_ta_2=100
@@ -105,6 +107,7 @@ test_that("two-condition result has correct n_conditions", {
 })
 
 test_that("two-condition result has dprime_2 and lambda_2", {
+  skip_on_cran()
   res <- fit_max_sdt(
     n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
     n_hit_2=40, n_tp_choose_2=65, n_fa_2=20, N_tp_2=100, N_ta_2=100
@@ -114,6 +117,7 @@ test_that("two-condition result has dprime_2 and lambda_2", {
 })
 
 test_that("constrain_d forces equal d' estimates", {
+  skip_on_cran()
   res <- fit_max_sdt(
     n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
     n_hit_2=40, n_tp_choose_2=65, n_fa_2=20, N_tp_2=100, N_ta_2=100,
@@ -123,6 +127,7 @@ test_that("constrain_d forces equal d' estimates", {
 })
 
 test_that("constrain_c forces equal lambda estimates", {
+  skip_on_cran()
   res <- fit_max_sdt(
     n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
     n_hit_2=40, n_tp_choose_2=65, n_fa_2=20, N_tp_2=100, N_ta_2=100,
@@ -132,6 +137,7 @@ test_that("constrain_c forces equal lambda estimates", {
 })
 
 test_that("constrained model has higher or equal chi-sq than unconstrained", {
+  skip_on_cran()
   free_fit <- fit_max_sdt(
     n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
     n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100
@@ -147,6 +153,7 @@ test_that("constrained model has higher or equal chi-sq than unconstrained", {
 # --- compare_max_sdt ---
 
 test_that("compare_max_sdt returns correct class", {
+  skip_on_cran()
   free_fit <- fit_max_sdt(
     n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
     n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100
@@ -161,6 +168,7 @@ test_that("compare_max_sdt returns correct class", {
 })
 
 test_that("compare_max_sdt delta_chisq >= 0", {
+  skip_on_cran()
   free_fit <- fit_max_sdt(
     n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
     n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100
@@ -175,6 +183,7 @@ test_that("compare_max_sdt delta_chisq >= 0", {
 })
 
 test_that("compare_max_sdt test_df == 1 for one constraint", {
+  skip_on_cran()
   free_fit <- fit_max_sdt(
     n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
     n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100
@@ -189,6 +198,7 @@ test_that("compare_max_sdt test_df == 1 for one constraint", {
 })
 
 test_that("identical conditions give non-significant chi-sq difference", {
+  skip_on_cran()
   # Same counts in both conditions => equal d' is plausible
   fit_free <- fit_max_sdt(
     n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
@@ -210,6 +220,7 @@ test_that("compare_max_sdt errors if free has fewer params than constrained", {
 })
 
 test_that("compare_max_sdt rejects fits to different data", {
+  skip_on_cran()
   free_fit <- fit_max_sdt(
     n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
     n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100
@@ -223,6 +234,7 @@ test_that("compare_max_sdt rejects fits to different data", {
 })
 
 test_that("compare_max_sdt rejects non-nested constraint swaps", {
+  skip_on_cran()
   constrain_d_fit <- fit_max_sdt(
     n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
     n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100,
@@ -250,6 +262,7 @@ test_that("plot returns a ggplot", {
 })
 
 test_that("compare print runs without error", {
+  skip_on_cran()
   free_fit <- fit_max_sdt(
     n_hit=55, n_tp_choose=80, n_fa=20, N_tp=100, N_ta=100,
     n_hit_2=30, n_tp_choose_2=60, n_fa_2=40, N_tp_2=100, N_ta_2=100
@@ -297,6 +310,7 @@ test_that("boot_ci has correct dimensions when nboot > 0", {
 })
 
 test_that("bootstrap CI contains true parameter (single condition)", {
+  skip_on_cran()
   set.seed(7)
   true_d <- 1.2
   cts <- sim_max_sdt_counts(true_d, 0.3, n=6, N_tp=500, N_ta=500, seed=99)

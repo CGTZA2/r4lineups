@@ -91,6 +91,7 @@ testthat::test_that("make_dpp Equation 3 weights behave as documented", {
 })
 
 testthat::test_that("compare_dpp bootstraps the difference", {
+  skip_on_cran()
   data(lineup_example, package = "r4lineups", envir = environment())
   odd <- seq(1, nrow(lineup_example), by = 2)
   a <- lineup_example[odd, ]
