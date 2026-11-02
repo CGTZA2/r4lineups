@@ -35,8 +35,7 @@ analysis, and models of lineup decisions [@wells1979; @wells1980;
 It provides classical and modern measures of lineup fairness,
 bootstrap and Bayesian uncertainty summaries, ROC/CAC/RAC and full-ROC
 analyses, calibration and evidential measures, signal-detection and
-two-high-threshold models, Lee and Penrod's Multi-$d'$ framework
-[@lee2019], simulation and power tools, and optional face-similarity and
+two-high-threshold models, the multi-$d'$ framework, simulation and power tools, and optional face-similarity and
 lineup-memory-model workflows. An interactive application covers most of
 these analyses and runs in a web browser without installation. The intended
 users are eyewitness researchers, forensic psychologists, students, and applied
@@ -57,7 +56,7 @@ between the z-transformed rates at which witnesses choose the innocent suspect
 and the fillers from target-absent lineups as a resultant index of lineup bias
 [@lee2019]. Analysts therefore need both lineup-construction
 measures---including suspect-selection proportion, foil bias, functional size,
-Malpass effective size, and Tredoux effective size---and measures of
+Malpass' effective size, and Tredoux's effective size---and measures of
 identification performance and evidential value [@doob1973; @wells1979; @malpass1981; @tredoux1998].
 
 Before `r4lineups`, these computations were commonly distributed across
@@ -85,16 +84,12 @@ does not duplicate the established Python likelihood/model-fitting engine.
 Instead, its optional `fit_lineup_models()` bridge calls a pinned pyWitness
 revision and returns R-native objects. Independent Observations,
 Ensemble, and Integration models can therefore be examined from R while
-remaining comparable with the reference implementation [@wixted2018]. The
-older `fit_max_sdt()` function, also available in `r4lineups`, is explicitly
-narrower: it is a single-criterion,
-aggregate, equal-variance Independent Observations fit, not the complete
-confidence-based Wixted model.
+remaining comparable with the reference implementation [@wixted2018]. A separate function, `fit_max_sdt()`, fits a narrower model: a single-criterion, aggregate, equal-variance version of the Independent Observations model, not the complete confidence-based Wixted model.
 
 # Software design
 
-The core design separates two input families. Fairness functions accept lineup
-choice vectors or tables. Confidence-based functions use trial-level data with
+The core design separates two input families. Fairness functions accept 'lineup
+choice vectors' or 'lineup tables'. Confidence-based functions use trial-level data with
 `target_present`, `identification`, and `confidence`, with optional fields such
 as response time and experimental condition. Analysis wrappers return
 structured S3 objects with `print()`, `summary()`, and `plot()` methods, making
@@ -123,7 +118,7 @@ the package website. In the browser version, mock-witness and experimental
 data stay on the user's computer, an important safeguard when the data come
 from police casework.
 
-The sixteen vignettes carry the methodological detail that users will need.
+There are sixteen vignettes, and these provide the methodological detail that users will need.
 They cover fairness and diagnosticity, Bayesian inference,
 ROC/CAC/RAC and full ROC, calibration and decision measures, expected
 information gain and error-rate ranges, Winter's two-high-threshold model,
@@ -160,9 +155,9 @@ and this paper: Anthropic Claude (Sonnet 4 and 5; Opus 4.6, 4.8 and 5.5) and
 OpenAI Codex with GPT-5-family models (including GPT-5.5 and GPT-5.6 Sol) and
 GPT-6.1 Sol. In the software, they generated and refactored code, including the
 interactive application, scaffolded tests, and assisted with code review,
-debugging and package-check remediation. They drafted documentation and
+debugging and package-check remediation. They were used to assist drafting of documentation and
 vignettes. They helped draft this paper under close control by the authors,
-and checked its language. The statistical audit described above was conducted
+and checked its language for spelling and grammatical issues. The statistical audit described above was conducted
 by the authors with assistance from OpenAI Codex (GPT-6.1 Sol).
 
 The authors made the statistical and software-design decisions. Colin Tredoux
