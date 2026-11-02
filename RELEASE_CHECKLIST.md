@@ -38,11 +38,11 @@ regression test.
 The JOSS manuscript names 2.3.0 and renders cleanly in the Open Journals
 job.
 
-Checked candidate: `cran_submission_2026-10-31b/r4lineups_2.3.0.tar.gz`,
-2,298,002 bytes, SHA-256
-`dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386`,
-built from the merge commit `7315cf3`, which fixes the two pretest
-NOTEs. Earlier archives (`cran_submission_2026-10-31/` and before) are
+Checked candidate: `cran_submission_2026-11-02/r4lineups_2.3.0.tar.gz`,
+2,347,222 bytes, SHA-256
+`441cabddae64f4841629659f75a45ed609d4eafb603436cc7e337049b65d1273`,
+built from the merge commit `94fcb14`, which cuts the check time.
+Earlier archives (`cran_submission_2026-10-31b/` and before) are
 superseded.
 
 ## Publication gates
@@ -51,8 +51,7 @@ MIT-relicensing consent recorded for both authors: Colin Tredoux
 confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.
 
 The R release/devel/oldrel-1 operating-system matrix passes on the
-resubmitted revision: GitHub Actions run `41242178346` (tree identical
-to `7315cf3`).
+resubmitted revision: GitHub Actions run `41420279002` on `94fcb14`.
 
 The TeX-equipped reference-manual job produces a PDF (same run).
 
@@ -92,13 +91,25 @@ November 2026) returned 361029 because the whole check took 14 minutes
 on Windows (limit 10). Slow tests now skip on CRAN and the slowest
 vignette chunks load precomputed results (PR \#13).
 
-Rebuild from `main` after PR \#13, check, and resubmit on Colin’s
-go-ahead.
+Rebuilt from `main` (`94fcb14`); local `R CMD check --as-cran` with
+network: Status OK (tests 14 s, vignettes 159 s including the locally
+installed pyWitness vignette).
 
-Maintainer clicks the confirmation link; CRAN pretest and review.
+win-builder R-devel (Windows, 2026-11-01 r90825) on the same archive:
+Status OK, check time 400 s (tests 62 s, vignettes 116 s; previously 297
+s and 328 s on CRAN’s Windows pretest).
 
-After CRAN accepts the unchanged source, tag the matching commit
-`v2.3.0` and create the GitHub release.
+Resubmitted the `cran_submission_2026-11-02/` archive (SHA-256
+`441cabdd…1273`) on 2 November 2026 through the web form (submission ID
+361198); the maintainer confirmation email was sent.
+
+Maintainer confirmed 361198; CRAN accepted 2.3.0 on 2 November 2026
+(“package r4lineups_2.3.0.tar.gz is on its way to CRAN”).
+
+Tagged the accepted commit `94fcb14` as `v2.3.0`.
+
+Created the GitHub release for `v2.3.0` with the accepted archive
+(<https://github.com/CGTZA2/r4lineups/releases/tag/v2.3.0>).
 
 Submit the JOSS paper.
 

@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/CGTZA2/r4lineups/blob/v2.3.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/CGTZA2/r4lineups/blob/main/inst/CITATION)
 
 Tredoux C, Naylor T (2026). *r4lineups: Statistical Inference on Lineup
 Fairness*.

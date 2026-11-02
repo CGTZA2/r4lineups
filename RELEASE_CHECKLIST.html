@@ -49,7 +49,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>r4lineups 2.3.0 release checklist</h1>
-      <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/v2.3.0/RELEASE_CHECKLIST.md" class="external-link"><code>RELEASE_CHECKLIST.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/RELEASE_CHECKLIST.md" class="external-link"><code>RELEASE_CHECKLIST.md</code></a></small>
     </div>
 
 <div id="r4lineups-230-release-checklist" class="section level1">
@@ -65,12 +65,12 @@
 <li><label><input type="checkbox" checked><code>R CMD check --as-cran</code> with network access passes on macOS 27.0.1/R 4.6.1 with 0 errors, 0 warnings and 0 notes, including the CRAN incoming feasibility and URL checks and the PDF manual.</label></li>
 <li><label><input type="checkbox" checked>The reviewers’ reproductions give the corrected values, and each is a regression test.</label></li>
 <li><label><input type="checkbox" checked>The JOSS manuscript names 2.3.0 and renders cleanly in the Open Journals job.</label></li>
-<li><label><input type="checkbox" checked>Checked candidate: <code>cran_submission_2026-10-31b/r4lineups_2.3.0.tar.gz</code>, 2,298,002 bytes, SHA-256 <code>dfda255ead9fac6d149efd8c7adc937372a1ed277ee78535af370d3bdc2b5386</code>, built from the merge commit <code>7315cf3</code>, which fixes the two pretest NOTEs. Earlier archives (<code>cran_submission_2026-10-31/</code> and before) are superseded.</label></li>
+<li><label><input type="checkbox" checked>Checked candidate: <code>cran_submission_2026-11-02/r4lineups_2.3.0.tar.gz</code>, 2,347,222 bytes, SHA-256 <code>441cabddae64f4841629659f75a45ed609d4eafb603436cc7e337049b65d1273</code>, built from the merge commit <code>94fcb14</code>, which cuts the check time. Earlier archives (<code>cran_submission_2026-10-31b/</code> and before) are superseded.</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="publication-gates">Publication gates<a class="anchor" aria-label="anchor" href="#publication-gates"></a></h2>
 <ul class="task-list"><li><label><input type="checkbox" checked>MIT-relicensing consent recorded for both authors: Colin Tredoux confirmed on 2026-08-10 that Tamsyn Naylor agreed on 2026-08-09.</label></li>
-<li><label><input type="checkbox" checked>The R release/devel/oldrel-1 operating-system matrix passes on the resubmitted revision: GitHub Actions run <code>41242178346</code> (tree identical to <code>7315cf3</code>).</label></li>
+<li><label><input type="checkbox" checked>The R release/devel/oldrel-1 operating-system matrix passes on the resubmitted revision: GitHub Actions run <code>41420279002</code> on <code>94fcb14</code>.</label></li>
 <li><label><input type="checkbox" checked>The TeX-equipped reference-manual job produces a PDF (same run).</label></li>
 <li><label><input type="checkbox" checked>The official JOSS/Open Journals job produces a clean <code>paper.pdf</code>.</label></li>
 <li><label><input type="checkbox" checked>The Linux/macOS/Windows pinned-pyWitness workflow passes on commit <code>28c8768</code> (run <code>40962145807</code>); the later <code><a href="reference/fit_max_sdt.html">fit_max_sdt()</a></code> fix does not touch the pyWitness bridge.</label></li>
@@ -81,9 +81,12 @@
 <li><label><input type="checkbox" checked>CRAN’s automatic pretest returned 2 NOTEs on Windows and Debian (a flagged word in DESCRIPTION and slow examples); fixed in PR #12.</label></li>
 <li><label><input type="checkbox" checked>Resubmitted the <code>cran_submission_2026-10-31b/</code> archive (SHA-256 <code>dfda255e…2b5386</code>) on 1 November 2026 through the web form (submission ID 361029); the maintainer confirmation email was sent to <a href="mailto:colin.tredoux@uct.ac.za" class="email">colin.tredoux@uct.ac.za</a>.</label></li>
 <li><label><input type="checkbox" checked>Maintainer confirmed; both pretests were OK, but CRAN (Uwe Ligges, 1 November 2026) returned 361029 because the whole check took 14 minutes on Windows (limit 10). Slow tests now skip on CRAN and the slowest vignette chunks load precomputed results (PR #13).</label></li>
-<li><label><input type="checkbox">Rebuild from <code>main</code> after PR #13, check, and resubmit on Colin’s go-ahead.</label></li>
-<li><label><input type="checkbox">Maintainer clicks the confirmation link; CRAN pretest and review.</label></li>
-<li><label><input type="checkbox">After CRAN accepts the unchanged source, tag the matching commit <code>v2.3.0</code> and create the GitHub release.</label></li>
+<li><label><input type="checkbox" checked>Rebuilt from <code>main</code> (<code>94fcb14</code>); local <code>R CMD check --as-cran</code> with network: Status OK (tests 14 s, vignettes 159 s including the locally installed pyWitness vignette).</label></li>
+<li><label><input type="checkbox" checked>win-builder R-devel (Windows, 2026-11-01 r90825) on the same archive: Status OK, check time 400 s (tests 62 s, vignettes 116 s; previously 297 s and 328 s on CRAN’s Windows pretest).</label></li>
+<li><label><input type="checkbox" checked>Resubmitted the <code>cran_submission_2026-11-02/</code> archive (SHA-256 <code>441cabdd…1273</code>) on 2 November 2026 through the web form (submission ID 361198); the maintainer confirmation email was sent.</label></li>
+<li><label><input type="checkbox" checked>Maintainer confirmed 361198; CRAN accepted 2.3.0 on 2 November 2026 (“package r4lineups_2.3.0.tar.gz is on its way to CRAN”).</label></li>
+<li><label><input type="checkbox" checked>Tagged the accepted commit <code>94fcb14</code> as <code>v2.3.0</code>.</label></li>
+<li><label><input type="checkbox" checked>Created the GitHub release for <code>v2.3.0</code> with the accepted archive (<a href="https://github.com/CGTZA2/r4lineups/releases/tag/v2.3.0" class="external-link uri">https://github.com/CGTZA2/r4lineups/releases/tag/v2.3.0</a>).</label></li>
 <li><label><input type="checkbox">Submit the JOSS paper.</label></li>
 <li><label><input type="checkbox">At successful JOSS review, archive the accepted release, add the archive DOI to JOSS metadata, and verify that author lists agree.</label></li>
 </ul></div>
