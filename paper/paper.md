@@ -15,7 +15,7 @@ authors:
 affiliations:
   - name: Department of Psychology, University of Cape Town, South Africa
     index: 1
-date: 29 October 2026
+date: 2 November 2026
 bibliography: paper.bib
 ---
 
@@ -38,8 +38,9 @@ analyses, calibration and evidential measures, signal-detection and
 two-high-threshold models, Lee and Penrod's Multi-d′ framework
 [@lee2019], simulation and power tools, and optional face-similarity and
 lineup-memory-model workflows. An interactive application covers most of
-these analyses and runs in a web browser without installation. The intended users are
-eyewitness researchers, forensic psychologists, students, and applied analysts.
+these analyses and runs in a web browser without installation. The intended
+users are eyewitness researchers, forensic psychologists, students, and applied
+analysts.
 
 # Statement of need
 
@@ -55,10 +56,9 @@ time, although eyewitness data can also support estimates of lineup fairness
 between the z-transformed rates at which witnesses choose the innocent suspect
 and the fillers from target-absent lineups as a resultant index of lineup bias
 [@lee2019]. Analysts therefore need both lineup-construction
-measures--including
-suspect-selection proportion, foil bias, functional size, Malpass effective
-size, and Tredoux effective size--and measures of identification performance
-and evidential value [@doob1973; @wells1979; @malpass1981; @tredoux1998].
+measures--including suspect-selection proportion, foil bias, functional size,
+Malpass effective size, and Tredoux effective size--and measures of
+identification performance and evidential value [@doob1973; @wells1979; @malpass1981; @tredoux1998].
 
 Before `r4lineups`, these computations were commonly distributed across
 article supplements, small bespoke scripts, and general statistical packages.
@@ -73,8 +73,7 @@ extension of the original package, first released on CRAN as version 0.1.1 in
 
 General R tools such as `boot` [@boot] provide important computational
 infrastructure, but do not encode eyewitness response categories or estimands.
-The R
-package `fullROC` focuses on full receiver operating characteristic curves
+The R package `fullROC` focuses on full receiver operating characteristic curves
 using suspect, filler, and rejection responses [@yang2023]. The Python package
 `pyWitness` provides a broad eyewitness-analysis toolkit, including
 confidence-based signal-detection models [@mickes2024].
@@ -133,9 +132,10 @@ Wixted models, simulation and power, and optional face similarity.
 Validation of selected methods combines published definitions, independent
 hand calculations, invariance identities, numerical integration and simulation
 recovery. The lineup-memory bridge also checks its interface against a pinned
-pyWitness revision [@mickes2024]. An independent statistical audit records the conditions
-examined, evidence gaps and limitations of approximate inference; selected
-counterexamples are retained as regression tests. The pyWitness bridge applies
+pyWitness revision [@mickes2024]. A statistical audit by the authors, assisted
+by OpenAI Codex, records the conditions examined, evidence gaps and limitations
+of approximate inference; selected counterexamples are retained as regression
+tests. The pyWitness bridge applies
 a per-fit correction to the pinned engine's rejection-cell variance denominators
 so its default objective is consistently Pearson chi-squared, without modifying
 the installed Python environment; an option reproduces the engine's own
@@ -155,16 +155,21 @@ application also support teaching, method comparison, and applied review.
 
 # AI usage disclosure
 
-Development used multiple dynamically updated frontier models: Anthropic
-Claude Sonnet 4 and 5 and Claude Opus 4.6, 4.8 and 5.5, and OpenAI Codex with
-GPT-5-family models including GPT-5.5 and GPT-5.6 Sol. Additional Claude and
-Codex sessions were used, but exact session-level model identifiers were not
-consistently recorded. These tools assisted with code review and drafting,
-debugging, test scaffolding, documentation, package-check remediation, the
-interactive application, and manuscript editing. Colin Tredoux and Tamsyn Naylor reviewed, modified, and
-validated the AI-assisted outputs, made the statistical and software-design
-decisions, and retain full responsibility for accuracy, originality,
-licensing, and scholarly claims.
+Generative AI tools were used in developing the software, its documentation
+and this paper: Anthropic Claude (Sonnet 4 and 5; Opus 4.6, 4.8 and 5.5) and
+OpenAI Codex with GPT-5-family models (including GPT-5.5 and GPT-5.6 Sol) and
+GPT-6.1 Sol. In the software, they generated and refactored code, including the
+interactive application, scaffolded tests, and assisted with code review,
+debugging and package-check remediation. They drafted documentation and
+vignettes. They helped draft this paper under close control by the authors,
+and checked its language. The statistical audit described above was conducted
+by the authors with assistance from OpenAI Codex (GPT-6.1 Sol).
+
+The authors made the statistical and software-design decisions. Colin Tredoux
+thoroughly reviewed, modified and validated all AI-generated content. Tamsyn
+Naylor programmed much of the original package and has maintained it. The
+authors retain full responsibility for accuracy, originality, licensing and
+scholarly claims.
 
 # Acknowledgements
 

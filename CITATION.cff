@@ -11,8 +11,8 @@ authors:
     given-names: Tamsyn M.
     email: tmnaylor@outlook.com
     affiliation: University of Cape Town
-version: 2.1.0
-date-released: 2026-08-10
+version: 2.3.0
+date-released: 2026-11-02
 license: MIT
 repository-code: "https://github.com/CGTZA2/r4lineups"
 url: "https://cgtza2.github.io/r4lineups/"
