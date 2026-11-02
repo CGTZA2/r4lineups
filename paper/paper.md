@@ -8,6 +8,7 @@ tags:
   - forensic psychology
 authors:
   - name: Colin G. Tredoux
+    orcid: 0000-0002-9653-786X
     affiliation: 1
     corresponding: true
   - name: Tamsyn M. Naylor
