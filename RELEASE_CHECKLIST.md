@@ -64,6 +64,12 @@ None of these files is in the build. See NEWS.md.
   `dfda255e…2b5386`) on 1 November 2026 through the web form (submission ID
   361029); the maintainer confirmation email was sent to
   colin.tredoux@uct.ac.za.
+- [x] Maintainer confirmed; both pretests were OK, but CRAN (Uwe Ligges, 1
+  November 2026) returned 361029 because the whole check took 14 minutes on
+  Windows (limit 10). Slow tests now skip on CRAN and the slowest vignette
+  chunks load precomputed results (PR #13).
+- [ ] Rebuild from `main` after PR #13, check, and resubmit on Colin's
+  go-ahead.
 - [ ] Maintainer clicks the confirmation link; CRAN pretest and review.
 - [ ] After CRAN accepts the unchanged source, tag the matching commit
   `v2.3.0` and create the GitHub release.
