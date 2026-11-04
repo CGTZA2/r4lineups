@@ -24,6 +24,13 @@
   correct rejections; it is deprecated and now means `population = "choosers"`.
   The default (suspect identifications, as in CAC) is unchanged.
 
+## Bug fixes
+
+* `homog_diag()` now stops with an informative error when a pair has a zero or
+  non-finite log-ratio variance (for example, every witness choosing the
+  suspect). It previously reported `heterogeneous = FALSE` from non-finite
+  weights and pooled results.
+
 # r4lineups 2.3.0 (2026-10-29)
 
 ## Breaking changes
