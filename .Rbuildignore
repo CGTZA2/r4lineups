@@ -48,3 +48,6 @@
 ^Gmail.*\.pdf$
 ^cran_submission_.*$
 ^codex_(qa|review)_[0-9]+\.md$
+^implement_tutor\.md$
+^claude_review_[0-9]+\.md$
+^vignette_report_[0-9]+\.md$

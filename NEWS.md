@@ -1,4 +1,4 @@
-# r4lineups (development version)
+# r4lineups 2.3.1
 
 ## Breaking changes
 

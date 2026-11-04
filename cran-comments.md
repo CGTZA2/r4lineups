@@ -1,5 +1,24 @@
 # cran-comments
 
+## r4lineups 2.3.1
+
+This update follows 2.3.0 closely because it corrects results that were wrong,
+found while checking the package against the primary sources:
+
+* `make_bayes_curves()` computed entropy reduction while documenting and citing
+  the Wells, Yang and Smalarz (2015) information gain (posterior minus prior).
+  The cited measure is now the default; the entropy measure is an option.
+* `make_fullroc(order = "apriori")` did not use the published a priori order
+  (Smith, Yang & Wells, 2020; Yang & Smith, 2023).
+* Calibration with `choosers_only = FALSE` scored correct rejections as errors.
+* `homog_diag()` reported homogeneity from non-finite results, and
+  `fit_max_sdt()` could return estimates outside its bounds.
+
+## R CMD check results
+
+0 errors | 0 warnings | 0 notes (local, macOS, R release).
+
+
 ## Resubmission
 
 ### Check time (second submission, 1 November 2026)
