@@ -16,6 +16,13 @@
   Previously all filler IDs preceded all rejections, which changes the curve and
   AUC whenever their confidence ranges overlap. The documentation now cites
   Smith, Yang and Wells (2020) rather than "Smith & Yang".
+* Calibration functions gain `population = c("suspect_ids", "choosers",
+  "nonchoosers")`. `"choosers"` includes filler identifications as errors, as in
+  Brewer and Wells (2006); `"nonchoosers"` calibrates rejections, which are
+  correct when the culprit is absent. `choosers_only = FALSE` previously scored
+  every response other than a target-present suspect ID as incorrect, including
+  correct rejections; it is deprecated and now means `population = "choosers"`.
+  The default (suspect identifications, as in CAC) is unchanged.
 
 # r4lineups 2.3.0 (2026-10-29)
 

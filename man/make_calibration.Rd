@@ -12,6 +12,7 @@ make_calibration(
   show_plot = TRUE,
   confidence_scale = c("auto", "0-1", "0-100"),
   innocent_suspect = "auto",
+  population = NULL,
   ...
 )
 }

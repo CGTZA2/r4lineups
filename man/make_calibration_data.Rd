@@ -10,7 +10,8 @@ make_calibration_data(
   choosers_only = TRUE,
   lineup_size = 6,
   confidence_scale = c("auto", "0-1", "0-100"),
-  innocent_suspect = "auto"
+  innocent_suspect = "auto",
+  population = NULL
 )
 }
 \arguments{
@@ -25,8 +26,9 @@ make_calibration_data(
 (e.g., c(0, 60, 80, 100) creates bins 0-60, 60-80, 80-100).
 If NULL, uses individual confidence levels.}
 
-\item{choosers_only}{Logical. If TRUE (default), only analyze suspect identifications.
-If FALSE, analyze all responses (including fillers and rejections).}
+\item{choosers_only}{Logical. If TRUE (default), only analyze suspect identifications
+(\code{population = "suspect_ids"}). FALSE is deprecated: it now means
+\code{population = "choosers"}. Ignored when \code{population} is supplied.}
 
 \item{lineup_size}{Integer. Number of people in lineup (default = 6).
 Used for estimating incorrect suspect IDs from filler choices in target-absent lineups.}
@@ -45,6 +47,13 @@ innocent-suspect count is estimated as filler IDs divided by
 \code{"designated"} when any target-absent row is a suspect ID or the data
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
+
+\item{population}{Which responses are calibrated: \code{"suspect_ids"}
+(suspect identifications, as in CAC analysis; correct when target-present),
+\code{"choosers"} (suspect and filler identifications, as in Brewer & Wells,
+2006; only target-present suspect IDs are correct), or \code{"nonchoosers"}
+(rejections; correct when target-absent). If NULL (default), it is set from
+\code{choosers_only}.}
 }
 \value{
 A list containing:
@@ -79,12 +88,13 @@ The Normalized Resolution Index (NRI) captures how well confidence discriminates
 correct from incorrect responses:
 \deqn{NRI = \frac{\frac{1}{N} \sum_{j=1}^{J} n_j (a_j - \bar{a})^2}{\bar{a}(1-\bar{a})}}
 
-When \code{choosers_only = TRUE}, only suspect identifications are included (standard
-for eyewitness calibration analysis). When \code{choosers_only = FALSE}, all responses
-are included with fillers and rejections counted as incorrect.
-Consequently that option measures correct-suspect identification across all
-responses, not general decision accuracy: a correct TA rejection still scores
-zero. Do not interpret it as calibration of the correctness of every decision.
+The default population, suspect identifications, is the one used in CAC
+analysis (Mickes, 2015). In the eyewitness calibration literature (e.g.,
+Brewer & Wells, 2006) choosers are all witnesses who identify someone, so
+filler identifications enter as errors; use \code{population = "choosers"}
+to reproduce that analysis. Nonchoosers (\code{population = "nonchoosers"})
+are witnesses who reject the lineup; a rejection is correct when the culprit
+is absent.
 
 If target-absent data contain designated innocent-suspect identifications,
 those observations are used directly. Otherwise, each target-absent filler
@@ -109,6 +119,11 @@ cal$calibration_data
 
 }
 \references{
+Mickes, L. (2015). Receiver operating characteristic analysis and
+confidence-accuracy characteristic analysis in investigations of system
+variables and estimator variables that affect eyewitness memory.
+\emph{Journal of Applied Research in Memory and Cognition, 4}(2), 93-102.
+
 Juslin, P., Olsson, N., & Winman, A. (1996). Calibration and diagnosticity
 of confidence in eyewitness identification: Comments on what can be inferred
 from the low confidence-accuracy correlation. \emph{Journal of Experimental
