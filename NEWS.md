@@ -30,6 +30,9 @@
   non-finite log-ratio variance (for example, every witness choosing the
   suspect). It previously reported `heterogeneous = FALSE` from non-finite
   weights and pooled results.
+* `classify_lineup_choices()` no longer treats a missing chosen position (`NA`)
+  as a rejection. The outcome is `NA`, with a warning; recode to 0 first if `NA`
+  records a rejection.
 
 # r4lineups 2.3.0 (2026-10-29)
 
