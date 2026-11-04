@@ -40,6 +40,15 @@
 * `simulate_power_analysis()`: `d_prime_null` is renamed `d_prime_2`. It is the
   second condition's generating value, not a null hypothesis; the old name
   still works with a deprecation warning.
+* `boot_winter_2ht()` plots use `linewidth`, removing a ggplot2 deprecation
+  warning.
+* `fit_sdt_roc(n_bootstrap = 0)` no longer warns that all bootstrap samples
+  failed.
+* `esize_m(both = TRUE)` labels its two values by what they do: Malpass (1981)
+  with null foils excluded, and Tredoux (1998, Eq. 5) with nominal size kept.
+  Tredoux (1998, Table 3) calls the first of these the adjusted estimate.
+* `esize_T_ci_n()` gains `conf_level`; `alpha` (which was the confidence level)
+  remains for compatibility.
 
 # r4lineups 2.3.0 (2026-10-29)
 

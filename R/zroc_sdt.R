@@ -333,7 +333,7 @@ fit_sdt_roc <- function(data,
   n_failed <- sum(!valid)
   boot_dprime[!valid] <- NA_real_
   boot_variance_ratio[!valid] <- NA_real_
-  if (n_failed == n_bootstrap) {
+  if (n_bootstrap > 0 && n_failed == n_bootstrap) {
     warning("All ", n_bootstrap, " bootstrap samples failed, so the bootstrap ",
             "intervals are NA",
             if (!is.null(first_error)) paste0(". First error: ", first_error),
