@@ -1,6 +1,86 @@
 # Changelog
 
+## r4lineups 2.3.1
+
+### Breaking changes
+
+- [`make_bayes_curves()`](https://cgtza2.github.io/r4lineups/reference/make_bayes_curves.md)
+  gains `gain = c("probability", "entropy")`. The default is now the
+  Wells, Yang and Smalarz (2015) information gain, posterior minus
+  prior, which the function cites. The previous measure, the reduction
+  in binary entropy (Starns, Cohen & Rotello, 2023), is available as
+  `gain = "entropy"`. The two can differ in sign: a suspect
+  identification at a low prior has a positive probability gain but a
+  negative entropy reduction.
+  [`plot_bayes_information_gain()`](https://cgtza2.github.io/r4lineups/reference/plot_bayes_information_gain.md)
+  labels its axis to match.
+- [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
+  and
+  [`make_fullroc_data()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc_data.md)
+  with `order = "apriori"` now use the a priori order of Smith, Yang and
+  Wells (2020, p. 604) and Yang and Smith (2023): suspect IDs from high
+  to low confidence, then rejections and filler IDs alternately from low
+  to high confidence, rejection first at each level. Previously all
+  filler IDs preceded all rejections, which changes the curve and AUC
+  whenever their confidence ranges overlap. The documentation now cites
+  Smith, Yang and Wells (2020) rather than “Smith & Yang”.
+- Calibration functions gain
+  `population = c("suspect_ids", "choosers", "nonchoosers")`.
+  `"choosers"` includes filler identifications as errors, as in Brewer
+  and Wells (2006); `"nonchoosers"` calibrates rejections, which are
+  correct when the culprit is absent. `choosers_only = FALSE` previously
+  scored every response other than a target-present suspect ID as
+  incorrect, including correct rejections; it is deprecated and now
+  means `population = "choosers"`. The default (suspect identifications,
+  as in CAC) is unchanged.
+
+### Bug fixes
+
+- [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md)
+  now stops with an informative error when a pair has a zero or
+  non-finite log-ratio variance (for example, every witness choosing the
+  suspect). It previously reported `heterogeneous = FALSE` from
+  non-finite weights and pooled results.
+- [`classify_lineup_choices()`](https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.md)
+  no longer treats a missing chosen position (`NA`) as a rejection. The
+  outcome is `NA`, with a warning; recode to 0 first if `NA` records a
+  rejection.
+- With `correction = "none"`,
+  [`sdt_summary_from_counts()`](https://cgtza2.github.io/r4lineups/reference/sdt_summary_from_counts.md)
+  and
+  [`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md)
+  no longer clamp rates of 0 or 1 silently to finite values. The
+  affected normal scores and indices are infinite, with a warning. The
+  variance enumeration in
+  [`sdt_summary_variance()`](https://cgtza2.github.io/r4lineups/reference/sdt_summary_variance.md)
+  keeps its numerical safeguard.
+- [`simulate_power_analysis()`](https://cgtza2.github.io/r4lineups/reference/simulate_power_analysis.md):
+  `d_prime_null` is renamed `d_prime_2`. It is the second condition’s
+  generating value, not a null hypothesis; the old name still works with
+  a deprecation warning.
+- [`boot_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/boot_winter_2ht.md)
+  plots use `linewidth`, removing a ggplot2 deprecation warning.
+- `fit_sdt_roc(n_bootstrap = 0)` no longer warns that all bootstrap
+  samples failed.
+- `esize_m(both = TRUE)` labels its two values by what they do:
+  Malpass (1981) with null foils excluded, and Tredoux (1998, Eq. 5)
+  with nominal size kept. Tredoux (1998, Table 3) calls the first of
+  these the adjusted estimate.
+- [`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
+  no longer returns estimates outside its parameter bounds (for example
+  a negative d’): the unconstrained Nelder-Mead polishing step is
+  discarded when it leaves the box.
+- The `line73` help now describes the data as inspired by Doob and
+  Kirshenbaum
+  1973. but not their data, which do not appear to have survived (their
+        study used a 12-member lineup and 21 mock witnesses).
+- [`esize_T_ci_n()`](https://cgtza2.github.io/r4lineups/reference/esize_T_ci_n.md)
+  gains `conf_level`; `alpha` (which was the confidence level) remains
+  for compatibility.
+
 ## r4lineups 2.3.0 (2026-10-29)
+
+CRAN release: 2026-11-02
 
 ### Breaking changes
 

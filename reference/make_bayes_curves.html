@@ -9,7 +9,7 @@ update beliefs about suspect guilt, following Wells, Yang, &amp;amp; Smalarz (20
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,8 @@ update beliefs about suspect guilt, following Wells, Yang, &amp; Smalarz (2015).
 <span>  confidence_bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prior_grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.99</span>, <span class="fl">0.01</span><span class="op">)</span>,</span>
 <span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>  innocent_suspect <span class="op">=</span> <span class="st">"auto"</span></span>
+<span>  innocent_suspect <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  gain <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"probability"</span>, <span class="st">"entropy"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -117,6 +118,15 @@ innocent-suspect count is estimated as filler IDs divided by
 have a non-missing <code>suspect_pos</code> column, and <code>"estimated"</code>
 otherwise, with a message.</p></dd>
 
+
+<dt id="arg-gain">gain<a class="anchor" aria-label="anchor" href="#arg-gain"></a></dt>
+<dd><p>Character. How information gain is measured. <code>"probability"</code>
+(default) is the Wells et al. (2015) measure, posterior minus prior on the
+probability scale (positive when the response raises the probability of
+guilt). <code>"entropy"</code> is the reduction in binary entropy, H(prior) minus
+H(posterior), in bits (Starns, Cohen &amp; Rotello, 2023); it is the per-response
+term of expected information gain (<code><a href="compute_eig.html">compute_eig</a></code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -136,19 +146,25 @@ $$p(x|innocent) = \frac{count(x | target\_absent)}{N_{innocent}}$$</p>
 <p><strong>For each prior probability p(guilty):</strong>
 $$p(x) = p(guilty) \cdot p(x|guilty) + (1-p(guilty)) \cdot p(x|innocent)$$
 $$p(guilty|x) = \frac{p(guilty) \cdot p(x|guilty)}{p(x)}$$</p>
-<p><strong>Information gain:</strong>
-$$IG(x) = H(prior) - H(posterior)$$</p>
-<p>where H(p) is binary entropy.</p>
-<p>The information gain quantifies how much uncertainty is reduced by observing
-response x. It is negative when the response moves belief towards 0.5, as a
-suspect identification does at a low prior; that is a correct update that
-leaves more uncertainty, not misleading evidence.</p>
+<p><strong>Information gain</strong> (<code>gain = "probability"</code>, Wells et al., 2015):
+$$IG(x) = p(guilty|x) - p(guilty)$$
+It is positive for responses that incriminate the suspect and negative for
+responses that exonerate.</p>
+<p><strong>Entropy reduction</strong> (<code>gain = "entropy"</code>, Starns et al., 2023):
+$$IG(x) = H(prior) - H(posterior)$$
+where H(p) is binary entropy in bits. It is negative when the response moves
+belief towards 0.5, as a suspect identification does at a low prior; that is
+a correct update that leaves more uncertainty, not misleading evidence. The
+two measures can differ in sign, so state which one is reported.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Wells, G. L., Yang, Y., &amp; Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect-equivalency curves, and reasonable
 suspicion. <em>Law and Human Behavior, 39</em>(2), 99-122.</p>
+<p>Starns, J. J., Cohen, A. L., &amp; Rotello, C. M. (2023). A complete method for
+assessing the effectiveness of eyewitness identification procedures: Expected
+information gain. <em>Psychological Review, 130</em>(3), 677-719.</p>
     </div>
 
     <div class="section level2">

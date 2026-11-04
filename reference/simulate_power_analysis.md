@@ -10,7 +10,7 @@ of sample sizes and recording how often the difference is detected.
 simulate_power_analysis(
   sample_sizes,
   d_prime,
-  d_prime_null = 0,
+  d_prime_2 = 0,
   n_simulations = 1000,
   test_function = NULL,
   alpha = 0.05,
@@ -18,6 +18,7 @@ simulate_power_analysis(
   n_bootstrap = 200,
   seed = NULL,
   verbose = TRUE,
+  d_prime_null = NULL,
   ...
 )
 ```
@@ -35,12 +36,16 @@ simulate_power_analysis(
 
   Numeric. Discriminability of the condition of interest.
 
-- d_prime_null:
+- d_prime_2:
 
-  Numeric. Discriminability of the comparison condition. Defaults to 0,
-  which asks how often the procedure can be shown to discriminate better
-  than chance. Set it to a non-zero value to ask the more usual question
-  of how often two working procedures can be told apart.
+  Numeric. Generating discriminability of the second (comparison)
+  condition. It is not the null hypothesis: the test asks whether the
+  two conditions differ. The default, 0, is a condition with no memory
+  of the culprit, so it asks how often the procedure can be shown to
+  discriminate better than chance. For a comparison of two working
+  procedures, set it to a realistic value (for example `d_prime = 1.5`,
+  `d_prime_2 = 1.2`). Equal values estimate the test's rejection rate
+  under the null.
 
 - n_simulations:
 
@@ -75,6 +80,10 @@ simulate_power_analysis(
 - verbose:
 
   Logical. Report progress (default = TRUE).
+
+- d_prime_null:
+
+  Deprecated name for `d_prime_2`.
 
 - ...:
 
@@ -116,9 +125,10 @@ that is really there. Estimating it by simulation means specifying the
 effect, generating many studies of that size, applying the analysis you
 intend to use, and counting how often it reaches significance.
 
-That requires a null to test against, which is what `d_prime_null`
-supplies. Simulating a single condition and computing a statistic from
-it is not a power analysis, because no hypothesis is being tested.
+That requires a second condition to compare against, which `d_prime_2`
+supplies; the null hypothesis is that the two conditions do not differ.
+Simulating a single condition and computing a statistic from it is not a
+power analysis, because no hypothesis is being tested.
 
 ## See also
 

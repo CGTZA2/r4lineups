@@ -11,7 +11,7 @@ sample sizes and recording how often the difference is detected."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@ sample sizes and recording how often the difference is detected.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simulate_power_analysis</span><span class="op">(</span></span>
 <span>  <span class="va">sample_sizes</span>,</span>
 <span>  <span class="va">d_prime</span>,</span>
-<span>  d_prime_null <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  d_prime_2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  n_simulations <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  test_function <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
@@ -76,6 +76,7 @@ sample sizes and recording how often the difference is detected.</p>
 <span>  n_bootstrap <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  d_prime_null <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -95,11 +96,15 @@ in the whole simulated experiment.</p></dd>
 <dd><p>Numeric. Discriminability of the condition of interest.</p></dd>
 
 
-<dt id="arg-d-prime-null">d_prime_null<a class="anchor" aria-label="anchor" href="#arg-d-prime-null"></a></dt>
-<dd><p>Numeric. Discriminability of the comparison condition.
-Defaults to 0, which asks how often the procedure can be shown to
-discriminate better than chance. Set it to a non-zero value to ask the more
-usual question of how often two working procedures can be told apart.</p></dd>
+<dt id="arg-d-prime-">d_prime_2<a class="anchor" aria-label="anchor" href="#arg-d-prime-"></a></dt>
+<dd><p>Numeric. Generating discriminability of the second
+(comparison) condition. It is not the null hypothesis: the test asks
+whether the two conditions differ. The default, 0, is a condition with no
+memory of the culprit, so it asks how often the procedure can be shown to
+discriminate better than chance. For a comparison of two working
+procedures, set it to a realistic value (for example <code>d_prime = 1.5</code>,
+<code>d_prime_2 = 1.2</code>). Equal values estimate the test's rejection rate
+under the null.</p></dd>
 
 
 <dt id="arg-n-simulations">n_simulations<a class="anchor" aria-label="anchor" href="#arg-n-simulations"></a></dt>
@@ -135,6 +140,10 @@ to a bootstrap comparison of partial AUC via <code><a href="compare_pauc.html">c
 <dd><p>Logical. Report progress (default = TRUE).</p></dd>
 
 
+<dt id="arg-d-prime-null">d_prime_null<a class="anchor" aria-label="anchor" href="#arg-d-prime-null"></a></dt>
+<dd><p>Deprecated name for <code>d_prime_2</code>.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to simulate_lineup_data(), for example
 <code>conf_levels</code> or <code>foil_bias</code>.</p></dd>
@@ -162,8 +171,9 @@ failure rates as well as conditional power when assessing a design.</p>
 is really there. Estimating it by simulation means specifying the effect,
 generating many studies of that size, applying the analysis you intend to
 use, and counting how often it reaches significance.</p>
-<p>That requires a null to test against, which is what <code>d_prime_null</code>
-supplies. Simulating a single condition and computing a statistic from it is
+<p>That requires a second condition to compare against, which
+<code>d_prime_2</code> supplies; the null hypothesis is that the two conditions do
+not differ. Simulating a single condition and computing a statistic from it is
 not a power analysis, because no hypothesis is being tested.</p>
     </div>
     <div class="section level2">

@@ -26,12 +26,16 @@ A ggplot2 object
 
 ## Details
 
-Information gain curves show the reduction in uncertainty (measured in
-bits) for each response type across different prior probabilities. A
-response that points to guilt gains most at priors above 0.5 and one
-that points to innocence at priors below 0.5; either can be negative
-where it moves belief towards 0.5. The legend lists responses from the
-most to the least indicative of guilt.
+The vertical axis follows the `gain` used in
+[`make_bayes_curves()`](https://cgtza2.github.io/r4lineups/reference/make_bayes_curves.md).
+With `gain = "probability"` (Wells et al., 2015) it is posterior minus
+prior: positive for responses that point to guilt, negative for
+responses that point to innocence. With `gain = "entropy"` it is the
+reduction in uncertainty in bits: a response that points to guilt gains
+most at priors above 0.5 and one that points to innocence at priors
+below 0.5, and either can be negative where it moves belief towards 0.5.
+The legend lists responses from the most to the least indicative of
+guilt.
 
 ## Examples
 

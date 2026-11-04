@@ -74,9 +74,8 @@ lineup_vec <- round(runif(100, 1, 6))
 
 #Call:
 esize_m(lineup_vec, 6, both = TRUE)
-#> Effective size (Malpass, 1981) =  4.84 
-#> Effective size (Malpass, 1981, 
-#>              adj Tredoux, 1998) =  4.84 
+#> Effective size (Malpass, 1981; null foils excluded) =  4.84 
+#> Effective size (Tredoux, 1998, Eq. 5; nominal size kept) =  4.84 
 #> [1] 4.84
 esize_m(lineup_vec, 6)
 #> [1] 4.84

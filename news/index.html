@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,41 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.3.0" id="r4lineups-230-2026-10-29">r4lineups 2.3.0 (2026-10-29)<a class="anchor" aria-label="anchor" href="#r4lineups-230-2026-10-29"></a></h2>
+<h2 class="pkg-version" data-toc-text="2.3.1" id="r4lineups-231">r4lineups 2.3.1<a class="anchor" aria-label="anchor" href="#r4lineups-231"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-2-3-1">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-2-3-1"></a></h3>
+<ul><li>
+<code><a href="../reference/make_bayes_curves.html">make_bayes_curves()</a></code> gains <code>gain = c("probability", "entropy")</code>. The default is now the Wells, Yang and Smalarz (2015) information gain, posterior minus prior, which the function cites. The previous measure, the reduction in binary entropy (Starns, Cohen &amp; Rotello, 2023), is available as <code>gain = "entropy"</code>. The two can differ in sign: a suspect identification at a low prior has a positive probability gain but a negative entropy reduction. <code><a href="../reference/plot_bayes_information_gain.html">plot_bayes_information_gain()</a></code> labels its axis to match.</li>
+<li>
+<code><a href="../reference/make_fullroc.html">make_fullroc()</a></code> and <code><a href="../reference/make_fullroc_data.html">make_fullroc_data()</a></code> with <code>order = "apriori"</code> now use the a priori order of Smith, Yang and Wells (2020, p. 604) and Yang and Smith (2023): suspect IDs from high to low confidence, then rejections and filler IDs alternately from low to high confidence, rejection first at each level. Previously all filler IDs preceded all rejections, which changes the curve and AUC whenever their confidence ranges overlap. The documentation now cites Smith, Yang and Wells (2020) rather than “Smith &amp; Yang”.</li>
+<li>Calibration functions gain <code>population = c("suspect_ids", "choosers", "nonchoosers")</code>. <code>"choosers"</code> includes filler identifications as errors, as in Brewer and Wells (2006); <code>"nonchoosers"</code> calibrates rejections, which are correct when the culprit is absent. <code>choosers_only = FALSE</code> previously scored every response other than a target-present suspect ID as incorrect, including correct rejections; it is deprecated and now means <code>population = "choosers"</code>. The default (suspect identifications, as in CAC) is unchanged.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-2-3-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-2-3-1"></a></h3>
+<ul><li>
+<code><a href="../reference/homog_diag.html">homog_diag()</a></code> now stops with an informative error when a pair has a zero or non-finite log-ratio variance (for example, every witness choosing the suspect). It previously reported <code>heterogeneous = FALSE</code> from non-finite weights and pooled results.</li>
+<li>
+<code><a href="../reference/classify_lineup_choices.html">classify_lineup_choices()</a></code> no longer treats a missing chosen position (<code>NA</code>) as a rejection. The outcome is <code>NA</code>, with a warning; recode to 0 first if <code>NA</code> records a rejection.</li>
+<li>With <code>correction = "none"</code>, <code><a href="../reference/sdt_summary_from_counts.html">sdt_summary_from_counts()</a></code> and <code><a href="../reference/make_multid.html">make_multid()</a></code> no longer clamp rates of 0 or 1 silently to finite values. The affected normal scores and indices are infinite, with a warning. The variance enumeration in <code><a href="../reference/sdt_summary_variance.html">sdt_summary_variance()</a></code> keeps its numerical safeguard.</li>
+<li>
+<code><a href="../reference/simulate_power_analysis.html">simulate_power_analysis()</a></code>: <code>d_prime_null</code> is renamed <code>d_prime_2</code>. It is the second condition’s generating value, not a null hypothesis; the old name still works with a deprecation warning.</li>
+<li>
+<code><a href="../reference/boot_winter_2ht.html">boot_winter_2ht()</a></code> plots use <code>linewidth</code>, removing a ggplot2 deprecation warning.</li>
+<li>
+<code>fit_sdt_roc(n_bootstrap = 0)</code> no longer warns that all bootstrap samples failed.</li>
+<li>
+<code>esize_m(both = TRUE)</code> labels its two values by what they do: Malpass (1981) with null foils excluded, and Tredoux (1998, Eq. 5) with nominal size kept. Tredoux (1998, Table 3) calls the first of these the adjusted estimate.</li>
+<li>
+<code><a href="../reference/fit_max_sdt.html">fit_max_sdt()</a></code> no longer returns estimates outside its parameter bounds (for example a negative d’): the unconstrained Nelder-Mead polishing step is discarded when it leaves the box.</li>
+<li>The <code>line73</code> help now describes the data as inspired by Doob and Kirshenbaum
+<ol start="1973" style="list-style-type: decimal"><li>but not their data, which do not appear to have survived (their study used a 12-member lineup and 21 mock witnesses).</li>
+</ol></li>
+<li>
+<code><a href="../reference/esize_T_ci_n.html">esize_T_ci_n()</a></code> gains <code>conf_level</code>; <code>alpha</code> (which was the confidence level) remains for compatibility.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.3.0" id="r4lineups-230-2026-10-29">r4lineups 2.3.0 (2026-10-29)<a class="anchor" aria-label="anchor" href="#r4lineups-230-2026-10-29"></a></h2><p class="text-muted">CRAN release: 2026-11-02</p>
 <div class="section level3">
 <h3 id="breaking-changes-2-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-2-3-0"></a></h3>
 <ul><li>

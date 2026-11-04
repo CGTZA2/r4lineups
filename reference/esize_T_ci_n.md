@@ -7,7 +7,7 @@ interval derived from the normal-theory variance formula in Tredoux
 ## Usage
 
 ``` r
-esize_T_ci_n(lineup_tab, alpha)
+esize_T_ci_n(lineup_tab, alpha = 0.95, conf_level = NULL)
 ```
 
 ## Arguments
@@ -19,6 +19,12 @@ esize_T_ci_n(lineup_tab, alpha)
 - alpha:
 
   Confidence level as a decimal (e.g., 0.95 for a 95-percent CI).
+  Despite its name this is the confidence level, not the error rate;
+  prefer `conf_level`.
+
+- conf_level:
+
+  Confidence level as a decimal. Overrides `alpha`.
 
 ## Details
 

@@ -14,6 +14,7 @@ make_calibration(
   show_plot = TRUE,
   confidence_scale = c("auto", "0-1", "0-100"),
   innocent_suspect = "auto",
+  population = NULL,
   ...
 )
 ```
@@ -58,6 +59,15 @@ make_calibration(
   suspect ID or the data have a non-missing `suspect_pos` column, and
   `"estimated"` otherwise, with a message.
 
+- population:
+
+  Which responses are calibrated: `"suspect_ids"` (suspect
+  identifications, as in CAC analysis; correct when target-present),
+  `"choosers"` (suspect and filler identifications, as in Brewer &
+  Wells, 2006; only target-present suspect IDs are correct), or
+  `"nonchoosers"` (rejections; correct when target-absent). If NULL
+  (default), it is set from `choosers_only`.
+
 - ...:
 
   Additional arguments passed to make_calibration_gg()
@@ -84,7 +94,7 @@ print(cal_result)
 #> 
 #> === Lineup Calibration Analysis ===
 #> 
-#> Analysis type: Choosers only (suspect IDs)
+#> Population: Suspect identifications 
 #> Total N: 103 
 #> 
 #> Calibration Statistics:

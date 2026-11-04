@@ -26,8 +26,9 @@ classify_lineup_choices(
 - member_col:
 
   Name of the column holding the position of the lineup member chosen,
-  with `0` (or `NA`) denoting a rejection. Defaults to
-  `"lineup_member"`.
+  with `0` denoting a rejection. `NA` is treated as a missing response
+  and gives `NA` in the outcome column, with a warning; recode it to 0
+  first if it records a rejection. Defaults to `"lineup_member"`.
 
 - suspect_col:
 

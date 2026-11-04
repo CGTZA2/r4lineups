@@ -646,9 +646,8 @@ prints the original Malpass estimate for comparison.
 
 ``` r
 esize_m(lineup_tab, k = 8, both = TRUE)
-Effective size (Malpass, 1981) =  5.962406 
-Effective size (Malpass, 1981, 
-             adj Tredoux, 1998) =  5.962406 
+Effective size (Malpass, 1981; null foils excluded) =  5.962406 
+Effective size (Tredoux, 1998, Eq. 5; nominal size kept) =  5.962406 
 [1] 5.962406
 ```
 
@@ -659,9 +658,8 @@ which is where the distinction between $`k`$ and $`k_a`$ bites:
 ``` r
 # Position 4 was never chosen
 esize_m(lineup_table(null_foil_vec, k = 8), k = 8, both = TRUE)
-Effective size (Malpass, 1981) =  7 
-Effective size (Malpass, 1981, 
-             adj Tredoux, 1998) =  7 
+Effective size (Malpass, 1981; null foils excluded) =  7 
+Effective size (Tredoux, 1998, Eq. 5; nominal size kept) =  7 
 [1] 7
 ```
 

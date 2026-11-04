@@ -265,12 +265,14 @@ to use, and count how often it reaches significance.
 
 That last step needs a **hypothesis test**, which is why
 [`simulate_power_analysis()`](https://cgtza2.github.io/r4lineups/reference/simulate_power_analysis.md)
-requires two conditions. `d_prime` is the condition of interest and
-`d_prime_null` is what it is being compared against. The default
-`d_prime_null = 0` asks how often a study of this size could show that
-the procedure discriminates better than chance; setting it to a non-zero
-value asks the more usual question of how often two working procedures
-could be told apart.
+requires two conditions. `d_prime` is the generating value for the
+condition of interest and `d_prime_2` the generating value for the
+condition it is compared with; the null hypothesis is that the two do
+not differ. The default `d_prime_2 = 0` is a condition with no memory of
+the culprit, so it asks how often a study of this size could show that
+the procedure discriminates better than chance. Comparing two working
+procedures, for example `d_prime = 1.5` against `d_prime_2 = 1.2`, is
+the more usual planning question and needs far more witnesses.
 
 Each simulated study is tested with
 [`compare_pauc()`](https://cgtza2.github.io/r4lineups/reference/compare_pauc.md),
@@ -293,7 +295,7 @@ the `n_total` column gives the total.
 power_result <- simulate_power_analysis(
   sample_sizes  = c(25, 50, 100, 200),
   d_prime       = 1.0,
-  d_prime_null  = 0,
+  d_prime_2     = 0,
   n_simulations = 30,   # small, so this vignette builds quickly
   n_bootstrap   = 60,   # likewise
   conf_levels   = 5,
@@ -668,7 +670,7 @@ uses every response, including foil identifications and rejections.
 fullroc_result <- make_fullroc(sim_roc, lineup_size = 6, show_plot = FALSE)
 print(fullroc_result)
 #> 
-#> === Full Lineup ROC Analysis (Smith & Yang, 2020) ===
+#> === Full Lineup ROC Analysis (Smith, Yang & Wells, 2020) ===
 #> 
 #> Full AUC: 0.83 
 #> Target-present trials (N): 300 

@@ -1,10 +1,10 @@
 # line73
 
-A dataframe of lineup choices for 1 trial; real data from a Doob &
-Kirshenbaum (1973) article. This article was the first to discuss lineup
-size 1 column x 42 observations
-
-42 mock witnesses Nominal size is 6 Target position is 4
+A dataframe of 42 mock-witness choices from a six-member lineup (target
+position 4), inspired by the original Doob and Kirshenbaum (1973) study
+but not their data, which do not appear to have survived. Their study,
+the first to discuss lineup size, used a 12-member lineup and 21 mock
+witnesses.
 
 ## Usage
 

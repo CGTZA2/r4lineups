@@ -1,7 +1,7 @@
 # Plot Full ROC Curve
 
 Creates a ggplot2 visualization of full ROC data from lineup
-identification experiments using the Smith & Yang (2020) method.
+identification experiments using the Smith, Yang & Wells (2020) method.
 
 ## Usage
 
@@ -10,7 +10,7 @@ plot_fullroc(
   fullroc_obj,
   show_auc = TRUE,
   point_labels = FALSE,
-  title = "Full ROC Curve (Smith & Yang, 2020)"
+  title = "Full ROC Curve (Smith, Yang & Wells, 2020)"
 )
 ```
 
@@ -35,7 +35,7 @@ plot_fullroc(
 
 - title:
 
-  Character. Plot title (default = "Full ROC Curve (Smith & Yang,
+  Character. Plot title (default = "Full ROC Curve (Smith, Yang & Wells,
   2020)")
 
 ## Value

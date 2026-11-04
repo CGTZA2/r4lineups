@@ -11,7 +11,7 @@ each witness actually chose."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +85,9 @@ each witness actually chose.</p>
 
 <dt id="arg-member-col">member_col<a class="anchor" aria-label="anchor" href="#arg-member-col"></a></dt>
 <dd><p>Name of the column holding the position of the lineup
-member chosen, with <code>0</code> (or <code>NA</code>) denoting a rejection. Defaults
+member chosen, with <code>0</code> denoting a rejection. <code>NA</code> is treated as a
+missing response and gives <code>NA</code> in the outcome column, with a warning;
+recode it to 0 first if it records a rejection. Defaults
 to <code>"lineup_member"</code>.</p></dd>
 
 

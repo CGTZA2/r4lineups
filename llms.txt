@@ -440,9 +440,10 @@ time-accuracy analysis.
 Full ROC curves using all response categories.
 
 - [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
-  : Compute and Plot Full ROC Curve (Smith & Yang, 2020)
+  : Compute and Plot Full ROC Curve (Smith, Yang & Wells, 2020)
 - [`make_fullroc_data()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc_data.md)
-  : Compute Full ROC Data for Lineup Identification (Smith & Yang, 2020)
+  : Compute Full ROC Data for Lineup Identification (Smith, Yang &
+  Wells, 2020)
 - [`plot_fullroc()`](https://cgtza2.github.io/r4lineups/reference/plot_fullroc.md)
   : Plot Full ROC Curve
 - [`print(`*`<lineup_fullroc>`*`)`](https://cgtza2.github.io/r4lineups/reference/print.lineup_fullroc.md)

@@ -9,7 +9,7 @@ derived from the normal-theory variance formula in Tredoux (1998)."></head><body
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@ derived from the normal-theory variance formula in Tredoux (1998).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">esize_T_ci_n</span><span class="op">(</span><span class="va">lineup_tab</span>, <span class="va">alpha</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">esize_T_ci_n</span><span class="op">(</span><span class="va">lineup_tab</span>, alpha <span class="op">=</span> <span class="fl">0.95</span>, conf_level <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -74,7 +74,13 @@ derived from the normal-theory variance formula in Tredoux (1998).</p>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Confidence level as a decimal (e.g., 0.95 for a 95-percent CI).</p></dd>
+<dd><p>Confidence level as a decimal (e.g., 0.95 for a 95-percent CI).
+Despite its name this is the confidence level, not the error rate; prefer
+<code>conf_level</code>.</p></dd>
+
+
+<dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
+<dd><p>Confidence level as a decimal. Overrides <code>alpha</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

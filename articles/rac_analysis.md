@@ -672,4 +672,4 @@ eyewitness confidence and identification accuracy: A new synthesis.
 
 ------------------------------------------------------------------------
 
-*This vignette was created for r4lineups version 2.3.0*
+*This vignette was created for r4lineups version 2.3.1*

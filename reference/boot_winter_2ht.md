@@ -138,10 +138,6 @@ print(boot_fit)
 #> b    0.0273     0.0012     0.0677  0.0176
 #> g    0.4452     0.4122     0.5182  0.0275
 plot(boot_fit)
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the r4lineups package.
-#>   Please report the issue at <https://github.com/CGTZA2/r4lineups/issues>.
 
 # }
 ```

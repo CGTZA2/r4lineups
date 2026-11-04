@@ -164,7 +164,7 @@ print(cal_result)
 
 === Lineup Calibration Analysis ===
 
-Analysis type: Choosers only (suspect IDs)
+Population: Suspect identifications 
 Total N: 503 
 
 Calibration Statistics:
@@ -406,16 +406,16 @@ $curves
  [38;5;246m# A tibble: 297 × 4 [39m
    response prior posterior information_gain
     [3m [38;5;246m<chr> [39m [23m     [3m [38;5;246m<dbl> [39m [23m      [3m [38;5;246m<dbl> [39m [23m             [3m [38;5;246m<dbl> [39m [23m
- [38;5;250m 1 [39m filler    0.01   0.005 [4m3 [24m [4m3 [24m           0.032 [4m9 [24m
- [38;5;250m 2 [39m filler    0.02   0.010 [4m7 [24m            0.056 [4m0 [24m
- [38;5;250m 3 [39m filler    0.03   0.016 [4m1 [24m            0.075 [4m2 [24m
- [38;5;250m 4 [39m filler    0.04   0.021 [4m6 [24m            0.091 [4m8 [24m
- [38;5;250m 5 [39m filler    0.05   0.027 [4m2 [24m            0.106 
- [38;5;250m 6 [39m filler    0.06   0.032 [4m7 [24m            0.119 
- [38;5;250m 7 [39m filler    0.07   0.038 [4m4 [24m            0.131 
- [38;5;250m 8 [39m filler    0.08   0.044 [4m1 [24m            0.141 
- [38;5;250m 9 [39m filler    0.09   0.049 [4m8 [24m            0.151 
- [38;5;250m10 [39m filler    0.1    0.055 [4m7 [24m            0.159 
+ [38;5;250m 1 [39m filler    0.01   0.005 [4m3 [24m [4m3 [24m         - [31m0 [39m [31m. [39m [31m00 [39m [31m4 [4m6 [24m [4m7 [24m [39m
+ [38;5;250m 2 [39m filler    0.02   0.010 [4m7 [24m          - [31m0 [39m [31m. [39m [31m00 [39m [31m9 [4m2 [24m [4m9 [24m [39m
+ [38;5;250m 3 [39m filler    0.03   0.016 [4m1 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m13 [4m9 [24m [39m 
+ [38;5;250m 4 [39m filler    0.04   0.021 [4m6 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m18 [4m4 [24m [39m 
+ [38;5;250m 5 [39m filler    0.05   0.027 [4m2 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m22 [4m8 [24m [39m 
+ [38;5;250m 6 [39m filler    0.06   0.032 [4m7 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m27 [4m3 [24m [39m 
+ [38;5;250m 7 [39m filler    0.07   0.038 [4m4 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m31 [4m6 [24m [39m 
+ [38;5;250m 8 [39m filler    0.08   0.044 [4m1 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m35 [4m9 [24m [39m 
+ [38;5;250m 9 [39m filler    0.09   0.049 [4m8 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m40 [4m2 [24m [39m 
+ [38;5;250m10 [39m filler    0.1    0.055 [4m7 [24m          - [31m0 [39m [31m. [39m [31m0 [39m [31m44 [4m3 [24m [39m 
  [38;5;246m# ℹ 287 more rows [39m
 
 $likelihoods
@@ -448,6 +448,9 @@ $lineup_size
 
 $innocent_suspect_method
 [1] "designated"
+
+$gain
+[1] "probability"
 
 # Plot prior-posterior relationships
 plot_bayes_prior_posterior(bayes_result)
@@ -487,10 +490,11 @@ near 0 or near 1.
 
 ### Information Gain
 
-Information gain quantifies uncertainty reduction, measured in bits: the
-entropy of the prior minus the entropy of the posterior. Where the
-posterior curve says *where belief ends up*, information gain says *how
-much uncertainty was removed*:
+Wells, Yang and Smalarz (2015) measure the information gained from a
+response as the change in the probability of guilt, posterior minus
+prior. This is the default (`gain = "probability"`). It is positive for
+responses that point to guilt and negative for responses that point to
+innocence, and it is largest in absolute terms at middling priors:
 
 ``` r
 
@@ -499,24 +503,30 @@ plot_bayes_information_gain(bayes_result)
 
 ![](calibration_decision_analysis_files/figure-html/bayes-information-gain-1.png)
 
-Interpretation:
+A second measure, used by Starns, Cohen and Rotello (2023) in expected
+information gain, is the reduction in uncertainty in bits: the entropy
+of the prior minus the entropy of the posterior (`gain = "entropy"`):
 
-- **Positive values**: the response moves belief towards certainty
-  (towards 0 or 1), so uncertainty falls.
-- **Negative values**: the response moves belief towards 50/50, so
-  uncertainty rises. That is not a sign of misleading evidence: a
-  suspect identification given a low prior raises the probability of
-  guilt towards .5, which is the correct update and also the most
-  uncertain state.
-- **Where each curve peaks** depends on the direction of the evidence.
-  Responses that point to guilt (suspect identifications) gain most at
-  priors above .5, where they push belief towards 1; responses that
-  point to innocence (rejections, filler identifications) gain most at
-  priors below .5.
+``` r
 
-The curves bend sharply because binary entropy changes fastest near 0
-and 1. That shape is a property of the measure, not of these data or of
-any smoothing.
+bayes_entropy <- make_bayes_curves(
+  lineup_example,
+  response_categories = "simple",
+  prior_grid = seq(0.01, 0.99, 0.01),
+  gain = "entropy"
+)
+plot_bayes_information_gain(bayes_entropy)
+```
+
+![](calibration_decision_analysis_files/figure-html/bayes-information-gain-entropy-1.png)
+
+The two measures answer different questions and can differ in sign. A
+suspect identification given a low prior raises the probability of guilt
+towards .5: its probability gain is positive, but its entropy reduction
+is negative because .5 is the most uncertain state. That is a correct
+update, not misleading evidence. Responses that point to guilt reduce
+entropy most at priors above .5, and responses that point to innocence
+reduce it most at priors below .5. State which measure you report.
 
 ### Confidence-Based Bayesian Analysis
 
@@ -1447,6 +1457,11 @@ diagnostic utility of eyewitness lineups but partial area under the ROC
 curve does not. *Journal of Applied Research in Memory and Cognition,
 8*(1), 50-59. <https://doi.org/10.1016/j.jarmac.2018.09.003>
 
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
+for assessing the effectiveness of eyewitness identification procedures:
+Expected information gain. *Psychological Review, 130*(3), 677-719.
+<https://doi.org/10.1037/rev0000332>
+
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect-equivalency curves, and
 reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
@@ -1480,7 +1495,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] r4lineups_2.3.0
+[1] r4lineups_2.3.1
 
 loaded via a namespace (and not attached):
  [1] Matrix_1.7-6       gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1       

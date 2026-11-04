@@ -1,8 +1,8 @@
-# Compute and Plot Full ROC Curve (Smith & Yang, 2020)
+# Compute and Plot Full ROC Curve (Smith, Yang & Wells, 2020)
 
 Main function to compute and plot a full ROC curve using all eyewitness
-responses (suspect ID, filler ID, rejection) following Smith & Yang
-(2020).
+responses (suspect ID, filler ID, rejection) following Smith, Yang &
+Wells (2020).
 
 ## Usage
 

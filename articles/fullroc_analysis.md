@@ -170,9 +170,9 @@ result <- make_fullroc(
 
 print(result)
 #> 
-#> === Full Lineup ROC Analysis (Smith & Yang, 2020) ===
+#> === Full Lineup ROC Analysis (Smith, Yang & Wells, 2020) ===
 #> 
-#> Full AUC: 0.76 
+#> Full AUC: 0.726 
 #> Target-present trials (N): 700 
 #> Target-absent trials (N): 700 
 #> Lineup size: 6 
@@ -204,6 +204,7 @@ print(result)
 #>      suspect_40 0.071428571      0.022857143           3.1250000
 #>      suspect_30 0.048571429      0.025714286           1.8888889
 #>      suspect_20 0.037142857      0.022857143           1.6250000
+#>       reject_20 0.095714286      0.287142857           0.3333333
 #>       filler_20 0.047142857      0.108571429           0.4342105
 #>       filler_30 0.047142857      0.110000000           0.4285714
 #>       filler_40 0.054285714      0.098571429           0.5507246
@@ -213,7 +214,6 @@ print(result)
 #>       filler_80 0.020000000      0.021428571           0.9333333
 #>       filler_90 0.008571429      0.014285714           0.6000000
 #>      filler_100 0.010000000      0.028571429           0.3500000
-#>       reject_20 0.095714286      0.287142857           0.3333333
 #> 
 #> Plot: use plot(x), or save the object and extract x$plot
 ```
@@ -238,15 +238,21 @@ difference is very important more than it might appear.
 
 ### A-priori ordering
 
-`order = "apriori"` fixes the order in advance on theoretical grounds:
-
-1.  Suspect identifications, from high confidence down to low
-2.  Filler identifications, from low confidence up to high
-3.  Rejections, from low confidence up to high
+`order = "apriori"` fixes the order in advance on theoretical grounds,
+following Smith, Yang and Wells (2020, p. 604) and Yang and Smith
+(2023). Suspect identifications come first, from high confidence down to
+low. Rejections and filler identifications follow, alternately and from
+low confidence up to high, with the rejection first at each level. For
+three confidence levels the order is high, medium and low-confidence
+suspect IDs; low-confidence rejections and filler IDs; medium-confidence
+rejections and filler IDs; and high-confidence rejections and filler
+IDs.
 
 The reasoning is that a confident suspect identification is the
-strongest evidence of guilt, while a confident rejection or a confident
-filler identification is the strongest evidence of innocence.
+strongest evidence of guilt, that any decision made with low confidence
+carries less information than one made with high confidence, and that a
+confident rejection or a confident filler identification is the
+strongest evidence of innocence.
 
 ### Diagnosticity ordering
 
@@ -302,10 +308,10 @@ knitr::kable(
 
 | Lineups per arm | Diagnosticity ordering | A-priori ordering |
 |----------------:|-----------------------:|------------------:|
-|             100 |                  0.655 |             0.482 |
-|             200 |                  0.601 |             0.490 |
-|             500 |                  0.568 |             0.494 |
-|            1000 |                  0.544 |             0.496 |
+|             100 |                  0.655 |             0.486 |
+|             200 |                  0.601 |             0.491 |
+|             500 |                  0.568 |             0.502 |
+|            1000 |                  0.544 |             0.497 |
 
 Mean AUC from data containing NO signal at all, so the true AUC is
 0.500. Simulated, 15 replications per row, 15 decision-by-confidence
@@ -362,8 +368,8 @@ knitr::kable(
 
 | Version                          | Operating points |    AUC |
 |:---------------------------------|-----------------:|-------:|
-| All confidence levels            |               20 | 0.7596 |
-| Three bins (0-60, 60-80, 80-100) |                8 | 0.7599 |
+| All confidence levels            |               20 | 0.7264 |
+| Three bins (0-60, 60-80, 80-100) |                8 | 0.7266 |
 
 Effect of binning confidence, lineup_example, a-priori ordering.
 {.table}
@@ -481,8 +487,8 @@ knitr::kable(
 
 | Condition                |    AUC |
 |:-------------------------|-------:|
-| Strong memory (d’ = 2.0) | 0.8443 |
-| Weak memory (d’ = 1.2)   | 0.6835 |
+| Strong memory (d’ = 2.0) | 0.8071 |
+| Weak memory (d’ = 1.2)   | 0.6482 |
 
 Full ROC AUC by viewing condition, simulated data (500 target-present
 and 500 target-absent lineups per condition, a-priori ordering).
@@ -617,6 +623,10 @@ identification performance. *Perspectives on Psychological Science,
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect equivalency curves, and
 reasonable suspicion. *Law and Human Behavior, 39*(1), 99-122.
+
+Yang, Y., & Smith, A. M. (2023). fullROC: An R package for generating
+and analyzing eyewitness-lineup ROC curves. *Behavior Research Methods,
+55*, 1259-1274. <https://doi.org/10.3758/s13428-022-01807-6>
 
 ## Further Reading
 

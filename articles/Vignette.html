@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-02</h4>
+            <h4 data-toc-skip class="date">2026-11-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/Vignette.Rmd" class="external-link"><code>vignettes/Vignette.Rmd</code></a></small>
       <div class="d-none name"><code>Vignette.Rmd</code></div>
@@ -679,10 +679,9 @@ nominal size. The function always returns the Tredoux-adjusted estimate;
 <code>both = TRUE</code> additionally prints the original Malpass
 estimate for comparison.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">esize_m</span>(lineup_tab, <span class="at">k =</span> <span class="dv">8</span>, <span class="at">both =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>, </span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>             adj Tredoux, <span class="dv">1998</span>) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.962406</span></span></code></pre></div>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>; null foils excluded) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Tredoux, <span class="dv">1998</span>, Eq. <span class="dv">5</span>; nominal size kept) <span class="ot">=</span>  <span class="fl">5.962406</span> </span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.962406</span></span></code></pre></div>
 <p>Every member of <code>lineup_1</code> was chosen at least once, so
 here the two formulations coincide. They come apart as soon as there is
 a null foil, which is where the distinction between
@@ -692,10 +691,9 @@ and
 bites:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Position 4 was never chosen</span></span>
 <span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">esize_m</span>(<span class="fu">lineup_table</span>(null_foil_vec, <span class="at">k =</span> <span class="dv">8</span>), <span class="at">k =</span> <span class="dv">8</span>, <span class="at">both =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>) <span class="ot">=</span>  <span class="dv">7</span> </span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>, </span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>             adj Tredoux, <span class="dv">1998</span>) <span class="ot">=</span>  <span class="dv">7</span> </span>
-<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">7</span></span></code></pre></div>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>Effective <span class="fu">size</span> (Malpass, <span class="dv">1981</span>; null foils excluded) <span class="ot">=</span>  <span class="dv">7</span> </span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>Effective <span class="fu">size</span> (Tredoux, <span class="dv">1998</span>, Eq. <span class="dv">5</span>; nominal size kept) <span class="ot">=</span>  <span class="dv">7</span> </span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">7</span></span></code></pre></div>
 <p>The adjusted estimate deducts the unchosen member. Note that both
 figures happen to be 7 in this particular example, but for different
 reasons: the adjusted formula starts from k = 8 and deducts the null
