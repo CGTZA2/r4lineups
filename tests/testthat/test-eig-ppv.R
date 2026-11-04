@@ -155,3 +155,25 @@ test_that("PPV keeps confidence bins that contain no target-absent trials", {
   expect_s3_class(plot_error_rate_conf(rng), "ggplot")
   expect_s3_class(plot_ppv_range(rng), "ggplot")
 })
+
+test_that("make_bayes_curves() information gain follows the requested measure", {
+  dat <- data.frame(
+    target_present = rep(c(TRUE, FALSE), each = 100),
+    identification = rep(rep(c("suspect", "filler", "reject"), 2),
+                         times = c(60, 20, 20, 10, 30, 60))
+  )
+  # Wells et al. (2015): posterior minus prior; suspect ID at prior .1 -> .4.
+  prob <- make_bayes_curves(dat, prior_grid = 0.1, innocent_suspect = "designated")
+  sus <- prob$curves[prob$curves$response == "suspect", ]
+  expect_equal(prob$gain, "probability")
+  expect_equal(sus$posterior, 0.4)
+  expect_equal(sus$information_gain, 0.3)
+  # Starns et al. (2023): entropy reduction; negative for the same update.
+  ent <- make_bayes_curves(dat, prior_grid = 0.1, innocent_suspect = "designated",
+                           gain = "entropy")
+  sus_e <- ent$curves[ent$curves$response == "suspect", ]
+  h <- function(p) -p * log2(p) - (1 - p) * log2(1 - p)
+  expect_equal(sus_e$information_gain, h(0.1) - h(0.4))
+  expect_lt(sus_e$information_gain, 0)
+  expect_error(make_bayes_curves(dat, gain = "bits"))
+})

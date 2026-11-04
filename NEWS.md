@@ -1,3 +1,15 @@
+# r4lineups (development version)
+
+## Breaking changes
+
+* `make_bayes_curves()` gains `gain = c("probability", "entropy")`. The default
+  is now the Wells, Yang and Smalarz (2015) information gain, posterior minus
+  prior, which the function cites. The previous measure, the reduction in binary
+  entropy (Starns, Cohen & Rotello, 2023), is available as `gain = "entropy"`.
+  The two can differ in sign: a suspect identification at a low prior has a
+  positive probability gain but a negative entropy reduction.
+  `plot_bayes_information_gain()` labels its axis to match.
+
 # r4lineups 2.3.0 (2026-10-29)
 
 ## Breaking changes

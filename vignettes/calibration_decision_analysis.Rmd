@@ -368,30 +368,37 @@ and very little when the prior is already near 0 or near 1.
 
 ### Information Gain
 
-Information gain quantifies uncertainty reduction, measured in bits: the
-entropy of the prior minus the entropy of the posterior. Where the posterior
-curve says *where belief ends up*, information gain says *how much uncertainty
-was removed*:
+Wells, Yang and Smalarz (2015) measure the information gained from a response
+as the change in the probability of guilt, posterior minus prior. This is the
+default (`gain = "probability"`). It is positive for responses that point to
+guilt and negative for responses that point to innocence, and it is largest in
+absolute terms at middling priors:
 
 ```{r bayes-information-gain}
 plot_bayes_information_gain(bayes_result)
 ```
 
-Interpretation:
+A second measure, used by Starns, Cohen and Rotello (2023) in expected
+information gain, is the reduction in uncertainty in bits: the entropy of the
+prior minus the entropy of the posterior (`gain = "entropy"`):
 
-- **Positive values**: the response moves belief towards certainty (towards 0
-  or 1), so uncertainty falls.
-- **Negative values**: the response moves belief towards 50/50, so uncertainty
-  rises. That is not a sign of misleading evidence: a suspect identification
-  given a low prior raises the probability of guilt towards .5, which is the
-  correct update and also the most uncertain state.
-- **Where each curve peaks** depends on the direction of the evidence. Responses
-  that point to guilt (suspect identifications) gain most at priors above .5,
-  where they push belief towards 1; responses that point to innocence
-  (rejections, filler identifications) gain most at priors below .5.
+```{r bayes-information-gain-entropy}
+bayes_entropy <- make_bayes_curves(
+  lineup_example,
+  response_categories = "simple",
+  prior_grid = seq(0.01, 0.99, 0.01),
+  gain = "entropy"
+)
+plot_bayes_information_gain(bayes_entropy)
+```
 
-The curves bend sharply because binary entropy changes fastest near 0 and 1.
-That shape is a property of the measure, not of these data or of any smoothing.
+The two measures answer different questions and can differ in sign. A suspect
+identification given a low prior raises the probability of guilt towards .5:
+its probability gain is positive, but its entropy reduction is negative because
+.5 is the most uncertain state. That is a correct update, not misleading
+evidence. Responses that point to guilt reduce entropy most at priors above .5,
+and responses that point to innocence reduce it most at priors below .5. State
+which measure you report.
 
 ### Confidence-Based Bayesian Analysis
 
@@ -982,6 +989,8 @@ Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in eyewitne
 Mickes, L. (2015). Receiver operating characteristic analysis and confidence-accuracy characteristic analysis in investigations of system variables and estimator variables that affect eyewitness memory. *Journal of Applied Research in Memory and Cognition, 4*(2), 93-102.
 
 Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova, S. (2019). Deviation from perfect performance measures the diagnostic utility of eyewitness lineups but partial area under the ROC curve does not. *Journal of Applied Research in Memory and Cognition, 8*(1), 50-59. https://doi.org/10.1016/j.jarmac.2018.09.003
+
+Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for assessing the effectiveness of eyewitness identification procedures: Expected information gain. *Psychological Review, 130*(3), 677-719. https://doi.org/10.1037/rev0000332
 
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect-equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
 

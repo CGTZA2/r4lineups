@@ -8,6 +8,13 @@
 #' Computes Bayesian updating curves showing how different lineup responses
 #' update beliefs about suspect guilt, following Wells, Yang, & Smalarz (2015).
 #'
+#' @param gain Character. How information gain is measured. \code{"probability"}
+#'   (default) is the Wells et al. (2015) measure, posterior minus prior on the
+#'   probability scale (positive when the response raises the probability of
+#'   guilt). \code{"entropy"} is the reduction in binary entropy, H(prior) minus
+#'   H(posterior), in bits (Starns, Cohen & Rotello, 2023); it is the per-response
+#'   term of expected information gain (\code{\link{compute_eig}}).
+#'
 #' @param data A dataframe with the following columns:
 #'   \itemize{
 #'     \item target_present: Logical. TRUE if guilty suspect in lineup
@@ -48,20 +55,26 @@
 #' \deqn{p(x) = p(guilty) \cdot p(x|guilty) + (1-p(guilty)) \cdot p(x|innocent)}
 #' \deqn{p(guilty|x) = \frac{p(guilty) \cdot p(x|guilty)}{p(x)}}
 #'
-#' \strong{Information gain:}
+#' \strong{Information gain} (\code{gain = "probability"}, Wells et al., 2015):
+#' \deqn{IG(x) = p(guilty|x) - p(guilty)}
+#' It is positive for responses that incriminate the suspect and negative for
+#' responses that exonerate.
+#'
+#' \strong{Entropy reduction} (\code{gain = "entropy"}, Starns et al., 2023):
 #' \deqn{IG(x) = H(prior) - H(posterior)}
-#'
-#' where H(p) is binary entropy.
-#'
-#' The information gain quantifies how much uncertainty is reduced by observing
-#' response x. It is negative when the response moves belief towards 0.5, as a
-#' suspect identification does at a low prior; that is a correct update that
-#' leaves more uncertainty, not misleading evidence.
+#' where H(p) is binary entropy in bits. It is negative when the response moves
+#' belief towards 0.5, as a suspect identification does at a low prior; that is
+#' a correct update that leaves more uncertainty, not misleading evidence. The
+#' two measures can differ in sign, so state which one is reported.
 #'
 #' @references
 #' Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 #' Bayesian information gain, base-rate effect-equivalency curves, and reasonable
 #' suspicion. \emph{Law and Human Behavior, 39}(2), 99-122.
+#'
+#' Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
+#' assessing the effectiveness of eyewitness identification procedures: Expected
+#' information gain. \emph{Psychological Review, 130}(3), 677-719.
 #'
 #' @examples
 #' data(lineup_example)
@@ -76,8 +89,10 @@ make_bayes_curves <- function(data,
                                confidence_bins = NULL,
                                prior_grid = seq(0.01, 0.99, 0.01),
                                lineup_size = 6,
-                               innocent_suspect = "auto") {
+                               innocent_suspect = "auto",
+                               gain = c("probability", "entropy")) {
 
+  gain <- match.arg(gain)
   # Validate required columns
   required_cols <- c("target_present", "identification")
   missing_cols <- setdiff(required_cols, names(data))
@@ -198,10 +213,13 @@ make_bayes_curves <- function(data,
         # Compute posterior
         posterior <- (prior * p_x_g) / p_x
 
-        # Compute information gain
-        H_prior <- entropy(prior)
-        H_post <- entropy(posterior)
-        info_gain <- H_prior - H_post
+        # Wells et al. (2015): change in probability; Starns et al. (2023):
+        # change in binary entropy.
+        info_gain <- if (gain == "probability") {
+          posterior - prior
+        } else {
+          entropy(prior) - entropy(posterior)
+        }
       }
 
       curve_results <- rbind(curve_results, tibble::tibble(
@@ -224,7 +242,8 @@ make_bayes_curves <- function(data,
     n_innocent = n_innocent,
     response_categories = response_categories,
     lineup_size = lineup_size,
-    innocent_suspect_method = innocent_method
+    innocent_suspect_method = innocent_method,
+    gain = gain
   )
 }
 
@@ -488,12 +507,14 @@ plot_bayes_prior_posterior <- function(bayes_obj,
 #' @return A ggplot2 object
 #'
 #' @details
-#' Information gain curves show the reduction in uncertainty (measured in bits)
-#' for each response type across different prior probabilities. A response that
-#' points to guilt gains most at priors above 0.5 and one that points to
-#' innocence at priors below 0.5; either can be negative where it moves belief
-#' towards 0.5. The legend lists responses from the most to the least
-#' indicative of guilt.
+#' The vertical axis follows the \code{gain} used in \code{make_bayes_curves()}.
+#' With \code{gain = "probability"} (Wells et al., 2015) it is posterior minus
+#' prior: positive for responses that point to guilt, negative for responses that
+#' point to innocence. With \code{gain = "entropy"} it is the reduction in
+#' uncertainty in bits: a response that points to guilt gains most at priors
+#' above 0.5 and one that points to innocence at priors below 0.5, and either can
+#' be negative where it moves belief towards 0.5. The legend lists responses from
+#' the most to the least indicative of guilt.
 #'
 #' @examples
 #' data(lineup_example)
@@ -512,6 +533,8 @@ plot_bayes_information_gain <- function(bayes_obj,
     curve_data <- curve_data[curve_data$response %in% selected_responses, ]
   }
   curve_data <- .order_bayes_responses(curve_data)
+  # Objects created before the gain argument existed used entropy.
+  entropy_gain <- identical(bayes_obj$gain, "entropy") || is.null(bayes_obj$gain)
 
   # Create plot
   p <- ggplot(curve_data, aes(x = prior, y = information_gain, color = response)) +
@@ -519,9 +542,11 @@ plot_bayes_information_gain <- function(bayes_obj,
     theme_bw(base_size = 14) +
     labs(
       x = "Prior Probability of Guilt",
-      y = "Information Gain (bits)",
+      y = if (entropy_gain) "Entropy Reduction (bits)" else
+        "Information Gain (posterior - prior)",
       title = "Information Gain Curves",
-      subtitle = "Reduction in uncertainty for different lineup responses",
+      subtitle = if (entropy_gain) "Reduction in uncertainty (Starns et al., 2023)" else
+        "Change in probability of guilt (Wells et al., 2015)",
       color = "Response"
     ) +
     scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
