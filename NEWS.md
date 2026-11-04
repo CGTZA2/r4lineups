@@ -37,6 +37,9 @@
   no longer clamp rates of 0 or 1 silently to finite values. The affected
   normal scores and indices are infinite, with a warning. The variance
   enumeration in `sdt_summary_variance()` keeps its numerical safeguard.
+* `simulate_power_analysis()`: `d_prime_null` is renamed `d_prime_2`. It is the
+  second condition's generating value, not a null hypothesis; the old name
+  still works with a deprecation warning.
 
 # r4lineups 2.3.0 (2026-10-29)
 

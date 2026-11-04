@@ -7,7 +7,7 @@
 simulate_power_analysis(
   sample_sizes,
   d_prime,
-  d_prime_null = 0,
+  d_prime_2 = 0,
   n_simulations = 1000,
   test_function = NULL,
   alpha = 0.05,
@@ -15,6 +15,7 @@ simulate_power_analysis(
   n_bootstrap = 200,
   seed = NULL,
   verbose = TRUE,
+  d_prime_null = NULL,
   ...
 )
 }
@@ -26,10 +27,14 @@ in the whole simulated experiment.}
 
 \item{d_prime}{Numeric. Discriminability of the condition of interest.}
 
-\item{d_prime_null}{Numeric. Discriminability of the comparison condition.
-Defaults to 0, which asks how often the procedure can be shown to
-discriminate better than chance. Set it to a non-zero value to ask the more
-usual question of how often two working procedures can be told apart.}
+\item{d_prime_2}{Numeric. Generating discriminability of the second
+(comparison) condition. It is not the null hypothesis: the test asks
+whether the two conditions differ. The default, 0, is a condition with no
+memory of the culprit, so it asks how often the procedure can be shown to
+discriminate better than chance. For a comparison of two working
+procedures, set it to a realistic value (for example \code{d_prime = 1.5},
+\code{d_prime_2 = 1.2}). Equal values estimate the test's rejection rate
+under the null.}
 
 \item{n_simulations}{Integer. Number of simulated studies per sample size
 (default = 1000). Power is a proportion estimated from these, so its own
@@ -49,6 +54,8 @@ to a bootstrap comparison of partial AUC via \code{\link{compare_pauc}}.}
 \item{seed}{Optional integer seed for reproducibility.}
 
 \item{verbose}{Logical. Report progress (default = TRUE).}
+
+\item{d_prime_null}{Deprecated name for \code{d_prime_2}.}
 
 \item{...}{Additional arguments passed to simulate_lineup_data(), for example
 \code{conf_levels} or \code{foil_bias}.}
@@ -82,8 +89,9 @@ is really there. Estimating it by simulation means specifying the effect,
 generating many studies of that size, applying the analysis you intend to
 use, and counting how often it reaches significance.
 
-That requires a null to test against, which is what \code{d_prime_null}
-supplies. Simulating a single condition and computing a statistic from it is
+That requires a second condition to compare against, which
+\code{d_prime_2} supplies; the null hypothesis is that the two conditions do
+not differ. Simulating a single condition and computing a statistic from it is
 not a power analysis, because no hypothesis is being tested.
 }
 \examples{

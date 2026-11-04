@@ -588,10 +588,15 @@ print.simulated_lineup_data <- function(x, ...) {
 #'   each of the two simulated conditions: 2n witnesses per condition and 4n
 #'   in the whole simulated experiment.
 #' @param d_prime Numeric. Discriminability of the condition of interest.
-#' @param d_prime_null Numeric. Discriminability of the comparison condition.
-#'   Defaults to 0, which asks how often the procedure can be shown to
-#'   discriminate better than chance. Set it to a non-zero value to ask the more
-#'   usual question of how often two working procedures can be told apart.
+#' @param d_prime_2 Numeric. Generating discriminability of the second
+#'   (comparison) condition. It is not the null hypothesis: the test asks
+#'   whether the two conditions differ. The default, 0, is a condition with no
+#'   memory of the culprit, so it asks how often the procedure can be shown to
+#'   discriminate better than chance. For a comparison of two working
+#'   procedures, set it to a realistic value (for example \code{d_prime = 1.5},
+#'   \code{d_prime_2 = 1.2}). Equal values estimate the test's rejection rate
+#'   under the null.
+#' @param d_prime_null Deprecated name for \code{d_prime_2}.
 #' @param n_simulations Integer. Number of simulated studies per sample size
 #'   (default = 1000). Power is a proportion estimated from these, so its own
 #'   standard error is roughly \code{sqrt(0.25 / n_simulations)}.
@@ -613,8 +618,9 @@ print.simulated_lineup_data <- function(x, ...) {
 #' generating many studies of that size, applying the analysis you intend to
 #' use, and counting how often it reaches significance.
 #'
-#' That requires a null to test against, which is what \code{d_prime_null}
-#' supplies. Simulating a single condition and computing a statistic from it is
+#' That requires a second condition to compare against, which
+#' \code{d_prime_2} supplies; the null hypothesis is that the two conditions do
+#' not differ. Simulating a single condition and computing a statistic from it is
 #' not a power analysis, because no hypothesis is being tested.
 #'
 #' @return A dataframe of class \code{power_analysis} with columns:
@@ -653,7 +659,7 @@ print.simulated_lineup_data <- function(x, ...) {
 #' @export
 simulate_power_analysis <- function(sample_sizes,
                                      d_prime,
-                                     d_prime_null = 0,
+                                     d_prime_2 = 0,
                                      n_simulations = 1000,
                                      test_function = NULL,
                                      alpha = 0.05,
@@ -661,7 +667,14 @@ simulate_power_analysis <- function(sample_sizes,
                                      n_bootstrap = 200,
                                      seed = NULL,
                                      verbose = TRUE,
+                                     d_prime_null = NULL,
                                      ...) {
+
+  if (!is.null(d_prime_null)) {
+    warning("d_prime_null is deprecated; use d_prime_2. It is the second ",
+            "condition's generating value, not a null hypothesis.", call. = FALSE)
+    d_prime_2 <- d_prime_null
+  }
 
   if (!is.numeric(sample_sizes) || length(sample_sizes) < 1L ||
       anyNA(sample_sizes) || any(sample_sizes < 2)) {
@@ -671,16 +684,16 @@ simulate_power_analysis <- function(sample_sizes,
   if (!is.numeric(alpha) || length(alpha) != 1L || alpha <= 0 || alpha >= 1) {
     stop("alpha must be strictly between 0 and 1.", call. = FALSE)
   }
-  if (!is.numeric(d_prime_null) || length(d_prime_null) != 1L ||
-      !is.finite(d_prime_null) || d_prime_null < 0) {
-    stop("d_prime_null must be a finite non-negative scalar.", call. = FALSE)
+  if (!is.numeric(d_prime_2) || length(d_prime_2) != 1L ||
+      !is.finite(d_prime_2) || d_prime_2 < 0) {
+    stop("d_prime_2 must be a finite non-negative scalar.", call. = FALSE)
   }
   if (!is.numeric(n_simulations) || length(n_simulations) != 1L ||
       !is.finite(n_simulations) || n_simulations < 1 ||
       n_simulations != floor(n_simulations)) {
     stop("n_simulations must be a positive integer.", call. = FALSE)
   }
-  if (d_prime_null == d_prime) {
+  if (d_prime_2 == d_prime) {
     warning("The generating d_prime values are equal; this evaluates the test's null rejection rate, which need not equal alpha in small or sparse samples.", call. = FALSE)
   }
 
@@ -720,7 +733,7 @@ simulate_power_analysis <- function(sample_sizes,
         lineup_size = lineup_size, ...
       ))
       data_null <- as.data.frame(simulate_lineup_data(
-        n_tp = n, n_ta = n, d_prime = d_prime_null,
+        n_tp = n, n_ta = n, d_prime = d_prime_2,
         lineup_size = lineup_size, ...
       ))
 
@@ -767,7 +780,7 @@ simulate_power_analysis <- function(sample_sizes,
   rownames(result_df) <- NULL
   attr(result_df, "alpha") <- alpha
   attr(result_df, "d_prime") <- d_prime
-  attr(result_df, "d_prime_null") <- d_prime_null
+  attr(result_df, "d_prime_2") <- d_prime_2
   attr(result_df, "n_simulations") <- n_simulations
   class(result_df) <- c("power_analysis", "data.frame")
   result_df
@@ -792,7 +805,8 @@ plot.power_analysis <- function(x, ...) {
   }
 
   d_prime <- attr(x, "d_prime")
-  d_null  <- attr(x, "d_prime_null")
+  d_null  <- attr(x, "d_prime_2")
+  if (is.null(d_null)) d_null <- attr(x, "d_prime_null")
   n_sims  <- attr(x, "n_simulations")
 
   subtitle <- if (!is.null(d_prime)) {
