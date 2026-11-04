@@ -47,6 +47,12 @@
 * `esize_m(both = TRUE)` labels its two values by what they do: Malpass (1981)
   with null foils excluded, and Tredoux (1998, Eq. 5) with nominal size kept.
   Tredoux (1998, Table 3) calls the first of these the adjusted estimate.
+* `fit_max_sdt()` no longer returns estimates outside its parameter bounds
+  (for example a negative d'): the unconstrained Nelder-Mead polishing step is
+  discarded when it leaves the box.
+* The `line73` help now describes the data as inspired by Doob and Kirshenbaum
+  (1973) but not their data, which do not appear to have survived (their study
+  used a 12-member lineup and 21 mock witnesses).
 * `esize_T_ci_n()` gains `conf_level`; `alpha` (which was the confidence level)
   remains for compatibility.
 

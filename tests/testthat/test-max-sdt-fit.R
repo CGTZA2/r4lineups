@@ -362,3 +362,9 @@ test_that("fit_max_sdt uses mutually exclusive response cells", {
   # df = 3 (two multinomials: 2 + 1) less 2 parameters
   expect_equal(fit$df, 1)
 })
+
+test_that("fit_max_sdt() estimates stay within the parameter bounds", {
+  fit <- fit_max_sdt(n_hit = 2, n_tp_choose = 60, n_fa = 60,
+                     N_tp = 100, N_ta = 100, n = 6)
+  expect_gte(fit$dprime_1, 0)
+})

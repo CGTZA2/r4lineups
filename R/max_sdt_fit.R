@@ -366,6 +366,12 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
           control = list(maxit = 5000)),
     error = function(e) NULL
   )
+  # Nelder-Mead is unconstrained; discard a polish that leaves the box (for
+  # example a negative d'), so the reported estimate respects the bounds.
+  if (!is.null(opt_nm) &&
+      !all(opt_nm$par >= lower - 1e-10 & opt_nm$par <= upper + 1e-10)) {
+    opt_nm <- NULL
+  }
   if (!is.null(opt_nm)) {
     tol <- 1e-8 * (1 + abs(opt$value))
     if (opt_nm$value < opt$value ||
