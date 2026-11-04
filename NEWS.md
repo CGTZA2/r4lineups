@@ -33,6 +33,10 @@
 * `classify_lineup_choices()` no longer treats a missing chosen position (`NA`)
   as a rejection. The outcome is `NA`, with a warning; recode to 0 first if `NA`
   records a rejection.
+* With `correction = "none"`, `sdt_summary_from_counts()` and `make_multid()`
+  no longer clamp rates of 0 or 1 silently to finite values. The affected
+  normal scores and indices are infinite, with a warning. The variance
+  enumeration in `sdt_summary_variance()` keeps its numerical safeguard.
 
 # r4lineups 2.3.0 (2026-10-29)
 

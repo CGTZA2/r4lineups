@@ -27,6 +27,7 @@ sdt_summary_from_counts <- function(hits,
   if (ns <= 0 || nn <= 0) {
     stop("Signal and noise trial counts must be positive.", call. = FALSE)
   }
+  if (correction == "none") .warn_uncorrected_boundary(c(hits, fas), c(ns, nn))
   pH <- sdt_adjust_rate(hits, ns, correction)
   pF <- sdt_adjust_rate(fas, nn, correction)
   zH <- stats::qnorm(pH)
@@ -113,7 +114,7 @@ sdt_summary_variance <- function(hits,
         bf <- stats::rbinom(1, nn, pF)
         bm <- ns - bh
         bc <- nn - bf
-        bs <- sdt_summary_from_counts(bh, bf, bm, bc, correction = correction)
+        bs <- suppressWarnings(sdt_summary_from_counts(bh, bf, bm, bc, correction = correction))
         c(zH = bs$zH, zF = bs$zF, dprime = bs$dprime, c = bs$c)
       }
     )
@@ -233,7 +234,11 @@ compare_sdt_summary <- function(hits_a, fas_a, misses_a, cr_a,
   )
 }
 
-sdt_adjust_rate <- function(count, n, correction) {
+# With correction = "none" a rate of 0 or 1 is returned as observed, so its
+# normal score is infinite; other corrections keep rates inside (0, 1).
+# The variance enumeration needs finite scores for every possible count and
+# passes clamp = TRUE.
+sdt_adjust_rate <- function(count, n, correction, clamp = correction != "none") {
   if (correction == "none") {
     p <- count / n
   } else if (correction == "half") {
@@ -244,13 +249,25 @@ sdt_adjust_rate <- function(count, n, correction) {
   } else {
     p <- (count + 0.5) / (n + 1)
   }
-  pmin(pmax(p, 1e-6), 1 - 1e-6)
+  if (clamp) p <- pmin(pmax(p, 1e-6), 1 - 1e-6)
+  p
+}
+
+.warn_uncorrected_boundary <- function(counts, n) {
+  if (any(counts == 0 | counts == n)) {
+    warning("correction = \"none\" with a rate of 0 or 1 gives an infinite ",
+            "normal score, so the affected indices are infinite. Use the ",
+            "\"loglinear\" or \"half\" correction to obtain finite estimates.",
+            call. = FALSE)
+  }
+  invisible(NULL)
 }
 
 sdt_var_z_from_binom <- function(n, p, correction) {
   counts <- 0:n
   probs <- stats::dbinom(counts, size = n, prob = p)
-  p_i <- vapply(counts, sdt_adjust_rate, numeric(1), n = n, correction = correction)
+  p_i <- vapply(counts, sdt_adjust_rate, numeric(1), n = n, correction = correction,
+                clamp = TRUE)
   z_i <- stats::qnorm(p_i)
   e_z <- sum(z_i * probs)
   e_z2 <- sum((z_i^2) * probs)

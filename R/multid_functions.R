@@ -176,6 +176,10 @@ make_multid <- function(data = NULL,
   n_tp <- sum(raw[c("G", "Fp", "Rp")])
   n_ta <- sum(raw[c("I", "Fa", "Ra")], na.rm = TRUE)
 
+  if (correction == "none") {
+    obs <- unlist(split[c("G", "Fp", "Rp", "I", "Fa", "Ra")])
+    .warn_uncorrected_boundary(obs, rep(c(n_tp, n_ta), each = 3))
+  }
   est <- .multid_compute(split, n_tp, n_ta, lineup_size, filler_rate, correction)
 
   boot_draws <- NULL
