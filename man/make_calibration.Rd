@@ -41,6 +41,13 @@ innocent-suspect count is estimated as filler IDs divided by
 have a non-missing \code{suspect_pos} column, and \code{"estimated"}
 otherwise, with a message.}
 
+\item{population}{Which responses are calibrated: \code{"suspect_ids"}
+(suspect identifications, as in CAC analysis; correct when target-present),
+\code{"choosers"} (suspect and filler identifications, as in Brewer & Wells,
+2006; only target-present suspect IDs are correct), or \code{"nonchoosers"}
+(rejections; correct when target-absent). If NULL (default), it is set from
+\code{choosers_only}.}
+
 \item{...}{Additional arguments passed to make_calibration_gg()}
 }
 \value{

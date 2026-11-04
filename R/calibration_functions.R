@@ -625,6 +625,7 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 #'                                confidence_bins = c(0, 60, 80, 100))
 #' print(cal_result)
 #'
+#' @inheritParams make_calibration_data
 #' @inheritParams make_rocdata
 #' @export
 make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
