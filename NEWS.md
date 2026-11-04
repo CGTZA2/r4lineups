@@ -9,6 +9,13 @@
   The two can differ in sign: a suspect identification at a low prior has a
   positive probability gain but a negative entropy reduction.
   `plot_bayes_information_gain()` labels its axis to match.
+* `make_fullroc()` and `make_fullroc_data()` with `order = "apriori"` now use the
+  a priori order of Smith, Yang and Wells (2020, p. 604) and Yang and Smith
+  (2023): suspect IDs from high to low confidence, then rejections and filler IDs
+  alternately from low to high confidence, rejection first at each level.
+  Previously all filler IDs preceded all rejections, which changes the curve and
+  AUC whenever their confidence ranges overlap. The documentation now cites
+  Smith, Yang and Wells (2020) rather than "Smith & Yang".
 
 # r4lineups 2.3.0 (2026-10-29)
 

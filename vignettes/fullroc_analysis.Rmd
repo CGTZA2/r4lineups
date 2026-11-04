@@ -186,15 +186,19 @@ more than it might appear.
 
 ### A-priori ordering
 
-`order = "apriori"` fixes the order in advance on theoretical grounds:
-
-1. Suspect identifications, from high confidence down to low
-2. Filler identifications, from low confidence up to high
-3. Rejections, from low confidence up to high
+`order = "apriori"` fixes the order in advance on theoretical grounds, following
+Smith, Yang and Wells (2020, p. 604) and Yang and Smith (2023). Suspect
+identifications come first, from high confidence down to low. Rejections and
+filler identifications follow, alternately and from low confidence up to high,
+with the rejection first at each level. For three confidence levels the order is
+high, medium and low-confidence suspect IDs; low-confidence rejections and filler
+IDs; medium-confidence rejections and filler IDs; and high-confidence rejections
+and filler IDs.
 
 The reasoning is that a confident suspect identification is the strongest
-evidence of guilt, while a confident rejection or a confident filler
-identification is the strongest evidence of innocence.
+evidence of guilt, that any decision made with low confidence carries less
+information than one made with high confidence, and that a confident rejection
+or a confident filler identification is the strongest evidence of innocence.
 
 ### Diagnosticity ordering
 
@@ -476,6 +480,8 @@ National Research Council. (2014). *Identifying the culprit: Assessing eyewitnes
 Smith, A. M., Yang, Y., & Wells, G. L. (2020). Distinguishing between investigator discriminability and eyewitness discriminability: A method for creating full receiver operating characteristic curves of lineup identification performance. *Perspectives on Psychological Science, 15*(3), 589-607. https://doi.org/10.1177/1745691620902426
 
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(1), 99-122.
+
+Yang, Y., & Smith, A. M. (2023). fullROC: An R package for generating and analyzing eyewitness-lineup ROC curves. *Behavior Research Methods, 55*, 1259-1274. https://doi.org/10.3758/s13428-022-01807-6
 
 :::
 
