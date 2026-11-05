@@ -162,12 +162,23 @@ test_that("make_bayes_curves() information gain follows the requested measure", 
     identification = rep(rep(c("suspect", "filler", "reject"), 2),
                          times = c(60, 20, 20, 10, 30, 60))
   )
-  # Wells et al. (2015): posterior minus prior; suspect ID at prior .1 -> .4.
+  # Wells & Lindsay (1980), Wells et al. (2015): |posterior - prior|;
+  # suspect ID at prior .1 -> .4.
   prob <- make_bayes_curves(dat, prior_grid = 0.1, innocent_suspect = "designated")
   sus <- prob$curves[prob$curves$response == "suspect", ]
+  rej <- prob$curves[prob$curves$response == "reject", ]
   expect_equal(prob$gain, "probability")
   expect_equal(sus$posterior, 0.4)
   expect_equal(sus$information_gain, 0.3)
+  # A rejection lowers the probability of guilt; the absolute gain is positive.
+  expect_lt(rej$posterior, 0.1)
+  expect_equal(rej$information_gain, 0.1 - rej$posterior)
+  # "signed" keeps the direction.
+  sgn <- make_bayes_curves(dat, prior_grid = 0.1, innocent_suspect = "designated",
+                           gain = "signed")
+  expect_equal(sgn$curves$information_gain[sgn$curves$response == "suspect"], 0.3)
+  expect_equal(sgn$curves$information_gain[sgn$curves$response == "reject"],
+               rej$posterior - 0.1)
   # Starns et al. (2023): entropy reduction; negative for the same update.
   ent <- make_bayes_curves(dat, prior_grid = 0.1, innocent_suspect = "designated",
                            gain = "entropy")

@@ -368,11 +368,13 @@ and very little when the prior is already near 0 or near 1.
 
 ### Information Gain
 
-Wells, Yang and Smalarz (2015) measure the information gained from a response
-as the change in the probability of guilt, posterior minus prior. This is the
-default (`gain = "probability"`). It is positive for responses that point to
-guilt and negative for responses that point to innocence, and it is largest in
-absolute terms at middling priors:
+Wells and Lindsay (1980) and Wells, Yang and Smalarz (2015) measure the
+information gained from a response as the absolute change in the probability of
+guilt, |posterior − prior|: what counts is how far the response moves belief,
+not its direction. This is the default (`gain = "probability"`), and it is
+largest at middling priors. `gain = "signed"` keeps the direction, positive for
+responses that point to guilt and negative for responses that point to
+innocence:
 
 ```{r bayes-information-gain}
 plot_bayes_information_gain(bayes_result)
@@ -991,6 +993,8 @@ Mickes, L. (2015). Receiver operating characteristic analysis and confidence-acc
 Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., & Mackovichova, S. (2019). Deviation from perfect performance measures the diagnostic utility of eyewitness lineups but partial area under the ROC curve does not. *Journal of Applied Research in Memory and Cognition, 8*(1), 50-59. https://doi.org/10.1016/j.jarmac.2018.09.003
 
 Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for assessing the effectiveness of eyewitness identification procedures: Expected information gain. *Psychological Review, 130*(3), 677-719. https://doi.org/10.1037/rev0000332
+
+Wells, G. L., & Lindsay, R. C. L. (1980). On estimating the diagnosticity of eyewitness nonidentifications. *Psychological Bulletin, 88*(3), 776–784. https://doi.org/10.1037/0033-2909.88.3.776
 
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification: Bayesian information gain, base-rate effect-equivalency curves, and reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
 

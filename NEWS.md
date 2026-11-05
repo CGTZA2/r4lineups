@@ -2,12 +2,14 @@
 
 ## Breaking changes
 
-* `make_bayes_curves()` gains `gain = c("probability", "entropy")`. The default
-  is now the Wells, Yang and Smalarz (2015) information gain, posterior minus
-  prior, which the function cites. The previous measure, the reduction in binary
-  entropy (Starns, Cohen & Rotello, 2023), is available as `gain = "entropy"`.
-  The two can differ in sign: a suspect identification at a low prior has a
-  positive probability gain but a negative entropy reduction.
+* `make_bayes_curves()` gains `gain = c("probability", "signed", "entropy")`.
+  The default is now the information gain of Wells and Lindsay (1980) and Wells,
+  Yang and Smalarz (2015), the absolute change in the probability of guilt,
+  |posterior − prior|. `gain = "signed"` keeps the direction of the change
+  (positive when a response raises the probability of guilt). The previous
+  measure, the reduction in binary entropy (Starns, Cohen & Rotello, 2023), is
+  available as `gain = "entropy"`; it is negative when a response moves belief
+  towards .5, as a suspect identification does at a low prior.
   `plot_bayes_information_gain()` labels its axis to match.
 * `make_fullroc()` and `make_fullroc_data()` with `order = "apriori"` now use the
   a priori order of Smith, Yang and Wells (2020, p. 604) and Yang and Smith
@@ -17,9 +19,12 @@
   AUC whenever their confidence ranges overlap. The documentation now cites
   Smith, Yang and Wells (2020) rather than "Smith & Yang".
 * Calibration functions gain `population = c("suspect_ids", "choosers",
-  "nonchoosers")`. `"choosers"` includes filler identifications as errors, as in
-  Brewer and Wells (2006); `"nonchoosers"` calibrates rejections, which are
-  correct when the culprit is absent. `choosers_only = FALSE` previously scored
+  "nonchoosers")`. `"choosers"` follows Brewer and Wells (2006): target-present
+  suspect IDs are correct, all target-absent identifications are errors, and
+  target-present filler IDs are excluded, because a filler is known not to be
+  the culprit. `tp_fillers = "error"` keeps those filler IDs as errors instead.
+  `"nonchoosers"` calibrates rejections, which are correct when the culprit is
+  absent. `choosers_only = FALSE` previously scored
   every response other than a target-present suspect ID as incorrect, including
   correct rejections; it is deprecated and now means `population = "choosers"`.
   The default (suspect identifications, as in CAC) is unchanged.
