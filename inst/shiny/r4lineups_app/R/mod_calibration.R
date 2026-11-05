@@ -7,7 +7,7 @@ calibration_ui <- function(id) {
     sidebar = bslib::sidebar(
       width = 320,
       uiOutput(ns("banner")),
-      checkboxInput(ns("choosers"), "Choosers only (suspect and filler IDs)", value = TRUE),
+      checkboxInput(ns("choosers"), "Suspect identifications only (untick for all choosers)", value = TRUE),
       bslib::layout_columns(
         numericInput(ns("n_boot"), "ANRI and DPP bootstrap R", value = 1000, min = 100, step = 100),
         numericInput(ns("seed"), "Seed", value = 2026, step = 1)

@@ -13,6 +13,7 @@ make_calibration(
   confidence_scale = c("auto", "0-1", "0-100"),
   innocent_suspect = "auto",
   population = NULL,
+  tp_fillers = c("exclude", "error"),
   ...
 )
 }
@@ -43,10 +44,17 @@ otherwise, with a message.}
 
 \item{population}{Which responses are calibrated: \code{"suspect_ids"}
 (suspect identifications, as in CAC analysis; correct when target-present),
-\code{"choosers"} (suspect and filler identifications, as in Brewer & Wells,
-2006; only target-present suspect IDs are correct), or \code{"nonchoosers"}
+\code{"choosers"} (witnesses who identify someone; only target-present
+suspect IDs are correct; see \code{tp_fillers}), or \code{"nonchoosers"}
 (rejections; correct when target-absent). If NULL (default), it is set from
 \code{choosers_only}.}
+
+\item{tp_fillers}{For \code{population = "choosers"} only: how filler
+identifications in target-present lineups are treated. \code{"exclude"}
+(default) leaves them out, as Brewer and Wells (2006) did, because a filler
+is known in advance not to be the culprit. \code{"error"} keeps them as
+incorrect identifications; Brewer and Wells note that overconfidence is
+then more marked.}
 
 \item{...}{Additional arguments passed to make_calibration_gg()}
 }

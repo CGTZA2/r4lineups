@@ -9,10 +9,17 @@ test_that("calibration populations score responses as in the literature", {
   expect_equal(sus$n_total, 2)
   expect_equal(sus$overall_accuracy, 0.5)
 
-  # Choosers (Brewer & Wells, 2006): suspect and filler IDs; filler IDs are errors.
+  # Choosers (Brewer & Wells, 2006): target-present filler IDs are excluded;
+  # the TP suspect ID is correct and both TA identifications are errors.
   cho <- make_calibration_data(dat, confidence_scale = "0-100", population = "choosers")
-  expect_equal(cho$n_total, 4)
-  expect_equal(cho$overall_accuracy, 0.25)
+  expect_equal(cho$tp_fillers, "exclude")
+  expect_equal(cho$n_total, 3)
+  expect_equal(cho$overall_accuracy, 1 / 3)
+  # tp_fillers = "error" keeps the TP filler ID as an error.
+  cho_all <- make_calibration_data(dat, confidence_scale = "0-100",
+                                   population = "choosers", tp_fillers = "error")
+  expect_equal(cho_all$n_total, 4)
+  expect_equal(cho_all$overall_accuracy, 0.25)
 
   # Nonchoosers: a target-absent rejection is correct.
   non <- make_calibration_data(dat, confidence_scale = "0-100", population = "nonchoosers")
