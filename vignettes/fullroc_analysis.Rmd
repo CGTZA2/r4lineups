@@ -330,7 +330,12 @@ knitr::kable(
 
 The AUC has a direct probabilistic reading: it is the probability that a
 randomly chosen guilty suspect receives stronger evidence than a randomly chosen
-innocent one. 0.5 is chance.
+innocent one, where "stronger" is defined by the order of the response categories.
+0.5 is chance-level ranking under that order. It does not show that the responses
+carry no information: if filler IDs were more frequent in target-present lineups,
+the a priori order would place an informative category on the wrong side of the
+rejections, and the AUC could be .5 although another order gives a much larger
+value.
 
 Descriptive labels — "0.7 is moderate", "0.8 is good" — circulate widely, but
 they should be resisted here for two reasons. The bias demonstrated above means

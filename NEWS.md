@@ -67,6 +67,12 @@
   revision as "pinned" in their titles and messages. The returned fields
   `audited_revision` and `audited_revision_matches` keep their names.
 
+## Documentation
+
+* The full ROC vignette and the model-comparison vignette now describe an AUC of
+  .5 as chance-level ranking under the chosen category order, not as evidence
+  that the responses carry no information.
+
 # r4lineups 2.3.0 (2026-10-29)
 
 ## Breaking changes

@@ -628,7 +628,7 @@ ranked against each other directly.
 |---|---|---|---|
 | 2-HT | Latent probabilities of detection, bias and guessing | Four probabilities in [0, 1] | Standard errors from the observed information matrix; bootstrap intervals via `boot_winter_2ht()`. No fit test for a single condition (zero residual df) |
 | EIG | Expected reduction in uncertainty about guilt | Bits, 0 to the prior entropy | None in this package. Tuttle, Starns and Cohen (2025) give 95% credible intervals for EIG from a Bayesian multinomial model of the response proportions; adding this is planned |
-| Full ROC | Investigator discriminability | AUC in [0, 1], .5 = no discrimination | None in this package; see the note on ordering bias below |
+| Full ROC | Investigator discriminability | AUC in [0, 1], .5 = chance ranking under the chosen category order | None in this package; see the note on ordering bias below |
 
 ### 2-HT estimation
 
