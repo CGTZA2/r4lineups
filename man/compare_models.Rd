@@ -21,7 +21,7 @@ compare_models(
 \itemize{
   \item "2ht" or "winter": Winter et al. (2022) Two-High Threshold MPT model
   \item "eig": Expected Information Gain (Starns et al., 2023)
-  \item "fullroc": Full ROC curve (Smith & Yang, 2020)
+  \item "fullroc": Full ROC curve (Smith et al., 2020)
 }
 Default = c("2ht", "eig", "fullroc") fits all models.}
 
@@ -64,7 +64,7 @@ requirements and output formats across models.
     to the same observations and outcome representation.
   \item **EIG (Starns et al., 2023)**: Information-theoretic measure of
     evidentiary value. Higher values indicate more diagnostic procedures.
-  \item **Full ROC (Smith & Yang, 2020)**: Uses ALL responses to compute
+  \item **Full ROC (Smith et al., 2020)**: Uses ALL responses to compute
     investigator discriminability. AUC ranges from 0 to 1; 0.5 represents
     chance under a fixed ordering.
 }

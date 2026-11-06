@@ -60,6 +60,12 @@
   used a 12-member lineup and 21 mock witnesses).
 * `esize_T_ci_n()` gains `conf_level`; `alpha` (which was the confidence level)
   remains for compatibility.
+* `compare_models()`, its help, the model-comparison vignette and the Shiny ROC
+  tab label the full ROC "Smith et al., 2020" (Smith, Yang & Wells), not "Smith &
+  Yang".
+* `install_pywitness()` and `check_pywitness_deps()` describe the fixed pyWitness
+  revision as "pinned" in their titles and messages. The returned fields
+  `audited_revision` and `audited_revision_matches` keep their names.
 
 # r4lineups 2.3.0 (2026-10-29)
 

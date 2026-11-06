@@ -33,7 +33,7 @@ Eyewitness identification data can be analyzed using multiple theoretical framew
 
 1. **2-HT Model** (Winter et al., 2022): Multinomial Processing Tree model
 2. **EIG** (Starns et al., 2023): Expected Information Gain
-3. **Full ROC** (Smith & Yang, 2020): Receiver Operating Characteristic
+3. **Full ROC** (Smith et al., 2020): Receiver Operating Characteristic
 
 The `compare_models()` function provides a unified interface for fitting all models and generating comparison tables and visualizations.
 

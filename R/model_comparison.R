@@ -11,7 +11,7 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #'   \itemize{
 #'     \item "2ht" or "winter": Winter et al. (2022) Two-High Threshold MPT model
 #'     \item "eig": Expected Information Gain (Starns et al., 2023)
-#'     \item "fullroc": Full ROC curve (Smith & Yang, 2020)
+#'     \item "fullroc": Full ROC curve (Smith et al., 2020)
 #'   }
 #'   Default = c("2ht", "eig", "fullroc") fits all models.
 #' @param lineup_size Integer. Number of people in the lineup (default = 6)
@@ -44,7 +44,7 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #'     to the same observations and outcome representation.
 #'   \item **EIG (Starns et al., 2023)**: Information-theoretic measure of
 #'     evidentiary value. Higher values indicate more diagnostic procedures.
-#'   \item **Full ROC (Smith & Yang, 2020)**: Uses ALL responses to compute
+#'   \item **Full ROC (Smith et al., 2020)**: Uses ALL responses to compute
 #'     investigator discriminability. AUC ranges from 0 to 1; 0.5 represents
 #'     chance under a fixed ordering.
 #' }
@@ -253,21 +253,21 @@ compare_models <- function(data,
 
       # Add to comparison table
       comparison_table <- rbind(comparison_table, data.frame(
-        Model = "Full ROC (Smith & Yang, 2020)",
+        Model = "Full ROC (Smith et al., 2020)",
         Measure = "Full AUC",
         Value = round(fitted_fullroc$auc, 4),
         Interpretation = "Higher is better (0-1)",
         stringsAsFactors = FALSE
       ))
       comparison_table <- rbind(comparison_table, data.frame(
-        Model = "Full ROC (Smith & Yang, 2020)",
+        Model = "Full ROC (Smith et al., 2020)",
         Measure = "Operating Points",
         Value = fitted_fullroc$summary$n_operating_points,
         Interpretation = "Number of decision criteria",
         stringsAsFactors = FALSE
       ))
       comparison_table <- rbind(comparison_table, data.frame(
-        Model = "Full ROC (Smith & Yang, 2020)",
+        Model = "Full ROC (Smith et al., 2020)",
         Measure = "Max Hit Rate",
         Value = round(fitted_fullroc$summary$max_hit_rate, 3),
         Interpretation = "Cumulative (0-1)",

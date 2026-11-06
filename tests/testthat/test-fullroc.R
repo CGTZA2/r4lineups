@@ -1,4 +1,4 @@
-# Tests for Full ROC analysis (Smith & Yang, 2020)
+# Tests for Full ROC analysis (Smith et al., 2020)
 
 make_sim_data <- function(n = 200, seed = 123,
                           tp_probs = c(0.6, 0.2, 0.2),
