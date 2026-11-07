@@ -39,7 +39,7 @@
 #'     \item calibration_data: Dataframe with per-bin confidence, accuracy, and counts
 #'     \item C: Calibration statistic (weighted mean squared difference between confidence and accuracy)
 #'     \item OU: Over/underconfidence (mean confidence minus mean accuracy)
-#'     \item NRI: Normalized Resolution Index (standardized within-person variance)
+#'     \item NRI: Normalized Resolution Index, the between-bin variance of accuracy divided by \eqn{\bar{a}(1 - \bar{a})}, the total variance of the outcome (the proportion of outcome variance explained by the confidence bins)
 #'     \item overall_accuracy: Mean accuracy across all responses
 #'     \item overall_confidence: Mean confidence across all responses
 #'     \item n_total: Total number of responses analyzed
@@ -49,7 +49,7 @@
 #' Calibration analysis distinguishes between:
 #' \itemize{
 #'   \item \strong{Calibration (C)}: How well confidence matches accuracy (perfect = 0)
-#'   \item \strong{Over/underconfidence (O/U)}: Overall bias in confidence judgments (0 = perfectly calibrated)
+#'   \item \strong{Over/underconfidence (O/U)}: Overall bias in confidence judgments (0 = no net bias in the mean; overconfident and underconfident bins can cancel, so perfect calibration needs C = 0)
 #'   \item \strong{Resolution (NRI)}: Ability to discriminate correct from incorrect responses
 #' }
 #'

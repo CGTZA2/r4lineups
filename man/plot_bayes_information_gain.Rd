@@ -16,7 +16,9 @@ If NULL (default), plots all responses.}
 A ggplot2 object
 }
 \description{
-Creates a plot showing how much uncertainty is reduced by different lineup responses.
+Plots the information gain chosen in \code{make_bayes_curves()} for each
+lineup response: by default the absolute change in the probability of guilt,
+or the reduction in entropy when \code{gain = "entropy"}.
 }
 \details{
 The vertical axis follows the \code{gain} used in \code{make_bayes_curves()}.

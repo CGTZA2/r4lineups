@@ -515,7 +515,9 @@ plot_bayes_prior_posterior <- function(bayes_obj,
 
 #' Plot Information Gain Curves
 #'
-#' Creates a plot showing how much uncertainty is reduced by different lineup responses.
+#' Plots the information gain chosen in \code{make_bayes_curves()} for each
+#' lineup response: by default the absolute change in the probability of guilt,
+#' or the reduction in entropy when \code{gain = "entropy"}.
 #'
 #' @param bayes_obj List output from make_bayes_curves()
 #' @param selected_responses Character vector of response categories to plot.

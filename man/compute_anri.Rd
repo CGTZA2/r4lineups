@@ -58,7 +58,7 @@ A list containing:
 \description{
 Computes ANRI, a bias-corrected version of NRI following Yaniv et al. (1991).
 ANRI adjusts NRI for the number of confidence bins and sample size, providing
-more accurate estimates especially when J (bins) is small relative to N.
+more accurate estimates especially when J (bins) is large relative to N.
 }
 \details{
 ANRI corrects NRI for small-sample and small-bin-count bias:
@@ -78,7 +78,9 @@ Where:
 
 **When to use ANRI vs NRI:**
 \itemize{
-  \item Use ANRI when J is small (e.g., 3-5 bins)
+  \item The upward bias of NRI is about (J - 1) / N, so the correction is
+    largest when J / N is not negligible: many bins, modest N, or both
+    (J = 5, N = 400 gives .01; J = 11, N = 50 gives .20)
   \item Use ANRI when N is modest (e.g., < 200)
   \item Use ANRI when comparing across different numbers of bins
   \item NRI is asymptotically unbiased as N approaches infinity

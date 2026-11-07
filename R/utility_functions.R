@@ -19,7 +19,11 @@
 #'     \item fp: False positive (innocent suspect ID) - typically very negative
 #'     \item tn: True negative (correct rejection of innocent) - typically positive
 #'   }
-#'   Default: c(tp=1, fn=-0.5, fp=-2, tn=0.5)
+#'   Default: c(tp=1, fn=-0.5, fp=-2, tn=0.5).
+#'   Only the differences \code{tp - fn} and \code{tn - fp} affect the optimal
+#'   rule and any utility difference between procedures; the signs and absolute
+#'   levels do not. The trade-off between the two kinds of error is the ratio of
+#'   those differences (2.5 to 1.5 for the default).
 #' @param lineup_size Integer. Number of people in lineup (default = 6).
 #'   Used to estimate false IDs from filler choices.
 #' @param criteria Character. How to define decision criteria:
@@ -295,8 +299,12 @@ make_utility_curves <- function(data,
 #' }
 #'
 #' Lampinen et al. (2019) show that ROC dominance does not guarantee utility
-#' dominance. A procedure with a lower pAUC might have higher utility at
-#' certain base rates and cost structures.
+#' dominance in general. Dominance holds only over the false-identification
+#' range that both curves reach: if the dominating curve is less truncated than
+#' the dominated one, its maximum utility is necessarily higher, but when it
+#' stops short of the other curve's optimum, or for utilities other than the
+#' maximum (average or high-confidence utility), a procedure with a lower pAUC
+#' can have the higher utility at some base rates and cost structures.
 #'
 #' @references
 #' Lampinen, J. M., Smith, A. M., & Wells, G. L. (2019). Four utilities in
@@ -653,7 +661,7 @@ print.lineup_utility_comparison <- function(x, ...) {
     cat("Crossover points (base rates where procedures are equivalent):\n")
     cat("  ", paste(sprintf("%.3f", x$crossover_points), collapse = ", "), "\n\n")
   } else {
-    cat("No crossover points - one procedure dominates across all base rates\n\n")
+    cat("No sign change in the difference over the base rates evaluated (for this utility type and cost matrix)\n\n")
   }
 
   # Summary at key base rates
