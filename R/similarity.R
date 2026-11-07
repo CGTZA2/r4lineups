@@ -43,7 +43,7 @@
 #' result$similarity  # 0.85 would mean very similar
 #' 
 #' # Inspect the model's same-identity flag; this is not a fairness judgment.
-#' result$verified  # TRUE would indicate problematic similarity
+#' result$verified  # TRUE: the model judges the images the same identity; inspect them (not a fairness finding)
 #' }
 #'
 #' @export
@@ -108,8 +108,8 @@ face_similarity <- function(img1_path,
 #' Compute Lineup Similarity Matrix
 #'
 #' Computes similarity between a target face and all foils in a lineup,
-#' returning a comprehensive similarity analysis useful for lineup fairness
-#' assessment.
+#' returning a similarity analysis useful for describing and screening lineup
+#' construction. It does not assess lineup fairness.
 #'
 #' @param target_path Path to the target (suspect) face image.
 #' @param foil_paths Character vector of paths to foil face images.

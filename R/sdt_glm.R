@@ -1,8 +1,9 @@
 #' Fit an SDT GLM for Old/New Recognition
 #'
 #' Fits a single-level GLM (binomial link) to estimate SDT metrics from
-#' old/new recognition responses. With centered item coding, the coefficient
-#' on item status corresponds to d' (probit) or ln(OR) (logit).
+#' old/new recognition responses. The coefficient on item status is
+#' d' (probit) or ln(OR) (logit); with centered item coding the intercept is
+#' also minus the criterion.
 #'
 #' @param data Data frame containing trial-level responses.
 #' @param is_old Column name indicating whether the item is old (1) or new (0).
