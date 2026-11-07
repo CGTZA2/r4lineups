@@ -53,8 +53,11 @@ utils::globalVariables(c("Parameter", "Estimate", "Lower", "Upper"))
 #' \itemize{
 #'   \item AIC/BIC describe the 2-HT likelihood fit but cannot be compared with
 #'     EIG or full-ROC AUC
-#'   \item Use EIG for comparing procedure diagnosticity (higher is better)
-#'   \item Use Full ROC AUC for investigator discriminability (higher is better)
+#'   \item Use EIG for comparing procedure diagnosticity (higher is better,
+#'     at the same \code{prior_guilt} and with the same binning of responses)
+#'   \item Use Full ROC AUC for investigator discriminability (higher is
+#'     better; the default diagnosticity ordering is optimistic, so compare
+#'     procedures with the a-priori order)
 #' }
 #'
 #' @examples
@@ -376,8 +379,8 @@ summary.model_comparison <- function(object, ...) {
   cat("---\n")
   cat("Interpretation Guidance:\n")
   cat("  - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes\n")
-  cat("  - EIG: Higher values = more informative procedure\n")
-  cat("  - Full ROC: Higher AUC = better investigator discriminability\n")
+  cat("  - EIG: Higher values = more informative procedure, at the same prior and binning\n")
+  cat("  - Full ROC: Higher AUC = better investigator discriminability (default ordering is optimistic; use the a-priori order to compare)\n")
   cat("\nEach model provides different information; consider reporting more than one.\n")
 
   invisible(object)

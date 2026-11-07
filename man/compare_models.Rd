@@ -73,8 +73,11 @@ requirements and output formats across models.
 \itemize{
   \item AIC/BIC describe the 2-HT likelihood fit but cannot be compared with
     EIG or full-ROC AUC
-  \item Use EIG for comparing procedure diagnosticity (higher is better)
-  \item Use Full ROC AUC for investigator discriminability (higher is better)
+  \item Use EIG for comparing procedure diagnosticity (higher is better,
+    at the same \code{prior_guilt} and with the same binning of responses)
+  \item Use Full ROC AUC for investigator discriminability (higher is
+    better; the default diagnosticity ordering is optimistic, so compare
+    procedures with the a-priori order)
 }
 }
 \examples{
