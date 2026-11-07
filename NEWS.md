@@ -78,8 +78,42 @@
   revision as "pinned" in their titles and messages. The returned fields
   `audited_revision` and `audited_revision_matches` keep their names.
 
+* `print()` for `compare_pauc()` no longer names one condition as having
+  "higher discriminability" when the difference is not significant. It reports
+  the larger pAUC over the shared false-ID range only when p < .05.
+* `print()` for `fit_sdt_roc()` no longer prints unsourced verbal bands for d'
+  or an "unbiased responding" line based on the mean criterion, and labels the
+  unequal-variance index d_a.
+* `print()` for `sdt_compare()` calls the prior "Jeffreys" only when
+  `alpha = 0.5`; it previously used that name for any Beta prior.
+* `print()` for `compare_utility()` reports "no sign change over the base rates
+  evaluated" rather than that one procedure dominates.
+* `install_r4lineups_python()` accepts Python 3.13, for which TensorFlow now
+  publishes wheels.
+
 ## Documentation
 
+* A review of every vignette and help page for interpretive errors led to
+  these corrections, among others:
+  - utility trade-offs are stated as ratios of utility differences, which alone
+    affect the optimal criterion;
+  - calibration conclusions drawn from `lineup_example` say that its confidence
+    labels are stipulated;
+  - the SDT GLM vignette now shows the inflated evidence of a single-level GLM
+    with participants who differ in d' (random slopes), which its earlier
+    simulation of response bias alone could not show;
+  - 2-HT fits on a parameter boundary are no longer described as clean or as
+    correct zeros, and single-condition fits are described as just identified;
+  - the power vignette and `simulate_power_analysis()` help state that power
+    applies to generalising over witnesses for one lineup set, and qualify a
+    power of 1 from 30 simulations;
+  - example data are described as the dataset help describes them (`line73`,
+    `lineup_example`, target positions in `nortje2012`);
+  - Lee, Mansour and Penrod (2024), Weber et al. (2004), Malpass (1981) and the
+    UK lineup size (PACE Code D) are described accurately;
+  - help pages for estimated innocent suspects state the fair-lineup assumption
+    of dividing filler IDs by lineup size, and `datacheck1()` to `datacheck3()`
+    say what they check.
 * The full ROC vignette and the model-comparison vignette now describe an AUC of
   .5 as chance-level ranking under the chosen category order, not as evidence
   that the responses carry no information.
