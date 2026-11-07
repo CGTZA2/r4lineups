@@ -11,7 +11,10 @@
 #'     \item confidence: Numeric. Confidence rating
 #'   }
 #' @param confidence_bins Numeric vector of bin edges (required for ANRI)
-#' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
+#' @param choosers_only Logical. If \code{TRUE} (default), suspect
+#'   identifications are analysed. If \code{FALSE}, choosers are analysed:
+#'   identifications, with target-present filler IDs excluded, as with
+#'   \code{make_calibration_data(population = "choosers")}.
 #' @param lineup_size Integer. Lineup size (default = 6)
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
 #'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
@@ -97,7 +100,7 @@ compute_anri <- function(data,
   cal_obj <- make_calibration_data(
     data,
     confidence_bins = confidence_bins,
-    choosers_only = choosers_only,
+    population = if (choosers_only) "suspect_ids" else "choosers",
     lineup_size = lineup_size,
     confidence_scale = confidence_scale,
     innocent_suspect = innocent_suspect
@@ -135,7 +138,10 @@ compute_anri <- function(data,
 #'
 #' @param data Dataframe with standard lineup format
 #' @param confidence_bins Numeric vector of bin edges
-#' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
+#' @param choosers_only Logical. If \code{TRUE} (default), suspect
+#'   identifications are analysed. If \code{FALSE}, choosers are analysed:
+#'   identifications, with target-present filler IDs excluded, as with
+#'   \code{make_calibration_data(population = "choosers")}.
 #' @param lineup_size Integer. Lineup size (default = 6)
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
 #'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
@@ -267,7 +273,10 @@ bootstrap_anri <- function(data,
 #' @param data Dataframe with standard lineup format plus a grouping variable
 #' @param group_var Character. Name of grouping variable (must have exactly 2 levels)
 #' @param confidence_bins Numeric vector of bin edges
-#' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
+#' @param choosers_only Logical. If \code{TRUE} (default), suspect
+#'   identifications are analysed. If \code{FALSE}, choosers are analysed:
+#'   identifications, with target-present filler IDs excluded, as with
+#'   \code{make_calibration_data(population = "choosers")}.
 #' @param lineup_size Integer. Lineup size (default = 6)
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
 #'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
@@ -565,7 +574,8 @@ plot_anri_difference_distribution <- function(compare_obj) {
 #' @export
 print.lineup_anri <- function(x, ...) {
   cat("\n=== ANRI (Adjusted Normalized Resolution Index) ===\n\n")
-  cat("Analysis type:", ifelse(x$choosers_only, "Choosers only\n", "All responses\n"))
+  cat("Responses:", ifelse(x$choosers_only, "Suspect identifications\n",
+                            "Choosers (target-present filler IDs excluded)\n"))
   cat("Total N:", x$n_total, "\n")
   cat("Number of bins:", x$n_bins, "\n\n")
 

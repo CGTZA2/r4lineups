@@ -12,6 +12,9 @@
 #'   confidence level as its own bin.
 #' @param choosers_only Logical. If \code{TRUE} (default), only suspect
 #'   identifications are included (standard eyewitness calibration practice).
+#'   If \code{FALSE}, choosers are included: identifications, with
+#'   target-present filler IDs excluded, as with
+#'   \code{make_calibration_data(population = "choosers")}.
 #' @param lineup_size Integer. Number of lineup members (default 6).
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
 #'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
@@ -95,7 +98,8 @@ calibration_bayes <- function(data,
 
   freq <- make_calibration_data(data,
                                 confidence_bins = confidence_bins,
-                                choosers_only   = choosers_only,
+                                population = if (choosers_only)
+                                  "suspect_ids" else "choosers",
                                 lineup_size     = lineup_size,
                                 confidence_scale = confidence_scale,
                                 innocent_suspect = innocent_suspect)

@@ -22,7 +22,10 @@ make_calibration(
 
 \item{confidence_bins}{Numeric vector of bin edges (optional)}
 
-\item{choosers_only}{Logical. Whether to analyze only suspect IDs (default = TRUE)}
+\item{choosers_only}{Logical. If \code{TRUE} (default), suspect
+identifications are analysed; \code{FALSE} (deprecated) means
+\code{population = "choosers"}. Ignored when \code{population} is
+supplied.}
 
 \item{lineup_size}{Integer. Number of people in lineup (default = 6)}
 

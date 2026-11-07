@@ -13,7 +13,8 @@
 #'   Smalarz (2015): the absolute difference between posterior and prior,
 #'   |posterior - prior|, on the probability scale. \code{"signed"} is the same
 #'   difference with its sign kept (positive when the response raises the
-#'   probability of guilt, negative when it lowers it). \code{"entropy"} is the
+#'   probability of guilt, negative when it lowers it), as in Smith, Lindsay
+#'   and Wells (2016). \code{"entropy"} is the
 #'   reduction in binary entropy, H(prior) minus H(posterior), in bits (Starns,
 #'   Cohen & Rotello, 2023); it is the per-response term of expected information
 #'   gain (\code{\link{compute_eig}}).
@@ -64,7 +65,8 @@
 #' Wells and Lindsay use the absolute value because the amount of change, not
 #' its direction, measures the information gained. \code{gain = "signed"}
 #' returns \eqn{p(guilty|x) - p(guilty)}, positive for responses that
-#' incriminate the suspect and negative for responses that exonerate.
+#' incriminate the suspect and negative for responses that exonerate; Smith et
+#' al. (2016) report gain this way.
 #'
 #' \strong{Entropy reduction} (\code{gain = "entropy"}, Starns et al., 2023):
 #' \deqn{IG(x) = H(prior) - H(posterior)}
@@ -80,6 +82,11 @@
 #' Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 #' Bayesian information gain, base-rate effect-equivalency curves, and reasonable
 #' suspicion. \emph{Law and Human Behavior, 39}(2), 99-122.
+#'
+#' Smith, A. M., Lindsay, R. C. L., & Wells, G. L. (2016). A Bayesian analysis
+#' on the (dis)utility of iterative-showup procedures: The moderating impact of
+#' prior probabilities. \emph{Law and Human Behavior, 40}(5), 503-516.
+#' \doi{10.1037/lhb0000196}
 #'
 #' Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method for
 #' assessing the effectiveness of eyewitness identification procedures: Expected

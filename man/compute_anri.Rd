@@ -23,7 +23,10 @@ compute_anri(
 
 \item{confidence_bins}{Numeric vector of bin edges (required for ANRI)}
 
-\item{choosers_only}{Logical. Whether to analyze only suspect IDs (default = TRUE)}
+\item{choosers_only}{Logical. If \code{TRUE} (default), suspect
+identifications are analysed. If \code{FALSE}, choosers are analysed:
+identifications, with target-present filler IDs excluded, as with
+\code{make_calibration_data(population = "choosers")}.}
 
 \item{lineup_size}{Integer. Lineup size (default = 6)}
 

@@ -31,6 +31,17 @@
 
 ## Bug fixes
 
+* `make_calibration()` now keeps `tp_fillers` in its result, so that printing a
+  `population = "choosers", tp_fillers = "error"` analysis reports that
+  target-present filler IDs were scored as errors; it previously said they were
+  excluded.
+* `compute_anri()`, `bootstrap_anri()`, `compare_anri()`,
+  `make_calibration_by_condition()` and `calibration_bayes()` with
+  `choosers_only = FALSE` analyse choosers with target-present filler IDs
+  excluded, as `make_calibration()` does, without a deprecation warning that
+  pointed to a `population` argument these functions do not have. The ANRI print
+  method and the Shiny app's calibration and Bayesian tabs label the population
+  accordingly.
 * `homog_diag()` now stops with an informative error when a pair has a zero or
   non-finite log-ratio variance (for example, every witness choosing the
   suspect). It previously reported `heterogeneous = FALSE` from non-finite

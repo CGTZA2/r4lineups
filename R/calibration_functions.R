@@ -311,7 +311,10 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 #' @param condition_vars Character vector of column names defining conditions
 #'   (e.g., c("instruction_type", "foil_similarity"))
 #' @param confidence_bins Numeric vector of bin edges (optional)
-#' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
+#' @param choosers_only Logical. If \code{TRUE} (default), suspect
+#'   identifications are analysed. If \code{FALSE}, choosers are analysed:
+#'   identifications, with target-present filler IDs excluded, as with
+#'   \code{make_calibration_data(population = "choosers")}.
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
 #'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
@@ -386,7 +389,7 @@ make_calibration_by_condition <- function(data, condition_vars,
       cal_result <- make_calibration_data(
         cond_data,
         confidence_bins = confidence_bins,
-        choosers_only = choosers_only,
+        population = if (choosers_only) "suspect_ids" else "choosers",
         lineup_size = lineup_size,
         confidence_scale = confidence_scale,
         innocent_suspect = innocent_suspect
@@ -620,7 +623,10 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 #'
 #' @param data A dataframe with columns: target_present, identification, confidence
 #' @param confidence_bins Numeric vector of bin edges (optional)
-#' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
+#' @param choosers_only Logical. If \code{TRUE} (default), suspect
+#'   identifications are analysed; \code{FALSE} (deprecated) means
+#'   \code{population = "choosers"}. Ignored when \code{population} is
+#'   supplied.
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
 #' @param show_plot Logical. Whether to display the plot (default = TRUE)
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
@@ -685,6 +691,7 @@ make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
     n_total = cal_obj$n_total,
     choosers_only = cal_obj$choosers_only,
     population = cal_obj$population,
+    tp_fillers = cal_obj$tp_fillers,
     confidence_scale = cal_obj$confidence_scale,
     innocent_suspect_method = cal_obj$innocent_suspect_method
   )
@@ -741,8 +748,9 @@ print.lineup_calibration <- function(x, ...) {
     .r4l_state$warned_choosers_only <- TRUE
     warning("choosers_only = FALSE is deprecated. It previously scored correct ",
             "rejections as errors; it now means population = \"choosers\" ",
-            "(suspect and filler identifications). Use population = ",
-            "\"nonchoosers\" to calibrate rejections.", call. = FALSE)
+            "(identifications, with target-present filler IDs excluded as in ",
+            "Brewer & Wells, 2006). Use population = \"nonchoosers\" to ",
+            "calibrate rejections.", call. = FALSE)
   }
   "choosers"
 }
