@@ -146,7 +146,12 @@
 #'   confidence ratings, a scalar generates \code{conf_levels} thresholds from
 #'   \code{c_criterion} through \code{c_criterion + 2}; alternatively, supply
 #'   exactly one strictly increasing threshold per confidence level. Lower
-#'   values are more liberal (default = 0).
+#'   values are more liberal (default = 0). Under the MAX rule the criterion
+#'   applies to the largest of the lineup strengths, so 0 is not neutral: with
+#'   six members it rejects only about 2\% of target-absent lineups. The neutral
+#'   value (50\% target-absent rejections) is
+#'   \code{qnorm(0.5^(1 / lineup_size))}, about 1.23 for six members. Choose
+#'   the criterion to give the rejection rate you expect.
 #' @param lineup_size Integer. Number of lineup members (default = 6)
 #' @param conf_levels Integer. Number of confidence levels to simulate. If NULL,
 #'   returns binary decision only (default = 5)
@@ -245,24 +250,29 @@
 #' 1533-1550.
 #'
 #' @examples
-#' # Basic simulation: strong memory with MAX rule (default)
+#' # Basic simulation: strong memory with MAX rule (default). The criterion
+#' # 1.23 is the neutral value for six members (about half of target-absent
+#' # lineups rejected); the default of 0 would reject almost none.
 #' strong_memory <- simulate_lineup_data(
 #'   n_tp = 200, n_ta = 200,
 #'   d_prime = 2.0,
+#'   c_criterion = 1.23,
 #'   conf_levels = 3,
 #'   seed = 42
 #' )
 #'
-#' # Ensemble decision rule
+#' # Ensemble decision rule (a similar criterion gives about half rejections)
 #' ensemble_data <- simulate_lineup_data(
 #'   n_tp = 200, n_ta = 200,
 #'   d_prime = 1.5,
+#'   c_criterion = 1.23,
 #'   decision_rule = "ensemble",
 #'   conf_levels = 5,
 #'   seed = 42
 #' )
 #'
-#' # Integration decision rule
+#' # Integration decision rule (the sum of six strengths is centred on 0, so
+#' # the default criterion of 0 is already near neutral)
 #' integration_data <- simulate_lineup_data(
 #'   n_tp = 200, n_ta = 200,
 #'   d_prime = 1.5,
@@ -281,6 +291,7 @@
 #' power_results <- simulate_power_analysis(
 #'   sample_sizes = c(50, 100),
 #'   d_prime = 1.5,
+#'   c_criterion = 1.23,
 #'   n_simulations = 5,
 #'   n_bootstrap = 50,
 #'   seed = 1
@@ -610,7 +621,11 @@ print.simulated_lineup_data <- function(x, ...) {
 #' @param seed Optional integer seed for reproducibility.
 #' @param verbose Logical. Report progress (default = TRUE).
 #' @param ... Additional arguments passed to simulate_lineup_data(), for example
-#'   \code{conf_levels} or \code{foil_bias}.
+#'   \code{c_criterion}, \code{conf_levels} or \code{foil_bias}. Set
+#'   \code{c_criterion} to match the rejection rate you expect: the default, 0,
+#'   makes witnesses choose almost always under the MAX rule (see
+#'   \code{\link{simulate_lineup_data}}), and the power then applies to that
+#'   setting.
 #'
 #' @details
 #' Power is the probability that a study of a given size detects an effect that
@@ -622,6 +637,30 @@ print.simulated_lineup_data <- function(x, ...) {
 #' \code{d_prime_2} supplies; the null hypothesis is that the two conditions do
 #' not differ. Simulating a single condition and computing a statistic from it is
 #' not a power analysis, because no hypothesis is being tested.
+#'
+#' Each simulated study samples witnesses for one lineup set (one fixed foil
+#' structure) and gives every witness the same \eqn{d'} and criterion. The
+#' power is therefore for generalising over witnesses to these materials.
+#' Generalising over culprits and lineups as well needs sets sampled as units,
+#' and with few sets the effective sample size for that question is closer to
+#' the number of sets (Wells & Windschitl, 1999; Westfall, Kenny, & Judd,
+#' 2014).
+#'
+#' Power is estimated from \code{n_simulations} studies, so it has Monte Carlo
+#' error, and each default test rests on \code{n_bootstrap} resamples. An
+#' estimated power of 1 (standard error 0) means only that the true power is
+#' high: by the rule of three, with 30 simulations it is above about
+#' \eqn{1 - 3/30 = 0.90} with 95\% confidence.
+#'
+#' @references
+#' Wells, G. L., & Windschitl, P. D. (1999). Stimulus sampling and social
+#' psychological experimentation. \emph{Personality and Social Psychology
+#' Bulletin, 25}, 1115--1125.
+#'
+#' Westfall, J., Kenny, D. A., & Judd, C. M. (2014). Statistical power and
+#' optimal design in experiments in which samples of participants respond to
+#' samples of stimuli. \emph{Journal of Experimental Psychology: General,
+#' 143}, 2020--2045.
 #'
 #' @return A dataframe of class \code{power_analysis} with columns:
 #'   \itemize{
@@ -648,6 +687,7 @@ print.simulated_lineup_data <- function(x, ...) {
 #' power_res <- simulate_power_analysis(
 #'   sample_sizes = c(50, 100),
 #'   d_prime = 1.5,
+#'   c_criterion = 1.23,
 #'   n_simulations = 8,
 #'   n_bootstrap = 50,
 #'   conf_levels = 5,
