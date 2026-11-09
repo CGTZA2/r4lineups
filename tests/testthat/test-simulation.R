@@ -238,6 +238,7 @@ test_that("simulated data works with r4lineups functions", {
 })
 
 test_that("simulate_power_analysis returns the documented structure", {
+  skip_on_cran()
   power_result <- simulate_power_analysis(
     sample_sizes = c(40),
     d_prime = 1.5,

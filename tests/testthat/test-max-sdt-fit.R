@@ -302,6 +302,7 @@ test_that("boot_ci is NULL when nboot = 0", {
 })
 
 test_that("boot_ci has correct dimensions when nboot > 0", {
+  skip_on_cran()
   res <- fit_max_sdt(n_hit=45, n_tp_choose=70, n_fa=25, N_tp=100, N_ta=100,
                       nboot=100, seed=1)
   expect_false(is.null(res$boot_ci))
@@ -321,6 +322,7 @@ test_that("bootstrap CI contains true parameter (single condition)", {
 })
 
 test_that("bootstrap reports converged and failed replicate counts", {
+  skip_on_cran()
   # Regression test. Replicates that fail to converge are left as NA rows in
   # boot_params, so sd(fit$boot_params[, 1]) returns NA with no explanation
   # unless the counts are recorded.

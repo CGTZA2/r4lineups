@@ -2,12 +2,14 @@
 
 ## Breaking changes
 
-* `make_bayes_curves()` gains `gain = c("probability", "entropy")`. The default
-  is now the Wells, Yang and Smalarz (2015) information gain, posterior minus
-  prior, which the function cites. The previous measure, the reduction in binary
-  entropy (Starns, Cohen & Rotello, 2023), is available as `gain = "entropy"`.
-  The two can differ in sign: a suspect identification at a low prior has a
-  positive probability gain but a negative entropy reduction.
+* `make_bayes_curves()` gains `gain = c("probability", "signed", "entropy")`.
+  The default is now the information gain of Wells and Lindsay (1980) and Wells,
+  Yang and Smalarz (2015), the absolute change in the probability of guilt,
+  |posterior − prior|. `gain = "signed"` keeps the direction of the change
+  (positive when a response raises the probability of guilt). The previous
+  measure, the reduction in binary entropy (Starns, Cohen & Rotello, 2023), is
+  available as `gain = "entropy"`; it is negative when a response moves belief
+  towards .5, as a suspect identification does at a low prior.
   `plot_bayes_information_gain()` labels its axis to match.
 * `make_fullroc()` and `make_fullroc_data()` with `order = "apriori"` now use the
   a priori order of Smith, Yang and Wells (2020, p. 604) and Yang and Smith
@@ -17,15 +19,29 @@
   AUC whenever their confidence ranges overlap. The documentation now cites
   Smith, Yang and Wells (2020) rather than "Smith & Yang".
 * Calibration functions gain `population = c("suspect_ids", "choosers",
-  "nonchoosers")`. `"choosers"` includes filler identifications as errors, as in
-  Brewer and Wells (2006); `"nonchoosers"` calibrates rejections, which are
-  correct when the culprit is absent. `choosers_only = FALSE` previously scored
+  "nonchoosers")`. `"choosers"` follows Brewer and Wells (2006): target-present
+  suspect IDs are correct, all target-absent identifications are errors, and
+  target-present filler IDs are excluded, because a filler is known not to be
+  the culprit. `tp_fillers = "error"` keeps those filler IDs as errors instead.
+  `"nonchoosers"` calibrates rejections, which are correct when the culprit is
+  absent. `choosers_only = FALSE` previously scored
   every response other than a target-present suspect ID as incorrect, including
   correct rejections; it is deprecated and now means `population = "choosers"`.
   The default (suspect identifications, as in CAC) is unchanged.
 
 ## Bug fixes
 
+* `make_calibration()` now keeps `tp_fillers` in its result, so that printing a
+  `population = "choosers", tp_fillers = "error"` analysis reports that
+  target-present filler IDs were scored as errors; it previously said they were
+  excluded.
+* `compute_anri()`, `bootstrap_anri()`, `compare_anri()`,
+  `make_calibration_by_condition()` and `calibration_bayes()` with
+  `choosers_only = FALSE` analyse choosers with target-present filler IDs
+  excluded, as `make_calibration()` does, without a deprecation warning that
+  pointed to a `population` argument these functions do not have. The ANRI print
+  method and the Shiny app's calibration and Bayesian tabs label the population
+  accordingly.
 * `homog_diag()` now stops with an informative error when a pair has a zero or
   non-finite log-ratio variance (for example, every witness choosing the
   suspect). It previously reported `heterogeneous = FALSE` from non-finite
@@ -55,6 +71,79 @@
   used a 12-member lineup and 21 mock witnesses).
 * `esize_T_ci_n()` gains `conf_level`; `alpha` (which was the confidence level)
   remains for compatibility.
+* `compare_models()`, its help, the model-comparison vignette and the Shiny ROC
+  tab label the full ROC "Smith et al., 2020" (Smith, Yang & Wells), not "Smith &
+  Yang".
+* `install_pywitness()` and `check_pywitness_deps()` describe the fixed pyWitness
+  revision as "pinned" in their titles and messages. The returned fields
+  `audited_revision` and `audited_revision_matches` keep their names.
+
+* `print()` for `compare_pauc()` no longer names one condition as having
+  "higher discriminability" when the difference is not significant. It reports
+  the larger pAUC over the shared false-ID range only when p < .05.
+* `print()` for `fit_sdt_roc()` no longer prints unsourced verbal bands for d'
+  or an "unbiased responding" line based on the mean criterion, and labels the
+  unequal-variance index d_a.
+* `print()` for `sdt_compare()` calls the prior "Jeffreys" only when
+  `alpha = 0.5`; it previously used that name for any Beta prior.
+* `print()` for `compare_utility()` reports "no sign change over the base rates
+  evaluated" rather than that one procedure dominates.
+* `install_r4lineups_python()` accepts Python 3.13, for which TensorFlow now
+  publishes wheels.
+* `make_bayes_curves()` returns `NA`, with a warning, for the posterior and
+  information gain of a response that has zero probability at a requested prior;
+  it previously returned the prior and a gain of zero. `make_bree_curve()`
+  returns `NA` when no prior in procedure B can match a posterior with a response
+  that can occur. Both check `prior_grid`.
+* Calibration functions stop with an informative error when the selected
+  population (for example, suspect identifications) is empty, rather than a
+  data-frame error.
+* `effsize_compare()` warns and returns the available intervals when every
+  bootstrap difference is equal, and falls back to normal and percentile
+  intervals when the BCa interval cannot be computed, instead of stopping.
+* Stricter input checks: draw counts (`S`), `credible_mass`, `nboot`, `n`,
+  `base_rate`, `utility_matrix` and member positions must be finite values of
+  the right kind, and `lineup_bias_boot_dist()` and `esize_boot_dist()` stop on
+  missing choices, as the other choice-based functions do. Factor choices are
+  read by their labels. `fit_sdt_glm()` rejects missing values in logical
+  columns as it does in numeric ones.
+
+## Tests
+
+* New tests reproduce published values from the primary sources: Malpass
+  (1981, Table 1); Tredoux (1998, Tables 3, 6, 7 and 9); Yaniv, Yates and Smith
+  (1991, NDI and ANDI); Smith, Yang and Wells (2020, Figure 3); Lampinen, Smith
+  and Wells (2019, Table 2); Wells, Yang and Smalarz (2015, posteriors);
+  Starns, Cohen and Rotello (2023, Table 1 and EIG); Fitzgerald, Tredoux and
+  Juncu (2023, Table 2); Yang et al. (2025, Table A1); and Miller (1996,
+  Table 2).
+
+## Documentation
+
+* A review of every vignette and help page for interpretive errors led to
+  these corrections, among others:
+  - utility trade-offs are stated as ratios of utility differences, which alone
+    affect the optimal criterion;
+  - calibration conclusions drawn from `lineup_example` say that its confidence
+    labels are stipulated;
+  - the SDT GLM vignette now shows the inflated evidence of a single-level GLM
+    with participants who differ in d' (random slopes), which its earlier
+    simulation of response bias alone could not show;
+  - 2-HT fits on a parameter boundary are no longer described as clean or as
+    correct zeros, and single-condition fits are described as just identified;
+  - the power vignette and `simulate_power_analysis()` help state that power
+    applies to generalising over witnesses for one lineup set, and qualify a
+    power of 1 from 30 simulations;
+  - example data are described as the dataset help describes them (`line73`,
+    `lineup_example`, target positions in `nortje2012`);
+  - Lee, Mansour and Penrod (2024), Weber et al. (2004), Malpass (1981) and the
+    UK lineup size (PACE Code D) are described accurately;
+  - help pages for estimated innocent suspects state the fair-lineup assumption
+    of dividing filler IDs by lineup size, and `datacheck1()` to `datacheck3()`
+    say what they check.
+* The full ROC vignette and the model-comparison vignette now describe an AUC of
+  .5 as chance-level ranking under the chosen category order, not as evidence
+  that the responses carry no information.
 
 # r4lineups 2.3.0 (2026-10-29)
 

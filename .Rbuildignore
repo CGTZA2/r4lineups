@@ -51,3 +51,5 @@
 ^implement_tutor\.md$
 ^claude_review_[0-9]+\.md$
 ^vignette_report_[0-9]+\.md$
+^FITS$
+^codex_.*\.md$

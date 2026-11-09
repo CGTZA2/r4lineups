@@ -11,7 +11,8 @@ make_calibration_data(
   lineup_size = 6,
   confidence_scale = c("auto", "0-1", "0-100"),
   innocent_suspect = "auto",
-  population = NULL
+  population = NULL,
+  tp_fillers = c("exclude", "error")
 )
 }
 \arguments{
@@ -50,10 +51,17 @@ otherwise, with a message.}
 
 \item{population}{Which responses are calibrated: \code{"suspect_ids"}
 (suspect identifications, as in CAC analysis; correct when target-present),
-\code{"choosers"} (suspect and filler identifications, as in Brewer & Wells,
-2006; only target-present suspect IDs are correct), or \code{"nonchoosers"}
+\code{"choosers"} (witnesses who identify someone; only target-present
+suspect IDs are correct; see \code{tp_fillers}), or \code{"nonchoosers"}
 (rejections; correct when target-absent). If NULL (default), it is set from
 \code{choosers_only}.}
+
+\item{tp_fillers}{For \code{population = "choosers"} only: how filler
+identifications in target-present lineups are treated. \code{"exclude"}
+(default) leaves them out, as Brewer and Wells (2006) did, because a filler
+is known in advance not to be the culprit. \code{"error"} keeps them as
+incorrect identifications; Brewer and Wells note that overconfidence is
+then more marked.}
 }
 \value{
 A list containing:
@@ -61,7 +69,7 @@ A list containing:
     \item calibration_data: Dataframe with per-bin confidence, accuracy, and counts
     \item C: Calibration statistic (weighted mean squared difference between confidence and accuracy)
     \item OU: Over/underconfidence (mean confidence minus mean accuracy)
-    \item NRI: Normalized Resolution Index (standardized within-person variance)
+    \item NRI: Normalized Resolution Index, the between-bin variance of accuracy divided by \eqn{\bar{a}(1 - \bar{a})}, the total variance of the outcome (the proportion of outcome variance explained by the confidence bins)
     \item overall_accuracy: Mean accuracy across all responses
     \item overall_confidence: Mean confidence across all responses
     \item n_total: Total number of responses analyzed
@@ -76,7 +84,7 @@ a more appropriate measure than simple confidence-accuracy correlation.
 Calibration analysis distinguishes between:
 \itemize{
   \item \strong{Calibration (C)}: How well confidence matches accuracy (perfect = 0)
-  \item \strong{Over/underconfidence (O/U)}: Overall bias in confidence judgments (0 = perfectly calibrated)
+  \item \strong{Over/underconfidence (O/U)}: Overall bias in confidence judgments (0 = no net bias in the mean; overconfident and underconfident bins can cancel, so perfect calibration needs C = 0)
   \item \strong{Resolution (NRI)}: Ability to discriminate correct from incorrect responses
 }
 
@@ -90,9 +98,12 @@ correct from incorrect responses:
 
 The default population, suspect identifications, is the one used in CAC
 analysis (Mickes, 2015). In the eyewitness calibration literature (e.g.,
-Brewer & Wells, 2006) choosers are all witnesses who identify someone, so
-filler identifications enter as errors; use \code{population = "choosers"}
-to reproduce that analysis. Nonchoosers (\code{population = "nonchoosers"})
+Brewer & Wells, 2006) choosers are witnesses who identify someone. Brewer and
+Wells excluded filler identifications from target-present lineups, because a
+filler is known not to be the culprit, and scored all target-absent
+identifications as errors; \code{population = "choosers"} reproduces that
+analysis, and \code{tp_fillers = "error"} keeps the target-present filler
+identifications as errors instead. Nonchoosers (\code{population = "nonchoosers"})
 are witnesses who reject the lineup; a rejection is correct when the culprit
 is absent.
 

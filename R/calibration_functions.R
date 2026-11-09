@@ -18,10 +18,16 @@
 #'   \code{population = "choosers"}. Ignored when \code{population} is supplied.
 #' @param population Which responses are calibrated: \code{"suspect_ids"}
 #'   (suspect identifications, as in CAC analysis; correct when target-present),
-#'   \code{"choosers"} (suspect and filler identifications, as in Brewer & Wells,
-#'   2006; only target-present suspect IDs are correct), or \code{"nonchoosers"}
+#'   \code{"choosers"} (witnesses who identify someone; only target-present
+#'   suspect IDs are correct; see \code{tp_fillers}), or \code{"nonchoosers"}
 #'   (rejections; correct when target-absent). If NULL (default), it is set from
 #'   \code{choosers_only}.
+#' @param tp_fillers For \code{population = "choosers"} only: how filler
+#'   identifications in target-present lineups are treated. \code{"exclude"}
+#'   (default) leaves them out, as Brewer and Wells (2006) did, because a filler
+#'   is known in advance not to be the culprit. \code{"error"} keeps them as
+#'   incorrect identifications; Brewer and Wells note that overconfidence is
+#'   then more marked.
 #' @param lineup_size Integer. Number of people in lineup (default = 6).
 #'   Used for estimating incorrect suspect IDs from filler choices in target-absent lineups.
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default;
@@ -33,7 +39,7 @@
 #'     \item calibration_data: Dataframe with per-bin confidence, accuracy, and counts
 #'     \item C: Calibration statistic (weighted mean squared difference between confidence and accuracy)
 #'     \item OU: Over/underconfidence (mean confidence minus mean accuracy)
-#'     \item NRI: Normalized Resolution Index (standardized within-person variance)
+#'     \item NRI: Normalized Resolution Index, the between-bin variance of accuracy divided by \eqn{\bar{a}(1 - \bar{a})}, the total variance of the outcome (the proportion of outcome variance explained by the confidence bins)
 #'     \item overall_accuracy: Mean accuracy across all responses
 #'     \item overall_confidence: Mean confidence across all responses
 #'     \item n_total: Total number of responses analyzed
@@ -43,7 +49,7 @@
 #' Calibration analysis distinguishes between:
 #' \itemize{
 #'   \item \strong{Calibration (C)}: How well confidence matches accuracy (perfect = 0)
-#'   \item \strong{Over/underconfidence (O/U)}: Overall bias in confidence judgments (0 = perfectly calibrated)
+#'   \item \strong{Over/underconfidence (O/U)}: Overall bias in confidence judgments (0 = no net bias in the mean; overconfident and underconfident bins can cancel, so perfect calibration needs C = 0)
 #'   \item \strong{Resolution (NRI)}: Ability to discriminate correct from incorrect responses
 #' }
 #'
@@ -57,9 +63,12 @@
 #'
 #' The default population, suspect identifications, is the one used in CAC
 #' analysis (Mickes, 2015). In the eyewitness calibration literature (e.g.,
-#' Brewer & Wells, 2006) choosers are all witnesses who identify someone, so
-#' filler identifications enter as errors; use \code{population = "choosers"}
-#' to reproduce that analysis. Nonchoosers (\code{population = "nonchoosers"})
+#' Brewer & Wells, 2006) choosers are witnesses who identify someone. Brewer and
+#' Wells excluded filler identifications from target-present lineups, because a
+#' filler is known not to be the culprit, and scored all target-absent
+#' identifications as errors; \code{population = "choosers"} reproduces that
+#' analysis, and \code{tp_fillers = "error"} keeps the target-present filler
+#' identifications as errors instead. Nonchoosers (\code{population = "nonchoosers"})
 #' are witnesses who reject the lineup; a rejection is correct when the culprit
 #' is absent.
 #'
@@ -107,11 +116,13 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
                                    lineup_size = 6,
                                    confidence_scale = c("auto", "0-1", "0-100"),
                                    innocent_suspect = "auto",
-                                   population = NULL) {
+                                   population = NULL,
+                                   tp_fillers = c("exclude", "error")) {
   .validate_lineup_analysis(data, lineup_size = lineup_size)
   .validate_bins(data$confidence, confidence_bins)
 
   confidence_scale <- match.arg(confidence_scale)
+  tp_fillers <- match.arg(tp_fillers)
 
   # Validate required columns
   required_cols <- c("target_present", "identification", "confidence")
@@ -128,7 +139,7 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
     if (innocent_method == "designated") {
       data_filtered <- data[data$identification == "suspect", , drop = FALSE]
-      data_filtered$.weight <- 1
+      data_filtered$.weight <- rep(1, nrow(data_filtered))
     } else {
       keep <- (data$target_present == TRUE & data$identification == "suspect") |
         (data$target_present == FALSE & data$identification == "filler")
@@ -141,10 +152,15 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     data_filtered$correct <- as.numeric(data_filtered$target_present == TRUE &
                                           data_filtered$identification == "suspect")
   } else if (population == "choosers") {
-    # All identifications; only a target-present suspect ID is correct.
-    data_filtered <- data[data$identification %in% c("suspect", "filler"), , drop = FALSE]
+    # Identifications; only a target-present suspect ID is correct. Brewer and
+    # Wells (2006) excluded target-present filler IDs (tp_fillers = "exclude").
+    keep <- data$identification %in% c("suspect", "filler")
+    if (tp_fillers == "exclude") {
+      keep <- keep & !(data$target_present == TRUE & data$identification == "filler")
+    }
+    data_filtered <- data[keep, , drop = FALSE]
     if (nrow(data_filtered) == 0) stop("No identifications found in data")
-    data_filtered$.weight <- 1
+    data_filtered$.weight <- rep(1, nrow(data_filtered))
     data_filtered$correct <- as.numeric(data_filtered$target_present == TRUE &
                                           data_filtered$identification == "suspect")
     innocent_method <- "not_applicable"
@@ -152,7 +168,7 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     # Rejections; correct when the culprit is absent.
     data_filtered <- data[data$identification == "reject", , drop = FALSE]
     if (nrow(data_filtered) == 0) stop("No rejections found in data")
-    data_filtered$.weight <- 1
+    data_filtered$.weight <- rep(1, nrow(data_filtered))
     data_filtered$correct <- as.numeric(data_filtered$target_present == FALSE)
     innocent_method <- "not_applicable"
   }
@@ -277,6 +293,7 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     n_total = N,
     choosers_only = population == "suspect_ids",
     population = population,
+    tp_fillers = if (population == "choosers") tp_fillers else NA_character_,
     confidence_scale = conf_scale,
     innocent_suspect_method = innocent_method
   )
@@ -294,7 +311,10 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
 #' @param condition_vars Character vector of column names defining conditions
 #'   (e.g., c("instruction_type", "foil_similarity"))
 #' @param confidence_bins Numeric vector of bin edges (optional)
-#' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
+#' @param choosers_only Logical. If \code{TRUE} (default), suspect
+#'   identifications are analysed. If \code{FALSE}, choosers are analysed:
+#'   identifications, with target-present filler IDs excluded, as with
+#'   \code{make_calibration_data(population = "choosers")}.
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
 #'   "0-1", or "0-100". See \code{\link{make_calibration_data}}.
@@ -369,7 +389,7 @@ make_calibration_by_condition <- function(data, condition_vars,
       cal_result <- make_calibration_data(
         cond_data,
         confidence_bins = confidence_bins,
-        choosers_only = choosers_only,
+        population = if (choosers_only) "suspect_ids" else "choosers",
         lineup_size = lineup_size,
         confidence_scale = confidence_scale,
         innocent_suspect = innocent_suspect
@@ -603,7 +623,10 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 #'
 #' @param data A dataframe with columns: target_present, identification, confidence
 #' @param confidence_bins Numeric vector of bin edges (optional)
-#' @param choosers_only Logical. Whether to analyze only suspect IDs (default = TRUE)
+#' @param choosers_only Logical. If \code{TRUE} (default), suspect
+#'   identifications are analysed; \code{FALSE} (deprecated) means
+#'   \code{population = "choosers"}. Ignored when \code{population} is
+#'   supplied.
 #' @param lineup_size Integer. Number of people in lineup (default = 6)
 #' @param show_plot Logical. Whether to display the plot (default = TRUE)
 #' @param confidence_scale How the confidence scale is interpreted: "auto" (default),
@@ -631,7 +654,8 @@ make_calibration_by_condition_gg <- function(cal_by_cond_obj, facet = TRUE,
 make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
                             lineup_size = 6, show_plot = TRUE,
                             confidence_scale = c("auto", "0-1", "0-100"),
-                            innocent_suspect = "auto", population = NULL, ...) {
+                            innocent_suspect = "auto", population = NULL,
+                            tp_fillers = c("exclude", "error"), ...) {
 
   confidence_scale <- match.arg(confidence_scale)
 
@@ -643,7 +667,8 @@ make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
     lineup_size = lineup_size,
     confidence_scale = confidence_scale,
     innocent_suspect = innocent_suspect,
-    population = population
+    population = population,
+    tp_fillers = match.arg(tp_fillers)
   )
 
   # Create plot
@@ -666,6 +691,7 @@ make_calibration <- function(data, confidence_bins = NULL, choosers_only = TRUE,
     n_total = cal_obj$n_total,
     choosers_only = cal_obj$choosers_only,
     population = cal_obj$population,
+    tp_fillers = cal_obj$tp_fillers,
     confidence_scale = cal_obj$confidence_scale,
     innocent_suspect_method = cal_obj$innocent_suspect_method
   )
@@ -683,7 +709,9 @@ print.lineup_calibration <- function(x, ...) {
   cat("\n=== Lineup Calibration Analysis ===\n\n")
   pop <- if (is.null(x$population)) "suspect_ids" else x$population
   cat("Population:", switch(pop, suspect_ids = "Suspect identifications",
-                            choosers = "Choosers (suspect and filler IDs)",
+                            choosers = if (identical(x$tp_fillers, "error"))
+                              "Choosers (all suspect and filler IDs)" else
+                              "Choosers (TP filler IDs excluded)",
                             nonchoosers = "Nonchoosers (rejections)"), "\n")
   cat("Total N:", x$n_total, "\n\n")
 
@@ -720,8 +748,9 @@ print.lineup_calibration <- function(x, ...) {
     .r4l_state$warned_choosers_only <- TRUE
     warning("choosers_only = FALSE is deprecated. It previously scored correct ",
             "rejections as errors; it now means population = \"choosers\" ",
-            "(suspect and filler identifications). Use population = ",
-            "\"nonchoosers\" to calibrate rejections.", call. = FALSE)
+            "(identifications, with target-present filler IDs excluded as in ",
+            "Brewer & Wells, 2006). Use population = \"nonchoosers\" to ",
+            "calibrate rejections.", call. = FALSE)
   }
   "choosers"
 }
