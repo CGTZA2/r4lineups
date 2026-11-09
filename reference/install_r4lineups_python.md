@@ -59,10 +59,10 @@ This function installs:
 
 - mediapipe - For 478-point face mesh (optional but recommended)
 
-- retinaface - Best face detector
+- retinaface - Face detector (the package default)
 
 **Python version.** TensorFlow publishes wheels for a limited range of
-Python versions (currently 3.9 to 3.12). On a machine whose default
+Python versions (currently 3.9 to 3.13). On a machine whose default
 interpreter is newer than that, pip finds no TensorFlow distribution at
 all and the install fails partway through with
 `No matching distribution found for tensorflow`, after downloading the

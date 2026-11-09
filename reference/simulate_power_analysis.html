@@ -146,7 +146,11 @@ to a bootstrap comparison of partial AUC via <code><a href="compare_pauc.html">c
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to simulate_lineup_data(), for example
-<code>conf_levels</code> or <code>foil_bias</code>.</p></dd>
+<code>c_criterion</code>, <code>conf_levels</code> or <code>foil_bias</code>. Set
+<code>c_criterion</code> to match the rejection rate you expect: the default, 0,
+makes witnesses choose almost always under the MAX rule (see
+<code><a href="simulate_lineup_data.html">simulate_lineup_data</a></code>), and the power then applies to that
+setting.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -175,6 +179,28 @@ use, and counting how often it reaches significance.</p>
 <code>d_prime_2</code> supplies; the null hypothesis is that the two conditions do
 not differ. Simulating a single condition and computing a statistic from it is
 not a power analysis, because no hypothesis is being tested.</p>
+<p>Each simulated study samples witnesses for one lineup set (one fixed foil
+structure) and gives every witness the same \(d'\) and criterion. The
+power is therefore for generalising over witnesses to these materials.
+Generalising over culprits and lineups as well needs sets sampled as units,
+and with few sets the effective sample size for that question is closer to
+the number of sets (Wells &amp; Windschitl, 1999; Westfall, Kenny, &amp; Judd,
+2014).</p>
+<p>Power is estimated from <code>n_simulations</code> studies, so it has Monte Carlo
+error, and each default test rests on <code>n_bootstrap</code> resamples. An
+estimated power of 1 (standard error 0) means only that the true power is
+high: by the rule of three, with 30 simulations it is above about
+\(1 - 3/30 = 0.90\) with 95% confidence.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Wells, G. L., &amp; Windschitl, P. D. (1999). Stimulus sampling and social
+psychological experimentation. <em>Personality and Social Psychology
+Bulletin, 25</em>, 1115–1125.</p>
+<p>Westfall, J., Kenny, D. A., &amp; Judd, C. M. (2014). Statistical power and
+optimal design in experiments in which samples of participants respond to
+samples of stimuli. <em>Journal of Experimental Psychology: General,
+143</em>, 2020–2045.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -188,6 +214,7 @@ not a power analysis, because no hypothesis is being tested.</p>
 <span class="r-in"><span><span class="va">power_res</span> <span class="op">&lt;-</span> <span class="fu">simulate_power_analysis</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  sample_sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  d_prime <span class="op">=</span> <span class="fl">1.5</span>,</span></span>
+<span class="r-in"><span>  c_criterion <span class="op">=</span> <span class="fl">1.23</span>,</span></span>
 <span class="r-in"><span>  n_simulations <span class="op">=</span> <span class="fl">8</span>,</span></span>
 <span class="r-in"><span>  n_bootstrap <span class="op">=</span> <span class="fl">50</span>,</span></span>
 <span class="r-in"><span>  conf_levels <span class="op">=</span> <span class="fl">5</span>,</span></span>
@@ -196,9 +223,9 @@ not a power analysis, because no hypothesis is being tested.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Simulating sample size 50 (8 studies)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Simulating sample size 100 (8 studies)</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">power_res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   sample_size n_total power  power_se mean_effect  sd_effect n_valid n_failed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          50     200 0.875 0.1169268  0.04444208 0.01567793       8        0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         100     400 1.000 0.0000000  0.04280260 0.01922859       8        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   sample_size n_total power  power_se mean_effect   sd_effect n_valid n_failed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          50     200  0.75 0.1530931  0.02025417 0.012625132       8        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         100     400  0.75 0.1530931  0.01616521 0.009858588       8        0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   n_attempted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1           8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2           8</span>

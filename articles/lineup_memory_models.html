@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/lineup_memory_models.Rmd" class="external-link"><code>vignettes/lineup_memory_models.Rmd</code></a></small>
       <div class="d-none name"><code>lineup_memory_models.Rmd</code></div>
@@ -219,7 +219,7 @@ match.</p>
 <span><span class="co">#&gt; Environment exists: FALSE </span></span>
 <span><span class="co">#&gt; Python initialized: FALSE </span></span>
 <span><span class="co">#&gt; pyWitness available: FALSE </span></span>
-<span><span class="co">#&gt; Audited revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba </span></span>
+<span><span class="co">#&gt; Pinned revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba </span></span>
 <span><span class="co">#&gt; No Python process was initialized. Use initialize = TRUE to import the isolated engine.</span></span></code></pre></div>
 <blockquote>
 <p><strong>Note.</strong> The pyWitness engine is not available in the
@@ -381,8 +381,13 @@ one matching the generating rule.</p>
 <p><strong>Read the p-values, not the chi-squares.</strong> The models
 do not have the same degrees of freedom — Independent Observations
 estimates five parameters against Ensemble’s four, leaving it one fewer
-residual degree of freedom — so the model with more parameters is
-favoured by a raw chi-square comparison purely by being more flexible.
+residual degree of freedom — and they are not nested, so a model with
+more parameters need not fit better. In the MAX row the fitted
+shared-variance parameter of Independent Observations is about zero
+(6.2e-08), so that model fits as a four-parameter model would, and its
+chi-square advantage over Ensemble (1.6 against 23.2) comes from the
+decision rule, not from the extra parameter. In the other two rows the
+shared variance is estimated well above zero (about .43 and .31).
 Ranking the models by chi-square alone is not a comparison the statistic
 licenses.</p>
 <p>A p-value here is the probability of a discrepancy this large if that

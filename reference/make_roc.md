@@ -76,6 +76,13 @@ For estimator variables (e.g., exposure duration, retention interval),
 use CAC analysis instead (see
 [`make_cac`](https://cgtza2.github.io/r4lineups/reference/make_cac.md)).
 
+Without a designated innocent suspect, filler IDs in target-absent
+lineups are divided by lineup size to estimate the false-ID rate. This
+assumes the innocent suspect is chosen at the average filler rate, which
+holds for a fair lineup; with a biased lineup the estimated false-ID
+rate, and so the ROC and pAUC, are wrong, and a designated innocent
+suspect should be used when one is available.
+
 ## References
 
 Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory

@@ -31,7 +31,10 @@ bootstrap_anri(
 
 - choosers_only:
 
-  Logical. Whether to analyze only suspect IDs (default = TRUE)
+  Logical. If `TRUE` (default), suspect identifications are analysed. If
+  `FALSE`, choosers are analysed: identifications, with target-present
+  filler IDs excluded, as with
+  `make_calibration_data(population = "choosers")`.
 
 - lineup_size:
 
@@ -87,8 +90,9 @@ A list containing:
 
 ## Details
 
-Bootstrap resampling procedure: 1. Resample observations with
-replacement 2. Compute ANRI for each bootstrap sample 3. Construct
+Bootstrap resampling procedure: 1. Resample lineups with replacement,
+separately within the target-present and target-absent lineups, so both
+totals stay fixed 2. Compute ANRI for each bootstrap sample 3. Construct
 percentile-based confidence interval
 
 The percentile method uses the empirical quantiles of the bootstrap

@@ -15,6 +15,7 @@ make_calibration(
   confidence_scale = c("auto", "0-1", "0-100"),
   innocent_suspect = "auto",
   population = NULL,
+  tp_fillers = c("exclude", "error"),
   ...
 )
 ```
@@ -31,7 +32,9 @@ make_calibration(
 
 - choosers_only:
 
-  Logical. Whether to analyze only suspect IDs (default = TRUE)
+  Logical. If `TRUE` (default), suspect identifications are analysed;
+  `FALSE` (deprecated) means `population = "choosers"`. Ignored when
+  `population` is supplied.
 
 - lineup_size:
 
@@ -63,10 +66,19 @@ make_calibration(
 
   Which responses are calibrated: `"suspect_ids"` (suspect
   identifications, as in CAC analysis; correct when target-present),
-  `"choosers"` (suspect and filler identifications, as in Brewer &
-  Wells, 2006; only target-present suspect IDs are correct), or
-  `"nonchoosers"` (rejections; correct when target-absent). If NULL
-  (default), it is set from `choosers_only`.
+  `"choosers"` (witnesses who identify someone; only target-present
+  suspect IDs are correct; see `tp_fillers`), or `"nonchoosers"`
+  (rejections; correct when target-absent). If NULL (default), it is set
+  from `choosers_only`.
+
+- tp_fillers:
+
+  For `population = "choosers"` only: how filler identifications in
+  target-present lineups are treated. `"exclude"` (default) leaves them
+  out, as Brewer and Wells (2006) did, because a filler is known in
+  advance not to be the culprit. `"error"` keeps them as incorrect
+  identifications; Brewer and Wells note that overconfidence is then
+  more marked.
 
 - ...:
 

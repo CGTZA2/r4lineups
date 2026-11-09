@@ -69,6 +69,12 @@ decision (suspect/filler/reject) and confidence level or bin. This
 function counts the frequency of each response category separately for
 target-present (guilty) and target-absent (innocent) lineups.
 
+When no innocent suspect is designated
+(`innocent_suspect = "estimated"`, or `"auto"` on such data),
+`1 / lineup_size` of each target-absent filler count is moved into the
+matching suspect category, so the result assumes a fair lineup of
+`lineup_size` members.
+
 ## References
 
 Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method

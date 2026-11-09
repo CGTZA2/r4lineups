@@ -89,7 +89,8 @@ Python, and import pyWitness. The default performs no initialization.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A one-row tibble with environment and engine status, including
-  whether the imported version encodes the audited revision when
+  whether the imported version encodes the pinned revision (fields
+  <code>audited_revision</code> and <code>audited_revision_matches</code>) when
   <code>initialize = TRUE</code>.</p>
     </div>
 
@@ -100,7 +101,7 @@ Python, and import pyWitness. The default performs no initialization.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Environment exists: FALSE </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Python initialized: FALSE </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> pyWitness available: FALSE </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Audited revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pinned revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> No Python process was initialized. Use initialize = TRUE to import the isolated engine.</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="fu">check_pywitness_deps</span><span class="op">(</span>initialize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>

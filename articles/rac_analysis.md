@@ -50,11 +50,12 @@ positive identifications: witnesses deciding faster than that were close
 to 90% accurate, those taking longer around 50%.
 
 The rule did not survive replication. Weber, Brewer, Wells, Semmler and
-Keast (2004) analysed a large set of studies and found that although
-accurate identifications were indeed faster than inaccurate ones, the
-*boundary* that best separated them varied enormously between
-experiments — from about 5 seconds to about 29 seconds. There is a real
-speed-accuracy relationship; there is no universal number.
+Keast (2004) analysed four studies, six samples including children, and
+found that although accurate identifications were indeed faster than
+inaccurate ones, no single time window marked the chi-square peaks
+across samples: the peaks fell between 5 and 28 seconds, and several
+samples showed more than one. There is a real speed-accuracy
+relationship; there is no universal number.
 
 The practical consequence shapes how this vignette proceeds. **A time
 boundary should be estimated from the data in hand rather than imported
@@ -250,10 +251,12 @@ rac_result$plot + theme_minimal(base_size = 12)
 ![](rac_analysis_files/figure-html/plot_rac-1.png)
 
 Accuracy falls as responses get slower, from about 100% in the fastest
-bin to about 79% in the slowest. The relationship is real but shallower
-than the corresponding CAC relationship, which is the usual finding:
-response time carries information about accuracy, but less of it than
-confidence does.
+bin to about 79% in the slowest. The relationship is shallower than the
+corresponding CAC relationship in these data, but the simulation builds
+in a weaker relation between response time and accuracy (response time
+depends on confidence plus substantial noise), so these data cannot show
+that this is the usual finding. Compare RAC and CAC in your own data
+before concluding which is stronger.
 
 ## RAC and CAC Compared
 
@@ -283,7 +286,7 @@ cac$plot + ggtitle("CAC: confidence and accuracy") +
 | **Measure** | Recorded automatically | Self-reported |
 | **Interpretation** | Faster is taken to indicate stronger memory | Higher confidence is taken to indicate stronger memory |
 | **Robustness** | A recorded decision time cannot be changed by later feedback; earlier information, procedures and timing conventions can still affect it | Can be inflated by confirming feedback |
-| **Typical strength** | Weaker relationship with accuracy | Stronger relationship with accuracy |
+| **Strength in these simulated data** | Weaker relationship with accuracy (built into the simulation) | Stronger relationship with accuracy |
 
 The two are related but not redundant: in these data the correlation
 between confidence and response time is about -0.53, which leaves a good
@@ -482,12 +485,13 @@ knitr::kable(
 RAC accuracy by condition, simulated data (400 target-present and 400
 target-absent lineups per condition). {.table}
 
-Condition 1 is more accurate at every response time. Note that this is a
-descriptive comparison: testing whether two RAC curves differ requires a
-bootstrap over witnesses, which the package does not yet provide for
-RAC. The continuous model above offers a route to it, since a condition
-term and its interaction with the time spline can simply be added to the
-[`glm()`](https://rdrr.io/r/stats/glm.html) call.
+Condition 1 has the higher sample accuracy in every bin, though the two
+converge in the slowest bin (0.807 against 0.800), and no intervals are
+shown. This is a descriptive comparison: testing whether two RAC curves
+differ requires a bootstrap over witnesses, which the package does not
+yet provide for RAC. The continuous model above offers a route to it,
+since a condition term and its interaction with the time spline can
+simply be added to the [`glm()`](https://rdrr.io/r/stats/glm.html) call.
 
 ## Custom Analysis
 
@@ -579,16 +583,19 @@ to bin, so there is no point running it here.
 
 Points to watch:
 
-1.  **Units.** Response times must all be in the same units. The package
-    assumes milliseconds.
+1.  **Units.** Response times must all share one unit, and the bin
+    boundaries must use it. The `time_units` argument only labels the
+    axis; it does not convert anything.
 2.  **Bins.** Inspect the distribution first, as above. Four to six bins
     is common, but the number is far less important than whether each is
     populated.
 3.  **Extreme values.** Very long times often mean an interruption
     rather than deliberation. Consider capping rather than deleting, and
     report what you did.
-4.  **Missing times.** Trials without a recorded time are dropped, so
-    check how many.
+4.  **Missing times.** A missing or non-finite time stops
+    [`make_racdata()`](https://cgtza2.github.io/r4lineups/reference/make_racdata.md)
+    with an error. Remove or impute those trials before the call, and
+    report how many there were.
 5.  **Sequential lineups.** Response time means something different when
     members are viewed one at a time; total time confounds decision time
     with viewing time.
@@ -628,13 +635,15 @@ confidence. In summary:
     signal.
 3.  There is no universal time boundary. Dunning and Perretta’s
     10-to-12-second rule did not replicate, and the best-separating time
-    ranges from about 5 to 29 seconds across studies (Weber et al.,
-    2004). Estimate it from your data.
+    differed across the samples of Weber et al. (2004), with peaks
+    between 5 and 28 seconds. Estimate it from your data.
 4.  Binning is conventional, not necessary. A logistic regression with a
     spline uses every observation, needs no boundaries, and gives an
     honest confidence band.
-5.  Response time is a weaker indicator of accuracy than confidence, and
-    should be reported alongside it rather than instead of it.
+5.  In the simulated data here, response time is a weaker indicator of
+    accuracy than confidence, by construction. Report it alongside
+    confidence rather than instead of it, and compare the two in your
+    own data.
 
 ## References
 

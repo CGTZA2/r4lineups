@@ -110,7 +110,12 @@ an 'embedding' list column.</p></dd>
     <p>This visualization helps understand:</p><ul><li><p>How faces cluster by identity</p></li>
 <li><p>Which foils are closest to the target in embedding space</p></li>
 <li><p>Overall structure of similarity in a lineup</p></li>
-</ul></div>
+</ul><p>Only <code>method = "pca"</code> is a linear projection of the embeddings, and it
+still loses most of the distance in the full embedding space. Distances in
+UMAP and t-SNE plots are not interpretable, and with a lineup of six faces
+the layout from either is close to arbitrary. Use <code>method = "pca"</code> for
+a lineup, and read exact distances from <code><a href="lineup_similarity.html">lineup_similarity</a></code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -120,7 +125,8 @@ an 'embedding' list column.</p></dd>
 <span class="r-in"><span><span class="va">embs</span> <span class="op">&lt;-</span> <span class="fu"><a href="batch_embeddings.html">batch_embeddings</a></span><span class="op">(</span><span class="va">all_faces</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot with target highlighted</span></span></span>
-<span class="r-in"><span><span class="fu">plot_embedding_space</span><span class="op">(</span><span class="va">embs</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Target"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span>, highlight <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_embedding_space</span><span class="op">(</span><span class="va">embs</span>, method <span class="op">=</span> <span class="st">"pca"</span>,</span></span>
+<span class="r-in"><span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Target"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span>, highlight <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

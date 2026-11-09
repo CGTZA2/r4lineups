@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/calibration_decision_analysis.Rmd" class="external-link"><code>vignettes/calibration_decision_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>calibration_decision_analysis.Rmd</code></div>
@@ -269,6 +269,15 @@ confidence, they are correct X% of the time.</p>
 <span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># ℹ 1 more variable: mean_confidence_prop &lt;dbl&gt; [39m</span></span>
 <span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a></span>
 <span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>Plot<span class="sc">:</span> save this object first, then extract it with x<span class="sc">$</span>plot</span></code></pre></div>
+<p>The confidence values in <code>lineup_example</code> (20 to 100) are
+ordinal categories that carry probability labels by stipulation, not
+probabilities the witnesses stated, so O/U depends on those labels.
+Relabelling the same nine categories as 90 to 100 changes O/U from
+-0.229 to +0.124, with the same accuracy in every bin. Accuracy here is
+also the proportion of suspect identifications that are guilty-suspect
+identifications, which depends on the 50:50 mix of target-present and
+target-absent lineups in the data. The figures below illustrate the
+output; they do not describe witness behaviour.</p>
 <p>The output provides three key statistics:</p>
 <ul>
 <li>
@@ -303,10 +312,11 @@ exceeds accuracy)</li>
 <p><img src="calibration_decision_analysis_files/figure-html/calibration-plot-1.png" class="r-plt" alt="" width="672"></p>
 <p>Accuracy rises steadily across the confidence bins, from about 76% in
 the lowest to about 96% in the highest, so confidence here is genuinely
-informative. The points sit <em>above</em> the diagonal, however, which
-means these witnesses are <strong>under</strong>confident: they are more
-accurate than their stated confidence implies. That is the direction the
-O/U statistic reports.</p>
+informative. The points sit <em>above</em> the diagonal, however, so
+with the 20 to 100 labels the confidence categories are
+<strong>under</strong>confident: accuracy exceeds the label. That is the
+direction the O/U statistic reports, and it follows from the labels
+chosen, as noted above.</p>
 <p>The plot is an ordinary <strong>ggplot2</strong> object, so it can be
 modified and saved in the usual way. <code><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave()</a></code> picks its
 output format from the file extension alone, so the same call writes
@@ -367,11 +377,11 @@ every rebuild.</p>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="va">cal_by_cond</span><span class="op">$</span><span class="va">condition_summary</span>, digits <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"Calibration statistics by procedure, simulated data (choosers only)."</span></span>
+<span>  caption <span class="op">=</span> <span class="st">"Calibration statistics by procedure, simulated data (suspect identifications)."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>Calibration statistics by procedure, simulated data (choosers
-only).</caption>
+<caption>Calibration statistics by procedure, simulated data (suspect
+identifications).</caption>
 <colgroup>
 <col width="16%">
 <col width="5%">
@@ -581,16 +591,16 @@ happens.</p>
 <span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 297 × 4 [39m</span></span>
 <span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>   response prior posterior information_gain</span>
 <span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>    [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m     [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m             [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">1</span> [<span class="dv">39</span>m filler    <span class="fl">0.01</span>   <span class="fl">0.005</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m [<span class="dv">4</span>m3 [<span class="dv">24</span>m         <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m00 [<span class="dv">39</span>m [<span class="dv">31</span>m4 [<span class="dv">4</span>m6 [<span class="dv">24</span>m [<span class="dv">4</span>m7 [<span class="dv">24</span>m [<span class="dv">39</span>m</span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">2</span> [<span class="dv">39</span>m filler    <span class="fl">0.02</span>   <span class="fl">0.010</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m00 [<span class="dv">39</span>m [<span class="dv">31</span>m9 [<span class="dv">4</span>m2 [<span class="dv">24</span>m [<span class="dv">4</span>m9 [<span class="dv">24</span>m [<span class="dv">39</span>m</span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">3</span> [<span class="dv">39</span>m filler    <span class="fl">0.03</span>   <span class="fl">0.016</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m13 [<span class="dv">4</span>m9 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">4</span> [<span class="dv">39</span>m filler    <span class="fl">0.04</span>   <span class="fl">0.021</span> [<span class="dv">4</span>m6 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m18 [<span class="dv">4</span>m4 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">5</span> [<span class="dv">39</span>m filler    <span class="fl">0.05</span>   <span class="fl">0.027</span> [<span class="dv">4</span>m2 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m22 [<span class="dv">4</span>m8 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">6</span> [<span class="dv">39</span>m filler    <span class="fl">0.06</span>   <span class="fl">0.032</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m27 [<span class="dv">4</span>m3 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
-<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">7</span> [<span class="dv">39</span>m filler    <span class="fl">0.07</span>   <span class="fl">0.038</span> [<span class="dv">4</span>m4 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m31 [<span class="dv">4</span>m6 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
-<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">8</span> [<span class="dv">39</span>m filler    <span class="fl">0.08</span>   <span class="fl">0.044</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m35 [<span class="dv">4</span>m9 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
-<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">9</span> [<span class="dv">39</span>m filler    <span class="fl">0.09</span>   <span class="fl">0.049</span> [<span class="dv">4</span>m8 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m40 [<span class="dv">4</span>m2 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
-<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m10 [<span class="dv">39</span>m filler    <span class="fl">0.1</span>    <span class="fl">0.055</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m          <span class="sc">-</span> [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m. [<span class="dv">39</span>m [<span class="dv">31</span>m0 [<span class="dv">39</span>m [<span class="dv">31</span>m44 [<span class="dv">4</span>m3 [<span class="dv">24</span>m [<span class="dv">39</span>m </span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">1</span> [<span class="dv">39</span>m filler    <span class="fl">0.01</span>   <span class="fl">0.005</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m [<span class="dv">4</span>m3 [<span class="dv">24</span>m          <span class="fl">0.004</span> [<span class="dv">4</span>m6 [<span class="dv">24</span>m [<span class="dv">4</span>m7 [<span class="dv">24</span>m</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">2</span> [<span class="dv">39</span>m filler    <span class="fl">0.02</span>   <span class="fl">0.010</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m           <span class="fl">0.009</span> [<span class="dv">4</span>m2 [<span class="dv">24</span>m [<span class="dv">4</span>m9 [<span class="dv">24</span>m</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">3</span> [<span class="dv">39</span>m filler    <span class="fl">0.03</span>   <span class="fl">0.016</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m           <span class="fl">0.013</span> [<span class="dv">4</span>m9 [<span class="dv">24</span>m </span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">4</span> [<span class="dv">39</span>m filler    <span class="fl">0.04</span>   <span class="fl">0.021</span> [<span class="dv">4</span>m6 [<span class="dv">24</span>m           <span class="fl">0.018</span> [<span class="dv">4</span>m4 [<span class="dv">24</span>m </span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">5</span> [<span class="dv">39</span>m filler    <span class="fl">0.05</span>   <span class="fl">0.027</span> [<span class="dv">4</span>m2 [<span class="dv">24</span>m           <span class="fl">0.022</span> [<span class="dv">4</span>m8 [<span class="dv">24</span>m </span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">6</span> [<span class="dv">39</span>m filler    <span class="fl">0.06</span>   <span class="fl">0.032</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m           <span class="fl">0.027</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m </span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">7</span> [<span class="dv">39</span>m filler    <span class="fl">0.07</span>   <span class="fl">0.038</span> [<span class="dv">4</span>m4 [<span class="dv">24</span>m           <span class="fl">0.031</span> [<span class="dv">4</span>m6 [<span class="dv">24</span>m </span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">8</span> [<span class="dv">39</span>m filler    <span class="fl">0.08</span>   <span class="fl">0.044</span> [<span class="dv">4</span>m1 [<span class="dv">24</span>m           <span class="fl">0.035</span> [<span class="dv">4</span>m9 [<span class="dv">24</span>m </span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m <span class="dv">9</span> [<span class="dv">39</span>m filler    <span class="fl">0.09</span>   <span class="fl">0.049</span> [<span class="dv">4</span>m8 [<span class="dv">24</span>m           <span class="fl">0.040</span> [<span class="dv">4</span>m2 [<span class="dv">24</span>m </span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m10 [<span class="dv">39</span>m filler    <span class="fl">0.1</span>    <span class="fl">0.055</span> [<span class="dv">4</span>m7 [<span class="dv">24</span>m           <span class="fl">0.044</span> [<span class="dv">4</span>m3 [<span class="dv">24</span>m </span>
 <span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># ℹ 287 more rows [39m</span></span>
 <span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a></span>
 <span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="sc">$</span>likelihoods</span>
@@ -666,18 +676,36 @@ convex (bowed below it) when
 and the diagonal itself when
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">L = 1</annotation></semantics></math>.
 It is not S-shaped. What the display shows is that the same response
-moves belief most, in absolute terms, at middling priors, and very
-little when the prior is already near 0 or near 1.</p>
+moves belief very little when the prior is already near 0 or near 1. The
+absolute change
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><mi>q</mi><mo stretchy="false" form="prefix">(</mo><mi>p</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>p</mi><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">|q(p) - p|</annotation></semantics></math>
+peaks at the prior
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><msqrt><mi>L</mi></msqrt><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">1/(1 + \sqrt{L})</annotation></semantics></math>:
+about .17 for a response with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mn>25</mn></mrow><annotation encoding="application/x-tex">L = 25</annotation></semantics></math>,
+such as the highest-confidence suspect identification, and about .64 for
+a rejection with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mn>0.33</mn></mrow><annotation encoding="application/x-tex">L = 0.33</annotation></semantics></math>.
+Only responses with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
+near 1 peak near .5.</p>
 </div>
 <div class="section level3">
 <h3 id="information-gain">Information Gain<a class="anchor" aria-label="anchor" href="#information-gain"></a>
 </h3>
-<p>Wells, Yang and Smalarz (2015) measure the information gained from a
-response as the change in the probability of guilt, posterior minus
-prior. This is the default (<code>gain = "probability"</code>). It is
-positive for responses that point to guilt and negative for responses
-that point to innocence, and it is largest in absolute terms at middling
-priors:</p>
+<p>Wells and Lindsay (1980) and Wells, Yang and Smalarz (2015) measure
+the information gained from a response as the absolute change in the
+probability of guilt, |posterior − prior|: what counts is how far the
+response moves belief, not its direction. This is the default
+(<code>gain = "probability"</code>), and for a response with likelihood
+ratio
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
+it is largest at the prior
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><msqrt><mi>L</mi></msqrt><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">1/(1 + \sqrt{L})</annotation></semantics></math>,
+at lower priors for stronger incriminating responses.
+<code>gain = "signed"</code> keeps the direction, positive for responses
+that point to guilt and negative for responses that point to
+innocence:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_bayes_information_gain.html">plot_bayes_information_gain</a></span><span class="op">(</span><span class="va">bayes_result</span><span class="op">)</span></span></code></pre></div>
 <p><img src="calibration_decision_analysis_files/figure-html/bayes-information-gain-1.png" class="r-plt" alt="" width="672"></p>
@@ -808,16 +836,24 @@ argument.</p>
 <span>  fp <span class="op">=</span> <span class="op">-</span><span class="fl">2.0</span>,   <span class="co"># Identifying an innocent suspect: the most serious cost</span></span>
 <span>  tn <span class="op">=</span>  <span class="fl">0.5</span>    <span class="co"># Correctly declining to identify an innocent suspect: a benefit</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The relative magnitudes carry the argument. Here a wrongful
-identification is set at four times the cost of a missed one
-(<code>-2.0</code> against <code>-0.5</code>), and twice the absolute
-value of a correct identification’s benefit. That is a moral and legal
-judgement, not a statistical one, and it is the natural place for
-disagreement. Someone who set <code>fp = -10</code> would be expressing
-Blackstone’s ratio; the analysis below would then recommend a
-considerably stricter confidence threshold. Because the choice is this
-important, report the sensitivity of the conclusion to it, which is what
-the base-rate section does for the other key assumption.</p>
+<p>Only two differences between these values affect which criterion is
+chosen, and any difference between procedures: <code>tp - fn</code>, the
+gain from acting on a guilty suspect rather than missing him or her (1.5
+here), and <code>tn - fp</code>, the loss from acting on an innocent
+suspect rather than declining (2.5 here). The trade-off is the ratio of
+those differences, 2.5 to 1.5 or about 1.67; the raw ratio of
+<code>-2.0</code> to <code>-0.5</code> plays no part, and adding the
+same constant to <code>tp</code> and <code>fn</code>, or to
+<code>tn</code> and <code>fp</code>, leaves the optimum unchanged. That
+ratio is a moral and legal judgement, not a statistical one, and it is
+the natural place for disagreement. Blackstone’s ratio, that it is
+better for ten guilty people to escape than for one innocent person to
+suffer, would make <code>tn - fp</code> ten times <code>tp - fn</code>,
+which in this matrix needs <code>fp = -14.5</code>; the optimum then
+moves from a criterion of 30 to 100, the strictest one. Because the
+choice is this important, report the sensitivity of the conclusion to
+it, which is what the base-rate section does for the other key
+assumption.</p>
 </div>
 <div class="section level3">
 <h3 id="compute-utility-curves">Compute Utility Curves<a class="anchor" aria-label="anchor" href="#compute-utility-curves"></a>
@@ -907,14 +943,18 @@ the base-rate section does for the other key assumption.</p>
 nothing, so little is gained and little is risked. Relaxing the
 threshold admits identifications that are mostly correct, and utility
 climbs. Past the optimum, each further relaxation admits more wrongful
-identifications than correct ones, and because those carry four times
-the weight, utility falls away again. The maximum is the criterion at
-which the marginal identification is exactly worth acting on.</p>
-<p>This is the shape Lampinen et al. (2019) describe. Note that the
-curve is usually rather flat near its peak, which is reassuring for
-practice: thresholds somewhat either side of the optimum lose very
-little, so the recommendation does not depend on locating the maximum
-precisely.</p>
+identifications than correct ones, which are weighted by
+<code>tn - fp</code> against <code>tp - fn</code> (2.5 against 1.5), and
+utility falls away again. The maximum is the criterion at which the
+marginal identification is exactly worth acting on.</p>
+<p>This is the shape Lampinen et al. (2019) describe. The optimum
+reported is the in-sample maximum over the observed criteria, with no
+interval, so it is optimistic as an estimate of the best rule for new
+lineups. Here the curve is nearly flat at the top (0.284 at 40, 0.288 at
+30 and 0.288 at 20), which means the data do not support a firm choice
+among those three criteria. Thresholds close to the optimum lose very
+little, but a flat curve is also a reason not to read the exact
+criterion that wins as more than a sample quantity.</p>
 </div>
 <div class="section level3">
 <h3 id="compare-procedures">Compare Procedures<a class="anchor" aria-label="anchor" href="#compare-procedures"></a>
@@ -947,11 +987,11 @@ small helper turns the result into a rule that can be stated:</p>
 <span>                       <span class="fu">utility_rule</span><span class="op">(</span><span class="va">util_proc_b</span><span class="op">$</span><span class="va">max_utility</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"Expected utility at the optimal confidence criterion, simulated data (200 target-present and 200 target-absent lineups per procedure)."</span></span>
+<span>  caption <span class="op">=</span> <span class="st">"Expected utility at the optimal confidence criterion, simulated data (400 target-present and 400 target-absent lineups per procedure)."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>Expected utility at the optimal confidence criterion, simulated
-data (200 target-present and 200 target-absent lineups per
+data (400 target-present and 400 target-absent lineups per
 procedure).</caption>
 <thead><tr class="header">
 <th align="left">Procedure</th>
@@ -971,9 +1011,12 @@ procedure).</caption>
 </tr>
 </tbody>
 </table>
-<p>The procedure with the stronger evidence supports both a higher
-expected utility and a stricter criterion: it can afford to wait for
-high-confidence identifications because it gets more of them.</p>
+<p>The procedure with the stronger evidence has the higher maximum
+expected utility in this simulation. The optimal criteria differ between
+the procedures, but the curves are nearly flat at the top (procedure A:
+0.367 at 40 and 0.366 at 30; procedure B: 0.181 at 40 and 0.185 at 30),
+so that difference is incidental and should not be read as a property of
+the procedures.</p>
 </div>
 <div class="section level3">
 <h3 id="sensitivity-to-base-rate">Sensitivity to Base Rate<a class="anchor" aria-label="anchor" href="#sensitivity-to-base-rate"></a>
@@ -1049,12 +1092,14 @@ contested. Lineup ROC curves cannot be traced over their full range: the
 observed false-alarm rate only extends as far as witnesses’ willingness
 to choose takes it, and that endpoint differs between procedures. pAUC
 handles this by integrating over a restricted region, but the choice of
-region is then itself a problem. Take the region from the procedure with
-the shorter curve and information from the other is discarded; take a
-common region and the comparison is made somewhere neither procedure was
-actually operating. Smith et al. argue that pAUC consequently fails to
-track which procedure has greater diagnostic utility, and that DPP
-does.</p>
+region is then itself a problem. Smith et al. judge it inappropriate to
+use a different region for each procedure, because the procedure whose
+curve covers more of the false-alarm axis gains an advantage in pAUC,
+and equally inappropriate to use one common region. A common region lies
+within the shorter curve, so it leaves out the longer curve’s points at
+higher false identification rates, which may include the criterion with
+the highest utility. They argue that pAUC consequently fails to track
+which procedure has greater diagnostic utility, and that DPP does.</p>
 <p>DPP takes a different approach. Rather than integrating over a
 region, it is computed at every operating point of the ROC, that is, at
 every cumulative confidence threshold, and then averaged. At an
@@ -1076,8 +1121,11 @@ DPP(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics
 is one minus the expected utility at that threshold, so the average DPP
 measures the average utility of the procedure across the confidence
 levels witnesses actually use. Because every procedure is evaluated at
-its own operating points, curves of different lengths remain
-comparable.</p>
+its own operating points, curves of different lengths can be compared
+without choosing a region. The average is an unweighted mean over those
+points, so it depends on their number and spacing: use it to compare
+procedures rated on the same confidence scale in the same study, not to
+compare values from studies that used different scales.</p>
 <p>This is an active disagreement rather than settled ground, and the
 pAUC vignette takes up the other side of it.</p>
 <div class="section level3">
@@ -1176,7 +1224,8 @@ percentile bootstrap interval for the difference in average DPP.</p>
 <ul>
 <li>You have confidence-based ROC data</li>
 <li>ROC curves are truncated (witnesses may not use full scale)</li>
-<li>You want a single performance metric comparable across studies</li>
+<li>You want a single performance metric for procedures rated on the
+same confidence scale in the same study</li>
 <li>You need to compare procedures with different confidence
 distributions</li>
 </ul>
@@ -1240,13 +1289,10 @@ estimates and removes that bias.</p>
 <span id="cb26-34"><a href="#cb26-34" tabindex="-1"></a></span>
 <span id="cb26-35"><a href="#cb26-35" tabindex="-1"></a><span class="sc">$</span>choosers_only</span>
 <span id="cb26-36"><a href="#cb26-36" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">TRUE</span></span></code></pre></div>
-<p>ANRI is always ≤ NRI because it removes positive bias. The bias
-correction is larger when:</p>
-<ul>
-<li>Sample size N is small</li>
-<li>Number of bins J is large</li>
-<li>The ratio J/N is high</li>
-</ul>
+<p>ANRI is always ≤ NRI because it removes positive bias. The bias of
+NRI is about (J − 1)/N, so the correction is larger when the sample size
+N is small, the number of bins J is large, or, in short, when the ratio
+J/N is high.</p>
 </div>
 <div class="section level3">
 <h3 id="bootstrap-confidence-intervals">Bootstrap Confidence Intervals<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-intervals"></a>
@@ -1311,9 +1357,10 @@ compared.</p>
 <h3 id="compare-groups">Compare Groups<a class="anchor" aria-label="anchor" href="#compare-groups"></a>
 </h3>
 <p>The comparison uses the two simulated procedures, which differ in the
-strength of the evidence they generate. Because they were simulated with
-genuinely different parameters, any difference found here reflects that
-design rather than chance group assignment.</p>
+strength of the evidence they generate. The two procedures differ in d’
+by construction, but that does not make the ANRI difference between
+these samples real: the interval below is what shows whether the data
+can separate them.</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>anri_comparison <span class="ot">&lt;-</span> <span class="fu">compare_anri</span>(</span>
 <span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>  procedures,</span>
 <span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>  <span class="at">group_var =</span> <span class="st">"procedure"</span>,</span>
@@ -1489,6 +1536,10 @@ design rather than chance group assignment.</p>
 <span id="cb28-173"><a href="#cb28-173" tabindex="-1"></a></span>
 <span id="cb28-174"><a href="#cb28-174" tabindex="-1"></a><span class="fu">plot_anri_comparison</span>(anri_comparison)</span></code></pre></div>
 <p><img src="calibration_decision_analysis_files/figure-html/anri-comparison-1.png" class="r-plt" alt="" width="672"></p>
+<p>The ANRI difference is 0.041 with a 95% interval of [-0.016, 0.093],
+which includes 0, so with these samples and 100 resamples the ANRI
+difference between the procedures cannot be distinguished from zero. Use
+2000 or more resamples for anything you report.</p>
 <p>The comparison provides:</p>
 <ul>
 <li>
@@ -1610,19 +1661,25 @@ analysis it describes. The same practice suits a manuscript.</p>
 deviation from perfect performance (DPP), and the adjusted normalized
 resolution index (ANRI) with bootstrap inference, using 1400 lineups of
 size 6 (700 target-present, 700 target-absent).</p>
-<p>Witnesses were well calibrated overall (C = 0.073), but
-systematically <strong>underconfident</strong> (O/U = -0.229): accuracy
-in the lowest confidence band was substantially higher than stated
-confidence implied. Average DPP was 0.7 (0 = perfect, 1 = chance), and
-the operating point of maximum utility was confidence of 20 or above
-(DPP = 0.533). Resolution, measured by ANRI, was 0.041 (95% CI [0.021,
-0.072]), against an uncorrected NRI of 0.045.</p>
+<p>Under the stipulated labels, calibration was poor (C = 0.073), mainly
+because witnesses were <strong>underconfident</strong> (O/U = -0.229):
+accuracy in the lowest confidence band was substantially higher than its
+label implied. The confidence values are ordinal categories given
+probability labels by stipulation, so C and the direction of O/U depend
+on the labels and are not findings about witness behaviour. Average DPP
+was 0.7 (0 = perfect, 1 = chance), and the operating point of maximum
+utility was confidence of 20 or above (DPP = 0.533). Resolution,
+measured by ANRI, was 0.041 (95% CI [0.021, 0.072]), against an
+uncorrected NRI of 0.045.</p>
 <p>Expected utility analysis assumed a base rate of 50% and the cost
 matrix u(correct suspect ID) = 1, u(missed guilty suspect) = -0.5,
-u(innocent suspect ID) = -2, u(correct rejection) = 0.5; that is, a
-wrongful identification was weighted four times as heavily as a missed
-one. Under those assumptions the rule “act on confidence &gt;= 30”
-maximised expected utility (EU = 0.288).</p>
+u(innocent suspect ID) = -2, u(correct rejection) = 0.5; only the
+differences between these affect the optimum, and they put the cost of
+acting on an innocent suspect at 2.5 against 1.5 for the gain from
+acting on a guilty one (a ratio of about 1.67). In this sample the rule
+“act on confidence &gt;= 30” maximised expected utility (EU = 0.288);
+this is an in-sample optimum with no interval, and the curve was nearly
+flat from 40 to 20.</p>
 <p>Bayesian analysis showed that high-confidence suspect identifications
 were the most informative response, with a likelihood ratio of 25 (based
 on 100 guilty-suspect and 4 innocent-suspect identifications in that
@@ -1664,6 +1721,9 @@ curve does not. <em>Journal of Applied Research in Memory and Cognition,
 method for assessing the effectiveness of eyewitness identification
 procedures: Expected information gain. <em>Psychological Review,
 130</em>(3), 677-719. <a href="https://doi.org/10.1037/rev0000332" class="external-link uri">https://doi.org/10.1037/rev0000332</a></p>
+<p>Wells, G. L., &amp; Lindsay, R. C. L. (1980). On estimating the
+diagnosticity of eyewitness nonidentifications. <em>Psychological
+Bulletin, 88</em>(3), 776–784. <a href="https://doi.org/10.1037/0033-2909.88.3.776" class="external-link uri">https://doi.org/10.1037/0033-2909.88.3.776</a></p>
 <p>Wells, G. L., Yang, Y., &amp; Smalarz, L. (2015). Eyewitness
 identification: Bayesian information gain, base-rate effect-equivalency
 curves, and reasonable suspicion. <em>Law and Human Behavior,
@@ -1710,7 +1770,7 @@ Bulletin, 110</em>(3), 611-617.</p>
 <span id="cb30-32"><a href="#cb30-32" tabindex="-1"></a>[<span class="dv">25</span>] ggrepel_0.<span class="fl">9.8</span>      tibble_3.<span class="fl">3.1</span>       desc_1.<span class="fl">4.3</span>         bslib_0.<span class="fl">12.0</span>      </span>
 <span id="cb30-33"><a href="#cb30-33" tabindex="-1"></a>[<span class="dv">29</span>] pillar_1.<span class="fl">11.1</span>      RColorBrewer_1<span class="fl">.1</span><span class="dv">-3</span> rlang_1.<span class="fl">3.0</span>        utf8_1.<span class="fl">2.6</span>        </span>
 <span id="cb30-34"><a href="#cb30-34" tabindex="-1"></a>[<span class="dv">33</span>] cachem_1.<span class="fl">1.0</span>       xfun_0<span class="fl">.62</span>          fs_2.<span class="fl">1.0</span>           sass_0.<span class="fl">4.10</span>       </span>
-<span id="cb30-35"><a href="#cb30-35" tabindex="-1"></a>[<span class="dv">37</span>] S7_0.<span class="fl">2.2</span>           otel_0.<span class="fl">2.0</span>         cli_3.<span class="fl">6.6</span>          withr_3.<span class="fl">0.3</span>       </span>
+<span id="cb30-35"><a href="#cb30-35" tabindex="-1"></a>[<span class="dv">37</span>] S7_0.<span class="fl">2.2</span>           otel_0.<span class="fl">3.0</span>         cli_3.<span class="fl">6.6</span>          withr_3.<span class="fl">0.3</span>       </span>
 <span id="cb30-36"><a href="#cb30-36" tabindex="-1"></a>[<span class="dv">41</span>] pkgdown_2.<span class="fl">2.1</span>      magrittr_2.<span class="fl">0.5</span>     digest_0.<span class="fl">6.39</span>      grid_4.<span class="fl">6.2</span>        </span>
 <span id="cb30-37"><a href="#cb30-37" tabindex="-1"></a>[<span class="dv">45</span>] lifecycle_1.<span class="fl">0.5</span>    vctrs_0.<span class="fl">7.3</span>        evaluate_1.<span class="fl">0.5</span>     glue_1.<span class="fl">8.1</span>        </span>
 <span id="cb30-38"><a href="#cb30-38" tabindex="-1"></a>[<span class="dv">49</span>] farver_2.<span class="fl">1.2</span>       ragg_1.<span class="fl">5.2</span>         purrr_1.<span class="fl">2.2</span>        rmarkdown_2<span class="fl">.32</span>    </span>

@@ -1,8 +1,8 @@
 # Compute Lineup Similarity Matrix
 
 Computes similarity between a target face and all foils in a lineup,
-returning a comprehensive similarity analysis useful for lineup fairness
-assessment.
+returning a similarity analysis useful for describing and screening
+lineup construction. It does not assess lineup fairness.
 
 ## Usage
 

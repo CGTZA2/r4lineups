@@ -16,7 +16,8 @@ lineup_boot_allprop(lineup_vec, k, conf = 0.95, R = 1000)
 
 - k:
 
-  Number of targets in lineup. Must be specified by user (scalar).
+  Number of members (nominal size) of the lineup. Must be specified by
+  user (scalar).
 
 - conf:
 

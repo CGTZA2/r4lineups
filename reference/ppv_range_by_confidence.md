@@ -75,12 +75,19 @@ A list of class "lineup_ppv_range" containing:
 This function provides the full PPV range recommended by Fitzgerald et
 al. (2023):
 
-- **Nominal** (upper bound): Assumes perfectly fair lineup
+- **Nominal**: The risk if the lineups had been fair; assumes the
+  innocent suspect attracts a 1/k share of mistaken identifications
 
-- **Effective**: Accounts for lineup bias via effective size
+- **Effective**: Accounts for lineup bias via effective size; assumes
+  the innocent suspect is among the more plausible members
 
-- **None** (lower bound): Assumes worst-case (all errors are
+- **None** (lower bound on PPV): Assumes worst-case (all errors are
   innocent-suspect)
+
+PPV also depends on the prior. With `base_rate = NULL` it is a ratio of
+counts, so the implicit prior is the study's own ratio of target-present
+to target-absent lineups (.5 when the numbers are equal); `base_rate`
+sets it explicitly.
 
 The range between nominal and none represents the uncertainty in PPV due
 to unknown lineup fairness conditions.

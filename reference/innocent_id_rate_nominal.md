@@ -27,8 +27,10 @@ Numeric. Estimated innocent-suspect identification rate.
 
 ## Details
 
-This represents the "best case" estimate assuming perfect lineup
-fairness. The formula is: innocent_id_rate = error_rate / lineup_size
+This shows the risk to an innocent suspect if the lineup had been fair
+(Fitzgerald et al., 2023), the "best case" if the suspect is no more
+likely than a filler to be chosen. The formula is: innocent_id_rate =
+error_rate / lineup_size
 
 ## References
 

@@ -38,7 +38,9 @@ calibration_bayes(
 - choosers_only:
 
   Logical. If `TRUE` (default), only suspect identifications are
-  included (standard eyewitness calibration practice).
+  included (standard eyewitness calibration practice). If `FALSE`,
+  choosers are included: identifications, with target-present filler IDs
+  excluded, as with `make_calibration_data(population = "choosers")`.
 
 - lineup_size:
 

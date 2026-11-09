@@ -94,8 +94,10 @@ intervals. Defaults to 0.95. May be specified by user (scalar).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A single integer: the number of lineup members whose bootstrapped
        confidence interval for the proportion choosing them includes the
-       chance value \(1/k\). These are the members that a mock witness
-       chose at a rate not distinguishable from guessing.</p>
+       chance value \(1/k\). A member counted this way has not been shown to
+       depart from the chance rate, which is not the same as being chosen at
+       that rate, and the count rises when there are few witnesses. It is
+       not on the scale of Malpass' continuous effective size.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

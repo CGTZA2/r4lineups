@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/Vignette.Rmd" class="external-link"><code>vignettes/Vignette.Rmd</code></a></small>
       <div class="d-none name"><code>Vignette.Rmd</code></div>
@@ -311,8 +311,8 @@ Please check vector of target positions.”</em></p>
 independent lineups, from a study conducted by Nortje &amp; Tredoux
 (2012)</li>
 <li>
-<code>line73</code>: Lineup data from Doob &amp; Kirshenbaum
-(1973)</li>
+<code>line73</code>: Illustrative mock-witness data modelled on Doob
+&amp; Kirshenbaum (1973); not their data</li>
 <li>
 <code>mockdata</code>: Lineup data from a study conducted by Nortje
 &amp; Tredoux (2012)</li>
@@ -349,9 +349,12 @@ proportion for individual lineup members
 (<code><a href="../reference/lineup_prop_vec.html">lineup_prop_vec()</a></code>), and for all members of a lineup with a
 subsidiary function (<code><a href="../reference/allprop.html">allprop()</a></code>).</p>
 <p>The calculation of the proportion of mock witnesses choosing the
-suspect is essentially a measure of lineup bias (see Malpass, 1981;
-Tredoux, 1998), especially when one tests whether it exceeds the
-proportion expected by chance guessing alone (1/nominal_size).</p>
+suspect is essentially a measure of lineup bias (see Doob &amp;
+Kirshenbaum, 1973; Malpass, 1981; Tredoux, 1998), especially when one
+tests whether it exceeds the proportion expected by chance guessing
+alone. Doob and Kirshenbaum (1973) took chance expectation to be
+1/nominal size, whereas Malpass (1981) proposed 1/effective size (an
+adjusted chance expectation).</p>
 <p>The measures in this vignette all rest on mock witnesses, who have
 not seen the perpetrator, so they can be used to vet a lineup before it
 is shown to a real witness. Bias can also be estimated from the
@@ -365,8 +368,11 @@ perfectly fair lineup does not give d’(IFa) = 0, and
 <code><a href="../reference/make_multid.html">make_multid()</a></code> reports the value a fair lineup would give
 alongside the observed one. Lee, Mansour and Penrod (2024) found that
 resultant measures, including d’(IFa), predicted eyewitness performance
-better than mock-witness measures did. The model, its bias indices and
-the relevant references are described in
+best, which they note is expected because those measures are computed
+from the same witnesses’ responses; among mock-witness measures, the
+lineup-bias indices predicted suspect identification rates but the
+lineup-size indices did not. The model, its bias indices and the
+relevant references are described in
 <code><a href="../articles/multid_model.html">vignette("multid_model")</a></code>.</p>
 <div class="section level3">
 <h3 id="calculating-proportion-for-a-single-targetlineup-member">Calculating proportion for a single target/lineup member<a class="anchor" aria-label="anchor" href="#calculating-proportion-for-a-single-targetlineup-member"></a>
@@ -988,20 +994,28 @@ is more important rather than less.</p>
 <div class="section level3">
 <h3 id="effective-size-per-foils">3. Effective Size Per Foils<a class="anchor" aria-label="anchor" href="#effective-size-per-foils"></a>
 </h3>
-<p>Malpass (1981) proposed an additional method for computing effective
-size, based on the number of foils who are chosen at a rate nearly equal
-to chance expectation. We propose that ‘nearly equal’ could mean that
-chance expectation falls within a confidence interval constructed around
-the proportion of mock witnesses choosing the lineup member.</p>
+<p>This package also offers a count-based measure of effective size, the
+number of lineup members whose choice rate is close to chance
+expectation. It is motivated by Malpass’s (1981) idea of plausible
+lineup members, and by his remark that each member could be tested
+against chance; Malpass himself defined effective size only through the
+continuous quantity above. We take ‘close to’ to mean that chance
+expectation falls within a confidence interval constructed around the
+proportion of mock witnesses choosing the lineup member.</p>
 <p>To calculate effective size by counting the number of foils who fall
 within the CI for chance guessing, we pass a vector of lineup data, a
 vector of target positions and nominal size.</p>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">eff_size_per_foils</span>(lineup_vec, <span class="at">target_pos =</span> <span class="fu">seq_len</span>(<span class="dv">8</span>), <span class="at">k =</span> <span class="dv">8</span>,</span>
 <span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>                   <span class="at">conf =</span> <span class="fl">0.95</span>, <span class="at">R =</span> <span class="dv">1000</span>)</span>
 <span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">4</span></span></code></pre></div>
-<p>Applying this function to our data, we see that effective size for
-this lineup is 4: four of the eight members were chosen at a rate not
-distinguishable from chance.</p>
+<p>Applying this function to our data, we see that the count is 4: the
+intervals for four of the eight members contain chance (1/8). This does
+not show that those members were chosen at the chance rate, because a
+non-significant departure is not equality, and the count rises when
+there are few mock witnesses. It is on a different scale from Malpass’s
+continuous effective size, which is 5.96 for the same lineup
+(<code><a href="../reference/esize_m.html">esize_m()</a></code> above), and the two should not be compared
+directly.</p>
 <p>Note that the value returned is a <strong>count of members</strong>,
 not a continuous quantity, so it moves only in whole steps as
 <code>conf</code> is varied, and it stays flat across any range of
@@ -1053,8 +1067,14 @@ new dataframe containing two independent lineups from
 <span id="cb34-10"><a href="#cb34-10" tabindex="-1"></a>Normal Theory <span class="sc">-</span><span class="fl">0.302</span> <span class="fl">1.887</span></span>
 <span id="cb34-11"><a href="#cb34-11" tabindex="-1"></a>Bootstrap<span class="sc">:</span> <span class="fu">percentile</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="sc">-</span><span class="fl">0.4</span> <span class="fl">1.737</span></span>
 <span id="cb34-12"><a href="#cb34-12" tabindex="-1"></a>Bootstrap<span class="sc">:</span> bias<span class="sc">-</span><span class="fu">corrected</span> (<span class="at">R =</span> <span class="dv">1000</span>) <span class="sc">-</span><span class="fl">0.292</span> <span class="fl">1.836</span></span></code></pre></div>
-<p>The effective size for lineup_1 is therefore not significantly
-different from the effective size for lineup_2.</p>
+<p>The estimated difference in effective size between lineup_1 and
+lineup_2 is 0.73, and the bias-corrected interval for the difference
+runs from about -0.3 to 1.8 (the normal and percentile intervals are
+similar). These intervals are approximate, not a calibrated test of
+equal population effective sizes, so the interval including 0 means that
+no difference has been shown, not that the two lineups have the same
+effective size; a difference of almost two members remains compatible
+with these data.</p>
 <hr>
 </div>
 </div>
@@ -1072,8 +1092,14 @@ diagnostic-testing sense; because the two proportions come from
 independent groups of witnesses it can also be read as a risk ratio.</p>
 <p>We can calculate the diagnosticity ratio for a set of identification
 parades using either <code><a href="../reference/diag_ratio_W.html">diag_ratio_W()</a></code> for Wells &amp;
-Lindsay’s (1980) formula, or <code><a href="../reference/diag_ratio_T.html">diag_ratio_T()</a></code> for Wells’
-adjusted diagnosticity ratio (see: Tredoux, 1998).</p>
+Lindsay’s (1980) formula, or <code><a href="../reference/diag_ratio_T.html">diag_ratio_T()</a></code> for Tredoux’s
+(1998, Eq. 12) ratio, which adds 0.5 to each frequency so that the ratio
+and its logarithm stay defined when a count is zero. In the example
+below, two of the <code>nortje2012</code> mock-witness lineups are
+paired only to show the computation, using the target position
+documented for each (3 for <code>lineup_1</code> and 2 for
+<code>lineup_3</code>); mock witnesses have not seen a culprit, so the
+resulting ratio is not a diagnosticity finding.</p>
 <p>Both functions require the same set of arguments: a vector of lineup
 choices in which the target was present (TP), a vector of lineup choices
 in which the target was absent (TA), as well as target positions and
@@ -1084,15 +1110,17 @@ are specified explicitly.</p>
 <span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>TA_lineup <span class="ot">&lt;-</span> nortje2012<span class="sc">$</span>lineup_3</span>
 <span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a></span>
 <span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a><span class="co"># Compute diagnosticity ratio</span></span>
-<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a><span class="fu">diag_ratio_W</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">7</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
-<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">6.333333</span></span>
-<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a><span class="fu">diag_ratio_T</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">7</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
-<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">5.571429</span></span></code></pre></div>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a><span class="fu">diag_ratio_W</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">2</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">1.9</span></span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a><span class="fu">diag_ratio_T</span>(TP_lineup, TA_lineup, <span class="at">pos_pres =</span> <span class="dv">3</span>, <span class="at">pos_abs =</span> <span class="dv">2</span>, <span class="at">k1 =</span> <span class="dv">8</span>, <span class="at">k2 =</span> <span class="dv">8</span>)</span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">1.857143</span></span></code></pre></div>
 <p>We can also calculate the large-sample variance of the log
 diagnosticity ratio, which is useful for applying some inferential
-methods:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">var_diag_ratio</span>(TP_lineup, TA_lineup, <span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">8</span>)</span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.3709273</span></span></code></pre></div>
+methods. It is computed from the uncorrected counts, so it belongs to
+the log of the <code><a href="../reference/diag_ratio_W.html">diag_ratio_W()</a></code> ratio rather than the
+corrected <code><a href="../reference/diag_ratio_T.html">diag_ratio_T()</a></code> ratio:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">var_diag_ratio</span>(TP_lineup, TA_lineup, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">8</span>, <span class="dv">8</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.137594</span></span></code></pre></div>
 <p><em>Note:</em> This variance is on the <strong>log-ratio
 scale</strong>, not the raw ratio scale. A delta-method variance on the
 raw scale multiplies it by the squared ratio. See Tredoux (1998) for the
@@ -1267,8 +1295,9 @@ significant<a class="anchor" aria-label="anchor" href="#a-cautionary-case-why-yo
 whose ratios differ in <strong>direction</strong> rather than just in
 degree — one lineup strongly incriminating, one uninformative, and one
 that points the wrong way (the suspect is chosen <em>more</em> often
-when the target is absent, which is what a badly biased lineup looks
-like):</p>
+when the target is absent, which can happen when the target-absent
+lineup is biased against its innocent suspect, for example when the
+innocent suspect stands out more than the culprit did):</p>
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>mixed_pres <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">60</span>), <span class="fu">choose_pos1</span>(<span class="dv">30</span>), <span class="fu">choose_pos1</span>(<span class="dv">20</span>))</span>
 <span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>mixed_abs  <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">choose_pos1</span>(<span class="dv">10</span>), <span class="fu">choose_pos1</span>(<span class="dv">30</span>), <span class="fu">choose_pos1</span>(<span class="dv">45</span>))</span>
 <span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a></span>
@@ -1579,7 +1608,7 @@ plotting function:</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">roc1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Partial ROC, Nortje &amp; Tredoux mock-witness data"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Partial ROC, simulated lineup_example data"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Vignette_files/figure-html/unnamed-chunk-45-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level3">

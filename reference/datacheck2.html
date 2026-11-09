@@ -77,18 +77,20 @@ the target was absent</p></dd>
 
 
 <dt id="arg-k-">k1<a class="anchor" aria-label="anchor" href="#arg-k-"></a></dt>
-<dd><p>Number of targets in TP lineup</p></dd>
+<dd><p>Number of members (nominal size) of the TP lineup</p></dd>
 
 
 <dt id="arg-k-">k2<a class="anchor" aria-label="anchor" href="#arg-k-"></a></dt>
-<dd><p>Number of targets in TA lineup</p></dd>
+<dd><p>Number of members (nominal size) of the TA lineup</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function ensures that a non-selected lineup member is not accidentally
-        omitted from the dataframe due to lack of selection by all mock witnesses.
-        It functions as a check that the total number of lineup members is accurate</p>
+    <p>This function applies <code><a href="datacheck1.html">datacheck1()</a></code> to each lineup: every choice
+        must be an integer position between 1 and the lineup's <code>k</code>. It
+        cannot detect a lineup member that no mock witness chose, because such
+        a member does not appear in the choices at all, so <code>k1</code> and
+        <code>k2</code> must be supplied correctly by the user.</p>
     </div>
 
     <div class="section level2">

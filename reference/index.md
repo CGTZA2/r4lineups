@@ -395,7 +395,7 @@ models for fair simultaneous lineups.
 - [`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
   : Fit Competing Wixted Lineup-Memory Models
 - [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md)
-  : Install the Audited pyWitness Engine
+  : Install the Pinned pyWitness Engine
 - [`plot(`*`<lineup_model_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.lineup_model_comparison.md)
   : Plot a Wixted Lineup-Memory Model Comparison
 

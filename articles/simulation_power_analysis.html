@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/simulation_power_analysis.Rmd" class="external-link"><code>vignettes/simulation_power_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>simulation_power_analysis.Rmd</code></div>
@@ -202,10 +202,8 @@ reasonable guard against the assumption doing damage.</p>
 al. (2018). The <code>"max"</code>, <code>"best_rest"</code> and
 <code>"ensemble"</code> implementations were written with reference to
 the Python package <strong>pyWitness</strong> (Mickes et al., 2024), and
-adapted into R here; the parameter recovery in
-<code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> is checked against it. See
-<code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code> for the pyWitness bridge
-itself.</p>
+adapted into R here. See <code><a href="../articles/lineup_memory_models.html">vignette("lineup_memory_models")</a></code>
+for the pyWitness bridge itself.</p>
 </div>
 <div class="section level3">
 <h3 id="the-criterion-in-plainer-terms">The criterion, in plainer terms<a class="anchor" aria-label="anchor" href="#the-criterion-in-plainer-terms"></a>
@@ -215,10 +213,11 @@ before the witness will identify anyone. Raise it and witnesses reject
 more often; lower it and they choose more often.</p>
 <p>It is important to make a point of clarification here. In textbook
 SDT, a criterion of 0 is “neutral”. <strong>That is not true
-here</strong>, because the criterion applies to the <em>maximum</em> of
-several members’ strengths, not to a single item. The maximum of six
-draws from Normal(0, 1) averages about 1.27, so a criterion of 0 is
-passed by nearly every lineup:</p>
+here</strong>, because under the default <code>"max"</code> rule (the
+only rule this section treats) the criterion applies to the
+<em>maximum</em> of several members’ strengths, not to a single item.
+The maximum of six draws from Normal(0, 1) averages about 1.27, so a
+criterion of 0 is passed by nearly every lineup:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">criteria</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.27</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span><span class="op">)</span></span>
 <span></span>
@@ -326,7 +325,7 @@ the median of the maximum of k standard normal draws.</caption>
 </tr>
 </tbody>
 </table>
-<p>The same formula gives any other target rejection rate
+<p>The same formula gives any other target-absent rejection rate
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="normal">Φ</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><msup><mi>r</mi><mrow><mn>1</mn><mi>/</mi><mi>k</mi></mrow></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Phi^{-1}(r^{1/k})</annotation></semantics></math>.
 It assumes a fair lineup with <code>foil_bias</code> at its default, so
@@ -345,7 +344,7 @@ drawing on.</p>
 <span>  n_tp        <span class="op">=</span> <span class="fl">200</span>,   <span class="co"># 200 target-present lineups</span></span>
 <span>  n_ta        <span class="op">=</span> <span class="fl">200</span>,   <span class="co"># 200 target-absent lineups</span></span>
 <span>  d_prime     <span class="op">=</span> <span class="fl">1.5</span>,   <span class="co"># moderate discriminability</span></span>
-<span>  c_criterion <span class="op">=</span> <span class="fl">1.0</span>,   <span class="co"># moderately conservative for a 6-person lineup</span></span>
+<span>  c_criterion <span class="op">=</span> <span class="fl">1.0</span>,   <span class="co"># somewhat liberal for 6 members (about 35% TA rejections)</span></span>
 <span>  lineup_size <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  conf_levels <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed        <span class="op">=</span> <span class="fl">2026</span></span>
@@ -446,6 +445,14 @@ simulates n target-present <strong>and</strong> n target-absent
 witnesses in each of the two conditions being compared, so 2n witnesses
 per condition and 4n in all; the <code>n_total</code> column gives the
 total.</p>
+<p>The stored analysis below uses the default
+<code>c_criterion = 0</code>. As shown in the criterion section, that
+setting makes witnesses choose almost always (about 1.8% of
+target-absent lineups are rejected with six members), so the power
+figures are for witnesses who rarely reject. A real power analysis
+should pass <code>c_criterion</code> through <code>...</code> and set it
+to match the rejection rate you expect, for example 1.23 for about half
+of target-absent lineups rejected with six members.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.</span></span>
 <span><span class="va">power_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_power_analysis.html">simulate_power_analysis</a></span><span class="op">(</span></span>
@@ -525,6 +532,23 @@ itself uncertain (see the standard errors). And <code>mean_effect</code>
 across sample sizes, which is a check: sample size does not change the
 size of an effect, only how precisely it is measured, and
 <code>sd_effect</code> duly shrinks.</p>
+<p>A power of 1.000 with a Monte Carlo standard error of 0.000 is not a
+claim of certainty. It means that all 30 simulated studies were
+significant, so the true power is high but not exactly 1; by the rule of
+three it is above about 1 − 3/30 = 0.90 with 95% confidence. Each
+p-value also rests on only 60 bootstrap resamples, so it is resolved no
+more finely than about 1/60, and the Monte Carlo standard error reflects
+the number of studies, not the noise within each test. Thirty
+simulations and 60 resamples support a rough sense of the sample size
+needed, not a precise one.</p>
+<p>The simulation draws every witness for a single lineup set, with one
+foil structure and one d′ for all witnesses. The power is therefore for
+generalising over witnesses to these materials. Generalising over
+culprits and lineups as well requires lineup sets sampled as units, and
+when a study uses only a few sets, the effective sample size for that
+question is closer to the number of sets than to the number of witnesses
+(Wells &amp; Windschitl, 1999; Westfall, Kenny, &amp; Judd, 2014). Treat
+the sample sizes here as a floor for such a study.</p>
 </div>
 <div class="section level3">
 <h3 id="plotting-and-adjusting-the-plot">Plotting, and adjusting the plot<a class="anchor" aria-label="anchor" href="#plotting-and-adjusting-the-plot"></a>
@@ -632,11 +656,21 @@ the generating model is a different model, and the exercise says nothing
 about bias, interval coverage or the process interpretation. Parameter
 recovery in the strict sense would simulate from the 2-HT equations
 themselves and check that the known parameters come back.</p>
-<p>The model fits without difficulty on data of this kind. If a fit does
-fail, resist the temptation to wrap it in <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code> and
-report “did not converge”, because that will also swallow genuine errors
-such as a mis-specified column name, and you will spend a long time
-looking for a convergence problem that is not there.</p>
+<p>All six fits end on the parameter boundary, with <code>b</code>
+estimated at 0 (the chunk suppresses six warnings, each reporting that
+the 2-HT estimate is on a boundary and that regular Hessian standard
+errors are unavailable). In these simulated lineups the foils are
+equally plausible and the suspect has no advantage, so a <code>b</code>
+of 0 is what a fair lineup should give; but it means that
+<code>dP</code> is estimated conditional on <code>b</code> = 0 and that
+no standard errors are available for the table. <code>dA</code> is small
+and nearly flat across d′ (0.007 to 0.202, and lower at d′ = 3.0 than at
+2.5), so it is not a sensitive index of memory strength here. If a fit
+fails outright, resist the temptation to wrap it in
+<code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code> and report “did not converge”, because that will
+also swallow genuine errors such as a mis-specified column name, and you
+will spend a long time looking for a convergence problem that is not
+there.</p>
 </div>
 <div class="section level2">
 <h2 id="comparing-experimental-designs">Comparing Experimental Designs<a class="anchor" aria-label="anchor" href="#comparing-experimental-designs"></a>
@@ -717,15 +751,18 @@ lineups per size, d’ = 1.5).</caption>
 </tr>
 </tbody>
 </table>
-<p>The false identification rate falls as the lineup grows, which is the
-protective effect a larger lineup is meant to provide: an innocent
-suspect is one of more alternatives, so mistaken choices are spread more
-thinly. The correct identification rate is far more stable, since it
-depends on the culprit standing out rather than on how many foils
-surround them. This is the trade-off that motivates the differing lineup
-sizes used in practice — six is common in North American research, while
-police forces in the United Kingdom typically use nine foils plus the
-suspect, and some jurisdictions use twelve members or more.</p>
+<p>Both rates fall as the lineup grows at a size-matched criterion. The
+false identification rate falls because an innocent suspect is one of
+more alternatives, so mistaken choices are spread more thinly; its trend
+is noisy, with differences between adjacent sizes of about the size of
+their Monte Carlo error. The correct identification rate falls too, by
+about 23 percentage points between sizes 4 and 12, because under the MAX
+rule the culprit competes with more foils for the largest strength. This
+is the trade-off behind the differing lineup sizes used in practice: six
+is common in North American research, police forces in the United
+Kingdom typically use a nine-person video array (the suspect and at
+least eight other people; PACE Code D, Annex A), and some jurisdictions
+use twelve members or more.</p>
 <p>Note that this simulation assumes every foil is equally plausible.
 Adding <code>foil_bias</code> would show the protection eroding, because
 a lineup of twelve in which eight are never chosen offers the protection
@@ -830,7 +867,7 @@ substantial noise added.</p>
 <span>  conf_levels <span class="op">=</span> <span class="fl">5</span>, include_response_time <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">6</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Bins must match the data. These simulated times run from roughly 2.5 to 9.5</span></span>
+<span><span class="co"># Bins must match the data. These simulated times run from roughly 1.6 to 11.2</span></span>
 <span><span class="co"># seconds, so bins extending to 20 seconds would leave the upper ones empty.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">sim_rac</span><span class="op">$</span><span class="va">response_time</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    0%   25%   50%   75%  100% </span></span>
@@ -940,9 +977,9 @@ smaller effect: a study powered for d′ = 1.0 will comfortably detect d′
 Choose it by the rejection rate it produces, as described earlier, and
 remember the neutral point scales with lineup size.</p>
 <p><strong>Lineup size.</strong> Six is the most common in North
-American research; UK practice uses nine foils with the suspect, and
-some jurisdictions use twelve or more. Use whatever matches the
-procedure you are studying.</p>
+American research; UK practice uses the suspect and at least eight other
+people (PACE Code D, Annex A), and some jurisdictions use twelve or
+more. Use whatever matches the procedure you are studying.</p>
 <p><strong>Number of simulations.</strong> The Monte Carlo standard
 error of an estimated power is at most
 <code>sqrt(0.25 / n_simulations)</code>, which is about 0.05 at 100
@@ -987,6 +1024,13 @@ at all.</li>
 <p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S.
 (2024). pyWitness 1.0: A python eyewitness identification analysis
 toolkit. <em>Behavior Research Methods, 56</em>, 1533-1550.</p>
+<p>Wells, G. L., &amp; Windschitl, P. D. (1999). Stimulus sampling and
+social psychological experimentation. <em>Personality and Social
+Psychology Bulletin, 25</em>(9), 1115-1125.</p>
+<p>Westfall, J., Kenny, D. A., &amp; Judd, C. M. (2014). Statistical
+power and optimal design in experiments in which samples of participants
+respond to samples of stimuli. <em>Journal of Experimental Psychology:
+General, 143</em>(5), 2020-2045.</p>
 <p>Wixted, J. T., &amp; Mickes, L. (2012). The field of eyewitness
 memory should abandon probative value and embrace receiver operating
 characteristic analysis. <em>Perspectives on Psychological Science,

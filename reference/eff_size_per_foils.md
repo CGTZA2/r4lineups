@@ -37,8 +37,10 @@ eff_size_per_foils(lineup_vec, target_pos, k, conf = 0.95, R = 1000)
 
 A single integer: the number of lineup members whose bootstrapped
 confidence interval for the proportion choosing them includes the chance
-value \\1/k\\. These are the members that a mock witness chose at a rate
-not distinguishable from guessing.
+value \\1/k\\. A member counted this way has not been shown to depart
+from the chance rate, which is not the same as being chosen at that
+rate, and the count rises when there are few witnesses. It is not on the
+scale of Malpass' continuous effective size.
 
 ## Details
 

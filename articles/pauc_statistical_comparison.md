@@ -343,10 +343,11 @@ $`\widehat{SE}`$.
 
 Because no usable closed-form expression exists. The partial area is a
 non-linear functional of a step function estimated from two correlated
-sets of counts, computed over a region that is itself determined by the
-data. Deriving its sampling variance analytically is not practical;
-resampling estimates it directly and makes no distributional assumption
-in doing so.
+sets of counts, computed over a false-ID range that both curves reach.
+Deriving its sampling variance analytically is not practical; resampling
+estimates it directly and makes no distributional assumption in doing
+so. The cutoff of that range is fixed at its full-sample value in every
+resample, so the standard error is conditional on the cutoff.
 
 ### Is normality reasonable?
 
@@ -419,12 +420,12 @@ ggplot(data.frame(diff = boot_diff), aes(x = diff)) +
 ![](pauc_statistical_comparison_files/figure-html/bootstrap_figure-1.png)
 
 Typically the distribution is close to normal but not exactly so — mild
-skew is common, because pAUC is bounded and the region is
-data-determined. With several hundred resamples a formal normality test
-will often reject even when the departure is too small to be important.
-The practical question is not whether normality holds exactly but
-whether it holds well enough that the interval is about right, and that
-is best answered by comparing the two intervals directly:
+skew is common, because pAUC is bounded. With several hundred resamples
+a formal normality test will often reject even when the departure is too
+small to be important. The practical question is not whether normality
+holds exactly but whether it holds well enough that the interval is
+about right, and that is best answered by comparing the two intervals
+directly:
 
 ``` r
 
@@ -449,10 +450,12 @@ knitr::kable(
 95% confidence intervals for the pAUC difference by two methods,
 simulated data. {.table}
 
-When the two agree closely, as here, the normal approximation is doing
-no harm. When they diverge, prefer the percentile interval: it inherits
-whatever shape the bootstrap distribution actually has, rather than
-imposing symmetry on it.
+Here the two intervals agree that the difference excludes 0, but their
+lower limits differ (0.0043 for the Wald interval and 0.0023 for the
+percentile interval), so the normal approximation is adequate for the
+conclusion but not exact near zero. When the intervals diverge, prefer
+the percentile interval: it inherits whatever shape the bootstrap
+distribution actually has, rather than imposing symmetry on it.
 
 ## A worked comparison
 
@@ -473,7 +476,7 @@ print(comparison)
 #>   Z = 2.6
 #>   p-value = 0.009329
 #> 
-#> Interpretation: Strong (d' = 2.0) has higher discriminability than Weak (d' = 1.4) (**)
+#> Interpretation: Strong (d' = 2.0) has the larger pAUC over the shared false-ID range (**)
 #> 
 #> Max false ID rate cutoff: 0.1125
 #> Bootstrap samples: 600

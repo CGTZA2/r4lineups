@@ -1,7 +1,12 @@
 # Compare SDT Summary Metrics Between Two Conditions
 
 Performs a large-sample z-test comparing d' (or criterion or ln beta)
-between two independent conditions using summary counts only.
+between two independent conditions using summary counts only. For lineup
+data, a hit is a correct identification of the culprit in a
+target-present lineup and a false alarm is an identification of the
+designated innocent suspect in a target-absent lineup; the yes/no model
+is then an approximation (see
+[`vignette("sdt_summary_comparisons")`](https://cgtza2.github.io/r4lineups/articles/sdt_summary_comparisons.md)).
 
 ## Usage
 

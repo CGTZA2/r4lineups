@@ -14,7 +14,7 @@ make_bayes_curves(
   prior_grid = seq(0.01, 0.99, 0.01),
   lineup_size = 6,
   innocent_suspect = "auto",
-  gain = c("probability", "entropy")
+  gain = c("probability", "signed", "entropy")
 )
 ```
 
@@ -69,11 +69,15 @@ make_bayes_curves(
 - gain:
 
   Character. How information gain is measured. `"probability"` (default)
-  is the Wells et al. (2015) measure, posterior minus prior on the
-  probability scale (positive when the response raises the probability
-  of guilt). `"entropy"` is the reduction in binary entropy, H(prior)
-  minus H(posterior), in bits (Starns, Cohen & Rotello, 2023); it is the
-  per-response term of expected information gain
+  is the measure of Wells and Lindsay (1980) and Wells, Yang and Smalarz
+  (2015): the absolute difference between posterior and prior,
+  \|posterior - prior\|, on the probability scale. `"signed"` is the
+  same difference with its sign kept (positive when the response raises
+  the probability of guilt, negative when it lowers it), as in Smith,
+  Lindsay and Wells (2016). `"entropy"` is the reduction in binary
+  entropy, H(prior) minus H(posterior), in bits (Starns, Cohen &
+  Rotello, 2023); it is the per-response term of expected information
+  gain
   ([`compute_eig`](https://cgtza2.github.io/r4lineups/reference/compute_eig.md)).
 
 ## Value
@@ -106,9 +110,13 @@ target\\absent)}{N\_{innocent}}\$\$
 p(x\|guilty) + (1-p(guilty)) \cdot p(x\|innocent)\$\$ \$\$p(guilty\|x) =
 \frac{p(guilty) \cdot p(x\|guilty)}{p(x)}\$\$
 
-**Information gain** (`gain = "probability"`, Wells et al., 2015):
-\$\$IG(x) = p(guilty\|x) - p(guilty)\$\$ It is positive for responses
-that incriminate the suspect and negative for responses that exonerate.
+**Information gain** (`gain = "probability"`; Wells & Lindsay, 1980;
+Wells et al., 2015): \$\$IG(x) = \|p(guilty\|x) - p(guilty)\|\$\$ Wells
+and Lindsay use the absolute value because the amount of change, not its
+direction, measures the information gained. `gain = "signed"` returns
+\\p(guilty\|x) - p(guilty)\\, positive for responses that incriminate
+the suspect and negative for responses that exonerate; Smith et al.
+(2016) report gain this way.
 
 **Entropy reduction** (`gain = "entropy"`, Starns et al., 2023):
 \$\$IG(x) = H(prior) - H(posterior)\$\$ where H(p) is binary entropy in
@@ -119,9 +127,19 @@ can differ in sign, so state which one is reported.
 
 ## References
 
+Wells, G. L., & Lindsay, R. C. L. (1980). On estimating the
+diagnosticity of eyewitness nonidentifications. *Psychological Bulletin,
+88*(3), 776-784.
+
 Wells, G. L., Yang, Y., & Smalarz, L. (2015). Eyewitness identification:
 Bayesian information gain, base-rate effect-equivalency curves, and
 reasonable suspicion. *Law and Human Behavior, 39*(2), 99-122.
+
+Smith, A. M., Lindsay, R. C. L., & Wells, G. L. (2016). A Bayesian
+analysis on the (dis)utility of iterative-showup procedures: The
+moderating impact of prior probabilities. *Law and Human Behavior,
+40*(5), 503-516.
+[doi:10.1037/lhb0000196](https://doi.org/10.1037/lhb0000196)
 
 Starns, J. J., Cohen, A. L., & Rotello, C. M. (2023). A complete method
 for assessing the effectiveness of eyewitness identification procedures:

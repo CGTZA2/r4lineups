@@ -94,11 +94,13 @@ line (default = TRUE)</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Effective size &lt; nominal size indicates lineup bias, where some members are
+    <p>Effective size &lt; nominal size suggests lineup bias, where some members are
 implausible and rarely chosen. This can vary by confidence level if witnesses
 at different confidence levels have different lineup viewing strategies.</p>
 <p>A horizontal line at the nominal lineup size provides a reference. Values
-below this line indicate bias; values at or above indicate fair lineups.</p>
+below this line suggest bias. Values at or above it do not establish a fair
+lineup, because the plug-in estimate from sparse bins is biased (see the
+small-sample bias section of <code><a href="esize_T.html">esize_T</a></code>).</p>
     </div>
 
     <div class="section level2">

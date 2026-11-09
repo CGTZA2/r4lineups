@@ -134,7 +134,9 @@ foil is nonfunctioning for witnesses.</p>
 <span class="r-in"><span><span class="va">result</span><span class="op">$</span><span class="va">similarity</span>  <span class="co"># 0.85 would mean very similar</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Inspect the model's same-identity flag; this is not a fairness judgment.</span></span></span>
-<span class="r-in"><span><span class="va">result</span><span class="op">$</span><span class="va">verified</span>  <span class="co"># TRUE would indicate problematic similarity</span></span></span>
+<span class="r-in"><span><span class="co"># TRUE means the model judges the two images to show the same identity;</span></span></span>
+<span class="r-in"><span><span class="co"># inspect them. It is not a finding about lineup fairness.</span></span></span>
+<span class="r-in"><span><span class="va">result</span><span class="op">$</span><span class="va">verified</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

@@ -110,20 +110,25 @@ df <- data.frame(
 )
 df$is_old <- rbinom(nrow(df), 1, 0.5)
 
-# True d' = 1.2, with both participants and items varying in difficulty
+# Average d' = 1.2. Participants and items differ in their tendency to say
+# "old" (shifts, which enter on old and new trials alike), and participants
+# also differ in their own d' (slope deviations, which enter on old trials only)
 subj_shift <- rnorm(n_subj,  0, 0.4)
 item_shift <- rnorm(n_items, 0, 0.4)
+subj_slope <- rnorm(n_subj,  0, 0.5)
 
 df$said_old <- rbinom(
   nrow(df), 1,
-  stats::pnorm(1.2 * df$is_old + subj_shift[df$subject_id] +
-                 item_shift[df$item_id])
+  stats::pnorm((1.2 + subj_slope[df$subject_id]) * df$is_old +
+                 subj_shift[df$subject_id] + item_shift[df$item_id])
 )
 ```
 
-Note that both participants **and items** vary. That is realistic — some
-faces are simply more memorable than others — and it is what makes the
-next section important.
+Both participants **and items** vary in their response bias, and
+participants also vary in how well they discriminate old from new. That
+is realistic: some people are better at recognition than others, and
+some faces look familiar whether or not they were studied. It is what
+makes the next section important.
 
 ## Single-level GLM
 
@@ -136,10 +141,10 @@ extract_sdt_metrics(glm_fit)
 #> [1] "dprime"
 #> 
 #> $estimate
-#> [1] 1.15806
+#> [1] 0.9519383
 #> 
 #> $criterion
-#> [1] -0.4869419
+#> [1] -0.406687
 #> 
 #> $link
 #> [1] "probit"
@@ -162,16 +167,16 @@ glmm_fit <- fit_sdt_glmm(df,
                          subject_id   = "subject_id",
                          item_id      = "item_id",
                          link         = "probit",
-                         random_slope = FALSE)
+                         random_slope = TRUE)
 extract_sdt_metrics(glmm_fit)
 #> $metric
 #> [1] "dprime"
 #> 
 #> $estimate
-#> [1] 1.312359
+#> [1] 1.132333
 #> 
 #> $criterion
-#> [1] -0.5736078
+#> [1] -0.5076341
 #> 
 #> $link
 #> [1] "probit"
@@ -195,7 +200,14 @@ averaging over items to get a by-participants test, once averaging over
 participants to get a by-items test — and require both to be
 significant. Crossed random effects do the job properly in one model.
 
-The consequence is visible in the standard errors:
+The consequence is visible in the evidence for d′. Variation in the
+tendency to say “old” alone leaves the test of d′ almost unchanged,
+because every participant and every item contributes both old and new
+trials. Variation in d′ itself is what inflates the evidence in a
+single-level GLM, and only a random slope for `is_old` captures it.
+[`fit_sdt_glmm()`](https://cgtza2.github.io/r4lineups/reference/fit_sdt_glmm.md)
+offers that slope for participants (`random_slope = TRUE`); items always
+receive a random intercept only.
 
 ``` r
 
@@ -210,7 +222,8 @@ structures <- list(
                                              subject_id = "subject_id",
                                              item_id = "item_id",
                                              link = "probit",
-                                             random_slope = FALSE)
+                                             random_slope = FALSE),
+  "GLMM: subject slope and item" = glmm_fit
 )
 
 comparison <- do.call(rbind, lapply(names(structures), function(nm) {
@@ -222,89 +235,111 @@ comparison <- do.call(rbind, lapply(names(structures), function(nm) {
     `Random effects` = nm,
     `d'`             = round(co[term, "Estimate"], 3),
     `SE`             = round(co[term, "Std. Error"], 4),
+    `z`              = round(co[term, "z value"], 1),
     check.names = FALSE
   )
 }))
 
 knitr::kable(
   comparison, row.names = FALSE,
-  caption = "Estimated d' and its standard error under three random-effect structures. Simulated data, 40 participants by 60 items, true d' = 1.2."
+  caption = "Estimated d', its standard error and z under four random-effect structures. Simulated data, 40 participants by 60 items, average d' = 1.2."
 )
 ```
 
-| Random effects         |    d’ |     SE |
-|:-----------------------|------:|-------:|
-| GLM: no clustering     | 1.158 | 0.0576 |
-| GLMM: subject only     | 1.245 | 0.0616 |
-| GLMM: subject and item | 1.312 | 0.0654 |
+| Random effects               |    d’ |     SE |    z |
+|:-----------------------------|------:|-------:|-----:|
+| GLM: no clustering           | 0.952 | 0.0553 | 17.2 |
+| GLMM: subject only           | 1.034 | 0.0590 | 17.5 |
+| GLMM: subject and item       | 1.072 | 0.0617 | 17.4 |
+| GLMM: subject slope and item | 1.132 | 0.0901 | 12.6 |
 
-Estimated d’ and its standard error under three random-effect
-structures. Simulated data, 40 participants by 60 items, true d’ = 1.2.
-{.table}
+Estimated d’, its standard error and z under four random-effect
+structures. Simulated data, 40 participants by 60 items, average d’ =
+1.2. {.table}
 
-The standard error grows as clustering is acknowledged. Ignoring it
-entirely treats every one of the 2400 trials as independent, which they
-are not: trials from the same participant share that participant’s
-ability, and trials on the same item share that item’s memorability. **A
-GLM that ignores this reports a standard error that is too small, and a
-p-value that is too generous.**
+The raw standard errors are not comparable across rows, because the
+estimates themselves differ (see the next subsection); z is the fair
+comparison. Adding random intercepts for participants and items leaves z
+at about 17, so variation in the tendency to say “old” does not change
+the conclusion about d′. Letting d′ itself vary over participants cuts z
+to about 13, and the standard error rises by almost two-thirds. Ignoring
+that variation treats all 2400 trials as independent, although trials
+from the same participant share that participant’s ability. **A GLM that
+ignores variation in d′ across participants reports a standard error
+that is too small, and a p-value that is too generous.** The same holds
+for variation across items, which
+[`fit_sdt_glmm()`](https://cgtza2.github.io/r4lineups/reference/fit_sdt_glmm.md)
+does not model.
 
 ### The estimates move too, and predictably
 
-The d′ estimates also differ across the three rows, and this is not
+The d′ estimates also differ across the four rows, and this is not
 noise. The GLM estimate is **marginal** (population-averaged): it
 describes the average response probability across all participants and
 items. The GLMM estimate is **conditional** (subject- and
 item-specific): it describes the effect for a participant and item at
 the average of the random effects.
 
-For a probit link the two are related by a known attenuation:
-
-``` math
-d'_{\text{marginal}} \approx \frac{d'_{\text{conditional}}}{\sqrt{1 + \sigma^2_{\text{subject}} + \sigma^2_{\text{item}}}}
-```
+For a probit link the two are related by a known attenuation. With only
+random intercepts, the marginal d′ is approximately the conditional d′
+divided by
+$`\sqrt{1 + \sigma^2_{\text{subject}} + \sigma^2_{\text{item}}}`$. With
+a random slope the variance of the random part differs between new and
+old items, so the probit-scale value for each kind of item is divided by
+its own factor $`\sqrt{1 + v(x)}`$, where
+$`v(x) = \sigma^2_{\text{int}} + 2x\sigma_{\text{int,slope}} +
+x^2\sigma^2_{\text{slope}} + \sigma^2_{\text{item}}`$ and $`x`$ is
+$`-0.5`$ for new and $`+0.5`$ for old items (centred coding). The
+marginal d′ is the difference between the two scaled values:
 
 ``` r
 
-vc <- as.data.frame(lme4::VarCorr(structures[["GLMM: subject and item"]]))
-total_var <- sum(vc$vcov)
+fit_re <- structures[["GLMM: subject slope and item"]]
+vc     <- lme4::VarCorr(fit_re)
+v_subj <- vc[[".subject_id"]]
+v_item <- vc[[".item_id"]][1, 1]
+v_x    <- function(x) v_subj[1, 1] + 2 * x * v_subj[1, 2] +
+  x^2 * v_subj[2, 2] + v_item
 
-cond <- lme4::fixef(structures[["GLMM: subject and item"]])[[".is_old_c"]]
+b    <- lme4::fixef(fit_re)
+cond <- b[[".is_old_c"]]
+pred <- (b[["(Intercept)"]] + 0.5 * cond) / sqrt(1 + v_x(0.5)) -
+  (b[["(Intercept)"]] - 0.5 * cond) / sqrt(1 + v_x(-0.5))
 marg <- stats::coef(structures[["GLM: no clustering"]])[[".is_old_c"]]
 
 knitr::kable(
   data.frame(
-    Quantity = c("Conditional d' (GLMM)",
-                 "Random-effect variance, total",
-                 "Attenuation factor",
-                 "Conditional / attenuation factor",
+    Quantity = c("Conditional d' (GLMM with random slope)",
+                 "Random-effect variance, new items",
+                 "Random-effect variance, old items",
+                 "Predicted marginal d'",
                  "Marginal d' (GLM), observed"),
-    Value = round(c(cond, total_var, sqrt(1 + total_var),
-                    cond / sqrt(1 + total_var), marg), 3)
+    Value = round(c(cond, v_x(-0.5), v_x(0.5), pred, marg), 3)
   ),
   row.names = FALSE,
-  caption = "Marginal and conditional d' are different quantities related by a known factor. Simulated data."
+  caption = "Marginal and conditional d' are different quantities related by a known attenuation. Simulated data."
 )
 ```
 
-| Quantity                         | Value |
-|:---------------------------------|------:|
-| Conditional d’ (GLMM)            | 1.312 |
-| Random-effect variance, total    | 0.336 |
-| Attenuation factor               | 1.156 |
-| Conditional / attenuation factor | 1.135 |
-| Marginal d’ (GLM), observed      | 1.158 |
+| Quantity                                | Value |
+|:----------------------------------------|------:|
+| Conditional d’ (GLMM with random slope) | 1.132 |
+| Random-effect variance, new items       | 0.289 |
+| Random-effect variance, old items       | 0.537 |
+| Predicted marginal d’                   | 0.918 |
+| Marginal d’ (GLM), observed             | 0.952 |
 
 Marginal and conditional d’ are different quantities related by a known
-factor. Simulated data. {.table}
+attenuation. Simulated data. {.table}
 
-The predicted marginal value and the observed one agree closely. So the
-two models are not disagreeing about the data; they are answering
-slightly different questions. Neither is wrong, but they should not be
-compared as though interchangeable, and a paper should say which is
-being reported. The conditional estimate is usually the one meant by
-“d′” in a cognitive model, since it refers to a typical participant
-rather than to an average over heterogeneity.
+The predicted marginal value and the observed one agree to within about
+one standard error of the GLM estimate. So the two models are not
+disagreeing about the data; they are answering slightly different
+questions. Neither is wrong, but they should not be compared as though
+interchangeable, and a paper should say which is being reported. The
+conditional estimate is often the one meant by “d′” in a cognitive
+model, since it refers to a typical participant rather than to an
+average over heterogeneity.
 
 ## Including covariates
 
@@ -325,19 +360,19 @@ summary(glm_fit_cov)
 #>     data = df)
 #> 
 #> Coefficients:
-#>                 Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)      0.48750    0.02886  16.893   <2e-16 ***
-#> .is_old_c        1.15905    0.05772  20.082   <2e-16 ***
-#> delay           -0.04253    0.02907  -1.463    0.143    
-#> .is_old_c:delay -0.06977    0.05813  -1.200    0.230    
+#>                  Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)      0.406670   0.027676  14.694   <2e-16 ***
+#> .is_old_c        0.951927   0.055353  17.197   <2e-16 ***
+#> delay           -0.009878   0.027813  -0.355    0.722    
+#> .is_old_c:delay -0.017666   0.055625  -0.318    0.751    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> (Dispersion parameter for binomial family taken to be 1)
 #> 
-#>     Null deviance: 3083.6  on 2399  degrees of freedom
-#> Residual deviance: 2647.3  on 2396  degrees of freedom
-#> AIC: 2655.3
+#>     Null deviance: 3136.4  on 2399  degrees of freedom
+#> Residual deviance: 2827.5  on 2396  degrees of freedom
+#> AIC: 2835.5
 #> 
 #> Number of Fisher Scoring iterations: 4
 ```
@@ -384,8 +419,10 @@ the intercept is not $`c`$.
     independent of the predictors.
 3.  **Crossed, not nested.** Participants and items are crossed: every
     participant sees every item, or nearly so.
-    `(1|subject_id) + (1|item_id)` is correct for this. If items were
-    nested within lists, the specification would differ.
+    `(1|subject_id) + (1|item_id)` (or
+    `(1 + is_old|subject_id) + (1|item_id)` with a random slope) is
+    correct for this. If items were nested within lists, the
+    specification would differ.
 4.  Random intercepts only, unless `random_slope = TRUE`. Allowing d′
     itself to vary across participants is often the more realistic model
     and requires more data to fit.

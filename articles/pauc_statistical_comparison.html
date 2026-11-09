@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/pauc_statistical_comparison.Rmd" class="external-link"><code>vignettes/pauc_statistical_comparison.Rmd</code></a></small>
       <div class="d-none name"><code>pauc_statistical_comparison.Rmd</code></div>
@@ -506,10 +506,11 @@ resulting differences is taken as
 </h3>
 <p>Because no usable closed-form expression exists. The partial area is
 a non-linear functional of a step function estimated from two correlated
-sets of counts, computed over a region that is itself determined by the
-data. Deriving its sampling variance analytically is not practical;
-resampling estimates it directly and makes no distributional assumption
-in doing so.</p>
+sets of counts, computed over a false-ID range that both curves reach.
+Deriving its sampling variance analytically is not practical; resampling
+estimates it directly and makes no distributional assumption in doing
+so. The cutoff of that range is fixed at its full-sample value in every
+resample, so the standard error is conditional on the cutoff.</p>
 </div>
 <div class="section level3">
 <h3 id="is-normality-reasonable">Is normality reasonable?<a class="anchor" aria-label="anchor" href="#is-normality-reasonable"></a>
@@ -592,12 +593,12 @@ simulated data (600 bootstrap resamples).</caption>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pauc_statistical_comparison_files/figure-html/bootstrap_figure-1.png" class="r-plt" alt="" width="672"></p>
 <p>Typically the distribution is close to normal but not exactly so —
-mild skew is common, because pAUC is bounded and the region is
-data-determined. With several hundred resamples a formal normality test
-will often reject even when the departure is too small to be important.
-The practical question is not whether normality holds exactly but
-whether it holds well enough that the interval is about right, and that
-is best answered by comparing the two intervals directly:</p>
+mild skew is common, because pAUC is bounded. With several hundred
+resamples a formal normality test will often reject even when the
+departure is too small to be important. The practical question is not
+whether normality holds exactly but whether it holds well enough that
+the interval is about right, and that is best answered by comparing the
+two intervals directly:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -631,10 +632,12 @@ methods, simulated data.</caption>
 </tr>
 </tbody>
 </table>
-<p>When the two agree closely, as here, the normal approximation is
-doing no harm. When they diverge, prefer the percentile interval: it
-inherits whatever shape the bootstrap distribution actually has, rather
-than imposing symmetry on it.</p>
+<p>Here the two intervals agree that the difference excludes 0, but
+their lower limits differ (0.0043 for the Wald interval and 0.0023 for
+the percentile interval), so the normal approximation is adequate for
+the conclusion but not exact near zero. When the intervals diverge,
+prefer the percentile interval: it inherits whatever shape the bootstrap
+distribution actually has, rather than imposing symmetry on it.</p>
 </div>
 </div>
 <div class="section level2">
@@ -656,7 +659,7 @@ than imposing symmetry on it.</p>
 <span><span class="co">#&gt;   Z = 2.6</span></span>
 <span><span class="co">#&gt;   p-value = 0.009329</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Interpretation: Strong (d' = 2.0) has higher discriminability than Weak (d' = 1.4) (**)</span></span>
+<span><span class="co">#&gt; Interpretation: Strong (d' = 2.0) has the larger pAUC over the shared false-ID range (**)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Max false ID rate cutoff: 0.1125</span></span>
 <span><span class="co">#&gt; Bootstrap samples: 600</span></span>

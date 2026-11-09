@@ -86,9 +86,7 @@ the assumption doing damage.
 **Attribution.** The decision rules follow Wixted et al. (2018). The
 `"max"`, `"best_rest"` and `"ensemble"` implementations were written
 with reference to the Python package **pyWitness** (Mickes et al.,
-2024), and adapted into R here; the parameter recovery in
-[`fit_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/fit_winter_2ht.md)
-is checked against it. See
+2024), and adapted into R here. See
 [`vignette("lineup_memory_models")`](https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.md)
 for the pyWitness bridge itself.
 
@@ -99,7 +97,8 @@ witness will identify anyone. Raise it and witnesses reject more often;
 lower it and they choose more often.
 
 It is important to make a point of clarification here. In textbook SDT,
-a criterion of 0 is “neutral”. **That is not true here**, because the
+a criterion of 0 is “neutral”. **That is not true here**, because under
+the default `"max"` rule (the only rule this section treats) the
 criterion applies to the *maximum* of several members’ strengths, not to
 a single item. The maximum of six draws from Normal(0, 1) averages about
 1.27, so a criterion of 0 is passed by nearly every lineup:
@@ -172,7 +171,7 @@ knitr::kable(
 Criterion giving 50% target-absent rejections in a fair lineup: the
 median of the maximum of k standard normal draws. {.table}
 
-The same formula gives any other target rejection rate $`r`$:
+The same formula gives any other target-absent rejection rate $`r`$:
 $`\Phi^{-1}(r^{1/k})`$. It assumes a fair lineup with `foil_bias` at its
 default, so treat it as a starting point when foils are unequal.
 
@@ -189,7 +188,7 @@ sim_data <- simulate_lineup_data(
   n_tp        = 200,   # 200 target-present lineups
   n_ta        = 200,   # 200 target-absent lineups
   d_prime     = 1.5,   # moderate discriminability
-  c_criterion = 1.0,   # moderately conservative for a 6-person lineup
+  c_criterion = 1.0,   # somewhat liberal for 6 members (about 35% TA rejections)
   lineup_size = 6,
   conf_levels = 5,
   seed        = 2026
@@ -289,6 +288,14 @@ target-present **and** n target-absent witnesses in each of the two
 conditions being compared, so 2n witnesses per condition and 4n in all;
 the `n_total` column gives the total.
 
+The stored analysis below uses the default `c_criterion = 0`. As shown
+in the criterion section, that setting makes witnesses choose almost
+always (about 1.8% of target-absent lineups are rejected with six
+members), so the power figures are for witnesses who rarely reject. A
+real power analysis should pass `c_criterion` through `...` and set it
+to match the rejection rate you expect, for example 1.23 for about half
+of target-absent lineups rejected with six members.
+
 ``` r
 
 # Stored with the vignette; set R4LINEUPS_PRECOMPUTE=true to recompute.
@@ -336,6 +343,25 @@ average observed difference in pAUC — stays roughly constant across
 sample sizes, which is a check: sample size does not change the size of
 an effect, only how precisely it is measured, and `sd_effect` duly
 shrinks.
+
+A power of 1.000 with a Monte Carlo standard error of 0.000 is not a
+claim of certainty. It means that all 30 simulated studies were
+significant, so the true power is high but not exactly 1; by the rule of
+three it is above about 1 − 3/30 = 0.90 with 95% confidence. Each
+p-value also rests on only 60 bootstrap resamples, so it is resolved no
+more finely than about 1/60, and the Monte Carlo standard error reflects
+the number of studies, not the noise within each test. Thirty
+simulations and 60 resamples support a rough sense of the sample size
+needed, not a precise one.
+
+The simulation draws every witness for a single lineup set, with one
+foil structure and one d′ for all witnesses. The power is therefore for
+generalising over witnesses to these materials. Generalising over
+culprits and lineups as well requires lineup sets sampled as units, and
+when a study uses only a few sets, the effective sample size for that
+question is closer to the number of sets than to the number of witnesses
+(Wells & Windschitl, 1999; Westfall, Kenny, & Judd, 2014). Treat the
+sample sizes here as a floor for such a study.
 
 ### Plotting, and adjusting the plot
 
@@ -425,8 +451,16 @@ the process interpretation. Parameter recovery in the strict sense would
 simulate from the 2-HT equations themselves and check that the known
 parameters come back.
 
-The model fits without difficulty on data of this kind. If a fit does
-fail, resist the temptation to wrap it in
+All six fits end on the parameter boundary, with `b` estimated at 0 (the
+chunk suppresses six warnings, each reporting that the 2-HT estimate is
+on a boundary and that regular Hessian standard errors are unavailable).
+In these simulated lineups the foils are equally plausible and the
+suspect has no advantage, so a `b` of 0 is what a fair lineup should
+give; but it means that `dP` is estimated conditional on `b` = 0 and
+that no standard errors are available for the table. `dA` is small and
+nearly flat across d′ (0.007 to 0.202, and lower at d′ = 3.0 than at
+2.5), so it is not a sensitive index of memory strength here. If a fit
+fails outright, resist the temptation to wrap it in
 [`tryCatch()`](https://rdrr.io/r/base/conditions.html) and report “did
 not converge”, because that will also swallow genuine errors such as a
 mis-specified column name, and you will spend a long time looking for a
@@ -484,15 +518,18 @@ Identification rates by lineup size at a size-matched criterion,
 simulated data (500 target-present and 500 target-absent lineups per
 size, d’ = 1.5). {.table}
 
-The false identification rate falls as the lineup grows, which is the
-protective effect a larger lineup is meant to provide: an innocent
-suspect is one of more alternatives, so mistaken choices are spread more
-thinly. The correct identification rate is far more stable, since it
-depends on the culprit standing out rather than on how many foils
-surround them. This is the trade-off that motivates the differing lineup
-sizes used in practice — six is common in North American research, while
-police forces in the United Kingdom typically use nine foils plus the
-suspect, and some jurisdictions use twelve members or more.
+Both rates fall as the lineup grows at a size-matched criterion. The
+false identification rate falls because an innocent suspect is one of
+more alternatives, so mistaken choices are spread more thinly; its trend
+is noisy, with differences between adjacent sizes of about the size of
+their Monte Carlo error. The correct identification rate falls too, by
+about 23 percentage points between sizes 4 and 12, because under the MAX
+rule the culprit competes with more foils for the largest strength. This
+is the trade-off behind the differing lineup sizes used in practice: six
+is common in North American research, police forces in the United
+Kingdom typically use a nine-person video array (the suspect and at
+least eight other people; PACE Code D, Annex A), and some jurisdictions
+use twelve members or more.
 
 Note that this simulation assumes every foil is equally plausible.
 Adding `foil_bias` would show the protection eroding, because a lineup
@@ -615,7 +652,7 @@ sim_rac <- simulate_lineup_data(
   conf_levels = 5, include_response_time = TRUE, seed = 6
 )
 
-# Bins must match the data. These simulated times run from roughly 2.5 to 9.5
+# Bins must match the data. These simulated times run from roughly 1.6 to 11.2
 # seconds, so bins extending to 20 seconds would leave the upper ones empty.
 round(quantile(sim_rac$response_time, c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE))
 #>    0%   25%   50%   75%  100% 
@@ -733,8 +770,9 @@ rejection rate it produces, as described earlier, and remember the
 neutral point scales with lineup size.
 
 **Lineup size.** Six is the most common in North American research; UK
-practice uses nine foils with the suspect, and some jurisdictions use
-twelve or more. Use whatever matches the procedure you are studying.
+practice uses the suspect and at least eight other people (PACE Code D,
+Annex A), and some jurisdictions use twelve or more. Use whatever
+matches the procedure you are studying.
 
 **Number of simulations.** The Monte Carlo standard error of an
 estimated power is at most `sqrt(0.25 / n_simulations)`, which is about
@@ -773,6 +811,15 @@ In summary:
 Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024).
 pyWitness 1.0: A python eyewitness identification analysis toolkit.
 *Behavior Research Methods, 56*, 1533-1550.
+
+Wells, G. L., & Windschitl, P. D. (1999). Stimulus sampling and social
+psychological experimentation. *Personality and Social Psychology
+Bulletin, 25*(9), 1115-1125.
+
+Westfall, J., Kenny, D. A., & Judd, C. M. (2014). Statistical power and
+optimal design in experiments in which samples of participants respond
+to samples of stimuli. *Journal of Experimental Psychology: General,
+143*(5), 2020-2045.
 
 Wixted, J. T., & Mickes, L. (2012). The field of eyewitness memory
 should abandon probative value and embrace receiver operating

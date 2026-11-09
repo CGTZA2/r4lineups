@@ -124,10 +124,16 @@ TP:TA split.</p></dd>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function provides the full PPV range recommended by Fitzgerald et al. (2023):</p><ul><li><p><strong>Nominal</strong> (upper bound): Assumes perfectly fair lineup</p></li>
-<li><p><strong>Effective</strong>: Accounts for lineup bias via effective size</p></li>
-<li><p><strong>None</strong> (lower bound): Assumes worst-case (all errors are innocent-suspect)</p></li>
-</ul><p>The range between nominal and none represents the uncertainty in PPV due to
+    <p>This function provides the full PPV range recommended by Fitzgerald et al. (2023):</p><ul><li><p><strong>Nominal</strong>: The risk if the lineups had been fair; assumes
+    the innocent suspect attracts a 1/k share of mistaken identifications</p></li>
+<li><p><strong>Effective</strong>: Accounts for lineup bias via effective size;
+    assumes the innocent suspect is among the more plausible members</p></li>
+<li><p><strong>None</strong> (lower bound on PPV): Assumes worst-case (all errors are innocent-suspect)</p></li>
+</ul><p>PPV also depends on the prior. With <code>base_rate = NULL</code> it is a ratio of
+counts, so the implicit prior is the study's own ratio of target-present to
+target-absent lineups (.5 when the numbers are equal); <code>base_rate</code> sets
+it explicitly.</p>
+<p>The range between nominal and none represents the uncertainty in PPV due to
 unknown lineup fairness conditions.</p>
     </div>
     <div class="section level2">

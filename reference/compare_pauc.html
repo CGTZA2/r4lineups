@@ -165,10 +165,17 @@ retention intervals, etc.).</p>
 <li><p>Calculates p-value from standard normal distribution</p></li>
 </ol><p>The two datasets are treated as independent conditions. This function does
 not implement a paired or clustered bootstrap.</p>
-<p>**Interpretation:**</p><ul><li><p>Positive pAUC difference: Condition 1 has better discriminability</p></li>
-<li><p>Negative pAUC difference: Condition 2 has better discriminability</p></li>
-<li><p>p &lt; 0.05: Significant difference between conditions</p></li>
-</ul><p>The independent-sample bootstrap estimates uncertainty in an empirical
+<p>**Interpretation:**</p><ul><li><p>Positive pAUC difference: Condition 1 has the larger pAUC over the
+    shared false-ID range</p></li>
+<li><p>Negative pAUC difference: Condition 2 has the larger pAUC over the
+    shared false-ID range</p></li>
+<li><p>p &lt; 0.05: Significant difference in pAUC between conditions; otherwise
+    there is no significant difference</p></li>
+</ul><p>The comparison covers only the shared false-ID range and uses suspect IDs
+only, so it is not a general statement about discriminability. A common-range
+pAUC can mislead when a procedure raises both culprit and innocent-suspect
+IDs (Smith et al., 2019).</p>
+<p>The independent-sample bootstrap estimates uncertainty in an empirical
   partial-area functional; the final comparison uses a normal/Wald interval.
   It is approximate and can be liberal in finite samples. A data-selected
   cutoff, sparse high-confidence cells, or resamples that do not reach the
@@ -176,7 +183,12 @@ not implement a paired or clustered bootstrap.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S. (2024). pyWitness 1.0:
+    <p>Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., &amp; Mackovichova,
+S. (2019). Deviation from perfect performance measures the diagnostic
+utility of eyewitness lineups but partial area under the ROC curve does
+not. <em>Journal of Applied Research in Memory and Cognition, 8</em>(1),
+50-59. <a href="https://doi.org/10.1016/j.jarmac.2018.09.003" class="external-link">doi:10.1016/j.jarmac.2018.09.003</a></p>
+<p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S. (2024). pyWitness 1.0:
 A python eyewitness identification analysis toolkit. <em>Behavior Research
 Methods, 56</em>, 1533-1550.</p>
 <p>Wixted, J. T., &amp; Mickes, L. (2012). The field of eyewitness memory should
@@ -217,7 +229,7 @@ abandon probative value and embrace receiver operating characteristic analysis.
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Z = 0.646</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   p-value = 0.5185</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Interpretation: Procedure A has higher discriminability than Procedure B (ns)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Interpretation: No significant difference in pAUC over the shared false-ID range (ns)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Max false ID rate cutoff: 0.1185</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap samples: 200</span>

@@ -131,11 +131,19 @@ does not implement a paired or clustered bootstrap.
 
 \*\*Interpretation:\*\*
 
-- Positive pAUC difference: Condition 1 has better discriminability
+- Positive pAUC difference: Condition 1 has the larger pAUC over the
+  shared false-ID range
 
-- Negative pAUC difference: Condition 2 has better discriminability
+- Negative pAUC difference: Condition 2 has the larger pAUC over the
+  shared false-ID range
 
-- p \< 0.05: Significant difference between conditions
+- p \< 0.05: Significant difference in pAUC between conditions;
+  otherwise there is no significant difference
+
+The comparison covers only the shared false-ID range and uses suspect
+IDs only, so it is not a general statement about discriminability. A
+common-range pAUC can mislead when a procedure raises both culprit and
+innocent-suspect IDs (Smith et al., 2019).
 
 The independent-sample bootstrap estimates uncertainty in an empirical
 partial-area functional; the final comparison uses a normal/Wald
@@ -145,6 +153,13 @@ not reach the cutoff require additional caution. It is not an exact
 discrimination test.
 
 ## References
+
+Smith, A. M., Lampinen, J. M., Wells, G. L., Smalarz, L., &
+Mackovichova, S. (2019). Deviation from perfect performance measures the
+diagnostic utility of eyewitness lineups but partial area under the ROC
+curve does not. *Journal of Applied Research in Memory and Cognition,
+8*(1), 50-59.
+[doi:10.1016/j.jarmac.2018.09.003](https://doi.org/10.1016/j.jarmac.2018.09.003)
 
 Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024).
 pyWitness 1.0: A python eyewitness identification analysis toolkit.
@@ -189,7 +204,7 @@ print(comparison)
 #>   Z = 0.646
 #>   p-value = 0.5185
 #> 
-#> Interpretation: Procedure A has higher discriminability than Procedure B (ns)
+#> Interpretation: No significant difference in pAUC over the shared false-ID range (ns)
 #> 
 #> Max false ID rate cutoff: 0.1185
 #> Bootstrap samples: 200

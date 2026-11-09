@@ -76,9 +76,11 @@
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function ensures that a non-selected lineup member is not accidentally
-        omitted from the dataframe due to lack of selection by all mock witnesses.
-        It functions as a check that the total number of lineup members is accurate.</p>
+    <p>This function checks that every choice is an integer position between
+        1 and <code>k</code>. It cannot detect a lineup member that no mock witness
+        chose, because such a member does not appear in the choices at all, so
+        <code>k</code> must be supplied correctly by the user. <code><a href="lineup_table.html">lineup_table()</a></code>
+        builds a table with a cell for every member.</p>
     </div>
 
     <div class="section level2">

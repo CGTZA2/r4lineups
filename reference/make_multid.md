@@ -147,8 +147,10 @@ With each d' computed as the difference between two z-transformed
 - \\d'(IFa) = z(I) - z(Fa)\\: innocent suspect versus TA fillers, which
   Lee and Penrod treat as TA lineup bias;
 
-- \\d'(FaFp) = z(Fa) - z(Fp)\\: the greater appeal of TA than TP fillers
-  (differential filler siphoning);
+- \\d'(FaFp) = z(Fa) - z(Fp)\\: the difference in filler-choice rate
+  between TA and TP lineups (differential filler siphoning). It is
+  expected to be positive partly because the culprit draws choices in TP
+  lineups, and it assumes that one filler rate is shared by all fillers;
 
 - \\d'(RaRp) = z(Ra) - z(Rp)\\: discrimination of culprit presence from
   culprit absence (detection).

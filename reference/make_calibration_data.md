@@ -15,7 +15,8 @@ make_calibration_data(
   lineup_size = 6,
   confidence_scale = c("auto", "0-1", "0-100"),
   innocent_suspect = "auto",
-  population = NULL
+  population = NULL,
+  tp_fillers = c("exclude", "error")
 )
 ```
 
@@ -71,10 +72,19 @@ make_calibration_data(
 
   Which responses are calibrated: `"suspect_ids"` (suspect
   identifications, as in CAC analysis; correct when target-present),
-  `"choosers"` (suspect and filler identifications, as in Brewer &
-  Wells, 2006; only target-present suspect IDs are correct), or
-  `"nonchoosers"` (rejections; correct when target-absent). If NULL
-  (default), it is set from `choosers_only`.
+  `"choosers"` (witnesses who identify someone; only target-present
+  suspect IDs are correct; see `tp_fillers`), or `"nonchoosers"`
+  (rejections; correct when target-absent). If NULL (default), it is set
+  from `choosers_only`.
+
+- tp_fillers:
+
+  For `population = "choosers"` only: how filler identifications in
+  target-present lineups are treated. `"exclude"` (default) leaves them
+  out, as Brewer and Wells (2006) did, because a filler is known in
+  advance not to be the culprit. `"error"` keeps them as incorrect
+  identifications; Brewer and Wells note that overconfidence is then
+  more marked.
 
 ## Value
 
@@ -88,7 +98,9 @@ A list containing:
 
 - OU: Over/underconfidence (mean confidence minus mean accuracy)
 
-- NRI: Normalized Resolution Index (standardized within-person variance)
+- NRI: Normalized Resolution Index, the between-bin variance of accuracy
+  divided by \\\bar{a}(1 - \bar{a})\\, the total variance of the outcome
+  (the proportion of outcome variance explained by the confidence bins)
 
 - overall_accuracy: Mean accuracy across all responses
 
@@ -104,7 +116,8 @@ Calibration analysis distinguishes between:
   0)
 
 - **Over/underconfidence (O/U)**: Overall bias in confidence judgments
-  (0 = perfectly calibrated)
+  (0 = no net bias in the mean; overconfident and underconfident bins
+  can cancel, so perfect calibration needs C = 0)
 
 - **Resolution (NRI)**: Ability to discriminate correct from incorrect
   responses
@@ -120,11 +133,14 @@ discriminates correct from incorrect responses: \$\$NRI =
 
 The default population, suspect identifications, is the one used in CAC
 analysis (Mickes, 2015). In the eyewitness calibration literature (e.g.,
-Brewer & Wells, 2006) choosers are all witnesses who identify someone,
-so filler identifications enter as errors; use `population = "choosers"`
-to reproduce that analysis. Nonchoosers (`population = "nonchoosers"`)
-are witnesses who reject the lineup; a rejection is correct when the
-culprit is absent.
+Brewer & Wells, 2006) choosers are witnesses who identify someone.
+Brewer and Wells excluded filler identifications from target-present
+lineups, because a filler is known not to be the culprit, and scored all
+target-absent identifications as errors; `population = "choosers"`
+reproduces that analysis, and `tp_fillers = "error"` keeps the
+target-present filler identifications as errors instead. Nonchoosers
+(`population = "nonchoosers"`) are witnesses who reject the lineup; a
+rejection is correct when the culprit is absent.
 
 If target-absent data contain designated innocent-suspect
 identifications, those observations are used directly. Otherwise, each

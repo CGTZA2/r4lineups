@@ -62,9 +62,9 @@ format_comparison_table(comparison)
 #> 11     EIG (Starns et al., 2023) Expected Information Gain     0.2189
 #> 12     EIG (Starns et al., 2023)    Information Efficiency    21.9000
 #> 13     EIG (Starns et al., 2023)             Prior Entropy     1.0000
-#> 14 Full ROC (Smith & Yang, 2020)                  Full AUC     0.7775
-#> 15 Full ROC (Smith & Yang, 2020)          Operating Points    19.0000
-#> 16 Full ROC (Smith & Yang, 2020)              Max Hit Rate     1.0000
+#> 14 Full ROC (Smith et al., 2020)                  Full AUC     0.7775
+#> 15 Full ROC (Smith et al., 2020)          Operating Points    19.0000
+#> 16 Full ROC (Smith et al., 2020)              Max Hit Rate     1.0000
 #>                 Interpretation
 #> 1            Model fit quality
 #> 2              Lower is better

@@ -36,7 +36,10 @@ make_calibration_by_condition(
 
 - choosers_only:
 
-  Logical. Whether to analyze only suspect IDs (default = TRUE)
+  Logical. If `TRUE` (default), suspect identifications are analysed. If
+  `FALSE`, choosers are analysed: identifications, with target-present
+  filler IDs excluded, as with
+  `make_calibration_data(population = "choosers")`.
 
 - lineup_size:
 

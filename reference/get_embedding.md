@@ -24,14 +24,13 @@ get_embedding(
 
 - model:
 
-  Character. The face recognition model to use. Default is "ArcFace"
-  (recommended). See
+  Character. The face recognition model to use. Default is "ArcFace".
+  See
   [`available_models`](https://cgtza2.github.io/r4lineups/reference/available_models.md).
 
 - detector:
 
-  Character. Face detection backend. Default is "retinaface" (most
-  accurate). See
+  Character. Face detection backend. Default is "retinaface". See
   [`available_detectors`](https://cgtza2.github.io/r4lineups/reference/available_detectors.md).
 
 - align:

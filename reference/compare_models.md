@@ -32,7 +32,7 @@ compare_models(
 
   - "eig": Expected Information Gain (Starns et al., 2023)
 
-  - "fullroc": Full ROC curve (Smith & Yang, 2020)
+  - "fullroc": Full ROC curve (Smith et al., 2020)
 
   Default = c("2ht", "eig", "fullroc") fits all models.
 
@@ -88,7 +88,7 @@ different data requirements and output formats across models.
 - \*\*EIG (Starns et al., 2023)\*\*: Information-theoretic measure of
   evidentiary value. Higher values indicate more diagnostic procedures.
 
-- \*\*Full ROC (Smith & Yang, 2020)\*\*: Uses ALL responses to compute
+- \*\*Full ROC (Smith et al., 2020)\*\*: Uses ALL responses to compute
   investigator discriminability. AUC ranges from 0 to 1; 0.5 represents
   chance under a fixed ordering.
 
@@ -97,9 +97,12 @@ different data requirements and output formats across models.
 - AIC/BIC describe the 2-HT likelihood fit but cannot be compared with
   EIG or full-ROC AUC
 
-- Use EIG for comparing procedure diagnosticity (higher is better)
+- Use EIG for comparing procedure diagnosticity (higher is better, at
+  the same `prior_guilt` and with the same binning of responses)
 
-- Use Full ROC AUC for investigator discriminability (higher is better)
+- Use Full ROC AUC for investigator discriminability (higher is better;
+  the default diagnosticity ordering is optimistic, so compare
+  procedures with the a-priori order)
 
 ## References
 
@@ -145,9 +148,9 @@ print(comparison)
 #>      EIG (Starns et al., 2023) Expected Information Gain     0.2189
 #>      EIG (Starns et al., 2023)    Information Efficiency    21.9000
 #>      EIG (Starns et al., 2023)             Prior Entropy     1.0000
-#>  Full ROC (Smith & Yang, 2020)                  Full AUC     0.7775
-#>  Full ROC (Smith & Yang, 2020)          Operating Points    19.0000
-#>  Full ROC (Smith & Yang, 2020)              Max Hit Rate     1.0000
+#>  Full ROC (Smith et al., 2020)                  Full AUC     0.7775
+#>  Full ROC (Smith et al., 2020)          Operating Points    19.0000
+#>  Full ROC (Smith et al., 2020)              Max Hit Rate     1.0000
 #>               Interpretation
 #>            Model fit quality
 #>              Lower is better
@@ -196,8 +199,8 @@ summary(comparison)
 #> ---
 #> Interpretation Guidance:
 #>   - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes
-#>   - EIG: Higher values = more informative procedure
-#>   - Full ROC: Higher AUC = better investigator discriminability
+#>   - EIG: Higher values = more informative procedure, at the same prior and binning
+#>   - Full ROC: Higher AUC = better investigator discriminability (default ordering is optimistic; use the a-priori order to compare)
 #> 
 #> Each model provides different information; consider reporting more than one.
 

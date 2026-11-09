@@ -1,7 +1,11 @@
 # SDT Summary Statistics from Counts
 
 Compute d', criterion, and beta from 2x2 SDT counts (hits, false alarms,
-misses, correct rejections).
+misses, correct rejections). For lineup data, a hit is a correct
+identification of the culprit in a target-present lineup and a false
+alarm is an identification of the designated innocent suspect in a
+target-absent lineup; the yes/no model is then an approximation (see
+[`vignette("sdt_summary_comparisons")`](https://cgtza2.github.io/r4lineups/articles/sdt_summary_comparisons.md)).
 
 ## Usage
 
@@ -35,11 +39,15 @@ sdt_summary_from_counts(
 
 - correction:
 
-  Correction for extreme rates ("loglinear", "half", or "none").
+  Correction for extreme rates ("loglinear", "half", or "none"). The
+  default "loglinear" adjusts every rate, \\(x + 0.5)/(n + 1)\\, not
+  only extreme ones; "half" adjusts only counts of 0 or n; "none" leaves
+  rates unadjusted, so a rate of 0 or 1 gives infinite estimates.
 
 ## Value
 
-A list with rates and SDT metrics.
+A list with rates and SDT metrics. The returned hit and false-alarm
+rates are the adjusted rates.
 
 ## Examples
 

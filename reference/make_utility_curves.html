@@ -97,7 +97,11 @@ Default = 0.5.</p></dd>
 <li><p>fn: False negative (miss/rejection of guilty) - typically negative</p></li>
 <li><p>fp: False positive (innocent suspect ID) - typically very negative</p></li>
 <li><p>tn: True negative (correct rejection of innocent) - typically positive</p></li>
-</ul><p>Default: c(tp=1, fn=-0.5, fp=-2, tn=0.5)</p></dd>
+</ul><p>Default: c(tp=1, fn=-0.5, fp=-2, tn=0.5).
+Only the differences <code>tp - fn</code> and <code>tn - fp</code> affect the optimal
+rule and any utility difference between procedures; the signs and absolute
+levels do not. The trade-off between the two kinds of error is the ratio of
+those differences (2.5 to 1.5 for the default).</p></dd>
 
 
 <dt id="arg-lineup-size">lineup_size<a class="anchor" aria-label="anchor" href="#arg-lineup-size"></a></dt>

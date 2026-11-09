@@ -5,13 +5,15 @@
 ### Breaking changes
 
 - [`make_bayes_curves()`](https://cgtza2.github.io/r4lineups/reference/make_bayes_curves.md)
-  gains `gain = c("probability", "entropy")`. The default is now the
-  Wells, Yang and Smalarz (2015) information gain, posterior minus
-  prior, which the function cites. The previous measure, the reduction
-  in binary entropy (Starns, Cohen & Rotello, 2023), is available as
-  `gain = "entropy"`. The two can differ in sign: a suspect
-  identification at a low prior has a positive probability gain but a
-  negative entropy reduction.
+  gains `gain = c("probability", "signed", "entropy")`. The default is
+  now the information gain of Wells and Lindsay (1980) and Wells, Yang
+  and Smalarz (2015), the absolute change in the probability of guilt,
+  \|posterior − prior\|. `gain = "signed"` keeps the direction of the
+  change (positive when a response raises the probability of guilt). The
+  previous measure, the reduction in binary entropy (Starns, Cohen &
+  Rotello, 2023), is available as `gain = "entropy"`; it is negative
+  when a response moves belief towards .5, as a suspect identification
+  does at a low prior.
   [`plot_bayes_information_gain()`](https://cgtza2.github.io/r4lineups/reference/plot_bayes_information_gain.md)
   labels its axis to match.
 - [`make_fullroc()`](https://cgtza2.github.io/r4lineups/reference/make_fullroc.md)
@@ -26,8 +28,11 @@
   Smith, Yang and Wells (2020) rather than “Smith & Yang”.
 - Calibration functions gain
   `population = c("suspect_ids", "choosers", "nonchoosers")`.
-  `"choosers"` includes filler identifications as errors, as in Brewer
-  and Wells (2006); `"nonchoosers"` calibrates rejections, which are
+  `"choosers"` follows Brewer and Wells (2006): target-present suspect
+  IDs are correct, all target-absent identifications are errors, and
+  target-present filler IDs are excluded, because a filler is known not
+  to be the culprit. `tp_fillers = "error"` keeps those filler IDs as
+  errors instead. `"nonchoosers"` calibrates rejections, which are
   correct when the culprit is absent. `choosers_only = FALSE` previously
   scored every response other than a target-present suspect ID as
   incorrect, including correct rejections; it is deprecated and now
@@ -36,15 +41,37 @@
 
 ### Bug fixes
 
+- [`make_calibration()`](https://cgtza2.github.io/r4lineups/reference/make_calibration.md)
+  now keeps `tp_fillers` in its result, so that printing a
+  `population = "choosers", tp_fillers = "error"` analysis reports that
+  target-present filler IDs were scored as errors; it previously said
+  they were excluded.
+
+- [`compute_anri()`](https://cgtza2.github.io/r4lineups/reference/compute_anri.md),
+  [`bootstrap_anri()`](https://cgtza2.github.io/r4lineups/reference/bootstrap_anri.md),
+  [`compare_anri()`](https://cgtza2.github.io/r4lineups/reference/compare_anri.md),
+  [`make_calibration_by_condition()`](https://cgtza2.github.io/r4lineups/reference/make_calibration_by_condition.md)
+  and
+  [`calibration_bayes()`](https://cgtza2.github.io/r4lineups/reference/calibration_bayes.md)
+  with `choosers_only = FALSE` analyse choosers with target-present
+  filler IDs excluded, as
+  [`make_calibration()`](https://cgtza2.github.io/r4lineups/reference/make_calibration.md)
+  does, without a deprecation warning that pointed to a `population`
+  argument these functions do not have. The ANRI print method and the
+  Shiny app’s calibration and Bayesian tabs label the population
+  accordingly.
+
 - [`homog_diag()`](https://cgtza2.github.io/r4lineups/reference/homog_diag.md)
   now stops with an informative error when a pair has a zero or
   non-finite log-ratio variance (for example, every witness choosing the
   suspect). It previously reported `heterogeneous = FALSE` from
   non-finite weights and pooled results.
+
 - [`classify_lineup_choices()`](https://cgtza2.github.io/r4lineups/reference/classify_lineup_choices.md)
   no longer treats a missing chosen position (`NA`) as a rejection. The
   outcome is `NA`, with a warning; recode to 0 first if `NA` records a
   rejection.
+
 - With `correction = "none"`,
   [`sdt_summary_from_counts()`](https://cgtza2.github.io/r4lineups/reference/sdt_summary_from_counts.md)
   and
@@ -54,29 +81,144 @@
   variance enumeration in
   [`sdt_summary_variance()`](https://cgtza2.github.io/r4lineups/reference/sdt_summary_variance.md)
   keeps its numerical safeguard.
+
 - [`simulate_power_analysis()`](https://cgtza2.github.io/r4lineups/reference/simulate_power_analysis.md):
   `d_prime_null` is renamed `d_prime_2`. It is the second condition’s
   generating value, not a null hypothesis; the old name still works with
   a deprecation warning.
+
 - [`boot_winter_2ht()`](https://cgtza2.github.io/r4lineups/reference/boot_winter_2ht.md)
   plots use `linewidth`, removing a ggplot2 deprecation warning.
+
 - `fit_sdt_roc(n_bootstrap = 0)` no longer warns that all bootstrap
   samples failed.
+
 - `esize_m(both = TRUE)` labels its two values by what they do:
   Malpass (1981) with null foils excluded, and Tredoux (1998, Eq. 5)
   with nominal size kept. Tredoux (1998, Table 3) calls the first of
   these the adjusted estimate.
+
 - [`fit_max_sdt()`](https://cgtza2.github.io/r4lineups/reference/fit_max_sdt.md)
   no longer returns estimates outside its parameter bounds (for example
   a negative d’): the unconstrained Nelder-Mead polishing step is
   discarded when it leaves the box.
+
 - The `line73` help now describes the data as inspired by Doob and
   Kirshenbaum
+
   1973. but not their data, which do not appear to have survived (their
         study used a 12-member lineup and 21 mock witnesses).
+
 - [`esize_T_ci_n()`](https://cgtza2.github.io/r4lineups/reference/esize_T_ci_n.md)
   gains `conf_level`; `alpha` (which was the confidence level) remains
   for compatibility.
+
+- [`compare_models()`](https://cgtza2.github.io/r4lineups/reference/compare_models.md),
+  its help, the model-comparison vignette and the Shiny ROC tab label
+  the full ROC “Smith et al., 2020” (Smith, Yang & Wells), not “Smith &
+  Yang”.
+
+- [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md)
+  and
+  [`check_pywitness_deps()`](https://cgtza2.github.io/r4lineups/reference/check_pywitness_deps.md)
+  describe the fixed pyWitness revision as “pinned” in their titles and
+  messages. The returned fields `audited_revision` and
+  `audited_revision_matches` keep their names.
+
+- [`print()`](https://rdrr.io/r/base/print.html) for
+  [`compare_pauc()`](https://cgtza2.github.io/r4lineups/reference/compare_pauc.md)
+  no longer names one condition as having “higher discriminability” when
+  the difference is not significant. It reports the larger pAUC over the
+  shared false-ID range only when p \< .05.
+
+- [`print()`](https://rdrr.io/r/base/print.html) for
+  [`fit_sdt_roc()`](https://cgtza2.github.io/r4lineups/reference/fit_sdt_roc.md)
+  no longer prints unsourced verbal bands for d’ or an “unbiased
+  responding” line based on the mean criterion, and labels the
+  unequal-variance index d_a.
+
+- [`print()`](https://rdrr.io/r/base/print.html) for
+  [`sdt_compare()`](https://cgtza2.github.io/r4lineups/reference/sdt_compare.md)
+  calls the prior “Jeffreys” only when `alpha = 0.5`; it previously used
+  that name for any Beta prior.
+
+- [`print()`](https://rdrr.io/r/base/print.html) for
+  [`compare_utility()`](https://cgtza2.github.io/r4lineups/reference/compare_utility.md)
+  reports “no sign change over the base rates evaluated” rather than
+  that one procedure dominates.
+
+- [`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md)
+  accepts Python 3.13, for which TensorFlow now publishes wheels.
+
+- [`make_bayes_curves()`](https://cgtza2.github.io/r4lineups/reference/make_bayes_curves.md)
+  returns `NA`, with a warning, for the posterior and information gain
+  of a response that has zero probability at a requested prior; it
+  previously returned the prior and a gain of zero.
+  [`make_bree_curve()`](https://cgtza2.github.io/r4lineups/reference/make_bree_curve.md)
+  returns `NA` when no prior in procedure B can match a posterior with a
+  response that can occur. Both check `prior_grid`.
+
+- Calibration functions stop with an informative error when the selected
+  population (for example, suspect identifications) is empty, rather
+  than a data-frame error.
+
+- [`effsize_compare()`](https://cgtza2.github.io/r4lineups/reference/effsize_compare.md)
+  warns and returns the available intervals when every bootstrap
+  difference is equal, and falls back to normal and percentile intervals
+  when the BCa interval cannot be computed, instead of stopping.
+
+- Stricter input checks: draw counts (`S`), `credible_mass`, `nboot`,
+  `n`, `base_rate`, `utility_matrix` and member positions must be finite
+  values of the right kind, and
+  [`lineup_bias_boot_dist()`](https://cgtza2.github.io/r4lineups/reference/lineup_bias_boot_dist.md)
+  and
+  [`esize_boot_dist()`](https://cgtza2.github.io/r4lineups/reference/esize_boot_dist.md)
+  stop on missing choices, as the other choice-based functions do.
+  Factor choices are read by their labels.
+  [`fit_sdt_glm()`](https://cgtza2.github.io/r4lineups/reference/fit_sdt_glm.md)
+  rejects missing values in logical columns as it does in numeric ones.
+
+### Tests
+
+- New tests reproduce published values from the primary sources: Malpass
+  (1981, Table 1); Tredoux (1998, Tables 3, 6, 7 and 9); Yaniv, Yates
+  and Smith (1991, NDI and ANDI); Smith, Yang and Wells (2020, Figure
+  3); Lampinen, Smith and Wells (2019, Table 2); Wells, Yang and Smalarz
+  (2015, posteriors); Starns, Cohen and Rotello (2023, Table 1 and EIG);
+  Fitzgerald, Tredoux and Juncu (2023, Table 2); Yang et al. (2025,
+  Table A1); and Miller (1996, Table 2).
+
+### Documentation
+
+- A review of every vignette and help page for interpretive errors led
+  to these corrections, among others:
+  - utility trade-offs are stated as ratios of utility differences,
+    which alone affect the optimal criterion;
+  - calibration conclusions drawn from `lineup_example` say that its
+    confidence labels are stipulated;
+  - the SDT GLM vignette now shows the inflated evidence of a
+    single-level GLM with participants who differ in d’ (random slopes),
+    which its earlier simulation of response bias alone could not show;
+  - 2-HT fits on a parameter boundary are no longer described as clean
+    or as correct zeros, and single-condition fits are described as just
+    identified;
+  - the power vignette and
+    [`simulate_power_analysis()`](https://cgtza2.github.io/r4lineups/reference/simulate_power_analysis.md)
+    help state that power applies to generalising over witnesses for one
+    lineup set, and qualify a power of 1 from 30 simulations;
+  - example data are described as the dataset help describes them
+    (`line73`, `lineup_example`, target positions in `nortje2012`);
+  - Lee, Mansour and Penrod (2024), Weber et al. (2004), Malpass (1981)
+    and the UK lineup size (PACE Code D) are described accurately;
+  - help pages for estimated innocent suspects state the fair-lineup
+    assumption of dividing filler IDs by lineup size, and
+    [`datacheck1()`](https://cgtza2.github.io/r4lineups/reference/datacheck1.md)
+    to
+    [`datacheck3()`](https://cgtza2.github.io/r4lineups/reference/datacheck3.md)
+    say what they check.
+- The full ROC vignette and the model-comparison vignette now describe
+  an AUC of .5 as chance-level ranking under the chosen category order,
+  not as evidence that the responses carry no information.
 
 ## r4lineups 2.3.0 (2026-10-29)
 

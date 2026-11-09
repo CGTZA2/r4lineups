@@ -88,7 +88,11 @@ simulate_power_analysis(
 - ...:
 
   Additional arguments passed to simulate_lineup_data(), for example
-  `conf_levels` or `foil_bias`.
+  `c_criterion`, `conf_levels` or `foil_bias`. Set `c_criterion` to
+  match the rejection rate you expect: the default, 0, makes witnesses
+  choose almost always under the MAX rule (see
+  [`simulate_lineup_data`](https://cgtza2.github.io/r4lineups/reference/simulate_lineup_data.md)),
+  and the power then applies to that setting.
 
 ## Value
 
@@ -130,6 +134,31 @@ supplies; the null hypothesis is that the two conditions do not differ.
 Simulating a single condition and computing a statistic from it is not a
 power analysis, because no hypothesis is being tested.
 
+Each simulated study samples witnesses for one lineup set (one fixed
+foil structure) and gives every witness the same \\d'\\ and criterion.
+The power is therefore for generalising over witnesses to these
+materials. Generalising over culprits and lineups as well needs sets
+sampled as units, and with few sets the effective sample size for that
+question is closer to the number of sets (Wells & Windschitl, 1999;
+Westfall, Kenny, & Judd, 2014).
+
+Power is estimated from `n_simulations` studies, so it has Monte Carlo
+error, and each default test rests on `n_bootstrap` resamples. An
+estimated power of 1 (standard error 0) means only that the true power
+is high: by the rule of three, with 30 simulations it is above about
+\\1 - 3/30 = 0.90\\ with 95% confidence.
+
+## References
+
+Wells, G. L., & Windschitl, P. D. (1999). Stimulus sampling and social
+psychological experimentation. *Personality and Social Psychology
+Bulletin, 25*, 1115–1125.
+
+Westfall, J., Kenny, D. A., & Judd, C. M. (2014). Statistical power and
+optimal design in experiments in which samples of participants respond
+to samples of stimuli. *Journal of Experimental Psychology: General,
+143*, 2020–2045.
+
 ## See also
 
 [`compare_pauc`](https://cgtza2.github.io/r4lineups/reference/compare_pauc.md),
@@ -143,6 +172,7 @@ power analysis, because no hypothesis is being tested.
 power_res <- simulate_power_analysis(
   sample_sizes = c(50, 100),
   d_prime = 1.5,
+  c_criterion = 1.23,
   n_simulations = 8,
   n_bootstrap = 50,
   conf_levels = 5,
@@ -151,9 +181,9 @@ power_res <- simulate_power_analysis(
 #> Simulating sample size 50 (8 studies)
 #> Simulating sample size 100 (8 studies)
 print(power_res)
-#>   sample_size n_total power  power_se mean_effect  sd_effect n_valid n_failed
-#> 1          50     200 0.875 0.1169268  0.04444208 0.01567793       8        0
-#> 2         100     400 1.000 0.0000000  0.04280260 0.01922859       8        0
+#>   sample_size n_total power  power_se mean_effect   sd_effect n_valid n_failed
+#> 1          50     200  0.75 0.1530931  0.02025417 0.012625132       8        0
+#> 2         100     400  0.75 0.1530931  0.01616521 0.009858588       8        0
 #>   n_attempted
 #> 1           8
 #> 2           8

@@ -21,10 +21,16 @@ datacheck3(lineup_tab, k)
 
 ## Details
 
-This function ensures that a non-selected lineup member is not
-accidentally omitted from the data due to lack of selection by all mock
-witnesses. It functions as a check that the total number of lineup
-members is accurate.
+This function checks that the table has no more than `k` cells, that its
+counts are finite and non-negative, and that its names (if any) are
+integer positions between 1 and `k`. An unnamed table must have exactly
+`k` cells. A named table with fewer than `k` positions, such as
+[`table()`](https://rdrr.io/r/base/table.html) of choices in which one
+member was never chosen, is accepted, because the missing member cannot
+be detected from the table, so `k` must be supplied correctly by the
+user.
+[`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+builds a table with a cell for every member.
 
 ## Examples
 

@@ -35,12 +35,13 @@ empirically assessing the fairness of a lineup. *Law and Human Behavior,
 
 ``` r
 #Data:
-lineup_vec <- round(runif(100, 1))
+set.seed(1)
+lineup_vec <- sample(1:6, 100, replace = TRUE)
 lineup_tab <- table(lineup_vec)
 
 #Call:
 lineup_prop_tab(lineup_tab, 3)
-#> [1] 0
+#> [1] 0.12
 lineup_prop_tab(table(lineup_vec), 2)
-#> [1] 0
+#> [1] 0.18
 ```

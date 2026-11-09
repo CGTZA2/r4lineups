@@ -93,7 +93,10 @@ bootstrap confidence intervals for the difference.</p>
 
 
 <dt id="arg-choosers-only">choosers_only<a class="anchor" aria-label="anchor" href="#arg-choosers-only"></a></dt>
-<dd><p>Logical. Whether to analyze only suspect IDs (default = TRUE)</p></dd>
+<dd><p>Logical. If <code>TRUE</code> (default), suspect
+identifications are analysed. If <code>FALSE</code>, choosers are analysed:
+identifications, with target-present filler IDs excluded, as with
+<code>make_calibration_data(population = "choosers")</code>.</p></dd>
 
 
 <dt id="arg-lineup-size">lineup_size<a class="anchor" aria-label="anchor" href="#arg-lineup-size"></a></dt>

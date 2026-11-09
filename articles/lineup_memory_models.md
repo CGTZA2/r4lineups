@@ -106,7 +106,7 @@ check_pywitness_deps(initialize = FALSE)
 #> Environment exists: FALSE 
 #> Python initialized: FALSE 
 #> pyWitness available: FALSE 
-#> Audited revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba 
+#> Pinned revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba 
 #> No Python process was initialized. Use initialize = TRUE to import the isolated engine.
 ```
 
@@ -268,9 +268,14 @@ knitr::kable(
 **Read the p-values, not the chi-squares.** The models do not have the
 same degrees of freedom — Independent Observations estimates five
 parameters against Ensemble’s four, leaving it one fewer residual degree
-of freedom — so the model with more parameters is favoured by a raw
-chi-square comparison purely by being more flexible. Ranking the models
-by chi-square alone is not a comparison the statistic licenses.
+of freedom — and they are not nested, so a model with more parameters
+need not fit better. In the MAX row the fitted shared-variance parameter
+of Independent Observations is about zero (6.2e-08), so that model fits
+as a four-parameter model would, and its chi-square advantage over
+Ensemble (1.6 against 23.2) comes from the decision rule, not from the
+extra parameter. In the other two rows the shared variance is estimated
+well above zero (about .43 and .31). Ranking the models by chi-square
+alone is not a comparison the statistic licenses.
 
 A p-value here is the probability of a discrepancy this large if that
 model were true; it is not the probability that the model is the correct

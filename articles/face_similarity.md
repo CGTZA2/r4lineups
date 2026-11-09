@@ -118,7 +118,7 @@ order below.
 
 **TensorFlow, which DeepFace depends on, does not publish wheels for
 every Python version.** At the time of writing it supports Python 3.9 to
-3.12. If your system Python is newer — 3.13 or 3.14, which is
+3.13. If your system Python is newer — 3.14 or later, which is
 increasingly common — the install will proceed a long way and then fail
 with `No matching distribution found for tensorflow`.
 [`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md)
@@ -189,7 +189,7 @@ The simplest use case is comparing two face images.
 result <- face_similarity(
   img1_path = "path/to/target.jpg",
   img2_path = "path/to/foil1.jpg",
-  model = "ArcFace",     # State-of-the-art face recognition model
+  model = "ArcFace",     # Face recognition model (the package default)
   metric = "cosine"      # Similarity metric
 )
 
@@ -340,14 +340,11 @@ Different models and metrics serve different purposes.
 # List all models
 available_models()
 
-# Models ordered by identity-recognition accuracy on standard benchmarks.
-# That is accuracy at telling people apart, not agreement with human
-# similarity judgements or with mock-witness choices.
-# 1. ArcFace
-# 2. Facenet512
-# 3. Facenet
-# 4. VGG-Face
-# 5. OpenFace (fastest, least accurate)
+# The models differ in architecture, embedding size and speed. Published
+# benchmarks measure accuracy at telling people apart, not agreement with human
+# similarity judgements or with mock-witness choices, and the ranking depends
+# on the benchmark and the installed version, so the package does not rank them.
+# ArcFace is the default.
 ```
 
 ### Distance Metrics

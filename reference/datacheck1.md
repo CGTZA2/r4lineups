@@ -20,10 +20,12 @@ datacheck1(lineup_vec, k)
 
 ## Details
 
-This function ensures that a non-selected lineup member is not
-accidentally omitted from the dataframe due to lack of selection by all
-mock witnesses. It functions as a check that the total number of lineup
-members is accurate.
+This function checks that every choice is an integer position between 1
+and `k`. It cannot detect a lineup member that no mock witness chose,
+because such a member does not appear in the choices at all, so `k` must
+be supplied correctly by the user.
+[`lineup_table()`](https://cgtza2.github.io/r4lineups/reference/lineup_table.md)
+builds a table with a cell for every member.
 
 ## Examples
 

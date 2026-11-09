@@ -31,7 +31,8 @@ check_pywitness_deps(
 ## Value
 
 A one-row tibble with environment and engine status, including whether
-the imported version encodes the audited revision when
+the imported version encodes the pinned revision (fields
+`audited_revision` and `audited_revision_matches`) when
 `initialize = TRUE`.
 
 ## Examples
@@ -42,7 +43,7 @@ check_pywitness_deps()
 #> Environment exists: FALSE 
 #> Python initialized: FALSE 
 #> pyWitness available: FALSE 
-#> Audited revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba 
+#> Pinned revision: e726dcfc09423d0e0ff7f46c8e3a711040293eba 
 #> No Python process was initialized. Use initialize = TRUE to import the isolated engine.
 if (FALSE) { # \dontrun{
 check_pywitness_deps(initialize = TRUE)

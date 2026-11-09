@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/face_similarity.Rmd" class="external-link"><code>vignettes/face_similarity.Rmd</code></a></small>
       <div class="d-none name"><code>face_similarity.Rmd</code></div>
@@ -220,9 +220,9 @@ reticulate package. This requires a one-time setup.</p>
 order below.</p>
 <p><strong>TensorFlow, which DeepFace depends on, does not publish
 wheels for every Python version.</strong> At the time of writing it
-supports Python 3.9 to 3.12. If your system Python is newer — 3.13 or
-3.14, which is increasingly common — the install will proceed a long way
-and then fail with
+supports Python 3.9 to 3.13. If your system Python is newer — 3.14 or
+later, which is increasingly common — the install will proceed a long
+way and then fail with
 <code>No matching distribution found for tensorflow</code>.
 <code><a href="../reference/install_r4lineups_python.html">install_r4lineups_python()</a></code> checks the interpreter first and
 stops before downloading anything, rather than letting that happen.</p>
@@ -284,7 +284,7 @@ prerequisite for anything else.</li>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/face_similarity.html">face_similarity</a></span><span class="op">(</span></span>
 <span>  img1_path <span class="op">=</span> <span class="st">"path/to/target.jpg"</span>,</span>
 <span>  img2_path <span class="op">=</span> <span class="st">"path/to/foil1.jpg"</span>,</span>
-<span>  model <span class="op">=</span> <span class="st">"ArcFace"</span>,     <span class="co"># State-of-the-art face recognition model</span></span>
+<span>  model <span class="op">=</span> <span class="st">"ArcFace"</span>,     <span class="co"># Face recognition model (the package default)</span></span>
 <span>  metric <span class="op">=</span> <span class="st">"cosine"</span>      <span class="co"># Similarity metric</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -433,14 +433,11 @@ distinguish from the suspect, as discussed above.</li>
 <code class="sourceCode R"><span><span class="co"># List all models</span></span>
 <span><span class="fu"><a href="../reference/available_models.html">available_models</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Models ordered by identity-recognition accuracy on standard benchmarks.</span></span>
-<span><span class="co"># That is accuracy at telling people apart, not agreement with human</span></span>
-<span><span class="co"># similarity judgements or with mock-witness choices.</span></span>
-<span><span class="co"># 1. ArcFace</span></span>
-<span><span class="co"># 2. Facenet512</span></span>
-<span><span class="co"># 3. Facenet</span></span>
-<span><span class="co"># 4. VGG-Face</span></span>
-<span><span class="co"># 5. OpenFace (fastest, least accurate)</span></span></code></pre></div>
+<span><span class="co"># The models differ in architecture, embedding size and speed. Published</span></span>
+<span><span class="co"># benchmarks measure accuracy at telling people apart, not agreement with human</span></span>
+<span><span class="co"># similarity judgements or with mock-witness choices, and the ranking depends</span></span>
+<span><span class="co"># on the benchmark and the installed version, so the package does not rank them.</span></span>
+<span><span class="co"># ArcFace is the default.</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="distance-metrics">Distance Metrics<a class="anchor" aria-label="anchor" href="#distance-metrics"></a>

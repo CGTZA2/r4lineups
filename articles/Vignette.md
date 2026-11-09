@@ -243,7 +243,8 @@ This package contains several sample datasets, listed below:
 
 1.  `nortje2012`: A dataframe of lineup choices for 3 independent
     lineups, from a study conducted by Nortje & Tredoux (2012)
-2.  `line73`: Lineup data from Doob & Kirshenbaum (1973)
+2.  `line73`: Illustrative mock-witness data modelled on Doob &
+    Kirshenbaum (1973); not their data
 3.  `mockdata`: Lineup data from a study conducted by Nortje & Tredoux
     (2012)
 4.  `mickwick`: Confidence and accuracy data for lineup choices
@@ -280,9 +281,12 @@ and for all members of a lineup with a subsidiary function
 ([`allprop()`](https://cgtza2.github.io/r4lineups/reference/allprop.md)).
 
 The calculation of the proportion of mock witnesses choosing the suspect
-is essentially a measure of lineup bias (see Malpass, 1981; Tredoux,
-1998), especially when one tests whether it exceeds the proportion
-expected by chance guessing alone (1/nominal_size).
+is essentially a measure of lineup bias (see Doob & Kirshenbaum, 1973;
+Malpass, 1981; Tredoux, 1998), especially when one tests whether it
+exceeds the proportion expected by chance guessing alone. Doob and
+Kirshenbaum (1973) took chance expectation to be 1/nominal size, whereas
+Malpass (1981) proposed 1/effective size (an adjusted chance
+expectation).
 
 The measures in this vignette all rest on mock witnesses, who have not
 seen the perpetrator, so they can be used to vet a lineup before it is
@@ -297,9 +301,12 @@ perfectly fair lineup does not give d’(IFa) = 0, and
 [`make_multid()`](https://cgtza2.github.io/r4lineups/reference/make_multid.md)
 reports the value a fair lineup would give alongside the observed one.
 Lee, Mansour and Penrod (2024) found that resultant measures, including
-d’(IFa), predicted eyewitness performance better than mock-witness
-measures did. The model, its bias indices and the relevant references
-are described in
+d’(IFa), predicted eyewitness performance best, which they note is
+expected because those measures are computed from the same witnesses’
+responses; among mock-witness measures, the lineup-bias indices
+predicted suspect identification rates but the lineup-size indices did
+not. The model, its bias indices and the relevant references are
+described in
 [`vignette("multid_model")`](https://cgtza2.github.io/r4lineups/articles/multid_model.md).
 
 ### Calculating proportion for a single target/lineup member
@@ -951,11 +958,14 @@ would be, so the correction is more important rather than less.
 
 ### 3. Effective Size Per Foils
 
-Malpass (1981) proposed an additional method for computing effective
-size, based on the number of foils who are chosen at a rate nearly equal
-to chance expectation. We propose that ‘nearly equal’ could mean that
-chance expectation falls within a confidence interval constructed around
-the proportion of mock witnesses choosing the lineup member.
+This package also offers a count-based measure of effective size, the
+number of lineup members whose choice rate is close to chance
+expectation. It is motivated by Malpass’s (1981) idea of plausible
+lineup members, and by his remark that each member could be tested
+against chance; Malpass himself defined effective size only through the
+continuous quantity above. We take ‘close to’ to mean that chance
+expectation falls within a confidence interval constructed around the
+proportion of mock witnesses choosing the lineup member.
 
 To calculate effective size by counting the number of foils who fall
 within the CI for chance guessing, we pass a vector of lineup data, a
@@ -967,9 +977,14 @@ eff_size_per_foils(lineup_vec, target_pos = seq_len(8), k = 8,
 [1] 4
 ```
 
-Applying this function to our data, we see that effective size for this
-lineup is 4: four of the eight members were chosen at a rate not
-distinguishable from chance.
+Applying this function to our data, we see that the count is 4: the
+intervals for four of the eight members contain chance (1/8). This does
+not show that those members were chosen at the chance rate, because a
+non-significant departure is not equality, and the count rises when
+there are few mock witnesses. It is on a different scale from Malpass’s
+continuous effective size, which is 5.96 for the same lineup
+([`esize_m()`](https://cgtza2.github.io/r4lineups/reference/esize_m.md)
+above), and the two should not be compared directly.
 
 Note that the value returned is a **count of members**, not a continuous
 quantity, so it moves only in whole steps as `conf` is varied, and it
@@ -1031,8 +1046,14 @@ Bootstrap: percentile (R = 1000) -0.4 1.737
 Bootstrap: bias-corrected (R = 1000) -0.292 1.836
 ```
 
-The effective size for lineup_1 is therefore not significantly different
-from the effective size for lineup_2.
+The estimated difference in effective size between lineup_1 and lineup_2
+is 0.73, and the bias-corrected interval for the difference runs from
+about -0.3 to 1.8 (the normal and percentile intervals are similar).
+These intervals are approximate, not a calibrated test of equal
+population effective sizes, so the interval including 0 means that no
+difference has been shown, not that the two lineups have the same
+effective size; a difference of almost two members remains compatible
+with these data.
 
 ------------------------------------------------------------------------
 
@@ -1054,7 +1075,13 @@ parades using either
 [`diag_ratio_W()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_W.md)
 for Wells & Lindsay’s (1980) formula, or
 [`diag_ratio_T()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T.md)
-for Wells’ adjusted diagnosticity ratio (see: Tredoux, 1998).
+for Tredoux’s (1998, Eq. 12) ratio, which adds 0.5 to each frequency so
+that the ratio and its logarithm stay defined when a count is zero. In
+the example below, two of the `nortje2012` mock-witness lineups are
+paired only to show the computation, using the target position
+documented for each (3 for `lineup_1` and 2 for `lineup_3`); mock
+witnesses have not seen a culprit, so the resulting ratio is not a
+diagnosticity finding.
 
 Both functions require the same set of arguments: a vector of lineup
 choices in which the target was present (TP), a vector of lineup choices
@@ -1068,18 +1095,23 @@ TP_lineup <- nortje2012$lineup_1
 TA_lineup <- nortje2012$lineup_3
 
 # Compute diagnosticity ratio
-diag_ratio_W(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 = 8, k2 = 8)
-[1] 6.333333
-diag_ratio_T(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 7, k1 = 8, k2 = 8)
-[1] 5.571429
+diag_ratio_W(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 2, k1 = 8, k2 = 8)
+[1] 1.9
+diag_ratio_T(TP_lineup, TA_lineup, pos_pres = 3, pos_abs = 2, k1 = 8, k2 = 8)
+[1] 1.857143
 ```
 
 We can also calculate the large-sample variance of the log diagnosticity
-ratio, which is useful for applying some inferential methods:
+ratio, which is useful for applying some inferential methods. It is
+computed from the uncorrected counts, so it belongs to the log of the
+[`diag_ratio_W()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_W.md)
+ratio rather than the corrected
+[`diag_ratio_T()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T.md)
+ratio:
 
 ``` r
-var_diag_ratio(TP_lineup, TA_lineup, 3, 7, 8, 8)
-[1] 0.3709273
+var_diag_ratio(TP_lineup, TA_lineup, 3, 2, 8, 8)
+[1] 0.137594
 ```
 
 *Note:* This variance is on the **log-ratio scale**, not the raw ratio
@@ -1256,7 +1288,9 @@ Heterogeneity is not always as tidy as that. Consider three pairs whose
 ratios differ in **direction** rather than just in degree — one lineup
 strongly incriminating, one uninformative, and one that points the wrong
 way (the suspect is chosen *more* often when the target is absent, which
-is what a badly biased lineup looks like):
+can happen when the target-absent lineup is biased against its innocent
+suspect, for example when the innocent suspect stands out more than the
+culprit did):
 
 ``` r
 mixed_pres <- list(choose_pos1(60), choose_pos1(30), choose_pos1(20))
@@ -1532,7 +1566,7 @@ rather than being limited to the arguments of the plotting function:
 
 plot(roc1) +
   ggplot2::theme_minimal(base_size = 12) +
-  ggplot2::labs(title = "Partial ROC, Nortje & Tredoux mock-witness data")
+  ggplot2::labs(title = "Partial ROC, simulated lineup_example data")
 ```
 
 ![](Vignette_files/figure-html/unnamed-chunk-45-1.png)

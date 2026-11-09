@@ -76,7 +76,7 @@ If strict = TRUE, either returns TRUE invisibly or stops with error.
 
 - Valid identification values
 
-- Positive confidence values
+- Non-negative confidence values
 
 - At least some target-present and target-absent trials
 

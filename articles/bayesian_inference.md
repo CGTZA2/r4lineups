@@ -243,7 +243,11 @@ plot(func_post)
 [`diag_ratio_T_bayes()`](https://cgtza2.github.io/r4lineups/reference/diag_ratio_T_bayes.md)
 models target-present and target-absent suspect-selection rates with
 independent beta-binomial posteriors and returns the posterior of the
-diagnosticity ratio.
+diagnosticity ratio. The example pairs the first two mock-witness
+lineups in `nortje2012` (suspect positions 3 and 6) as if they were a
+target-present and a target-absent lineup, only to show the computation;
+they are not such a pair, so the result is not a finding about
+diagnosticity.
 
 ``` r
 
@@ -255,7 +259,7 @@ diag_post <- diag_ratio_T_bayes(
   lineup_pres = tp_vec,
   lineup_abs = ta_vec,
   pos_pres = 3,
-  pos_abs = 3,
+  pos_abs = 6,
   k1 = max(tp_vec, na.rm = TRUE),
   k2 = max(ta_vec, na.rm = TRUE),
   alpha = 0.5,
@@ -267,12 +271,12 @@ diag_post
 #> Bayesian Diagnosticity Ratio (Tredoux) - Beta-Binomial model
 #>   Prior: Jeffreys-type Beta(0.50, 0.50)
 #>   TP lineup: n = 133, suspect IDs = 19
-#>   TA lineup: n = 133, suspect IDs = 5
-#>   Posterior mean DR:   4.301
-#>   Posterior median DR: 3.645
-#>   95% credible interval: [1.550, 11.214]
-#>   P(DR < 1.000 | data): 0.0010
-#>   P(DR > 1.000 | data): 0.9990
+#>   TA lineup: n = 133, suspect IDs = 4
+#>   Posterior mean DR:   5.530
+#>   Posterior median DR: 4.571
+#>   95% credible interval: [1.744, 14.718]
+#>   P(DR < 1.000 | data): 0.0000
+#>   P(DR > 1.000 | data): 1.0000
 ```
 
 ``` r

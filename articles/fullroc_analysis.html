@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/fullroc_analysis.Rmd" class="external-link"><code>vignettes/fullroc_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>fullroc_analysis.Rmd</code></div>
@@ -219,10 +219,12 @@ target-present and 700 target-absent lineups of size 6).</caption>
 <p>The full ROC reaches 1.0 because once foil identifications and
 rejections are admitted as evidence, every witness eventually
 contributes, and the cumulative rates must reach 1 in both arms.</p>
-<p><strong>The two areas are not comparable.</strong> A pAUC of 0.06 and
+<p><strong>The two areas are not comparable.</strong> A pAUC of 0.05 and
 an AUC of 0.78 are not in competition; they are computed over different
-ranges from different subsets of the data. Never report one as though it
-were the other.</p>
+ranges from different subsets of the data. The AUC of 0.78 uses the
+default diagnosticity order, which is optimistic (see below); the
+a-priori order gives 0.73 for the same data. Never report one as though
+it were the other.</p>
 </div>
 </div>
 <div class="section level2">
@@ -662,7 +664,13 @@ lineup_example.</caption>
 </h3>
 <p>The AUC has a direct probabilistic reading: it is the probability
 that a randomly chosen guilty suspect receives stronger evidence than a
-randomly chosen innocent one. 0.5 is chance.</p>
+randomly chosen innocent one, where “stronger” is defined by the order
+of the response categories. 0.5 is chance-level ranking under that
+order. It does not show that the responses carry no information: if
+filler IDs were more frequent in target-present lineups, the a priori
+order would place an informative category on the wrong side of the
+rejections, and the AUC could be .5 although another order gives a much
+larger value.</p>
 <p>Descriptive labels — “0.7 is moderate”, “0.8 is good” — circulate
 widely, but they should be resisted here for two reasons. The bias
 demonstrated above means a number in the 0.6s may reflect no signal at
@@ -745,9 +753,10 @@ ordering).</caption>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="fullroc_analysis_files/figure-html/comparison_plot-1.png" class="r-plt" alt="" width="672"></p>
-<p>Here the stronger condition dominates: its curve is above the weaker
-one throughout, so no assumption about base rates or costs could reverse
-the conclusion.</p>
+<p>Here the stronger condition’s sample curve is above the weaker one
+throughout, so these two estimated curves do not cross under the
+a-priori order. They are estimates without intervals, so this describes
+the samples and is not a claim about the populations.</p>
 <p><strong>When curves cross</strong>, there is no procedure-level
 winner, and the choice depends on where you intend to operate. That
 requires a base rate and a cost structure — which is expected utility
@@ -786,9 +795,12 @@ spans the full range. The area follows by the trapezoidal rule:</p>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">FAR_i = 0</annotation></semantics></math>:
 the ratio is undefined, so a small constant (<code>epsilon</code>,
-default 0.001) is substituted. The affected category sorts to the top
-under diagnosticity ordering, which is one route by which that ordering
-becomes optimistic.</li>
+default 0.001) is substituted, so the ratio is the hit rate divided by
+<code>epsilon</code>. A category with no target-absent responses
+therefore sorts by its hit rate: it ranks high when its hit rate is
+large, but one hit in 700 lineups gives a ratio of 1.43, in the middle
+of the table. This is one route by which diagnosticity ordering becomes
+optimistic.</li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mi>F</mi><mi>A</mi><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">HR_i = FAR_i = 0</annotation></semantics></math>:
 the category is empty and is removed.</li>
@@ -827,8 +839,9 @@ fixed.</p>
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <ol style="list-style-type: decimal">
-<li>Partial ROC uses one of six possible witness outcomes on each side;
-full ROC uses all of them, which is why it spans the entire range.</li>
+<li>Partial ROC uses one of three possible witness outcomes on each side
+(suspect ID, filler ID, rejection); full ROC uses all of them, which is
+why it spans the entire range.</li>
 <li>pAUC and full AUC are not comparable numbers.</li>
 <li>Full ROC measures <strong>investigator</strong> discriminability,
 not eyewitness memory.</li>

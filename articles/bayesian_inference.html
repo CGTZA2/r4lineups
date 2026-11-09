@@ -77,7 +77,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/bayesian_inference.Rmd" class="external-link"><code>vignettes/bayesian_inference.Rmd</code></a></small>
       <div class="d-none name"><code>bayesian_inference.Rmd</code></div>
@@ -355,7 +355,12 @@ size.</p>
 </h2>
 <p><code><a href="../reference/diag_ratio_T_bayes.html">diag_ratio_T_bayes()</a></code> models target-present and
 target-absent suspect-selection rates with independent beta-binomial
-posteriors and returns the posterior of the diagnosticity ratio.</p>
+posteriors and returns the posterior of the diagnosticity ratio. The
+example pairs the first two mock-witness lineups in
+<code>nortje2012</code> (suspect positions 3 and 6) as if they were a
+target-present and a target-absent lineup, only to show the computation;
+they are not such a pair, so the result is not a finding about
+diagnosticity.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tp_vec</span> <span class="op">&lt;-</span> <span class="va">nortje2012</span><span class="op">$</span><span class="va">lineup_1</span></span>
 <span><span class="va">ta_vec</span> <span class="op">&lt;-</span> <span class="va">nortje2012</span><span class="op">$</span><span class="va">lineup_2</span></span>
@@ -365,7 +370,7 @@ posteriors and returns the posterior of the diagnosticity ratio.</p>
 <span>  lineup_pres <span class="op">=</span> <span class="va">tp_vec</span>,</span>
 <span>  lineup_abs <span class="op">=</span> <span class="va">ta_vec</span>,</span>
 <span>  pos_pres <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  pos_abs <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  pos_abs <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  k1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tp_vec</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>  k2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">ta_vec</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
@@ -377,12 +382,12 @@ posteriors and returns the posterior of the diagnosticity ratio.</p>
 <span><span class="co">#&gt; Bayesian Diagnosticity Ratio (Tredoux) - Beta-Binomial model</span></span>
 <span><span class="co">#&gt;   Prior: Jeffreys-type Beta(0.50, 0.50)</span></span>
 <span><span class="co">#&gt;   TP lineup: n = 133, suspect IDs = 19</span></span>
-<span><span class="co">#&gt;   TA lineup: n = 133, suspect IDs = 5</span></span>
-<span><span class="co">#&gt;   Posterior mean DR:   4.301</span></span>
-<span><span class="co">#&gt;   Posterior median DR: 3.645</span></span>
-<span><span class="co">#&gt;   95% credible interval: [1.550, 11.214]</span></span>
-<span><span class="co">#&gt;   P(DR &lt; 1.000 | data): 0.0010</span></span>
-<span><span class="co">#&gt;   P(DR &gt; 1.000 | data): 0.9990</span></span></code></pre></div>
+<span><span class="co">#&gt;   TA lineup: n = 133, suspect IDs = 4</span></span>
+<span><span class="co">#&gt;   Posterior mean DR:   5.530</span></span>
+<span><span class="co">#&gt;   Posterior median DR: 4.571</span></span>
+<span><span class="co">#&gt;   95% credible interval: [1.744, 14.718]</span></span>
+<span><span class="co">#&gt;   P(DR &lt; 1.000 | data): 0.0000</span></span>
+<span><span class="co">#&gt;   P(DR &gt; 1.000 | data): 1.0000</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">diag_post</span><span class="op">)</span></span></code></pre></div>
 <p><img src="bayesian_inference_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="672"></p>

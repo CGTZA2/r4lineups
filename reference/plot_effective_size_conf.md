@@ -36,14 +36,16 @@ A ggplot2 object
 
 ## Details
 
-Effective size \< nominal size indicates lineup bias, where some members
+Effective size \< nominal size suggests lineup bias, where some members
 are implausible and rarely chosen. This can vary by confidence level if
 witnesses at different confidence levels have different lineup viewing
 strategies.
 
 A horizontal line at the nominal lineup size provides a reference.
-Values below this line indicate bias; values at or above indicate fair
-lineups.
+Values below this line suggest bias. Values at or above it do not
+establish a fair lineup, because the plug-in estimate from sparse bins
+is biased (see the small-sample bias section of
+[`esize_T`](https://cgtza2.github.io/r4lineups/reference/esize_T.md)).
 
 ## Examples
 

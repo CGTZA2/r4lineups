@@ -3,7 +3,7 @@
 Computes ANRI, a bias-corrected version of NRI following Yaniv et al.
 (1991). ANRI adjusts NRI for the number of confidence bins and sample
 size, providing more accurate estimates especially when J (bins) is
-small relative to N.
+large relative to N.
 
 ## Usage
 
@@ -36,7 +36,10 @@ compute_anri(
 
 - choosers_only:
 
-  Logical. Whether to analyze only suspect IDs (default = TRUE)
+  Logical. If `TRUE` (default), suspect identifications are analysed. If
+  `FALSE`, choosers are analysed: identifications, with target-present
+  filler IDs excluded, as with
+  `make_calibration_data(population = "choosers")`.
 
 - lineup_size:
 
@@ -99,7 +102,9 @@ Where:
 
 \*\*When to use ANRI vs NRI:\*\*
 
-- Use ANRI when J is small (e.g., 3-5 bins)
+- The upward bias of NRI is about (J - 1) / N, so the correction is
+  largest when J / N is not negligible: many bins, modest N, or both (J
+  = 5, N = 400 gives .01; J = 11, N = 50 gives .20)
 
 - Use ANRI when N is modest (e.g., \< 200)
 

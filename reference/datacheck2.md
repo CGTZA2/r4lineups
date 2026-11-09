@@ -22,18 +22,20 @@ datacheck2(lineup_pres, lineup_abs, k1, k2)
 
 - k1:
 
-  Number of targets in TP lineup
+  Number of members (nominal size) of the TP lineup
 
 - k2:
 
-  Number of targets in TA lineup
+  Number of members (nominal size) of the TA lineup
 
 ## Details
 
-This function ensures that a non-selected lineup member is not
-accidentally omitted from the dataframe due to lack of selection by all
-mock witnesses. It functions as a check that the total number of lineup
-members is accurate
+This function applies
+[`datacheck1()`](https://cgtza2.github.io/r4lineups/reference/datacheck1.md)
+to each lineup: every choice must be an integer position between 1 and
+the lineup's `k`. It cannot detect a lineup member that no mock witness
+chose, because such a member does not appear in the choices at all, so
+`k1` and `k2` must be supplied correctly by the user.
 
 ## Examples
 

@@ -123,6 +123,12 @@ for policymakers deciding on system variables (e.g., simultaneous vs. sequential
 lineups, lineup size, etc.).</p>
 <p>For estimator variables (e.g., exposure duration, retention interval), use
 CAC analysis instead (see <code><a href="make_cac.html">make_cac</a></code>).</p>
+<p>Without a designated innocent suspect, filler IDs in target-absent lineups
+are divided by lineup size to estimate the false-ID rate. This assumes the
+innocent suspect is chosen at the average filler rate, which holds for a fair
+lineup; with a biased lineup the estimated false-ID rate, and so the ROC and
+pAUC, are wrong, and a designated innocent suspect should be used when one is
+available.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

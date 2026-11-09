@@ -125,7 +125,9 @@ otherwise, with a message.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An S3 object of class "sdt_roc_fit" containing:</p><ul><li><p>dprime: Overall discriminability (d')</p></li>
+    <p>An S3 object of class "sdt_roc_fit" containing:</p><ul><li><p>dprime: Overall discriminability (d'). Under the unequal-variance
+      model this is d_a, the standardised separation
+      \(\sqrt{2}\,\mathrm{intercept} / \sqrt{1 + \mathrm{slope}^2}\)</p></li>
 <li><p>criteria: Decision criterion for each confidence level (c values)</p></li>
 <li><p>variance_ratio: Ratio of lure SD to target SD, the z-ROC slope
       (if unequal_variance)</p></li>
@@ -150,6 +152,8 @@ z-transformed false alarm rates for each confidence level.</p>
 - Slope &gt; 1 indicates greater variability in lure distribution</p>
 <p>**Parameter Estimation**:
 - d' = average distance between distributions in standard deviation units
+  (under the unequal-variance model the reported value is d_a, which uses the
+  root mean square of the two standard deviations)
 - c = decision criterion (0 = unbiased, positive = conservative, negative = liberal)
 - Higher d' = better discriminability</p>
 <p>**Bootstrap Confidence Intervals**:
@@ -197,10 +201,6 @@ Research in Memory and Cognition, 4(2), 93-102.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         c3 0.601</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         c4 0.461</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         c5 0.425</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Interpretation:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   - Moderate discriminability (1.0 &lt;= d' &lt; 2.0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   - Conservative bias (mean c &gt; 0)</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sdt_fit</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="fit_sdt_roc-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

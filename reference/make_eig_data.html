@@ -121,6 +121,10 @@ otherwise, with a message.</p></dd>
 (suspect/filler/reject) and confidence level or bin. This function counts
 the frequency of each response category separately for target-present
 (guilty) and target-absent (innocent) lineups.</p>
+<p>When no innocent suspect is designated (<code>innocent_suspect =
+"estimated"</code>, or <code>"auto"</code> on such data), <code>1 / lineup_size</code> of each
+target-absent filler count is moved into the matching suspect category, so
+the result assumes a fair lineup of <code>lineup_size</code> members.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

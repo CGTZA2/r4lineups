@@ -84,7 +84,7 @@ identification dataset, providing a side-by-side descriptive table.</p>
 <dt id="arg-models">models<a class="anchor" aria-label="anchor" href="#arg-models"></a></dt>
 <dd><p>Character vector of models to fit. Options:</p><ul><li><p>"2ht" or "winter": Winter et al. (2022) Two-High Threshold MPT model</p></li>
 <li><p>"eig": Expected Information Gain (Starns et al., 2023)</p></li>
-<li><p>"fullroc": Full ROC curve (Smith &amp; Yang, 2020)</p></li>
+<li><p>"fullroc": Full ROC curve (Smith et al., 2020)</p></li>
 </ul><p>Default = c("2ht", "eig", "fullroc") fits all models.</p></dd>
 
 
@@ -129,13 +129,16 @@ requirements and output formats across models.</p>
     to the same observations and outcome representation.</p></li>
 <li><p>**EIG (Starns et al., 2023)**: Information-theoretic measure of
     evidentiary value. Higher values indicate more diagnostic procedures.</p></li>
-<li><p>**Full ROC (Smith &amp; Yang, 2020)**: Uses ALL responses to compute
+<li><p>**Full ROC (Smith et al., 2020)**: Uses ALL responses to compute
     investigator discriminability. AUC ranges from 0 to 1; 0.5 represents
     chance under a fixed ordering.</p></li>
 </ul><p>**Interpretation:**</p><ul><li><p>AIC/BIC describe the 2-HT likelihood fit but cannot be compared with
     EIG or full-ROC AUC</p></li>
-<li><p>Use EIG for comparing procedure diagnosticity (higher is better)</p></li>
-<li><p>Use Full ROC AUC for investigator discriminability (higher is better)</p></li>
+<li><p>Use EIG for comparing procedure diagnosticity (higher is better,
+    at the same <code>prior_guilt</code> and with the same binning of responses)</p></li>
+<li><p>Use Full ROC AUC for investigator discriminability (higher is
+    better; the default diagnosticity ordering is optimistic, so compare
+    procedures with the a-priori order)</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -179,9 +182,9 @@ Psychological Science, 15</em>(3), 589-607.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023) Expected Information Gain     0.2189</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023)    Information Efficiency    21.9000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      EIG (Starns et al., 2023)             Prior Entropy     1.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)                  Full AUC     0.7775</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)          Operating Points    19.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith &amp; Yang, 2020)              Max Hit Rate     1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith et al., 2020)                  Full AUC     0.7775</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith et al., 2020)          Operating Points    19.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Full ROC (Smith et al., 2020)              Max Hit Rate     1.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               Interpretation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Model fit quality</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              Lower is better</span>
@@ -230,8 +233,8 @@ Psychological Science, 15</em>(3), 589-607.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Interpretation Guidance:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   - 2-HT: AIC/BIC are comparable only to other likelihood models fit to the same outcomes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   - EIG: Higher values = more informative procedure</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   - Full ROC: Higher AUC = better investigator discriminability</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   - EIG: Higher values = more informative procedure, at the same prior and binning</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   - Full ROC: Higher AUC = better investigator discriminability (default ordering is optimistic; use the a-priori order to compare)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Each model provides different information; consider reporting more than one.</span>
 <span class="r-in"><span></span></span>

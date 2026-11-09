@@ -14,9 +14,10 @@ Character vector of detector names.
 
 ## Details
 
-Available detectors (in rough order of accuracy/speed tradeoff):
+Available detectors (not ranked here; accuracy and speed depend on the
+images and the installed version):
 
-- retinaface - Most accurate, recommended for research
+- retinaface - Package default
 
 - mtcnn - Good accuracy, moderate speed
 

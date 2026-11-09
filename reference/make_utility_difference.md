@@ -97,8 +97,13 @@ Interpretation:
 - Zero difference: Procedures equivalent at that base rate
 
 Lampinen et al. (2019) show that ROC dominance does not guarantee
-utility dominance. A procedure with a lower pAUC might have higher
-utility at certain base rates and cost structures.
+utility dominance in general. Dominance holds only over the
+false-identification range that both curves reach: if the dominating
+curve is less truncated than the dominated one, its maximum utility is
+necessarily higher, but when it stops short of the other curve's
+optimum, or for utilities other than the maximum (average or
+high-confidence utility), a procedure with a lower pAUC can have the
+higher utility at some base rates and cost structures.
 
 ## References
 

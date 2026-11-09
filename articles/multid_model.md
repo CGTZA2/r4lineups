@@ -35,9 +35,14 @@ z-transformed rates.
 | d’(GI) | z(G) − z(I) | Guilty versus innocent suspect (the usual empirical d’) |
 | d’(GFp) | z(G) − z(Fp) | Guilty suspect versus TP fillers |
 | d’(IFa) | z(I) − z(Fa) | Innocent suspect versus TA fillers: TA lineup bias |
-| d’(FaFp) | z(Fa) − z(Fp) | Greater appeal of TA than TP fillers |
+| d’(FaFp) | z(Fa) − z(Fp) | Difference in filler-choice rate between TA and TP lineups |
 | d’(RaRp) | z(Ra) − z(Rp) | Detection of culprit presence versus absence |
 | d’(GFp) − d’(RaRp) |  | TP lineup bias, net of memory strength |
+
+The TP–TA filler difference d’(FaFp) is expected to be positive partly
+because the culprit draws choices in TP lineups, and the index assumes
+that one filler rate is shared by all fillers; it is not a property of
+the fillers alone.
 
 The three filler indices combine to give d’(GI):
 
@@ -283,10 +288,12 @@ such as
 or
 [`func_size()`](https://cgtza2.github.io/r4lineups/reference/func_size.md),
 they cannot be used to vet a lineup before it is shown to a witness.
-Lee, Mansour and Penrod (2024) found that only resultant measures,
-including the Multi-d’ bias indices, reliably predicted eyewitness
-performance across 40 lineup sets, while mock-witness measures,
-perceptual ratings and face-recognition algorithms did not.
+Lee, Mansour and Penrod (2024) found that resultant measures, including
+d’(IFa), predicted eyewitness performance best, which they note is
+expected because those measures are computed from the same witnesses’
+responses; among mock-witness measures, the lineup-bias indices
+predicted suspect identification rates but the lineup-size indices did
+not.
 
 Each index is an equal-variance d’ computed from a single pair of rates.
 Lee and Penrod present the model as a descriptive framework, a “series

@@ -79,7 +79,7 @@ Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
 Naylor</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/winter_2ht_model.Rmd" class="external-link"><code>vignettes/winter_2ht_model.Rmd</code></a></small>
       <div class="d-none name"><code>winter_2ht_model.Rmd</code></div>
@@ -222,10 +222,13 @@ already contains the required columns:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_2ht_fit.html">plot_2ht_fit</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="winter_2ht_model_files/figure-html/plot_fit-1.png" class="r-plt" alt="" width="672"></p>
-<p>The second plot is the one to check before interpreting anything: it
-compares observed response proportions against those the fitted model
-predicts. Visible discrepancies mean the model is not describing the
-data, and the parameters should not be read as though it were.</p>
+<p>The second plot compares observed response proportions against those
+the fitted model predicts. A single-condition fit is saturated (see the
+technical details), so for an interior estimate the two agree by
+construction and the plot cannot show misfit; a close match is not
+evidence that the model holds. The plot can show a discrepancy only when
+an estimate sits on a parameter boundary, and then the parameters should
+not be read as though the model described the data.</p>
 </div>
 <div class="section level2">
 <h2 id="bootstrap-confidence-intervals">3. Bootstrap confidence intervals<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-intervals"></a>
@@ -252,10 +255,12 @@ object:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_2ht_parameters.html">plot_2ht_parameters</a></span><span class="op">(</span><span class="va">boot_fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="winter_2ht_model_files/figure-html/plot_boot-1.png" class="r-plt" alt="" width="672"></p>
-<p>All four parameters are probabilities bounded in [0, 1]. At a
-boundary — <code>b</code> here — regular Hessian standard errors are
-unavailable. Percentile intervals respect the parameter space, but this
-alone does not establish nominal coverage at a boundary.</p>
+<p>All four parameters are probabilities bounded in [0, 1]. Here
+<code>b</code> is close to the boundary: its estimate is about 0.009 and
+its percentile interval starts at 0. At a boundary estimate regular
+Hessian standard errors are unavailable, and percentile intervals
+respect the parameter space but do not by themselves establish nominal
+coverage.</p>
 <p>For larger datasets, increase <code>nboot</code> to 1000 or more for
 stable intervals.</p>
 </div>
@@ -268,20 +273,24 @@ the proportion of mock witnesses choosing the suspect — are computed
 from <strong>mock-witness data</strong>: people who never saw the
 culprit, choosing from a description. They ask whether the suspect
 stands out.</p>
-<p>The 2-HT model answers the same question <strong>from the witness
-data themselves</strong>, with no mock-witness study required. Look
-again at where <code>b</code> sits in the tree: it is the probability of
-choosing the suspect <em>given that no detection occurred and before any
-guessing</em>. A witness in that state has no memorial basis for
-choosing the suspect, so if they do, it is because the lineup pointed
-them there.</p>
+<p>The 2-HT model addresses the same question <strong>from the witness
+data themselves</strong>, with no mock-witness study required, if the
+model holds. Look again at where <code>b</code> sits in the tree: it is
+the probability of choosing the suspect <em>given that no detection
+occurred and before any guessing</em>. A witness in that state has no
+memorial basis for choosing the suspect, so if they do, it is because
+the lineup pointed them there.</p>
 <p>In a perfectly fair lineup, <code>b = 0</code>: a non-detecting
 witness who chooses lands on the suspect with probability
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mi>L</mi></mrow><annotation encoding="application/x-tex">1/L</annotation></semantics></math>,
 purely by chance, and that is already captured by the <code>g/L</code>
 term. <strong>Any <code>b</code> above zero is a measure of
-unfairness</strong>, on a probability scale, with a confidence
-interval.</p>
+unfairness</strong>, on a probability scale, with a confidence interval.
+This reading depends on the tree’s assumptions: all-or-none detection,
+guessing spread equally (1/L) over the members, and no memory-based
+preference for the suspect among witnesses who did not detect. A suspect
+who merely resembles the culprit, for example, would also raise
+<code>b</code>.</p>
 <div class="section level3">
 <h3 id="does-it-work">Does it work?<a class="anchor" aria-label="anchor" href="#does-it-work"></a>
 </h3>
@@ -377,12 +386,17 @@ lineups, nominal size 6).</caption>
 behaviour.</p>
 <p><strong>But <code>b</code> and E′ are not the same measure, and the
 last two rows show it.</strong> With uneven foils, E′ collapses to 2.00
-and then 1.06, because a single dominant foil absorbs most of the
+and then 1.06, because one or two dominant foils absorb most of the
 choices and the lineup has almost no functioning alternatives.
-<code>b</code> stays at zero throughout — correctly, because in those
-lineups the suspect is chosen <em>below</em> chance and is, if anything,
-protected by the arrangement. <code>b</code> measures whether the
-<strong>suspect</strong> stands out; E′ measures how many
+<code>b</code> stays at zero throughout, but that is a boundary estimate
+(<code>b</code> cannot be negative), not a correct finding of a fair
+lineup. In those lineups the suspect is chosen <em>below</em> chance,
+which <code>b</code> cannot register, and the model’s equal 1/L guessing
+share does not describe choices spread unevenly over the members, so it
+does not reproduce the data (<code><a href="../reference/fit_winter_2ht.html">fit_winter_2ht()</a></code> flags the
+boundary, and <code><a href="../reference/plot_2ht_fit.html">plot_2ht_fit()</a></code> shows the discrepancy).
+<code>b</code> measures whether the <strong>suspect</strong> stands out,
+if the equal-guessing assumption holds; E′ measures how many
 <strong>alternatives</strong> are functioning. Report both.</p>
 <p>The practical value of <code>b</code> is that it is available
 <strong>when mock-witness data are not</strong>: a lineup already
@@ -402,7 +416,12 @@ books this as detection.</p>
 inflates the apparent memory performance of the procedure that produced
 them. <strong>Report <code>b</code> alongside <code>dP</code>, never
 <code>dP</code> alone.</strong> A high <code>dP</code> from a lineup
-with a high <code>b</code> is not evidence of a good procedure.</p>
+with a high <code>b</code> is not evidence of a good procedure. A low
+<code>b</code> does not make <code>dP</code> trustworthy either: the
+last two rows have the same generating d′ as the first two and
+<code>b</code> of 0, yet <code>dP</code> is 0.213 and 0.067 against
+0.453 for the fair lineup, because uneven foils distort <code>dP</code>
+even when <code>b</code> is 0.</p>
 </div>
 </div>
 <div class="section level2">

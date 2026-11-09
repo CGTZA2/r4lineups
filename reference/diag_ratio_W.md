@@ -32,11 +32,13 @@ diag_ratio_W(lineup_pres, lineup_abs, pos_pres, pos_abs, k1, k2)
 
 - k1:
 
-  Number of targets in TP lineup. Must be specified by user (scalar).
+  Number of members (nominal size) of the TP lineup. Must be specified
+  by user (scalar).
 
 - k2:
 
-  Number of targets in TA lineup. Must be specified by user (scalar).
+  Number of members (nominal size) of the TA lineup. Must be specified
+  by user (scalar).
 
 ## References
 

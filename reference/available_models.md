@@ -29,7 +29,7 @@ Available models with their embedding dimensions:
 
 - DeepID (160-d) - Compact model
 
-- ArcFace (512-d) - State-of-the-art, recommended
+- ArcFace (512-d) - Package default
 
 - Dlib (128-d) - Lightweight
 

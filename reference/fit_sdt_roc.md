@@ -67,7 +67,9 @@ fit_sdt_roc(
 
 An S3 object of class "sdt_roc_fit" containing:
 
-- dprime: Overall discriminability (d')
+- dprime: Overall discriminability (d'). Under the unequal-variance
+  model this is d_a, the standardised separation
+  \\\sqrt{2}\\\mathrm{intercept} / \sqrt{1 + \mathrm{slope}^2}\\
 
 - criteria: Decision criterion for each confidence level (c values)
 
@@ -101,9 +103,11 @@ Under unequal-variance SDT: - Slope = SD_lure / SD_target - Slope \> 1
 indicates greater variability in lure distribution
 
 \*\*Parameter Estimation\*\*: - d' = average distance between
-distributions in standard deviation units - c = decision criterion (0 =
-unbiased, positive = conservative, negative = liberal) - Higher d' =
-better discriminability
+distributions in standard deviation units (under the unequal-variance
+model the reported value is d_a, which uses the root mean square of the
+two standard deviations) - c = decision criterion (0 = unbiased,
+positive = conservative, negative = liberal) - Higher d' = better
+discriminability
 
 \*\*Bootstrap Confidence Intervals\*\*: If bootstrap = TRUE, resamples
 data with replacement to estimate standard errors and confidence
@@ -153,10 +157,6 @@ print(sdt_fit)
 #>         c3 0.601
 #>         c4 0.461
 #>         c5 0.425
-#> 
-#> Interpretation:
-#>   - Moderate discriminability (1.0 <= d' < 2.0)
-#>   - Conservative bias (mean c > 0)
 plot(sdt_fit)
 
 

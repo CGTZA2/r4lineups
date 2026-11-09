@@ -1,7 +1,7 @@
-# Install the Audited pyWitness Engine
+# Install the Pinned pyWitness Engine
 
 Explicitly creates or reuses an isolated Python virtual environment and
-installs the audited pyWitness Git revision used by
+installs the pinned pyWitness Git revision used by
 [`fit_lineup_models`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md).
 This function is never called when the package is loaded or checked.
 

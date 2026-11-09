@@ -99,9 +99,11 @@ The full ROC reaches 1.0 because once foil identifications and
 rejections are admitted as evidence, every witness eventually
 contributes, and the cumulative rates must reach 1 in both arms.
 
-**The two areas are not comparable.** A pAUC of 0.06 and an AUC of 0.78
+**The two areas are not comparable.** A pAUC of 0.05 and an AUC of 0.78
 are not in competition; they are computed over different ranges from
-different subsets of the data. Never report one as though it were the
+different subsets of the data. The AUC of 0.78 uses the default
+diagnosticity order, which is optimistic (see below); the a-priori order
+gives 0.73 for the same data. Never report one as though it were the
 other.
 
 ## The key idea: two signal detection tasks
@@ -439,7 +441,13 @@ Cumulative rates defining the ROC operating points, lineup_example.
 
 The AUC has a direct probabilistic reading: it is the probability that a
 randomly chosen guilty suspect receives stronger evidence than a
-randomly chosen innocent one. 0.5 is chance.
+randomly chosen innocent one, where “stronger” is defined by the order
+of the response categories. 0.5 is chance-level ranking under that
+order. It does not show that the responses carry no information: if
+filler IDs were more frequent in target-present lineups, the a priori
+order would place an informative category on the wrong side of the
+rejections, and the AUC could be .5 although another order gives a much
+larger value.
 
 Descriptive labels — “0.7 is moderate”, “0.8 is good” — circulate
 widely, but they should be resisted here for two reasons. The bias
@@ -519,9 +527,10 @@ ggplot(curves, aes(x = cumulative_false_alarm_rate, y = cumulative_hit_rate,
 
 ![](fullroc_analysis_files/figure-html/comparison_plot-1.png)
 
-Here the stronger condition dominates: its curve is above the weaker one
-throughout, so no assumption about base rates or costs could reverse the
-conclusion.
+Here the stronger condition’s sample curve is above the weaker one
+throughout, so these two estimated curves do not cross under the
+a-priori order. They are estimates without intervals, so this describes
+the samples and is not a claim about the populations.
 
 **When curves cross**, there is no procedure-level winner, and the
 choice depends on where you intend to operate. That requires a base rate
@@ -563,9 +572,11 @@ AUC = \sum_{i=2}^{n} \bigl(CFAR_i - CFAR_{i-1}\bigr)\cdot\frac{CHR_i + CHR_{i-1}
 ### Edge cases
 
 - $`FAR_i = 0`$: the ratio is undefined, so a small constant (`epsilon`,
-  default 0.001) is substituted. The affected category sorts to the top
-  under diagnosticity ordering, which is one route by which that
-  ordering becomes optimistic.
+  default 0.001) is substituted, so the ratio is the hit rate divided by
+  `epsilon`. A category with no target-absent responses therefore sorts
+  by its hit rate: it ranks high when its hit rate is large, but one hit
+  in 700 lineups gives a ratio of 1.43, in the middle of the table. This
+  is one route by which diagnosticity ordering becomes optimistic.
 - $`HR_i = FAR_i = 0`$: the category is empty and is removed.
 - Empty bins after `conf_bins` are applied are removed.
 
@@ -592,8 +603,9 @@ with the ordering held fixed.
 
 ## Summary
 
-1.  Partial ROC uses one of six possible witness outcomes on each side;
-    full ROC uses all of them, which is why it spans the entire range.
+1.  Partial ROC uses one of three possible witness outcomes on each side
+    (suspect ID, filler ID, rejection); full ROC uses all of them, which
+    is why it spans the entire range.
 2.  pAUC and full AUC are not comparable numbers.
 3.  Full ROC measures **investigator** discriminability, not eyewitness
     memory.

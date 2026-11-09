@@ -105,6 +105,13 @@ criteria. These are ordered by their diagnosticity ratio (HR/FAR) or by
 a-priori ordering, then cumulative hit and false alarm rates are
 computed to form the full ROC curve.
 
+Without a designated innocent suspect, target-absent filler IDs are
+split into an estimated innocent-suspect share (1 / lineup size) and the
+remainder. This assumes the innocent suspect is chosen at the average
+filler rate, which holds for a fair lineup; with a biased lineup the
+estimated false-alarm rates are wrong, and a designated innocent suspect
+should be used when available.
+
 The full ROC provides a threshold-free measure of investigator
 discriminability— the ability to distinguish guilty from innocent
 suspects using ALL available eyewitness evidence.
