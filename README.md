@@ -33,7 +33,7 @@ package, not in the cited work. Please report suspected errors through the
 - **ROC / CAC / RAC**: confidence‑accuracy methods for lineup data
 - **SDT summary comparisons**: d′/c/β from counts, variance estimates (Miller/Gourevitch/bootstrap), z‑tests
 - **mSDT (multi‑item SDT)**: max filler distribution, parameter estimation from rejection rates, joint plots
-- **Wixted lineup-memory models**: optional pyWitness-backed Independent Observations, Ensemble, and Integration fitting
+- **Lineup-memory models (Wixted et al., 2018)**: optional pyWitness-backed Independent Observations, Ensemble, and Integration fitting
 - **Full ROC (Smith & Yang)**: full ROC data and plots
 - **EIG & PPV range**: information‑gain and PPV‑range analyses
 - **Calibration & ANRI**: calibration metrics, ANRI and bootstrap comparisons
@@ -75,7 +75,7 @@ If you prefer base R:
 R CMD INSTALL .
 ```
 
-### Optional Wixted model engine
+### Optional pyWitness engine
 
 The lineup-memory fitting interface uses a separately installed, pinned
 pyWitness engine. Installation is explicit and isolated; it is never triggered
@@ -205,12 +205,12 @@ computer. The browser version leaves out face similarity, which needs Python.
 - `sdt_glm_analysis.Rmd` — SDT via GLM/GLMM (old/new recognition)
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from counts
 - `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions
-- `lineup_memory_models.Rmd` — optional Wixted/pyWitness model-fitting workflow
+- `lineup_memory_models.Rmd` — optional lineup-memory model fitting with pyWitness
 
 ## Notes
 
 - `notes/` contains working papers and test scripts and is **not** part of the package build.
 - `pdfs/` contains local audit sources and is ignored by Git and package builds.
 - For face similarity, Python dependencies are managed via `install_r4lineups_python()`.
-- For Wixted model fitting, pyWitness is managed separately via `install_pywitness()`.
+- For lineup-memory model fitting, pyWitness is managed separately via `install_pywitness()`.
 - Tests can be run with `testthat::test_dir("tests/testthat")`; package checks use standard `R CMD build` and `R CMD check` workflows.

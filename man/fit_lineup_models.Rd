@@ -2,7 +2,7 @@
 % Please edit documentation in R/lineup_models_pywitness.R
 \name{fit_lineup_models}
 \alias{fit_lineup_models}
-\title{Fit Competing Wixted Lineup-Memory Models}
+\title{Fit Competing Signal-Detection Models of Lineup Memory}
 \usage{
 fit_lineup_models(
   data,
@@ -55,7 +55,9 @@ An R-native \code{"lineup_model_comparison"} object containing
 }
 \description{
 Fits confidence-binned Independent Observations, Ensemble/BEST-Rest, and
-Integration models through an explicitly installed pyWitness engine.
+Integration models through an explicitly installed pyWitness engine. The
+models are those compared by Wixted et al. (2018); pyWitness, which fits
+them, is by Mickes et al. (2024).
 }
 \details{
 This interface is restricted to fair simultaneous lineups. Explicit

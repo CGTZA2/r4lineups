@@ -205,7 +205,7 @@ reference:
   - compare_multid
   - make_multid
   - plot.multid
-- title: "Wixted lineup-memory models (optional pyWitness engine)"
+- title: "Lineup-memory models (optional pyWitness engine)"
   desc: "Fit and compare Independent Observations, Ensemble, and Integration models for fair simultaneous lineups."
   contents:
   - check_pywitness_deps
