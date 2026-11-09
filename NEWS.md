@@ -90,6 +90,33 @@
   evaluated" rather than that one procedure dominates.
 * `install_r4lineups_python()` accepts Python 3.13, for which TensorFlow now
   publishes wheels.
+* `make_bayes_curves()` returns `NA`, with a warning, for the posterior and
+  information gain of a response that has zero probability at a requested prior;
+  it previously returned the prior and a gain of zero. `make_bree_curve()`
+  returns `NA` when no prior in procedure B can match a posterior with a response
+  that can occur. Both check `prior_grid`.
+* Calibration functions stop with an informative error when the selected
+  population (for example, suspect identifications) is empty, rather than a
+  data-frame error.
+* `effsize_compare()` warns and returns the available intervals when every
+  bootstrap difference is equal, and falls back to normal and percentile
+  intervals when the BCa interval cannot be computed, instead of stopping.
+* Stricter input checks: draw counts (`S`), `credible_mass`, `nboot`, `n`,
+  `base_rate`, `utility_matrix` and member positions must be finite values of
+  the right kind, and `lineup_bias_boot_dist()` and `esize_boot_dist()` stop on
+  missing choices, as the other choice-based functions do. Factor choices are
+  read by their labels. `fit_sdt_glm()` rejects missing values in logical
+  columns as it does in numeric ones.
+
+## Tests
+
+* New tests reproduce published values from the primary sources: Malpass
+  (1981, Table 1); Tredoux (1998, Tables 3, 6, 7 and 9); Yaniv, Yates and Smith
+  (1991, NDI and ANDI); Smith, Yang and Wells (2020, Figure 3); Lampinen, Smith
+  and Wells (2019, Table 2); Wells, Yang and Smalarz (2015, posteriors);
+  Starns, Cohen and Rotello (2023, Table 1 and EIG); Fitzgerald, Tredoux and
+  Juncu (2023, Table 2); Yang et al. (2025, Table A1); and Miller (1996,
+  Table 2).
 
 ## Documentation
 

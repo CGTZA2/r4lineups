@@ -114,10 +114,16 @@ make_utility_curves <- function(data,
     stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
   }
 
-  if (base_rate < 0 || base_rate > 1) {
-    stop("base_rate must be between 0 and 1")
+  if (!is.numeric(base_rate) || length(base_rate) != 1L ||
+      !is.finite(base_rate) || base_rate < 0 || base_rate > 1) {
+    stop("base_rate must be a finite numeric scalar between 0 and 1", call. = FALSE)
   }
 
+  if (!is.numeric(utility_matrix) || any(!is.finite(utility_matrix)) ||
+      anyDuplicated(names(utility_matrix))) {
+    stop("utility_matrix must be a finite numeric vector with unique outcome names.",
+         call. = FALSE)
+  }
   required_utils <- c("tp", "fn", "fp", "tn")
   missing_utils <- setdiff(required_utils, names(utility_matrix))
   if (length(missing_utils) > 0) {

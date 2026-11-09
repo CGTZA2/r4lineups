@@ -108,6 +108,11 @@ make_bayes_curves <- function(data,
                                innocent_suspect = "auto",
                                gain = c("probability", "signed", "entropy")) {
 
+  if (!is.numeric(prior_grid) || length(prior_grid) == 0L ||
+      any(!is.finite(prior_grid)) || any(prior_grid < 0 | prior_grid > 1)) {
+    stop("prior_grid must be a non-empty vector of finite probabilities in [0, 1].",
+         call. = FALSE)
+  }
   gain <- match.arg(gain)
   # Validate required columns
   required_cols <- c("target_present", "identification")
@@ -223,8 +228,8 @@ make_bayes_curves <- function(data,
 
       # Avoid division by zero
       if (p_x == 0) {
-        posterior <- prior  # No update possible
-        info_gain <- 0
+        posterior <- NA_real_
+        info_gain <- NA_real_
       } else {
         # Compute posterior
         posterior <- (prior * p_x_g) / p_x
@@ -246,6 +251,11 @@ make_bayes_curves <- function(data,
         information_gain = info_gain
       ))
     }
+  }
+
+  if (anyNA(curve_results$posterior)) {
+    warning("A response has zero probability at a requested prior; its posterior ",
+            "and information gain are undefined (NA).", call. = FALSE)
   }
 
   # Store the same (possibly filler-adjusted) counts used for likelihoods.
@@ -383,7 +393,10 @@ make_bree_curve <- function(data_proc_a,
     p_x_a <- prior_a * p_x_g_a + (1 - prior_a) * p_x_i_a
 
     if (p_x_a == 0) {
-      posterior_a <- prior_a
+      bree_results <- rbind(bree_results, tibble::tibble(
+        prior_a = prior_a, posterior_a = NA_real_, prior_b = NA_real_, delta = NA_real_
+      ))
+      next
     } else {
       posterior_a <- (prior_a * p_x_g_a) / p_x_a
     }
@@ -415,8 +428,8 @@ make_bree_curve <- function(data_proc_a,
       prior_b <- NA
     } else {
       prior_b <- numerator / denominator
-      # Constrain to valid probability range
-      prior_b <- max(0, min(1, prior_b))
+      # A boundary solution is usable only if the response can occur there.
+      if (prior_b * p_x_g_b + (1 - prior_b) * p_x_i_b == 0) prior_b <- NA_real_
     }
 
     delta <- prior_b - prior_a
@@ -427,6 +440,11 @@ make_bree_curve <- function(data_proc_a,
       prior_b = prior_b,
       delta = delta
     ))
+  }
+
+  if (anyNA(bree_results$prior_b)) {
+    warning("The requested posterior cannot be matched with a positive-probability ",
+            "response in procedure B, or is undefined in A; returning NA.", call. = FALSE)
   }
 
   list(

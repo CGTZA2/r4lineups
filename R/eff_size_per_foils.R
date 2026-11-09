@@ -42,7 +42,10 @@
 
 eff_size_per_foils <- function(lineup_vec, target_pos, k, conf = 0.95, R = 1000){
   lineup_vec <- typecheck(lineup_vec)
-  if (!setequal(as.integer(target_pos), seq_len(k))) {
+  datacheck1(lineup_vec, k)
+  if (!is.numeric(target_pos) || length(target_pos) != k ||
+      any(!is.finite(target_pos)) || any(target_pos != floor(target_pos)) ||
+      anyDuplicated(target_pos) || !setequal(target_pos, seq_len(k))) {
     stop("target_pos must contain each lineup member position exactly once.", call. = FALSE)
   }
   ci <- lineup_boot_allprop(lineup_vec, k, conf = conf, R = R)

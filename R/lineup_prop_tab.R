@@ -22,8 +22,13 @@
 
 lineup_prop_tab <- function(lineup_tab, target_pos){
   counts <- as.numeric(lineup_tab)
-  if (length(target_pos) != 1L || is.na(target_pos)) {
-    stop("target_pos must identify exactly one lineup member.", call. = FALSE)
+  if (!is.numeric(target_pos) || length(target_pos) != 1L ||
+      !is.finite(target_pos) || target_pos < 1 || target_pos != floor(target_pos)) {
+    stop("target_pos must identify one positive integer lineup member.", call. = FALSE)
+  }
+  declared_k <- attr(lineup_tab, "k")
+  if (!is.null(declared_k) && target_pos > declared_k) {
+    stop("target_pos is outside the declared lineup size.", call. = FALSE)
   }
   total <- sum(counts)
   if (!is.finite(total) || total <= 0 || any(!is.finite(counts)) || any(counts < 0)) {

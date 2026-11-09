@@ -824,7 +824,8 @@ as a risk ratio.
 
 We can calculate the diagnosticity ratio for a set of identification parades
 using either `diag_ratio_W()` for Wells & Lindsay's (1980) formula, or
-`diag_ratio_T()` for Wells' adjusted diagnosticity ratio (see: Tredoux, 1998).
+`diag_ratio_T()` for Tredoux's (1998, Eq. 12) ratio, which adds 0.5 to each
+frequency so that the ratio and its logarithm stay defined when a count is zero.
 In the example below, two of the `nortje2012` mock-witness lineups are paired
 only to show the computation, using the target position documented for each
 (3 for `lineup_1` and 2 for `lineup_3`); mock witnesses have not seen a culprit,

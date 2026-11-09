@@ -175,7 +175,7 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
 
   # --- input validation ---
   .max_sdt_check_count <- function(val, nm) {
-    if (!is.numeric(val) || length(val) != 1 || val < 0)
+    if (!is.numeric(val) || length(val) != 1L || !is.finite(val) || val < 0)
       stop(sprintf("%s must be a non-negative numeric scalar.", nm), call. = FALSE)
   }
   for (nm in c("n_hit","n_tp_choose","n_fa","N_tp","N_ta"))
@@ -208,11 +208,13 @@ fit_max_sdt <- function(n_hit, n_tp_choose, n_fa,
   if (!two_cond && (constrain_d || constrain_c))
     warning("constrain_d and constrain_c only apply with two conditions.", call. = FALSE)
 
-  if (!is.numeric(n) || n < 2)
+  if (!is.numeric(n) || length(n) != 1L || !is.finite(n) || n < 2 || n != floor(n))
     stop("n must be an integer >= 2.", call. = FALSE)
-  if (!is.numeric(nboot) || nboot < 0)
+  if (!is.numeric(nboot) || length(nboot) != 1L || !is.finite(nboot) ||
+      nboot < 0 || nboot != floor(nboot))
     stop("nboot must be a non-negative integer.", call. = FALSE)
-  if (!is.numeric(ci_level) || ci_level <= 0 || ci_level >= 1)
+  if (!is.numeric(ci_level) || length(ci_level) != 1L || !is.finite(ci_level) ||
+      ci_level <= 0 || ci_level >= 1)
     stop("ci_level must be in (0, 1).", call. = FALSE)
 
   # --- core probability functions ---

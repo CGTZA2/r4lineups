@@ -189,7 +189,7 @@ fit_sdt_glmm <- function(data,
 }
 
 .as_binary_sdt <- function(x, name) {
-  if (is.logical(x)) return(as.integer(x))
+  if (is.logical(x)) x <- as.integer(x)
   if (!is.numeric(x) || anyNA(x) || !all(x %in% c(0, 1))) {
     stop(name, " must contain only logical or numeric 0/1 values.", call. = FALSE)
   }

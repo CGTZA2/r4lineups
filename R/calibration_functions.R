@@ -139,7 +139,7 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     innocent_method <- .innocent_suspect_method(ta_data, innocent_suspect)
     if (innocent_method == "designated") {
       data_filtered <- data[data$identification == "suspect", , drop = FALSE]
-      data_filtered$.weight <- 1
+      data_filtered$.weight <- rep(1, nrow(data_filtered))
     } else {
       keep <- (data$target_present == TRUE & data$identification == "suspect") |
         (data$target_present == FALSE & data$identification == "filler")
@@ -160,7 +160,7 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     }
     data_filtered <- data[keep, , drop = FALSE]
     if (nrow(data_filtered) == 0) stop("No identifications found in data")
-    data_filtered$.weight <- 1
+    data_filtered$.weight <- rep(1, nrow(data_filtered))
     data_filtered$correct <- as.numeric(data_filtered$target_present == TRUE &
                                           data_filtered$identification == "suspect")
     innocent_method <- "not_applicable"
@@ -168,7 +168,7 @@ make_calibration_data <- function(data, confidence_bins = NULL, choosers_only = 
     # Rejections; correct when the culprit is absent.
     data_filtered <- data[data$identification == "reject", , drop = FALSE]
     if (nrow(data_filtered) == 0) stop("No rejections found in data")
-    data_filtered$.weight <- 1
+    data_filtered$.weight <- rep(1, nrow(data_filtered))
     data_filtered$correct <- as.numeric(data_filtered$target_present == FALSE)
     innocent_method <- "not_applicable"
   }

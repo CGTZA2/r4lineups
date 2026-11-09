@@ -98,6 +98,12 @@ sdt_summary_variance <- function(hits,
                                  seed = NULL) {
   method <- match.arg(method)
   correction <- match.arg(correction)
+  if (method == "bootstrap" &&
+      (!is.numeric(nboot) || length(nboot) != 1L || !is.finite(nboot) ||
+       nboot < 2 || nboot != floor(nboot))) {
+    stop("nboot must be an integer of at least 2 for bootstrap variance.",
+         call. = FALSE)
+  }
   summ <- sdt_summary_from_counts(hits, fas, misses, cr, correction = correction)
   ns <- summ$ns
   nn <- summ$nn
