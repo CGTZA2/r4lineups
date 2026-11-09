@@ -83,9 +83,10 @@ fairness inference, confidence-based evidential analysis, Bayesian summaries,
 model-based analyses, simulation, and reporting in an R-native interface. It
 does not duplicate the established Python likelihood/model-fitting engine.
 Instead, its optional `fit_lineup_models()` bridge calls a pinned pyWitness
-revision and returns R-native objects. Independent Observations,
-Ensemble, and Integration models can therefore be examined from R while
-remaining comparable with the reference implementation [@wixted2018]. A separate function, `fit_max_sdt()`, fits a narrower model: a single-criterion, aggregate, equal-variance version of the Independent Observations model, not the complete confidence-based Wixted model.
+revision and returns R-native objects. The Independent Observations,
+Ensemble, and Integration models compared by @wixted2018 can therefore be
+examined from R while remaining comparable with the reference implementation
+[@mickes2024]. A separate function, `fit_max_sdt()`, fits a narrower model: a single-criterion, aggregate, equal-variance version of the Independent Observations model, not the complete confidence-based model of @wixted2018.
 
 # Software design
 
@@ -124,7 +125,7 @@ They cover fairness and diagnosticity, Bayesian inference,
 ROC/CAC/RAC and full ROC, calibration and decision measures, expected
 information gain and error-rate ranges, Winter's two-high-threshold model,
 summary and regression-based signal-detection methods, the Multi-$d'$, mSDT and
-Wixted models, simulation and power, and optional face similarity.
+lineup-memory models, simulation and power, and optional face similarity.
 Validation of selected methods combines published definitions, independent
 hand calculations, invariance identities, numerical integration and simulation
 recovery. The lineup-memory bridge also checks its interface against a pinned

@@ -625,10 +625,12 @@ check_pywitness_deps <- function(envname = .pywitness_default_env,
   list(comparison = comparison, parameters = parameters, cells = cells)
 }
 
-#' Fit Competing Wixted Lineup-Memory Models
+#' Fit Competing Signal-Detection Models of Lineup Memory
 #'
 #' Fits confidence-binned Independent Observations, Ensemble/BEST-Rest, and
-#' Integration models through an explicitly installed pyWitness engine.
+#' Integration models through an explicitly installed pyWitness engine. The
+#' models are those compared by Wixted et al. (2018); pyWitness, which fits
+#' them, is by Mickes et al. (2024).
 #'
 #' @param data A data frame with \code{target_present}, \code{identification},
 #'   and numeric \code{confidence} columns.
@@ -883,7 +885,7 @@ fit_lineup_models <- function(
 
 #' @export
 print.lineup_model_comparison <- function(x, digits = 3, ...) {
-  cat("Wixted Lineup-Memory Model Comparison\n")
+  cat("Lineup-Memory Model Comparison\n")
   cat("Engine:", x$engine$name, x$engine$version, "\n")
   cat("Estimator:", x$specification$estimator, "\n")
   cat("Lineup size:", x$specification$lineup_size,
@@ -959,7 +961,7 @@ summary.lineup_model_comparison <- function(object, ...) {
   }))
 }
 
-#' Plot a Wixted Lineup-Memory Model Comparison
+#' Plot a Lineup-Memory Model Comparison
 #'
 #' @param x A \code{"lineup_model_comparison"} object.
 #' @param type Plot type: Pearson comparison, fitted response cells, or ROC.
@@ -978,7 +980,7 @@ plot.lineup_model_comparison <- function(
         ggplot2::geom_col() +
         ggplot2::labs(
           x = "Model", y = "Pearson chi-squared", fill = "Converged",
-          title = "Wixted lineup-memory model comparison"
+          title = "Lineup-memory model comparison"
         ) +
         ggplot2::theme_minimal(base_size = 12)
     )

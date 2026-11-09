@@ -2,7 +2,7 @@
 % Please edit documentation in R/lineup_models_pywitness.R
 \name{plot.lineup_model_comparison}
 \alias{plot.lineup_model_comparison}
-\title{Plot a Wixted Lineup-Memory Model Comparison}
+\title{Plot a Lineup-Memory Model Comparison}
 \usage{
 \method{plot}{lineup_model_comparison}(x, type = c("comparison", "fit", "roc"), ...)
 }
@@ -17,5 +17,5 @@
 A ggplot object.
 }
 \description{
-Plot a Wixted Lineup-Memory Model Comparison
+Plot a Lineup-Memory Model Comparison
 }
