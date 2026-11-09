@@ -23,6 +23,8 @@ NEWS.md for the full list.
 * local macOS 27.2 (arm64), R 4.6.1
 * win-builder, R-devel (2026-11-07 r90850 ucrt)
 * win-builder, R-release (4.6.2)
+* GitHub Actions: macOS and Windows (R release), Ubuntu (R devel, release and
+  oldrel-1), all passing with the full test suite (`NOT_CRAN=true`)
 
 ## R CMD check results
 
