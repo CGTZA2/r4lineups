@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@
     <li><a class="dropdown-item" href="articles/face_similarity.html">Face Similarity Analysis</a></li>
     <li><a class="dropdown-item" href="articles/fullroc_analysis.html">Full ROC Analysis for Eyewitness Lineups</a></li>
     <li><a class="dropdown-item" href="articles/information_error_rate_analysis.html">Information and Error-Rate Metrics</a></li>
-    <li><a class="dropdown-item" href="articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
+    <li><a class="dropdown-item" href="articles/lineup_memory_models.html">Fitting Lineup-Memory Models with pyWitness</a></li>
     <li><a class="dropdown-item" href="articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
     <li><a class="dropdown-item" href="articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
@@ -95,7 +95,7 @@
 <li>
 <strong>mSDT (multi‑item SDT)</strong>: max filler distribution, parameter estimation from rejection rates, joint plots</li>
 <li>
-<strong>Wixted lineup-memory models</strong>: optional pyWitness-backed Independent Observations, Ensemble, and Integration fitting</li>
+<strong>Lineup-memory models (Wixted et al., 2018)</strong>: optional pyWitness-backed Independent Observations, Ensemble, and Integration fitting</li>
 <li>
 <strong>Full ROC (Smith &amp; Yang)</strong>: full ROC data and plots</li>
 <li>
@@ -133,7 +133,7 @@
 <p>If you prefer base R:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>R CMD INSTALL .</span></code></pre></div>
 <div class="section level3">
-<h3 id="optional-wixted-model-engine">Optional Wixted model engine<a class="anchor" aria-label="anchor" href="#optional-wixted-model-engine"></a>
+<h3 id="optional-pywitness-engine">Optional pyWitness engine<a class="anchor" aria-label="anchor" href="#optional-pywitness-engine"></a>
 </h3>
 <p>The lineup-memory fitting interface uses a separately installed, pinned pyWitness engine. Installation is explicit and isolated; it is never triggered when r4lineups loads or during ordinary package checks.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -264,7 +264,7 @@
 <li>
 <code>msdt_model.Rmd</code> — multi‑item SDT (mSDT) core functions</li>
 <li>
-<code>lineup_memory_models.Rmd</code> — optional Wixted/pyWitness model-fitting workflow</li>
+<code>lineup_memory_models.Rmd</code> — optional lineup-memory model fitting with pyWitness</li>
 </ul>
 </div>
 <div class="section level2">
@@ -276,7 +276,7 @@
 <li>
 <code>pdfs/</code> contains local audit sources and is ignored by Git and package builds.</li>
 <li>For face similarity, Python dependencies are managed via <code><a href="reference/install_r4lineups_python.html">install_r4lineups_python()</a></code>.</li>
-<li>For Wixted model fitting, pyWitness is managed separately via <code><a href="reference/install_pywitness.html">install_pywitness()</a></code>.</li>
+<li>For lineup-memory model fitting, pyWitness is managed separately via <code><a href="reference/install_pywitness.html">install_pywitness()</a></code>.</li>
 <li>Tests can be run with <code>testthat::test_dir("tests/testthat")</code>; package checks use standard <code>R CMD build</code> and <code>R CMD check</code> workflows.</li>
 </ul>
 </div>

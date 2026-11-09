@@ -1,5 +1,17 @@
 # Changelog
 
+## r4lineups (development version)
+
+### Documentation
+
+- The lineup-memory models fitted through pyWitness are no longer called
+  “Wixted” models.
+  [`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md),
+  its print and plot output, the README and the vignette now name them
+  neutrally, cite Wixted, Vul, Mickes and Wilson (2018) for the model
+  comparison, and credit pyWitness to Mickes, Seale-Carlisle, Chen and
+  Boogert (2024). The vignette also says where each model came from.
+
 ## r4lineups 2.3.1
 
 ### Breaking changes

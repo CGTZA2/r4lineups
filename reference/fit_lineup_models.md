@@ -1,7 +1,9 @@
-# Fit Competing Wixted Lineup-Memory Models
+# Fit Competing Signal-Detection Models of Lineup Memory
 
 Fits confidence-binned Independent Observations, Ensemble/BEST-Rest, and
-Integration models through an explicitly installed pyWitness engine.
+Integration models through an explicitly installed pyWitness engine. The
+models are those compared by Wixted et al. (2018); pyWitness, which fits
+them, is by Mickes et al. (2024).
 
 ## Usage
 

@@ -41,8 +41,9 @@ tracker](https://github.com/CGTZA2/r4lineups/issues).
   (Miller/Gourevitch/bootstrap), z‑tests
 - **mSDT (multi‑item SDT)**: max filler distribution, parameter
   estimation from rejection rates, joint plots
-- **Wixted lineup-memory models**: optional pyWitness-backed Independent
-  Observations, Ensemble, and Integration fitting
+- **Lineup-memory models (Wixted et al., 2018)**: optional
+  pyWitness-backed Independent Observations, Ensemble, and Integration
+  fitting
 - **Full ROC (Smith & Yang)**: full ROC data and plots
 - **EIG & PPV range**: information‑gain and PPV‑range analyses
 - **Calibration & ANRI**: calibration metrics, ANRI and bootstrap
@@ -90,7 +91,7 @@ If you prefer base R:
 R CMD INSTALL .
 ```
 
-### Optional Wixted model engine
+### Optional pyWitness engine
 
 The lineup-memory fitting interface uses a separately installed, pinned
 pyWitness engine. Installation is explicit and isolated; it is never
@@ -237,8 +238,8 @@ needs Python.
 - `sdt_summary_comparisons.Rmd` — SDT summary‑level comparisons from
   counts
 - `msdt_model.Rmd` — multi‑item SDT (mSDT) core functions
-- `lineup_memory_models.Rmd` — optional Wixted/pyWitness model-fitting
-  workflow
+- `lineup_memory_models.Rmd` — optional lineup-memory model fitting with
+  pyWitness
 
 ## Notes
 
@@ -248,7 +249,7 @@ needs Python.
   builds.
 - For face similarity, Python dependencies are managed via
   [`install_r4lineups_python()`](https://cgtza2.github.io/r4lineups/reference/install_r4lineups_python.md).
-- For Wixted model fitting, pyWitness is managed separately via
+- For lineup-memory model fitting, pyWitness is managed separately via
   [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md).
 - Tests can be run with `testthat::test_dir("tests/testthat")`; package
   checks use standard `R CMD build` and `R CMD check` workflows.
@@ -640,7 +641,7 @@ including resultant lineup-bias indices.
 - [`plot(`*`<multid>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.multid.md)
   : Plot a Multi-d' Analysis
 
-## Wixted lineup-memory models (optional pyWitness engine)
+## Lineup-memory models (optional pyWitness engine)
 
 Fit and compare Independent Observations, Ensemble, and Integration
 models for fair simultaneous lineups.
@@ -648,11 +649,11 @@ models for fair simultaneous lineups.
 - [`check_pywitness_deps()`](https://cgtza2.github.io/r4lineups/reference/check_pywitness_deps.md)
   : Check Availability of the pyWitness Engine
 - [`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
-  : Fit Competing Wixted Lineup-Memory Models
+  : Fit Competing Signal-Detection Models of Lineup Memory
 - [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md)
   : Install the Pinned pyWitness Engine
 - [`plot(`*`<lineup_model_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.lineup_model_comparison.md)
-  : Plot a Wixted Lineup-Memory Model Comparison
+  : Plot a Lineup-Memory Model Comparison
 
 ## SDT estimation and comparison
 
@@ -805,8 +806,8 @@ Additional helper functions.
   Lineups](https://cgtza2.github.io/r4lineups/articles/fullroc_analysis.md):
 - [Information and Error-Rate
   Metrics](https://cgtza2.github.io/r4lineups/articles/information_error_rate_analysis.md):
-- [Fitting Wixted Lineup-Memory
-  Models](https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.md):
+- [Fitting Lineup-Memory Models with
+  pyWitness](https://cgtza2.github.io/r4lineups/articles/lineup_memory_models.md):
 - [Comparing Models for Eyewitness Identification
   Data](https://cgtza2.github.io/r4lineups/articles/model_comparison.md):
 - [mSDT: Multi-Item Signal Detection

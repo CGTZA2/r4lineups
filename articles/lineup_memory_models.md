@@ -1,4 +1,4 @@
-# Fitting Wixted Lineup-Memory Models
+# Fitting Lineup-Memory Models with pyWitness
 
 > **Acknowledgement.** Large language models supplied by Anthropic and
 > OpenAI were used in preparing this vignette, to assist with checking
@@ -16,6 +16,17 @@ distributions overlap. What it does *not* say is how the several
 strengths are combined into a single choice. That is an open theoretical
 question, and the models fitted here are three answers to it (Wixted,
 Vul, Mickes & Wilson, 2018).
+
+Wixted et al. compared these models but did not originate all of them.
+The Independent Observations model goes back to Macmillan and Creelman
+(1991) and Duncan (2006), both as cited in Wixted et al. (2018), and
+resembles the BEST rule of Clark’s (2003) WITNESS model. The Integration
+model comes from Duncan (2006, as cited in Wixted et al., 2018). The
+Ensemble model is Wixted et al.’s formal version of the
+diagnostic-feature-detection theory of Wixted and Mickes (2014). The
+fitting itself is done by pyWitness, the Python toolkit of Mickes,
+Seale-Carlisle, Chen and Boogert (2024); r4lineups passes the data to a
+pinned revision of it and returns the results as R objects.
 
 **Independent Observations.** The witness attends to the
 strongest-feeling face and identifies it if that feeling passes a
@@ -392,9 +403,19 @@ comparison table reports.
 
 ## References
 
+Clark, S. E. (2003). A memory and decision model for eyewitness
+identification. *Applied Cognitive Psychology, 17*(6), 629-654.
+<https://doi.org/10.1002/acp.891>
+
 Mickes, L., Seale-Carlisle, T. M., Chen, X., & Boogert, S. (2024).
 pyWitness 1.0: A Python eyewitness identification analysis toolkit.
-*Behavior Research Methods, 56*, 1533-1550.
+*Behavior Research Methods, 56*(3), 1533-1550.
+<https://doi.org/10.3758/s13428-023-02108-2>
+
+Wixted, J. T., & Mickes, L. (2014). A signal-detection-based
+diagnostic-feature-detection model of eyewitness identification.
+*Psychological Review, 121*(2), 262-276.
+<https://doi.org/10.1037/a0035940>
 
 Wixted, J. T., Vul, E., Mickes, L., & Wilson, B. M. (2018). Models of
 lineup memory. *Cognitive Psychology, 105*, 81-114.

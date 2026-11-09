@@ -385,7 +385,7 @@ including resultant lineup-bias indices.
 - [`plot(`*`<multid>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.multid.md)
   : Plot a Multi-d' Analysis
 
-## Wixted lineup-memory models (optional pyWitness engine)
+## Lineup-memory models (optional pyWitness engine)
 
 Fit and compare Independent Observations, Ensemble, and Integration
 models for fair simultaneous lineups.
@@ -393,11 +393,11 @@ models for fair simultaneous lineups.
 - [`check_pywitness_deps()`](https://cgtza2.github.io/r4lineups/reference/check_pywitness_deps.md)
   : Check Availability of the pyWitness Engine
 - [`fit_lineup_models()`](https://cgtza2.github.io/r4lineups/reference/fit_lineup_models.md)
-  : Fit Competing Wixted Lineup-Memory Models
+  : Fit Competing Signal-Detection Models of Lineup Memory
 - [`install_pywitness()`](https://cgtza2.github.io/r4lineups/reference/install_pywitness.md)
   : Install the Pinned pyWitness Engine
 - [`plot(`*`<lineup_model_comparison>`*`)`](https://cgtza2.github.io/r4lineups/reference/plot.lineup_model_comparison.md)
-  : Plot a Wixted Lineup-Memory Model Comparison
+  : Plot a Lineup-Memory Model Comparison
 
 ## SDT estimation and comparison
 

@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Fitting Wixted Lineup-Memory Models • r4lineups</title>
+<title>Fitting Lineup-Memory Models with pyWitness • r4lineups</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Fitting Wixted Lineup-Memory Models">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Fitting Lineup-Memory Models with pyWitness">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">r4lineups</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@
     <li><a class="dropdown-item" href="../articles/face_similarity.html">Face Similarity Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/fullroc_analysis.html">Full ROC Analysis for Eyewitness Lineups</a></li>
     <li><a class="dropdown-item" href="../articles/information_error_rate_analysis.html">Information and Error-Rate Metrics</a></li>
-    <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Wixted Lineup-Memory Models</a></li>
+    <li><a class="dropdown-item" href="../articles/lineup_memory_models.html">Fitting Lineup-Memory Models with pyWitness</a></li>
     <li><a class="dropdown-item" href="../articles/model_comparison.html">Comparing Models for Eyewitness Identification Data</a></li>
     <li><a class="dropdown-item" href="../articles/msdt_model.html">mSDT: Multi-Item Signal Detection Theory</a></li>
     <li><a class="dropdown-item" href="../articles/multid_model.html">Multi-d': Lee and Penrod's Signal Detection Framework for Lineups</a></li>
@@ -71,7 +71,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Fitting Wixted Lineup-Memory Models</h1>
+      <h1>Fitting Lineup-Memory Models with pyWitness</h1>
                         <h4 data-toc-skip class="author">Colin G.
 Tredoux</h4>
                         <h4 data-toc-skip class="author">Tamsyn M.
@@ -79,7 +79,7 @@ Naylor</h4>
             
             <h4 data-toc-skip class="date">2026-11-09</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/v2.3.1/vignettes/lineup_memory_models.Rmd" class="external-link"><code>vignettes/lineup_memory_models.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CGTZA2/r4lineups/blob/main/vignettes/lineup_memory_models.Rmd" class="external-link"><code>vignettes/lineup_memory_models.Rmd</code></a></small>
       <div class="d-none name"><code>lineup_memory_models.Rmd</code></div>
     </div>
 
@@ -103,6 +103,16 @@ members, but the distributions overlap. What it does <em>not</em> say is
 how the several strengths are combined into a single choice. That is an
 open theoretical question, and the models fitted here are three answers
 to it (Wixted, Vul, Mickes &amp; Wilson, 2018).</p>
+<p>Wixted et al. compared these models but did not originate all of
+them. The Independent Observations model goes back to Macmillan and
+Creelman (1991) and Duncan (2006), both as cited in Wixted et
+al. (2018), and resembles the BEST rule of Clark’s (2003) WITNESS model.
+The Integration model comes from Duncan (2006, as cited in Wixted et
+al., 2018). The Ensemble model is Wixted et al.’s formal version of the
+diagnostic-feature-detection theory of Wixted and Mickes (2014). The
+fitting itself is done by pyWitness, the Python toolkit of Mickes,
+Seale-Carlisle, Chen and Boogert (2024); r4lineups passes the data to a
+pinned revision of it and returns the results as R objects.</p>
 <p><strong>Independent Observations.</strong> The witness attends to the
 strongest-feeling face and identifies it if that feeling passes a
 criterion. Each member is evaluated on its own, so the decision depends
@@ -499,9 +509,15 @@ structure.</li>
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div class="hanging-indent">
+<p>Clark, S. E. (2003). A memory and decision model for eyewitness
+identification. <em>Applied Cognitive Psychology, 17</em>(6), 629-654.
+<a href="https://doi.org/10.1002/acp.891" class="external-link uri">https://doi.org/10.1002/acp.891</a></p>
 <p>Mickes, L., Seale-Carlisle, T. M., Chen, X., &amp; Boogert, S.
 (2024). pyWitness 1.0: A Python eyewitness identification analysis
-toolkit. <em>Behavior Research Methods, 56</em>, 1533-1550.</p>
+toolkit. <em>Behavior Research Methods, 56</em>(3), 1533-1550. <a href="https://doi.org/10.3758/s13428-023-02108-2" class="external-link uri">https://doi.org/10.3758/s13428-023-02108-2</a></p>
+<p>Wixted, J. T., &amp; Mickes, L. (2014). A signal-detection-based
+diagnostic-feature-detection model of eyewitness identification.
+<em>Psychological Review, 121</em>(2), 262-276. <a href="https://doi.org/10.1037/a0035940" class="external-link uri">https://doi.org/10.1037/a0035940</a></p>
 <p>Wixted, J. T., Vul, E., Mickes, L., &amp; Wilson, B. M. (2018).
 Models of lineup memory. <em>Cognitive Psychology, 105</em>, 81-114. <a href="https://doi.org/10.1016/j.cogpsych.2018.06.001" class="external-link uri">https://doi.org/10.1016/j.cogpsych.2018.06.001</a></p>
 </div>

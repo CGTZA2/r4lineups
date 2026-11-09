@@ -1547,7 +1547,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] r4lineups_2.3.1
+[1] r4lineups_2.3.1.9000
 
 loaded via a namespace (and not attached):
  [1] Matrix_1.7-6       gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1       

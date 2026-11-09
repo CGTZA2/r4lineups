@@ -1,6 +1,6 @@
-# Plot a Wixted Lineup-Memory Model Comparison
+# Plot a Lineup-Memory Model Comparison
 
-Plot a Wixted Lineup-Memory Model Comparison
+Plot a Lineup-Memory Model Comparison
 
 ## Usage
 
